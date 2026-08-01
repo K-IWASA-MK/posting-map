@@ -6,7 +6,7 @@ GASのコード変更後、以下の確認を必須とする。これを怠る�
 
 ### GAS変更時 必須確認リスト
 - [ ] `clasp push` 済みであること
-- [ ] `clasp deploy` またはデプロイメントが完了していること (`npx clasp deploy -i AKfycbwgiOFU5iudUS6UscNU-MZhnxZJaqJHywVA9ivA-GE0uLe02fi7mmBU474lWa1TD7-R -d "description"`)
+- [ ] `clasp deploy` またはデプロイメントが完了していること (`npx clasp deploy -i AKfycbyjNwgZ_6CCv258lqKMrCXJYi0wDR23ZCyyzOQIV1R_WcCF5TQxYXOzZWWSJd_vMyu_ -d "description"`)
 - [ ] Web App URL が更新されていること（デプロイメントIDの変更有無の確認）
 - [ ] `config.js` （各種クライアント用設定ファイル）内の `gasWebAppUrl` が同期（最新のURLへ更新）済みであること
 - [ ] 実機接続先が更新された新しいエンドポイントを向いているか確認済みであること
