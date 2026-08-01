@@ -1,0 +1,26 @@
+{
+  "pipeline": "DataAccuracyVerificationFoundation",
+  "district": "MIE-03",
+  "inputHashes": {
+    "admin": "NOT_FOUND",
+    "postal": "NOT_FOUND",
+    "csv": "a266286fe8de11f86ce4470f61a43d5dfdffa0be049b9dea1b0e8912c669e63f"
+  },
+  "outputHash": "a266286fe8de11f86ce4470f61a43d5dfdffa0be049b9dea1b0e8912c669e63f",
+  "recordCount": 684,
+  "administrativeMatchRate": 100,
+  "postalMatchRate": 100,
+  "missingCount": 0,
+  "extraCount": 0,
+  "postalMismatchCount": 0,
+  "accuracyStatus": "PASS",
+  "lifecycleStatus": "AUDITED",
+  "verifiedAt": "2026-07-24",
+  "verifiedBy": "AccuracyValidationAgent",
+  "auditedBy": "AuditAgent",
+  "details": {
+    "missingRecords": [],
+    "extraRecords": [],
+    "postalMismatches": []
+  }
+}

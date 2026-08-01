@@ -1,0 +1,9 @@
+{
+  "endpoint": "https://mcp.figma.com/mcp",
+  "authMode": "Unauthenticated",
+  "toolsListStatus": "FAIL",
+  "reason": "Missing Personal Access Token",
+  "discoveredTools": [],
+  "toolsListStatusCode": 401,
+  "mcpErrorResponseBody": "Unauthorized"
+}

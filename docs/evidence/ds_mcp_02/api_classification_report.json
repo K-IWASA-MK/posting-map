@@ -1,0 +1,32 @@
+{
+  "meta": {
+    "generatedAt": "2026-07-30T10:02:47.482Z",
+    "fileKey": "cmjPPVlC7d373Vv5YYf0Xo"
+  },
+  "categories": {
+    "Available via MCP": [
+      "Read Dev Mode (Inspect Code & CSS snippets via Dev Mode UI)"
+    ],
+    "Available via REST": [
+      "Read File (GET /v1/files/:key - with PAT Token)",
+      "Read Components (GET /v1/files/:key/components - with PAT Token)",
+      "Read Styles (GET /v1/files/:key/styles - with PAT Token)"
+    ],
+    "Requires Plugin API": [
+      "Create Node (Headless canvas frame/shape creation)",
+      "Update Node (Canvas node property/position mutation)",
+      "Auto Layout Edit (Direct padding/gap modification on canvas)",
+      "Text Edit (Canvas text string editing)"
+    ],
+    "Requires Enterprise": [
+      "Update Variables (POST /v1/files/:key/variables - requires Enterprise Org Plan & Variables API scope)"
+    ],
+    "Requires Authentication": [
+      "Read Variables (GET /v1/files/:key/variables/local - requires PAT Token with Variables Read scope)",
+      "GET /v1/me (User verification)"
+    ],
+    "Unavailable": [
+      "Headless Canvas Render without Browser/Plugin context"
+    ]
+  }
+}

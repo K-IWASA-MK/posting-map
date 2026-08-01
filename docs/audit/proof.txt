@@ -1,0 +1,67 @@
+--- PUBLISHED ROOT (/index.html) ---
+    let currentTab = 'settings';
+
+    async function initLiff() {
+      if (typeof liff === 'undefined') {
+        console.warn('[LIFF] SDK not loaded.');
+--
+          liff.login();
+        } else {
+          initLiff().then(() => renderView());
+        }
+      } else {
+--
+      document.getElementById('app-shell').classList.remove('hidden');
+      showLoading('LINE認証確認中...');
+      await initLiff();
+      switchTab(currentUser ? 'area' : 'settings');
+      showLoading('同期中...');
+--
+        renderSettings(main);
+      } else if (currentTab === 'area') {
+        renderAreaList(main);
+      } else if (currentTab === 'manual') {
+        main.innerHTML = `
+--
+    }
+
+    function renderAreaList(main) {
+      if (!appData) {
+        main.innerHTML = `<div class="bg-white rounded-[2rem] p-12 text-center shadow-sm"><p class="text-gray-400 font-bold mb-6">データを同期しています...</p><button onclick="startApp()" class="text-navy font-black border-b-2 border-navy/20">再試行する</button></div>`;
+
+--- LOCAL REPO (projects/posting-map/index.html) ---
+
+  <!-- Diagnostic HUD Overlay -->
+  <div id="liff-hud" class="fixed top-4 left-4 right-4 bg-black/90 backdrop-blur-md text-white rounded-2xl p-4 text-xs font-mono z-[100000] border border-white/20 shadow-2xl space-y-1">
+    <div class="font-bold text-blue-400 text-xs border-b border-white/20 pb-1 mb-2 flex justify-between">
+      <span>📱 REAL-TIME DIAGNOSTIC HUD</span>
+--
+    }
+
+    async function initLiff() {
+      const hudUrl = document.getElementById('hud-url');
+      if (hudUrl) hudUrl.textContent = 'URL: ' + window.location.href;
+--
+          liff.login();
+        } else {
+          initLiff().then(() => renderView());
+        }
+      } else {
+--
+      document.getElementById('app-shell').classList.remove('hidden');
+      showLoading('LINE認証確認中...');
+      const ok = await initLiff();
+      if (!ok) {
+        hideLoading();
+--
+        renderSettings(main);
+      } else if (currentTab === 'area') {
+        renderAreaList(main);
+      } else if (currentTab === 'manual') {
+        main.innerHTML = `
+--
+    }
+
+    function renderAreaList(main) {
+      if (!appData || !Array.isArray(appData.areas)) {
+        main.innerHTML = `<div class="bg-white rounded-[2rem] p-12 text-center shadow-sm"><p class="text-gray-400 font-bold mb-6">データを同期しています...</p><button onclick="startApp()" class="text-navy font-black border-b-2 border-navy/20">再試行する</button></div>`;

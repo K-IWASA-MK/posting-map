@@ -1,0 +1,27 @@
+{
+  "district": {
+    "id": "DST-UNK",
+    "name": ""
+  },
+  "resources": {
+    "spreadsheetId": "mock-spreadsheet-1784374182672",
+    "storageFolderId": "mock-storage-1784374182673",
+    "scriptId": "158Avw8hAtZx-c9yW10DE0NzB1NYngwv31eroqn-IAmHh_eKHN_fR58sa",
+    "webAppUrl": "https://script.google.com/macros/s/AKfycbwgiOFU5iudUS6UscNU-MZhnxZJaqJHywVA9ivA-GE0uLe02fi7mmBU474lWa1TD7-R/exec",
+    "gas": {
+      "mode": "REGISTER_ONLY",
+      "scriptId": "158Avw8hAtZx-c9yW10DE0NzB1NYngwv31eroqn-IAmHh_eKHN_fR58sa",
+      "webAppUrl": "https://script.google.com/macros/s/AKfycbwgiOFU5iudUS6UscNU-MZhnxZJaqJHywVA9ivA-GE0uLe02fi7mmBU474lWa1TD7-R/exec"
+    }
+  },
+  "provisioning": {
+    "templateVersion": "v1",
+    "createdAt": 1784374182673,
+    "createdBy": "aios-provisioner@platform.postingmap",
+    "status": "READY",
+    "transactionId": "prov-1784374182673-DST-UNK"
+  },
+  "certification": {
+    "phase31": "PASS"
+  }
+}

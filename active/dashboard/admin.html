@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>ADMIN COMMAND NEXT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="apple-touch-icon" href="https://area-management.github.io/posting-map-system/assets/icon180-v2.png?v=100">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'media',
+      theme: {
+        extend: {
+          colors: {
+            navy: { DEFAULT: '#1a237e', light: '#283593', dark: '#0d1642' },
+            apple: { light: '#f5f5f7', dark: '#000000' }
+          },
+          fontFamily: { sans: ['"Inter"', '"Noto Sans JP"', 'sans-serif'] },
+          boxShadow: {
+            'neu-light': '8px 8px 16px #d1d1d6, -8px -8px 16px #ffffff',
+            'neu-dark': '8px 8px 16px #000000, -4px -4px 12px #1c1c1e',
+            'neu-inset-light': 'inset 4px 4px 8px #d1d1d6, inset -4px -4px 8px #ffffff',
+            'neu-inset-dark': 'inset 4px 4px 8px #000000, inset -2px -2px 6px #1c1c1e',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { -webkit-tap-highlight-color: transparent; }
+    .safe-top { padding-top: env(safe-area-inset-top); }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .page { display: none; }
+    .page.active { display: block; animation: fadeIn 0.4s cubic-bezier(0.23, 1, 0.32, 1); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: none; } }
+    .btn-neu { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+    .btn-neu:active { transform: scale(0.97); }
+  </style>
+</head>
+<body class="bg-apple-light dark:bg-apple-dark text-[#1d1d1f] dark:text-[#f5f5f7] font-sans antialiased overflow-hidden select-none transition-colors duration-500">
+
+  <!-- Loading -->
+  <div id="loading" class="fixed inset-0 bg-apple-light dark:bg-apple-dark z-[3000] flex flex-col items-center justify-center">
+    <div class="w-12 h-12 border-4 border-gray-100 dark:border-gray-800 border-t-navy dark:border-t-blue-500 rounded-full animate-spin"></div>
+    <p class="mt-8 text-navy dark:text-blue-400 font-black tracking-[0.3em] uppercase text-[10px]">Secure Admin Sync...</p>
+  </div>
+
+  <div id="app" class="flex flex-col h-screen overflow-hidden">
+    
+    <!-- Header (Dynamic Island Consideration) -->
+    <header class="bg-apple-light/70 dark:bg-apple-dark/70 backdrop-blur-3xl border-b border-white/10 safe-top z-[100]">
+      <div class="px-8 py-6 flex justify-between items-center h-20 md:h-24">
+        <div class="flex items-center gap-4">
+          <div class="w-10 h-10 bg-navy dark:bg-blue-600 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg shadow-navy/20">⚡</div>
+          <div class="flex flex-col">
+            <h1 class="text-xl font-black tracking-tighter text-navy dark:text-blue-400 leading-none">ADMIN DASHBOARD</h1>
+            <p id="system-time" class="text-[9px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest mt-1.5">REAL-TIME FEED</p>
+          </div>
+        </div>
+        <button onclick="location.reload()" class="w-10 h-10 bg-white/50 dark:bg-white/5 rounded-2xl shadow-neu-light dark:shadow-neu-dark flex items-center justify-center active:scale-90 transition-all">🔄</button>
+      </div>
+    </header>
+
+    <main id="content" class="flex-1 overflow-y-auto hide-scrollbar p-8 space-y-8 safe-bottom pb-40">
+      
+      <!-- KPI Intelligence Grid -->
+      <section class="grid grid-cols-2 gap-6">
+        <div class="bg-white/60 dark:bg-white/5 rounded-[2.5rem] p-8 shadow-neu-light dark:shadow-neu-dark border border-white/10 flex flex-col justify-center">
+          <div class="text-[9px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-3">Coverage</div>
+          <div id="stat-pct" class="text-4xl font-black text-navy dark:text-blue-400 tracking-tighter leading-none mb-1">0%</div>
+          <div class="h-1 w-full bg-apple-light dark:bg-apple-dark rounded-full mt-3 overflow-hidden">
+            <div id="stat-bar" class="h-full bg-navy dark:bg-blue-600 transition-all duration-1000" style="width: 0%"></div>
+          </div>
+        </div>
+        <div class="bg-white/60 dark:bg-white/5 rounded-[2.5rem] p-8 shadow-neu-light dark:shadow-neu-dark border border-white/10 flex flex-col justify-center">
+          <div class="text-[9px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-3">Field Staff</div>
+          <div id="stat-staff" class="text-4xl font-black text-navy dark:text-blue-400 tracking-tighter leading-none">0</div>
+          <div class="text-[8px] font-bold text-green-500 mt-3 uppercase tracking-widest leading-none">● ACTIVE NOW</div>
+        </div>
+      </section>
+
+      <!-- Action Center (Neumorphic Tools) -->
+      <section>
+        <h3 class="text-[10px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-[0.3em] mb-6 px-4">Tactical Operations</h3>
+        <div class="grid grid-cols-2 gap-5">
+          <button onclick="runCommand('batch')" class="btn-neu bg-white/60 dark:bg-white/5 rounded-[2rem] p-6 shadow-neu-light dark:shadow-neu-dark border border-white/10 flex flex-col items-center gap-3">
+            <span class="text-2xl">🚀</span>
+            <span class="text-[10px] font-black text-navy dark:text-blue-400 uppercase tracking-widest">Batch Run</span>
+          </button>
+          <button onclick="runCommand('map')" class="btn-neu bg-white/60 dark:bg-white/5 rounded-[2rem] p-6 shadow-neu-light dark:shadow-neu-dark border border-white/10 flex flex-col items-center gap-3">
+            <span class="text-2xl">🗺️</span>
+            <span class="text-[10px] font-black text-navy dark:text-blue-400 uppercase tracking-widest">Command Map</span>
+          </button>
+          <button onclick="runCommand('stats')" class="btn-neu bg-white/60 dark:bg-white/5 rounded-[2rem] p-6 shadow-neu-light dark:shadow-neu-dark border border-white/10 flex flex-col items-center gap-3">
+            <span class="text-2xl">📊</span>
+            <span class="text-[10px] font-black text-navy dark:text-blue-400 uppercase tracking-widest">Aggregate</span>
+          </button>
+          <button onclick="runCommand('reset')" class="btn-neu bg-white/60 dark:bg-white/5 rounded-[2rem] p-6 shadow-neu-light dark:shadow-neu-dark border border-white/10 flex flex-col items-center gap-3 border-rose-500/20">
+            <span class="text-2xl">⚠️</span>
+            <span class="text-[10px] font-black text-rose-500 uppercase tracking-widest">System Reset</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Live Log Stream -->
+      <section class="bg-white/60 dark:bg-white/5 rounded-[3rem] p-10 shadow-neu-light dark:shadow-neu-dark border border-white/10">
+        <div class="flex justify-between items-center mb-8">
+          <h3 class="text-xs font-black text-navy dark:text-blue-400 tracking-[0.2em] uppercase">📡 Intel Stream</h3>
+          <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_10px_#3b82f6]"></span>
+        </div>
+        <div id="log-stream" class="space-y-6">
+          <!-- Logs Dynamic -->
+          <div class="py-10 text-center opacity-20 text-[10px] font-black uppercase tracking-[0.3em]">Listening for tactical updates...</div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Command Tabs -->
+    <nav class="fixed bottom-10 left-10 right-10 bg-white/60 dark:bg-white/5 backdrop-blur-3xl rounded-[3rem] shadow-neu-light dark:shadow-neu-dark border border-white/20 flex justify-around items-center p-3 z-[200]">
+      <button class="nav-item flex flex-col items-center justify-center w-20 py-3 transition-all active:scale-90 active text-navy dark:text-blue-400">
+        <span class="text-3xl mb-1">🎮</span>
+        <span class="text-[9px] font-black uppercase tracking-widest">Command</span>
+      </button>
+      <button class="nav-item flex flex-col items-center justify-center w-20 py-3 transition-all active:scale-90 text-gray-300 dark:text-gray-600">
+        <span class="text-3xl mb-1">👥</span>
+        <span class="text-[9px] font-black uppercase tracking-widest opacity-0">Staff</span>
+      </button>
+      <button class="nav-item flex flex-col items-center justify-center w-20 py-3 transition-all active:scale-90 text-gray-300 dark:text-gray-600">
+        <span class="text-3xl mb-1">🛠️</span>
+        <span class="text-[9px] font-black uppercase tracking-widest opacity-0">Config</span>
+      </button>
+    </nav>
+  </div>
+
+  <script>
+    function updateTime() {
+      const now = new Date();
+      document.getElementById('system-time').innerText = now.toLocaleTimeString('ja-JP', { hour12: false }) + ' LIVE FEED';
+    }
+    setInterval(updateTime, 1000);
+    updateTime();
+
+    function runCommand(cmd) {
+      const btn = event.currentTarget;
+      btn.classList.add('shadow-neu-inset-light', 'dark:shadow-neu-inset-dark');
+      setTimeout(() => {
+        btn.classList.remove('shadow-neu-inset-light', 'dark:shadow-neu-inset-dark');
+        alert("Command Initiated: " + cmd.toUpperCase());
+      }, 200);
+    }
+
+    // Simulate loading
+    window.onload = () => {
+      setTimeout(() => {
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('stat-pct').innerText = "42%";
+        document.getElementById('stat-bar').style.width = "42%";
+        document.getElementById('stat-staff').innerText = "12";
+      }, 1000);
+    };
+  </script>
+</body>
+</html>

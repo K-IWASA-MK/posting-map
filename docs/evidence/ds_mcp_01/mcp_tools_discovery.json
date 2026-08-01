@@ -1,0 +1,8 @@
+{
+  "endpoint": "https://mcp.figma.com/mcp",
+  "statusCode": 401,
+  "toolCount": 0,
+  "tools": [],
+  "rawResponse": "Unauthorized",
+  "parseError": "Unexpected token 'U', \"Unauthorized\" is not valid JSON"
+}

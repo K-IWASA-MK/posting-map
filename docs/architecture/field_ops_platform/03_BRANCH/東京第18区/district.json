@@ -1,0 +1,18 @@
+{
+  "district": {
+    "id": "TOKYO-18",
+    "name": "東京第18区",
+    "municipalities": [
+      {
+        "name": "武蔵野市"
+      },
+      {
+        "name": "小金井市"
+      },
+      {
+        "name": "西東京市"
+      }
+    ]
+  },
+  "createdAt": "2026-07-29T01:00:47.550Z"
+}

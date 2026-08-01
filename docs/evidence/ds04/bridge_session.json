@@ -1,0 +1,15 @@
+{
+  "sessionId": "ds04-trace-handshake-001",
+  "status": "CONNECTED",
+  "createdAt": "2026-07-30T23:08:46.396Z",
+  "lastHeartbeat": "2026-07-30T23:08:46.396Z",
+  "pluginInfo": {
+    "pluginVersion": "0.1.0",
+    "apiVersion": "1.0.0",
+    "bridgeProtocolVersion": "1.0.0",
+    "supportedCapabilities": [
+      "CREATE_FRAME",
+      "CREATE_TEXT"
+    ]
+  }
+}

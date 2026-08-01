@@ -1,0 +1,17 @@
+{
+  "system": {
+    "syncIntervalMs": 30000,
+    "gpsTrackingIntervalMs": 10000,
+    "defaultZoom": 13,
+    "map": {
+      "center": null
+    }
+  },
+  "app": {
+    "mode": "PROD",
+    "features": {
+      "offlineMapEnabled": true,
+      "gpsPhotoVerificationEnabled": true
+    }
+  }
+}

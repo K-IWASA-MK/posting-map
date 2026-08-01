@@ -1,0 +1,5161 @@
+{
+  "municipalityBatches": {
+    "三重郡川越町": {
+      "totalRecords": 10,
+      "totalSheets": 1,
+      "batches": [
+        {
+          "sheetName": "三重郡川越町",
+          "batchNo": 1,
+          "rows": 10,
+          "startIndex": 1,
+          "endIndex": 10,
+          "records": [
+            {
+              "address": "三重郡川越町 大字縄生",
+              "zip": "",
+              "originalLineNumber": 857
+            },
+            {
+              "address": "三重郡川越町 大字当新田",
+              "zip": "5108111",
+              "originalLineNumber": 854
+            },
+            {
+              "address": "三重郡川越町 大字亀須新田",
+              "zip": "5108112",
+              "originalLineNumber": 851
+            },
+            {
+              "address": "三重郡川越町 大字亀尾新田",
+              "zip": "5108113",
+              "originalLineNumber": 849
+            },
+            {
+              "address": "三重郡川越町 大字亀崎新田",
+              "zip": "5108114",
+              "originalLineNumber": 850
+            },
+            {
+              "address": "三重郡川越町 大字高松",
+              "zip": "5108121",
+              "originalLineNumber": 853
+            },
+            {
+              "address": "三重郡川越町 大字豊田",
+              "zip": "5108122",
+              "originalLineNumber": 855
+            },
+            {
+              "address": "三重郡川越町 大字豊田一色",
+              "zip": "5108123",
+              "originalLineNumber": 856
+            },
+            {
+              "address": "三重郡川越町 大字南福崎",
+              "zip": "5108124",
+              "originalLineNumber": 858
+            },
+            {
+              "address": "三重郡川越町 大字北福崎",
+              "zip": "5108125",
+              "originalLineNumber": 852
+            }
+          ]
+        }
+      ]
+    },
+    "四日市市": {
+      "totalRecords": 345,
+      "totalSheets": 35,
+      "batches": [
+        {
+          "sheetName": "四日市市",
+          "batchNo": 1,
+          "rows": 10,
+          "startIndex": 1,
+          "endIndex": 10,
+          "records": [
+            {
+              "address": "四日市市 雨池町",
+              "zip": "",
+              "originalLineNumber": 28
+            },
+            {
+              "address": "四日市市 八田一丁目",
+              "zip": "5100001",
+              "originalLineNumber": 242
+            },
+            {
+              "address": "四日市市 八田三丁目",
+              "zip": "5100001",
+              "originalLineNumber": 244
+            },
+            {
+              "address": "四日市市 八田二丁目",
+              "zip": "5100001",
+              "originalLineNumber": 243
+            },
+            {
+              "address": "四日市市 羽津中一丁目",
+              "zip": "5100002",
+              "originalLineNumber": 246
+            },
+            {
+              "address": "四日市市 羽津中三丁目",
+              "zip": "5100002",
+              "originalLineNumber": 248
+            },
+            {
+              "address": "四日市市 羽津中二丁目",
+              "zip": "5100002",
+              "originalLineNumber": 247
+            },
+            {
+              "address": "四日市市 大宮町",
+              "zip": "5100003",
+              "originalLineNumber": 81
+            },
+            {
+              "address": "四日市市 大宮西町",
+              "zip": "5100004",
+              "originalLineNumber": 82
+            },
+            {
+              "address": "四日市市 山手町",
+              "zip": "5100005",
+              "originalLineNumber": 337
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（2）",
+          "batchNo": 2,
+          "rows": 10,
+          "startIndex": 11,
+          "endIndex": 20,
+          "records": [
+            {
+              "address": "四日市市 緑丘町",
+              "zip": "5100006",
+              "originalLineNumber": 308
+            },
+            {
+              "address": "四日市市 別名一丁目",
+              "zip": "5100007",
+              "originalLineNumber": 267
+            },
+            {
+              "address": "四日市市 別名三丁目",
+              "zip": "5100007",
+              "originalLineNumber": 269
+            },
+            {
+              "address": "四日市市 別名二丁目",
+              "zip": "5100007",
+              "originalLineNumber": 268
+            },
+            {
+              "address": "四日市市 別名五丁目",
+              "zip": "5100007",
+              "originalLineNumber": 271
+            },
+            {
+              "address": "四日市市 別名六丁目",
+              "zip": "5100007",
+              "originalLineNumber": 272
+            },
+            {
+              "address": "四日市市 別名四丁目",
+              "zip": "5100007",
+              "originalLineNumber": 270
+            },
+            {
+              "address": "四日市市 南いかるが町",
+              "zip": "5100008",
+              "originalLineNumber": 309
+            },
+            {
+              "address": "四日市市 霞一丁目",
+              "zip": "5100011",
+              "originalLineNumber": 100
+            },
+            {
+              "address": "四日市市 霞二丁目",
+              "zip": "5100011",
+              "originalLineNumber": 101
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（3）",
+          "batchNo": 3,
+          "rows": 10,
+          "startIndex": 21,
+          "endIndex": 30,
+          "records": [
+            {
+              "address": "四日市市 大字羽津",
+              "zip": "5100012",
+              "originalLineNumber": 66
+            },
+            {
+              "address": "四日市市 富士町",
+              "zip": "5100013",
+              "originalLineNumber": 264
+            },
+            {
+              "address": "四日市市 金場町",
+              "zip": "5100014",
+              "originalLineNumber": 102
+            },
+            {
+              "address": "四日市市 城山町",
+              "zip": "5100015",
+              "originalLineNumber": 156
+            },
+            {
+              "address": "四日市市 羽津山町",
+              "zip": "5100016",
+              "originalLineNumber": 249
+            },
+            {
+              "address": "四日市市 羽津町",
+              "zip": "5100017",
+              "originalLineNumber": 245
+            },
+            {
+              "address": "四日市市 白須賀一丁目",
+              "zip": "5100018",
+              "originalLineNumber": 150
+            },
+            {
+              "address": "四日市市 白須賀三丁目",
+              "zip": "5100018",
+              "originalLineNumber": 152
+            },
+            {
+              "address": "四日市市 白須賀二丁目",
+              "zip": "5100018",
+              "originalLineNumber": 151
+            },
+            {
+              "address": "四日市市 三郎町",
+              "zip": "5100021",
+              "originalLineNumber": 137
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（4）",
+          "batchNo": 4,
+          "rows": 10,
+          "startIndex": 31,
+          "endIndex": 40,
+          "records": [
+            {
+              "address": "四日市市 大協町一丁目",
+              "zip": "5100022",
+              "originalLineNumber": 171
+            },
+            {
+              "address": "四日市市 大協町二丁目",
+              "zip": "5100022",
+              "originalLineNumber": 172
+            },
+            {
+              "address": "四日市市 午起一丁目",
+              "zip": "5100023",
+              "originalLineNumber": 59
+            },
+            {
+              "address": "四日市市 午起三丁目",
+              "zip": "5100023",
+              "originalLineNumber": 61
+            },
+            {
+              "address": "四日市市 午起二丁目",
+              "zip": "5100023",
+              "originalLineNumber": 60
+            },
+            {
+              "address": "四日市市 新浜町",
+              "zip": "5100024",
+              "originalLineNumber": 164
+            },
+            {
+              "address": "四日市市 東新町",
+              "zip": "5100025",
+              "originalLineNumber": 193
+            },
+            {
+              "address": "四日市市 高浜町",
+              "zip": "5100026",
+              "originalLineNumber": 182
+            },
+            {
+              "address": "四日市市 高浜新町",
+              "zip": "5100027",
+              "originalLineNumber": 181
+            },
+            {
+              "address": "四日市市 浜一色町",
+              "zip": "5100031",
+              "originalLineNumber": 251
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（5）",
+          "batchNo": 5,
+          "rows": 10,
+          "startIndex": 41,
+          "endIndex": 50,
+          "records": [
+            {
+              "address": "四日市市 京町",
+              "zip": "5100032",
+              "originalLineNumber": 121
+            },
+            {
+              "address": "四日市市 川原町",
+              "zip": "5100033",
+              "originalLineNumber": 113
+            },
+            {
+              "address": "四日市市 滝川町",
+              "zip": "5100034",
+              "originalLineNumber": 344
+            },
+            {
+              "address": "四日市市 陶栄町",
+              "zip": "5100035",
+              "originalLineNumber": 342
+            },
+            {
+              "address": "四日市市 稲葉町",
+              "zip": "5100041",
+              "originalLineNumber": 46
+            },
+            {
+              "address": "四日市市 高砂町",
+              "zip": "5100042",
+              "originalLineNumber": 175
+            },
+            {
+              "address": "四日市市 南納屋町",
+              "zip": "5100043",
+              "originalLineNumber": 314
+            },
+            {
+              "address": "四日市市 相生町",
+              "zip": "5100044",
+              "originalLineNumber": 1
+            },
+            {
+              "address": "四日市市 蔵町",
+              "zip": "5100045",
+              "originalLineNumber": 125
+            },
+            {
+              "address": "四日市市 浜町",
+              "zip": "5100046",
+              "originalLineNumber": 254
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（6）",
+          "batchNo": 6,
+          "rows": 10,
+          "startIndex": 51,
+          "endIndex": 60,
+          "records": [
+            {
+              "address": "四日市市 北納屋町",
+              "zip": "5100047",
+              "originalLineNumber": 115
+            },
+            {
+              "address": "四日市市 中納屋町",
+              "zip": "5100048",
+              "originalLineNumber": 217
+            },
+            {
+              "address": "四日市市 千歳町",
+              "zip": "5100051",
+              "originalLineNumber": 188
+            },
+            {
+              "address": "四日市市 末広町",
+              "zip": "5100052",
+              "originalLineNumber": 165
+            },
+            {
+              "address": "四日市市 曙一丁目",
+              "zip": "5100053",
+              "originalLineNumber": 19
+            },
+            {
+              "address": "四日市市 曙二丁目",
+              "zip": "5100053",
+              "originalLineNumber": 20
+            },
+            {
+              "address": "四日市市 曙町",
+              "zip": "5100054",
+              "originalLineNumber": 21
+            },
+            {
+              "address": "四日市市 寿町",
+              "zip": "5100055",
+              "originalLineNumber": 130
+            },
+            {
+              "address": "四日市市 南起町",
+              "zip": "5100056",
+              "originalLineNumber": 310
+            },
+            {
+              "address": "四日市市 昌栄町",
+              "zip": "5100057",
+              "originalLineNumber": 148
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（7）",
+          "batchNo": 7,
+          "rows": 10,
+          "startIndex": 61,
+          "endIndex": 70,
+          "records": [
+            {
+              "address": "四日市市 西末広町",
+              "zip": "5100058",
+              "originalLineNumber": 228
+            },
+            {
+              "address": "四日市市 尾上町",
+              "zip": "5100059",
+              "originalLineNumber": 96
+            },
+            {
+              "address": "四日市市 朝日町",
+              "zip": "5100061",
+              "originalLineNumber": 27
+            },
+            {
+              "address": "四日市市 北浜田町",
+              "zip": "5100062",
+              "originalLineNumber": 117
+            },
+            {
+              "address": "四日市市 十七軒町",
+              "zip": "5100063",
+              "originalLineNumber": 146
+            },
+            {
+              "address": "四日市市 新正一丁目",
+              "zip": "5100064",
+              "originalLineNumber": 157
+            },
+            {
+              "address": "四日市市 新正三丁目",
+              "zip": "5100064",
+              "originalLineNumber": 159
+            },
+            {
+              "address": "四日市市 新正二丁目",
+              "zip": "5100064",
+              "originalLineNumber": 158
+            },
+            {
+              "address": "四日市市 新正五丁目",
+              "zip": "5100064",
+              "originalLineNumber": 161
+            },
+            {
+              "address": "四日市市 新正四丁目",
+              "zip": "5100064",
+              "originalLineNumber": 160
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（8）",
+          "batchNo": 8,
+          "rows": 10,
+          "startIndex": 71,
+          "endIndex": 80,
+          "records": [
+            {
+              "address": "四日市市 中浜田町",
+              "zip": "5100065",
+              "originalLineNumber": 219
+            },
+            {
+              "address": "四日市市 南浜田町",
+              "zip": "5100066",
+              "originalLineNumber": 315
+            },
+            {
+              "address": "四日市市 浜田町",
+              "zip": "5100067",
+              "originalLineNumber": 253
+            },
+            {
+              "address": "四日市市 三栄町",
+              "zip": "5100068",
+              "originalLineNumber": 138
+            },
+            {
+              "address": "四日市市 幸町",
+              "zip": "5100069",
+              "originalLineNumber": 134
+            },
+            {
+              "address": "四日市市 西浦一丁目",
+              "zip": "5100071",
+              "originalLineNumber": 224
+            },
+            {
+              "address": "四日市市 西浦二丁目",
+              "zip": "5100071",
+              "originalLineNumber": 225
+            },
+            {
+              "address": "四日市市 九の城町",
+              "zip": "5100072",
+              "originalLineNumber": 122
+            },
+            {
+              "address": "四日市市 西浜田町",
+              "zip": "5100073",
+              "originalLineNumber": 232
+            },
+            {
+              "address": "四日市市 鵜の森一丁目",
+              "zip": "5100074",
+              "originalLineNumber": 57
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（9）",
+          "batchNo": 9,
+          "rows": 10,
+          "startIndex": 81,
+          "endIndex": 90,
+          "records": [
+            {
+              "address": "四日市市 鵜の森二丁目",
+              "zip": "5100074",
+              "originalLineNumber": 58
+            },
+            {
+              "address": "四日市市 安島一丁目",
+              "zip": "5100075",
+              "originalLineNumber": 330
+            },
+            {
+              "address": "四日市市 安島二丁目",
+              "zip": "5100075",
+              "originalLineNumber": 331
+            },
+            {
+              "address": "四日市市 堀木一丁目",
+              "zip": "5100076",
+              "originalLineNumber": 277
+            },
+            {
+              "address": "四日市市 堀木二丁目",
+              "zip": "5100076",
+              "originalLineNumber": 278
+            },
+            {
+              "address": "四日市市 北町",
+              "zip": "5100081",
+              "originalLineNumber": 119
+            },
+            {
+              "address": "四日市市 中部",
+              "zip": "5100082",
+              "originalLineNumber": 189
+            },
+            {
+              "address": "四日市市 沖の島町",
+              "zip": "5100083",
+              "originalLineNumber": 85
+            },
+            {
+              "address": "四日市市 栄町",
+              "zip": "5100084",
+              "originalLineNumber": 135
+            },
+            {
+              "address": "四日市市 諏訪町",
+              "zip": "5100085",
+              "originalLineNumber": 169
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（10）",
+          "batchNo": 10,
+          "rows": 10,
+          "startIndex": 91,
+          "endIndex": 100,
+          "records": [
+            {
+              "address": "四日市市 諏訪栄町",
+              "zip": "5100086",
+              "originalLineNumber": 168
+            },
+            {
+              "address": "四日市市 西新地",
+              "zip": "5100087",
+              "originalLineNumber": 227
+            },
+            {
+              "address": "四日市市 元町",
+              "zip": "5100088",
+              "originalLineNumber": 328
+            },
+            {
+              "address": "四日市市 西町",
+              "zip": "5100089",
+              "originalLineNumber": 234
+            },
+            {
+              "address": "四日市市 北浜町",
+              "zip": "5100091",
+              "originalLineNumber": 118
+            },
+            {
+              "address": "四日市市 新町",
+              "zip": "5100092",
+              "originalLineNumber": 163
+            },
+            {
+              "address": "四日市市 本町",
+              "zip": "5100093",
+              "originalLineNumber": 279
+            },
+            {
+              "address": "四日市市 新々町",
+              "zip": "5100094",
+              "originalLineNumber": 162
+            },
+            {
+              "address": "四日市市 元新町",
+              "zip": "5100095",
+              "originalLineNumber": 327
+            },
+            {
+              "address": "四日市市 中町",
+              "zip": "5100096",
+              "originalLineNumber": 220
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（11）",
+          "batchNo": 11,
+          "rows": 10,
+          "startIndex": 101,
+          "endIndex": 110,
+          "records": [
+            {
+              "address": "四日市市 八幡町",
+              "zip": "5100097",
+              "originalLineNumber": 241
+            },
+            {
+              "address": "四日市市 三ツ谷東町",
+              "zip": "5100801",
+              "originalLineNumber": 307
+            },
+            {
+              "address": "四日市市 三ツ谷町",
+              "zip": "5100802",
+              "originalLineNumber": 306
+            },
+            {
+              "address": "四日市市 阿倉川町",
+              "zip": "5100803",
+              "originalLineNumber": 18
+            },
+            {
+              "address": "四日市市 万古町",
+              "zip": "5100804",
+              "originalLineNumber": 255
+            },
+            {
+              "address": "四日市市 大字東阿倉川",
+              "zip": "5100805",
+              "originalLineNumber": 67
+            },
+            {
+              "address": "四日市市 本郷町",
+              "zip": "5100806",
+              "originalLineNumber": 343
+            },
+            {
+              "address": "四日市市 末永町",
+              "zip": "5100807",
+              "originalLineNumber": 345
+            },
+            {
+              "address": "四日市市 阿倉川新町",
+              "zip": "5100810",
+              "originalLineNumber": 17
+            },
+            {
+              "address": "四日市市 みゆきケ丘一丁目",
+              "zip": "5100811",
+              "originalLineNumber": 323
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（12）",
+          "batchNo": 12,
+          "rows": 10,
+          "startIndex": 111,
+          "endIndex": 120,
+          "records": [
+            {
+              "address": "四日市市 みゆきケ丘二丁目",
+              "zip": "5100811",
+              "originalLineNumber": 324
+            },
+            {
+              "address": "四日市市 大字西阿倉川",
+              "zip": "5100812",
+              "originalLineNumber": 65
+            },
+            {
+              "address": "四日市市 大字末永",
+              "zip": "5100813",
+              "originalLineNumber": 63
+            },
+            {
+              "address": "四日市市 清水町",
+              "zip": "5100814",
+              "originalLineNumber": 142
+            },
+            {
+              "address": "四日市市 野田一丁目",
+              "zip": "5100815",
+              "originalLineNumber": 238
+            },
+            {
+              "address": "四日市市 野田二丁目",
+              "zip": "5100815",
+              "originalLineNumber": 239
+            },
+            {
+              "address": "四日市市 久保田一丁目",
+              "zip": "5100821",
+              "originalLineNumber": 123
+            },
+            {
+              "address": "四日市市 久保田二丁目",
+              "zip": "5100821",
+              "originalLineNumber": 124
+            },
+            {
+              "address": "四日市市 芝田一丁目",
+              "zip": "5100822",
+              "originalLineNumber": 140
+            },
+            {
+              "address": "四日市市 芝田二丁目",
+              "zip": "5100822",
+              "originalLineNumber": 141
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（13）",
+          "batchNo": 13,
+          "rows": 10,
+          "startIndex": 121,
+          "endIndex": 130,
+          "records": [
+            {
+              "address": "四日市市 城北町",
+              "zip": "5100823",
+              "originalLineNumber": 153
+            },
+            {
+              "address": "四日市市 城東町",
+              "zip": "5100824",
+              "originalLineNumber": 155
+            },
+            {
+              "address": "四日市市 赤堀新町",
+              "zip": "5100825",
+              "originalLineNumber": 15
+            },
+            {
+              "address": "四日市市 赤堀一丁目",
+              "zip": "5100826",
+              "originalLineNumber": 12
+            },
+            {
+              "address": "四日市市 赤堀三丁目",
+              "zip": "5100826",
+              "originalLineNumber": 14
+            },
+            {
+              "address": "四日市市 赤堀二丁目",
+              "zip": "5100826",
+              "originalLineNumber": 13
+            },
+            {
+              "address": "四日市市 赤堀南町",
+              "zip": "5100827",
+              "originalLineNumber": 16
+            },
+            {
+              "address": "四日市市 石塚町",
+              "zip": "5100828",
+              "originalLineNumber": 43
+            },
+            {
+              "address": "四日市市 城西町",
+              "zip": "5100829",
+              "originalLineNumber": 154
+            },
+            {
+              "address": "四日市市 西伊倉町",
+              "zip": "5100831",
+              "originalLineNumber": 223
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（14）",
+          "batchNo": 14,
+          "rows": 10,
+          "startIndex": 131,
+          "endIndex": 140,
+          "records": [
+            {
+              "address": "四日市市 伊倉一丁目",
+              "zip": "5100832",
+              "originalLineNumber": 35
+            },
+            {
+              "address": "四日市市 伊倉三丁目",
+              "zip": "5100832",
+              "originalLineNumber": 37
+            },
+            {
+              "address": "四日市市 伊倉二丁目",
+              "zip": "5100832",
+              "originalLineNumber": 36
+            },
+            {
+              "address": "四日市市 中川原一丁目",
+              "zip": "5100833",
+              "originalLineNumber": 212
+            },
+            {
+              "address": "四日市市 中川原三丁目",
+              "zip": "5100833",
+              "originalLineNumber": 214
+            },
+            {
+              "address": "四日市市 中川原二丁目",
+              "zip": "5100833",
+              "originalLineNumber": 213
+            },
+            {
+              "address": "四日市市 中川原四丁目",
+              "zip": "5100833",
+              "originalLineNumber": 215
+            },
+            {
+              "address": "四日市市 ときわ一丁目",
+              "zip": "5100834",
+              "originalLineNumber": 195
+            },
+            {
+              "address": "四日市市 ときわ三丁目",
+              "zip": "5100834",
+              "originalLineNumber": 197
+            },
+            {
+              "address": "四日市市 ときわ二丁目",
+              "zip": "5100834",
+              "originalLineNumber": 196
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（15）",
+          "batchNo": 15,
+          "rows": 10,
+          "startIndex": 141,
+          "endIndex": 150,
+          "records": [
+            {
+              "address": "四日市市 ときわ五丁目",
+              "zip": "5100834",
+              "originalLineNumber": 199
+            },
+            {
+              "address": "四日市市 ときわ四丁目",
+              "zip": "5100834",
+              "originalLineNumber": 198
+            },
+            {
+              "address": "四日市市 大井手一丁目",
+              "zip": "5100835",
+              "originalLineNumber": 71
+            },
+            {
+              "address": "四日市市 大井手三丁目",
+              "zip": "5100835",
+              "originalLineNumber": 73
+            },
+            {
+              "address": "四日市市 大井手二丁目",
+              "zip": "5100835",
+              "originalLineNumber": 72
+            },
+            {
+              "address": "四日市市 大字松本",
+              "zip": "5100836",
+              "originalLineNumber": 68
+            },
+            {
+              "address": "四日市市 松本一丁目",
+              "zip": "5100836",
+              "originalLineNumber": 292
+            },
+            {
+              "address": "四日市市 松本三丁目",
+              "zip": "5100836",
+              "originalLineNumber": 294
+            },
+            {
+              "address": "四日市市 松本二丁目",
+              "zip": "5100836",
+              "originalLineNumber": 293
+            },
+            {
+              "address": "四日市市 松本五丁目",
+              "zip": "5100836",
+              "originalLineNumber": 296
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（16）",
+          "batchNo": 16,
+          "rows": 10,
+          "startIndex": 151,
+          "endIndex": 160,
+          "records": [
+            {
+              "address": "四日市市 松本六丁目",
+              "zip": "5100836",
+              "originalLineNumber": 297
+            },
+            {
+              "address": "四日市市 松本四丁目",
+              "zip": "5100836",
+              "originalLineNumber": 295
+            },
+            {
+              "address": "四日市市 西松本町",
+              "zip": "5100837",
+              "originalLineNumber": 235
+            },
+            {
+              "address": "四日市市 南松本町",
+              "zip": "5100838",
+              "originalLineNumber": 316
+            },
+            {
+              "address": "四日市市 青葉町",
+              "zip": "5100839",
+              "originalLineNumber": 2
+            },
+            {
+              "address": "四日市市 三田町",
+              "zip": "5100841",
+              "originalLineNumber": 305
+            },
+            {
+              "address": "四日市市 石原町",
+              "zip": "5100842",
+              "originalLineNumber": 44
+            },
+            {
+              "address": "四日市市 宮東町一丁目",
+              "zip": "5100843",
+              "originalLineNumber": 317
+            },
+            {
+              "address": "四日市市 宮東町三丁目",
+              "zip": "5100843",
+              "originalLineNumber": 319
+            },
+            {
+              "address": "四日市市 宮東町二丁目",
+              "zip": "5100843",
+              "originalLineNumber": 318
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（17）",
+          "batchNo": 17,
+          "rows": 10,
+          "startIndex": 161,
+          "endIndex": 170,
+          "records": [
+            {
+              "address": "四日市市 宝町",
+              "zip": "5100844",
+              "originalLineNumber": 185
+            },
+            {
+              "address": "四日市市 海山道町一丁目",
+              "zip": "5100845",
+              "originalLineNumber": 320
+            },
+            {
+              "address": "四日市市 海山道町三丁目",
+              "zip": "5100845",
+              "originalLineNumber": 322
+            },
+            {
+              "address": "四日市市 海山道町二丁目",
+              "zip": "5100845",
+              "originalLineNumber": 321
+            },
+            {
+              "address": "四日市市 大井の川町一丁目",
+              "zip": "5100846",
+              "originalLineNumber": 74
+            },
+            {
+              "address": "四日市市 大井の川町三丁目",
+              "zip": "5100846",
+              "originalLineNumber": 76
+            },
+            {
+              "address": "四日市市 大井の川町二丁目",
+              "zip": "5100846",
+              "originalLineNumber": 75
+            },
+            {
+              "address": "四日市市 大浜町",
+              "zip": "5100847",
+              "originalLineNumber": 80
+            },
+            {
+              "address": "四日市市 東邦町",
+              "zip": "5100848",
+              "originalLineNumber": 194
+            },
+            {
+              "address": "四日市市 浜旭町",
+              "zip": "5100852",
+              "originalLineNumber": 250
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（18）",
+          "batchNo": 18,
+          "rows": 10,
+          "startIndex": 171,
+          "endIndex": 180,
+          "records": [
+            {
+              "address": "四日市市 川合町",
+              "zip": "5100853",
+              "originalLineNumber": 105
+            },
+            {
+              "address": "四日市市 七つ屋町",
+              "zip": "5100856",
+              "originalLineNumber": 222
+            },
+            {
+              "address": "四日市市 高旭町",
+              "zip": "5100857",
+              "originalLineNumber": 174
+            },
+            {
+              "address": "四日市市 柳町",
+              "zip": "5100861",
+              "originalLineNumber": 335
+            },
+            {
+              "address": "四日市市 御薗町一丁目",
+              "zip": "5100862",
+              "originalLineNumber": 299
+            },
+            {
+              "address": "四日市市 御薗町二丁目",
+              "zip": "5100862",
+              "originalLineNumber": 300
+            },
+            {
+              "address": "四日市市 中里町",
+              "zip": "5100864",
+              "originalLineNumber": 216
+            },
+            {
+              "address": "四日市市 小浜町",
+              "zip": "5100865",
+              "originalLineNumber": 131
+            },
+            {
+              "address": "四日市市 大池町",
+              "zip": "5100866",
+              "originalLineNumber": 70
+            },
+            {
+              "address": "四日市市 松泉町",
+              "zip": "5100867",
+              "originalLineNumber": 149
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（19）",
+          "batchNo": 19,
+          "rows": 10,
+          "startIndex": 181,
+          "endIndex": 190,
+          "records": [
+            {
+              "address": "四日市市 川尻町",
+              "zip": "5100871",
+              "originalLineNumber": 112
+            },
+            {
+              "address": "四日市市 内堀町",
+              "zip": "5100872",
+              "originalLineNumber": 50
+            },
+            {
+              "address": "四日市市 貝塚町",
+              "zip": "5100873",
+              "originalLineNumber": 99
+            },
+            {
+              "address": "四日市市 泊小柳町",
+              "zip": "5100883",
+              "originalLineNumber": 200
+            },
+            {
+              "address": "四日市市 泊町",
+              "zip": "5100884",
+              "originalLineNumber": 201
+            },
+            {
+              "address": "四日市市 泊山崎町",
+              "zip": "5100892",
+              "originalLineNumber": 202
+            },
+            {
+              "address": "四日市市 前田町",
+              "zip": "5100893",
+              "originalLineNumber": 280
+            },
+            {
+              "address": "四日市市 大字泊村",
+              "zip": "5100894",
+              "originalLineNumber": 64
+            },
+            {
+              "address": "四日市市 東日野一丁目",
+              "zip": "5100941",
+              "originalLineNumber": 259
+            },
+            {
+              "address": "四日市市 東日野二丁目",
+              "zip": "5100941",
+              "originalLineNumber": 260
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（20）",
+          "batchNo": 20,
+          "rows": 10,
+          "startIndex": 191,
+          "endIndex": 200,
+          "records": [
+            {
+              "address": "四日市市 東日野町",
+              "zip": "5100942",
+              "originalLineNumber": 261
+            },
+            {
+              "address": "四日市市 西日野町",
+              "zip": "5100943",
+              "originalLineNumber": 233
+            },
+            {
+              "address": "四日市市 高花平一丁目",
+              "zip": "5100945",
+              "originalLineNumber": 176
+            },
+            {
+              "address": "四日市市 高花平三丁目",
+              "zip": "5100945",
+              "originalLineNumber": 178
+            },
+            {
+              "address": "四日市市 高花平二丁目",
+              "zip": "5100945",
+              "originalLineNumber": 177
+            },
+            {
+              "address": "四日市市 高花平五丁目",
+              "zip": "5100945",
+              "originalLineNumber": 180
+            },
+            {
+              "address": "四日市市 高花平四丁目",
+              "zip": "5100945",
+              "originalLineNumber": 179
+            },
+            {
+              "address": "四日市市 八王子町",
+              "zip": "5100947",
+              "originalLineNumber": 240
+            },
+            {
+              "address": "四日市市 室山町",
+              "zip": "5100948",
+              "originalLineNumber": 325
+            },
+            {
+              "address": "四日市市 小古曽東一丁目",
+              "zip": "5100951",
+              "originalLineNumber": 93
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（21）",
+          "batchNo": 21,
+          "rows": 10,
+          "startIndex": 201,
+          "endIndex": 210,
+          "records": [
+            {
+              "address": "四日市市 小古曽東三丁目",
+              "zip": "5100951",
+              "originalLineNumber": 95
+            },
+            {
+              "address": "四日市市 小古曽東二丁目",
+              "zip": "5100951",
+              "originalLineNumber": 94
+            },
+            {
+              "address": "四日市市 小古曽町",
+              "zip": "5100952",
+              "originalLineNumber": 92
+            },
+            {
+              "address": "四日市市 釆女が丘一丁目",
+              "zip": "5100953",
+              "originalLineNumber": 51
+            },
+            {
+              "address": "四日市市 釆女が丘三丁目",
+              "zip": "5100953",
+              "originalLineNumber": 53
+            },
+            {
+              "address": "四日市市 釆女が丘二丁目",
+              "zip": "5100953",
+              "originalLineNumber": 52
+            },
+            {
+              "address": "四日市市 釆女が丘五丁目",
+              "zip": "5100953",
+              "originalLineNumber": 55
+            },
+            {
+              "address": "四日市市 釆女が丘四丁目",
+              "zip": "5100953",
+              "originalLineNumber": 54
+            },
+            {
+              "address": "四日市市 釆女町",
+              "zip": "5100954",
+              "originalLineNumber": 56
+            },
+            {
+              "address": "四日市市 北小松町",
+              "zip": "5100955",
+              "originalLineNumber": 114
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（22）",
+          "batchNo": 22,
+          "rows": 10,
+          "startIndex": 211,
+          "endIndex": 220,
+          "records": [
+            {
+              "address": "四日市市 森カ山町",
+              "zip": "5100957",
+              "originalLineNumber": 329
+            },
+            {
+              "address": "四日市市 小古曽一丁目",
+              "zip": "5100958",
+              "originalLineNumber": 86
+            },
+            {
+              "address": "四日市市 小古曽三丁目",
+              "zip": "5100958",
+              "originalLineNumber": 88
+            },
+            {
+              "address": "四日市市 小古曽二丁目",
+              "zip": "5100958",
+              "originalLineNumber": 87
+            },
+            {
+              "address": "四日市市 小古曽五丁目",
+              "zip": "5100958",
+              "originalLineNumber": 90
+            },
+            {
+              "address": "四日市市 小古曽六丁目",
+              "zip": "5100958",
+              "originalLineNumber": 91
+            },
+            {
+              "address": "四日市市 小古曽四丁目",
+              "zip": "5100958",
+              "originalLineNumber": 89
+            },
+            {
+              "address": "四日市市 南小松町",
+              "zip": "5100971",
+              "originalLineNumber": 311
+            },
+            {
+              "address": "四日市市 天カ須賀一丁目",
+              "zip": "5108001",
+              "originalLineNumber": 29
+            },
+            {
+              "address": "四日市市 天カ須賀三丁目",
+              "zip": "5108001",
+              "originalLineNumber": 31
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（23）",
+          "batchNo": 23,
+          "rows": 10,
+          "startIndex": 221,
+          "endIndex": 230,
+          "records": [
+            {
+              "address": "四日市市 天カ須賀二丁目",
+              "zip": "5108001",
+              "originalLineNumber": 30
+            },
+            {
+              "address": "四日市市 天カ須賀五丁目",
+              "zip": "5108001",
+              "originalLineNumber": 33
+            },
+            {
+              "address": "四日市市 天カ須賀四丁目",
+              "zip": "5108001",
+              "originalLineNumber": 32
+            },
+            {
+              "address": "四日市市 天カ須賀新町",
+              "zip": "5108002",
+              "originalLineNumber": 34
+            },
+            {
+              "address": "四日市市 住吉町",
+              "zip": "5108003",
+              "originalLineNumber": 167
+            },
+            {
+              "address": "四日市市 富田一色町",
+              "zip": "5108004",
+              "originalLineNumber": 208
+            },
+            {
+              "address": "四日市市 富双一丁目",
+              "zip": "5108005",
+              "originalLineNumber": 265
+            },
+            {
+              "address": "四日市市 富双二丁目",
+              "zip": "5108005",
+              "originalLineNumber": 266
+            },
+            {
+              "address": "四日市市 東富田町",
+              "zip": "5108006",
+              "originalLineNumber": 258
+            },
+            {
+              "address": "四日市市 富田浜元町",
+              "zip": "5108007",
+              "originalLineNumber": 211
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（24）",
+          "batchNo": 24,
+          "rows": 10,
+          "startIndex": 231,
+          "endIndex": 240,
+          "records": [
+            {
+              "address": "四日市市 富田浜町",
+              "zip": "5108008",
+              "originalLineNumber": 210
+            },
+            {
+              "address": "四日市市 浜園町",
+              "zip": "5108009",
+              "originalLineNumber": 252
+            },
+            {
+              "address": "四日市市 東茂福町",
+              "zip": "5108011",
+              "originalLineNumber": 262
+            },
+            {
+              "address": "四日市市 茂福町",
+              "zip": "5108012",
+              "originalLineNumber": 326
+            },
+            {
+              "address": "四日市市 南富田町",
+              "zip": "5108013",
+              "originalLineNumber": 313
+            },
+            {
+              "address": "四日市市 富田一丁目",
+              "zip": "5108014",
+              "originalLineNumber": 204
+            },
+            {
+              "address": "四日市市 富田三丁目",
+              "zip": "5108014",
+              "originalLineNumber": 206
+            },
+            {
+              "address": "四日市市 富田二丁目",
+              "zip": "5108014",
+              "originalLineNumber": 205
+            },
+            {
+              "address": "四日市市 富田四丁目",
+              "zip": "5108014",
+              "originalLineNumber": 207
+            },
+            {
+              "address": "四日市市 松原町",
+              "zip": "5108015",
+              "originalLineNumber": 291
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（25）",
+          "batchNo": 25,
+          "rows": 10,
+          "startIndex": 241,
+          "endIndex": 250,
+          "records": [
+            {
+              "address": "四日市市 富州原町",
+              "zip": "5108016",
+              "originalLineNumber": 203
+            },
+            {
+              "address": "四日市市 平町",
+              "zip": "5108017",
+              "originalLineNumber": 173
+            },
+            {
+              "address": "四日市市 松寺一丁目",
+              "zip": "5108021",
+              "originalLineNumber": 288
+            },
+            {
+              "address": "四日市市 松寺三丁目",
+              "zip": "5108021",
+              "originalLineNumber": 290
+            },
+            {
+              "address": "四日市市 松寺二丁目",
+              "zip": "5108021",
+              "originalLineNumber": 289
+            },
+            {
+              "address": "四日市市 蒔田一丁目",
+              "zip": "5108022",
+              "originalLineNumber": 281
+            },
+            {
+              "address": "四日市市 蒔田三丁目",
+              "zip": "5108022",
+              "originalLineNumber": 283
+            },
+            {
+              "address": "四日市市 蒔田二丁目",
+              "zip": "5108022",
+              "originalLineNumber": 282
+            },
+            {
+              "address": "四日市市 蒔田四丁目",
+              "zip": "5108022",
+              "originalLineNumber": 284
+            },
+            {
+              "address": "四日市市 西富田三丁目",
+              "zip": "5108023",
+              "originalLineNumber": 230
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（26）",
+          "batchNo": 26,
+          "rows": 10,
+          "startIndex": 251,
+          "endIndex": 260,
+          "records": [
+            {
+              "address": "四日市市 西富田二丁目",
+              "zip": "5108023",
+              "originalLineNumber": 229
+            },
+            {
+              "address": "四日市市 西富田町",
+              "zip": "5108024",
+              "originalLineNumber": 231
+            },
+            {
+              "address": "四日市市 富田栄町",
+              "zip": "5108025",
+              "originalLineNumber": 209
+            },
+            {
+              "address": "四日市市 十志町",
+              "zip": "5108026",
+              "originalLineNumber": 147
+            },
+            {
+              "address": "四日市市 大字茂福",
+              "zip": "5108027",
+              "originalLineNumber": 69
+            },
+            {
+              "address": "四日市市 下之宮町",
+              "zip": "5108028",
+              "originalLineNumber": 145
+            },
+            {
+              "address": "四日市市 川北一丁目",
+              "zip": "5108031",
+              "originalLineNumber": 106
+            },
+            {
+              "address": "四日市市 川北三丁目",
+              "zip": "5108031",
+              "originalLineNumber": 108
+            },
+            {
+              "address": "四日市市 川北二丁目",
+              "zip": "5108031",
+              "originalLineNumber": 107
+            },
+            {
+              "address": "四日市市 川北町",
+              "zip": "5108032",
+              "originalLineNumber": 109
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（27）",
+          "batchNo": 27,
+          "rows": 10,
+          "startIndex": 261,
+          "endIndex": 270,
+          "records": [
+            {
+              "address": "四日市市 下さざらい町",
+              "zip": "5108033",
+              "originalLineNumber": 144
+            },
+            {
+              "address": "四日市市 大矢知町",
+              "zip": "5108034",
+              "originalLineNumber": 84
+            },
+            {
+              "address": "四日市市 東垂坂町",
+              "zip": "5108035",
+              "originalLineNumber": 257
+            },
+            {
+              "address": "四日市市 南垂坂町",
+              "zip": "5108036",
+              "originalLineNumber": 312
+            },
+            {
+              "address": "四日市市 垂坂町",
+              "zip": "5108037",
+              "originalLineNumber": 187
+            },
+            {
+              "address": "四日市市 垂坂新町",
+              "zip": "5108038",
+              "originalLineNumber": 186
+            },
+            {
+              "address": "四日市市 大矢知新町",
+              "zip": "5108039",
+              "originalLineNumber": 83
+            },
+            {
+              "address": "四日市市 大谷台一丁目",
+              "zip": "5120901",
+              "originalLineNumber": 78
+            },
+            {
+              "address": "四日市市 大谷台二丁目",
+              "zip": "5120901",
+              "originalLineNumber": 79
+            },
+            {
+              "address": "四日市市 小杉町",
+              "zip": "5120902",
+              "originalLineNumber": 129
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（28）",
+          "batchNo": 28,
+          "rows": 10,
+          "startIndex": 271,
+          "endIndex": 280,
+          "records": [
+            {
+              "address": "四日市市 小杉新町",
+              "zip": "5120903",
+              "originalLineNumber": 128
+            },
+            {
+              "address": "四日市市 山之一色町",
+              "zip": "5120906",
+              "originalLineNumber": 338
+            },
+            {
+              "address": "四日市市 東ケ谷",
+              "zip": "5120907",
+              "originalLineNumber": 256
+            },
+            {
+              "address": "四日市市 生桑町",
+              "zip": "5120911",
+              "originalLineNumber": 38
+            },
+            {
+              "address": "四日市市 尾平町",
+              "zip": "5120921",
+              "originalLineNumber": 97
+            },
+            {
+              "address": "四日市市 曽井町",
+              "zip": "5120922",
+              "originalLineNumber": 170
+            },
+            {
+              "address": "四日市市 寺方町",
+              "zip": "5120924",
+              "originalLineNumber": 191
+            },
+            {
+              "address": "四日市市 菅原町",
+              "zip": "5120925",
+              "originalLineNumber": 166
+            },
+            {
+              "address": "四日市市 浮橋一丁目",
+              "zip": "5120931",
+              "originalLineNumber": 47
+            },
+            {
+              "address": "四日市市 浮橋二丁目",
+              "zip": "5120931",
+              "originalLineNumber": 48
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（29）",
+          "batchNo": 29,
+          "rows": 10,
+          "startIndex": 281,
+          "endIndex": 290,
+          "records": [
+            {
+              "address": "四日市市 小生町",
+              "zip": "5120932",
+              "originalLineNumber": 133
+            },
+            {
+              "address": "四日市市 三滝台一丁目",
+              "zip": "5120933",
+              "originalLineNumber": 301
+            },
+            {
+              "address": "四日市市 三滝台三丁目",
+              "zip": "5120933",
+              "originalLineNumber": 303
+            },
+            {
+              "address": "四日市市 三滝台二丁目",
+              "zip": "5120933",
+              "originalLineNumber": 302
+            },
+            {
+              "address": "四日市市 三滝台四丁目",
+              "zip": "5120933",
+              "originalLineNumber": 304
+            },
+            {
+              "address": "四日市市 川島町",
+              "zip": "5120934",
+              "originalLineNumber": 111
+            },
+            {
+              "address": "四日市市 川島新町",
+              "zip": "5120935",
+              "originalLineNumber": 110
+            },
+            {
+              "address": "四日市市 別山一丁目",
+              "zip": "5120936",
+              "originalLineNumber": 273
+            },
+            {
+              "address": "四日市市 別山三丁目",
+              "zip": "5120936",
+              "originalLineNumber": 275
+            },
+            {
+              "address": "四日市市 別山二丁目",
+              "zip": "5120936",
+              "originalLineNumber": 274
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（30）",
+          "batchNo": 30,
+          "rows": 10,
+          "startIndex": 291,
+          "endIndex": 300,
+          "records": [
+            {
+              "address": "四日市市 別山四丁目",
+              "zip": "5120936",
+              "originalLineNumber": 276
+            },
+            {
+              "address": "四日市市 内山町",
+              "zip": "5121101",
+              "originalLineNumber": 49
+            },
+            {
+              "address": "四日市市 小山町",
+              "zip": "5121102",
+              "originalLineNumber": 98
+            },
+            {
+              "address": "四日市市 西山町",
+              "zip": "5121103",
+              "originalLineNumber": 237
+            },
+            {
+              "address": "四日市市 美里町",
+              "zip": "5121104",
+              "originalLineNumber": 298
+            },
+            {
+              "address": "四日市市 鹿間町",
+              "zip": "5121113",
+              "originalLineNumber": 139
+            },
+            {
+              "address": "四日市市 和無田町",
+              "zip": "5121114",
+              "originalLineNumber": 341
+            },
+            {
+              "address": "四日市市 堂ケ山町",
+              "zip": "5121115",
+              "originalLineNumber": 192
+            },
+            {
+              "address": "四日市市 六名町",
+              "zip": "5121116",
+              "originalLineNumber": 340
+            },
+            {
+              "address": "四日市市 上海老町",
+              "zip": "5121201",
+              "originalLineNumber": 103
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（31）",
+          "batchNo": 31,
+          "rows": 10,
+          "startIndex": 301,
+          "endIndex": 310,
+          "records": [
+            {
+              "address": "四日市市 あがたが丘一丁目",
+              "zip": "5121202",
+              "originalLineNumber": 3
+            },
+            {
+              "address": "四日市市 あがたが丘三丁目",
+              "zip": "5121202",
+              "originalLineNumber": 5
+            },
+            {
+              "address": "四日市市 あがたが丘二丁目",
+              "zip": "5121202",
+              "originalLineNumber": 4
+            },
+            {
+              "address": "四日市市 下海老町",
+              "zip": "5121203",
+              "originalLineNumber": 143
+            },
+            {
+              "address": "四日市市 赤水町",
+              "zip": "5121204",
+              "originalLineNumber": 22
+            },
+            {
+              "address": "四日市市 江村町",
+              "zip": "5121206",
+              "originalLineNumber": 62
+            },
+            {
+              "address": "四日市市 黒田町",
+              "zip": "5121207",
+              "originalLineNumber": 126
+            },
+            {
+              "address": "四日市市 北野町",
+              "zip": "5121208",
+              "originalLineNumber": 116
+            },
+            {
+              "address": "四日市市 高見台一丁目",
+              "zip": "5121301",
+              "originalLineNumber": 183
+            },
+            {
+              "address": "四日市市 高見台二丁目",
+              "zip": "5121301",
+              "originalLineNumber": 184
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（32）",
+          "batchNo": 32,
+          "rows": 10,
+          "startIndex": 311,
+          "endIndex": 320,
+          "records": [
+            {
+              "address": "四日市市 市場町",
+              "zip": "5121302",
+              "originalLineNumber": 45
+            },
+            {
+              "address": "四日市市 小牧町",
+              "zip": "5121303",
+              "originalLineNumber": 132
+            },
+            {
+              "address": "四日市市 中野町",
+              "zip": "5121304",
+              "originalLineNumber": 218
+            },
+            {
+              "address": "四日市市 西村町",
+              "zip": "5121305",
+              "originalLineNumber": 236
+            },
+            {
+              "address": "四日市市 まきの木台一丁目",
+              "zip": "5121306",
+              "originalLineNumber": 285
+            },
+            {
+              "address": "四日市市 まきの木台三丁目",
+              "zip": "5121306",
+              "originalLineNumber": 287
+            },
+            {
+              "address": "四日市市 まきの木台二丁目",
+              "zip": "5121306",
+              "originalLineNumber": 286
+            },
+            {
+              "address": "四日市市 山分町",
+              "zip": "5128041",
+              "originalLineNumber": 336
+            },
+            {
+              "address": "四日市市 中村町",
+              "zip": "5128044",
+              "originalLineNumber": 221
+            },
+            {
+              "address": "四日市市 萱生町",
+              "zip": "5128045",
+              "originalLineNumber": 104
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（33）",
+          "batchNo": 33,
+          "rows": 10,
+          "startIndex": 321,
+          "endIndex": 330,
+          "records": [
+            {
+              "address": "四日市市 あかつき台一丁目",
+              "zip": "5128046",
+              "originalLineNumber": 6
+            },
+            {
+              "address": "四日市市 あかつき台三丁目",
+              "zip": "5128046",
+              "originalLineNumber": 8
+            },
+            {
+              "address": "四日市市 あかつき台二丁目",
+              "zip": "5128046",
+              "originalLineNumber": 7
+            },
+            {
+              "address": "四日市市 あかつき台五丁目",
+              "zip": "5128046",
+              "originalLineNumber": 10
+            },
+            {
+              "address": "四日市市 あかつき台六丁目",
+              "zip": "5128046",
+              "originalLineNumber": 11
+            },
+            {
+              "address": "四日市市 あかつき台四丁目",
+              "zip": "5128046",
+              "originalLineNumber": 9
+            },
+            {
+              "address": "四日市市 八千代台一丁目",
+              "zip": "5128047",
+              "originalLineNumber": 332
+            },
+            {
+              "address": "四日市市 八千代台三丁目",
+              "zip": "5128047",
+              "originalLineNumber": 334
+            },
+            {
+              "address": "四日市市 八千代台二丁目",
+              "zip": "5128047",
+              "originalLineNumber": 333
+            },
+            {
+              "address": "四日市市 北山町",
+              "zip": "5128051",
+              "originalLineNumber": 120
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（34）",
+          "batchNo": 34,
+          "rows": 10,
+          "startIndex": 331,
+          "endIndex": 340,
+          "records": [
+            {
+              "address": "四日市市 西大鐘町",
+              "zip": "5128052",
+              "originalLineNumber": 226
+            },
+            {
+              "address": "四日市市 大鐘町",
+              "zip": "5128053",
+              "originalLineNumber": 77
+            },
+            {
+              "address": "四日市市 朝明町",
+              "zip": "5128054",
+              "originalLineNumber": 26
+            },
+            {
+              "address": "四日市市 あさけが丘一丁目",
+              "zip": "5128055",
+              "originalLineNumber": 23
+            },
+            {
+              "address": "四日市市 あさけが丘三丁目",
+              "zip": "5128055",
+              "originalLineNumber": 25
+            },
+            {
+              "address": "四日市市 あさけが丘二丁目",
+              "zip": "5128055",
+              "originalLineNumber": 24
+            },
+            {
+              "address": "四日市市 札場町",
+              "zip": "5128056",
+              "originalLineNumber": 136
+            },
+            {
+              "address": "四日市市 広永町",
+              "zip": "5128061",
+              "originalLineNumber": 263
+            },
+            {
+              "address": "四日市市 黄金町",
+              "zip": "5128062",
+              "originalLineNumber": 127
+            },
+            {
+              "address": "四日市市 山村町",
+              "zip": "5128063",
+              "originalLineNumber": 339
+            }
+          ]
+        },
+        {
+          "sheetName": "四日市市（35）",
+          "batchNo": 35,
+          "rows": 5,
+          "startIndex": 341,
+          "endIndex": 345,
+          "records": [
+            {
+              "address": "四日市市 伊坂町",
+              "zip": "5128064",
+              "originalLineNumber": 42
+            },
+            {
+              "address": "四日市市 千代田町",
+              "zip": "5128065",
+              "originalLineNumber": 190
+            },
+            {
+              "address": "四日市市 伊坂台一丁目",
+              "zip": "5128066",
+              "originalLineNumber": 39
+            },
+            {
+              "address": "四日市市 伊坂台三丁目",
+              "zip": "5128066",
+              "originalLineNumber": 41
+            },
+            {
+              "address": "四日市市 伊坂台二丁目",
+              "zip": "5128066",
+              "originalLineNumber": 40
+            }
+          ]
+        }
+      ]
+    },
+    "桑名市": {
+      "totalRecords": 324,
+      "totalSheets": 33,
+      "batches": [
+        {
+          "sheetName": "桑名市",
+          "batchNo": 1,
+          "rows": 10,
+          "startIndex": 1,
+          "endIndex": 10,
+          "records": [
+            {
+              "address": "桑名市 多度町東平賀",
+              "zip": "",
+              "originalLineNumber": 472
+            },
+            {
+              "address": "桑名市 巖新田",
+              "zip": "",
+              "originalLineNumber": 668
+            },
+            {
+              "address": "桑名市 縄生",
+              "zip": "",
+              "originalLineNumber": 625
+            },
+            {
+              "address": "桑名市 長島町老松",
+              "zip": "",
+              "originalLineNumber": 590
+            },
+            {
+              "address": "桑名市 大字上之輪新田",
+              "zip": "5110001",
+              "originalLineNumber": 506
+            },
+            {
+              "address": "桑名市 大字福島",
+              "zip": "5110002",
+              "originalLineNumber": 536
+            },
+            {
+              "address": "桑名市 東太一丸",
+              "zip": "5110003",
+              "originalLineNumber": 603
+            },
+            {
+              "address": "桑名市 住吉町",
+              "zip": "5110004",
+              "originalLineNumber": 387
+            },
+            {
+              "address": "桑名市 太一丸",
+              "zip": "5110005",
+              "originalLineNumber": 480
+            },
+            {
+              "address": "桑名市 今北町",
+              "zip": "5110006",
+              "originalLineNumber": 373
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（2）",
+          "batchNo": 2,
+          "rows": 10,
+          "startIndex": 11,
+          "endIndex": 20,
+          "records": [
+            {
+              "address": "桑名市 参宮通",
+              "zip": "5110007",
+              "originalLineNumber": 380
+            },
+            {
+              "address": "桑名市 蓮見町",
+              "zip": "5110008",
+              "originalLineNumber": 667
+            },
+            {
+              "address": "桑名市 大字桑名",
+              "zip": "5110009",
+              "originalLineNumber": 497
+            },
+            {
+              "address": "桑名市 船馬町",
+              "zip": "5110011",
+              "originalLineNumber": 455
+            },
+            {
+              "address": "桑名市 春日町",
+              "zip": "5110012",
+              "originalLineNumber": 388
+            },
+            {
+              "address": "桑名市 宝殿町",
+              "zip": "5110013",
+              "originalLineNumber": 638
+            },
+            {
+              "address": "桑名市 三崎通",
+              "zip": "5110014",
+              "originalLineNumber": 378
+            },
+            {
+              "address": "桑名市 殿町",
+              "zip": "5110015",
+              "originalLineNumber": 594
+            },
+            {
+              "address": "桑名市 相生町",
+              "zip": "5110016",
+              "originalLineNumber": 456
+            },
+            {
+              "address": "桑名市 今片町",
+              "zip": "5110017",
+              "originalLineNumber": 372
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（3）",
+          "batchNo": 3,
+          "rows": 10,
+          "startIndex": 21,
+          "endIndex": 30,
+          "records": [
+            {
+              "address": "桑名市 今中町",
+              "zip": "5110018",
+              "originalLineNumber": 371
+            },
+            {
+              "address": "桑名市 清水町",
+              "zip": "5110019",
+              "originalLineNumber": 432
+            },
+            {
+              "address": "桑名市 川口町",
+              "zip": "5110021",
+              "originalLineNumber": 453
+            },
+            {
+              "address": "桑名市 江戸町",
+              "zip": "5110022",
+              "originalLineNumber": 364
+            },
+            {
+              "address": "桑名市 本町",
+              "zip": "5110023",
+              "originalLineNumber": 643
+            },
+            {
+              "address": "桑名市 北魚町",
+              "zip": "5110024",
+              "originalLineNumber": 639
+            },
+            {
+              "address": "桑名市 風呂町",
+              "zip": "5110025",
+              "originalLineNumber": 634
+            },
+            {
+              "address": "桑名市 宮町",
+              "zip": "5110026",
+              "originalLineNumber": 358
+            },
+            {
+              "address": "桑名市 福島新町",
+              "zip": "5110027",
+              "originalLineNumber": 636
+            },
+            {
+              "address": "桑名市 三之丸",
+              "zip": "5110031",
+              "originalLineNumber": 379
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（4）",
+          "batchNo": 4,
+          "rows": 10,
+          "startIndex": 31,
+          "endIndex": 40,
+          "records": [
+            {
+              "address": "桑名市 吉之丸",
+              "zip": "5110032",
+              "originalLineNumber": 357
+            },
+            {
+              "address": "桑名市 大字赤須賀",
+              "zip": "5110033",
+              "originalLineNumber": 514
+            },
+            {
+              "address": "桑名市 大字地蔵",
+              "zip": "5110034",
+              "originalLineNumber": 522
+            },
+            {
+              "address": "桑名市 大字東野",
+              "zip": "5110035",
+              "originalLineNumber": 527
+            },
+            {
+              "address": "桑名市 伊賀町",
+              "zip": "5110036",
+              "originalLineNumber": 347
+            },
+            {
+              "address": "桑名市 元赤須賀",
+              "zip": "5110037",
+              "originalLineNumber": 363
+            },
+            {
+              "address": "桑名市 内堀",
+              "zip": "5110038",
+              "originalLineNumber": 624
+            },
+            {
+              "address": "桑名市 京町",
+              "zip": "5110039",
+              "originalLineNumber": 361
+            },
+            {
+              "address": "桑名市 外堀",
+              "zip": "5110041",
+              "originalLineNumber": 353
+            },
+            {
+              "address": "桑名市 柳原",
+              "zip": "5110042",
+              "originalLineNumber": 653
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（5）",
+          "batchNo": 5,
+          "rows": 10,
+          "startIndex": 41,
+          "endIndex": 50,
+          "records": [
+            {
+              "address": "桑名市 新屋敷",
+              "zip": "5110043",
+              "originalLineNumber": 404
+            },
+            {
+              "address": "桑名市 大字萱町",
+              "zip": "5110044",
+              "originalLineNumber": 495
+            },
+            {
+              "address": "桑名市 萱町",
+              "zip": "5110044",
+              "originalLineNumber": 355
+            },
+            {
+              "address": "桑名市 伝馬町",
+              "zip": "5110045",
+              "originalLineNumber": 593
+            },
+            {
+              "address": "桑名市 一色町",
+              "zip": "5110046",
+              "originalLineNumber": 348
+            },
+            {
+              "address": "桑名市 鍜冶町",
+              "zip": "5110047",
+              "originalLineNumber": 669
+            },
+            {
+              "address": "桑名市 新町",
+              "zip": "5110048",
+              "originalLineNumber": 416
+            },
+            {
+              "address": "桑名市 八幡町",
+              "zip": "5110049",
+              "originalLineNumber": 632
+            },
+            {
+              "address": "桑名市 矢田磧",
+              "zip": "5110051",
+              "originalLineNumber": 652
+            },
+            {
+              "address": "桑名市 相川町",
+              "zip": "5110052",
+              "originalLineNumber": 457
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（6）",
+          "batchNo": 6,
+          "rows": 10,
+          "startIndex": 51,
+          "endIndex": 60,
+          "records": [
+            {
+              "address": "桑名市 東鍋屋町",
+              "zip": "5110053",
+              "originalLineNumber": 604
+            },
+            {
+              "address": "桑名市 西鍋屋町",
+              "zip": "5110054",
+              "originalLineNumber": 439
+            },
+            {
+              "address": "桑名市 東矢田町",
+              "zip": "5110055",
+              "originalLineNumber": 605
+            },
+            {
+              "address": "桑名市 西矢田町",
+              "zip": "5110056",
+              "originalLineNumber": 440
+            },
+            {
+              "address": "桑名市 三ツ矢橋",
+              "zip": "5110057",
+              "originalLineNumber": 376
+            },
+            {
+              "address": "桑名市 千代田町",
+              "zip": "5110058",
+              "originalLineNumber": 452
+            },
+            {
+              "address": "桑名市 寿町一丁目",
+              "zip": "5110061",
+              "originalLineNumber": 384
+            },
+            {
+              "address": "桑名市 寿町三丁目",
+              "zip": "5110061",
+              "originalLineNumber": 386
+            },
+            {
+              "address": "桑名市 寿町二丁目",
+              "zip": "5110061",
+              "originalLineNumber": 385
+            },
+            {
+              "address": "桑名市 常盤町",
+              "zip": "5110062",
+              "originalLineNumber": 402
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（7）",
+          "batchNo": 7,
+          "rows": 10,
+          "startIndex": 61,
+          "endIndex": 70,
+          "records": [
+            {
+              "address": "桑名市 京橋町",
+              "zip": "5110063",
+              "originalLineNumber": 360
+            },
+            {
+              "address": "桑名市 新築町",
+              "zip": "5110064",
+              "originalLineNumber": 415
+            },
+            {
+              "address": "桑名市 大央町",
+              "zip": "5110065",
+              "originalLineNumber": 481
+            },
+            {
+              "address": "桑名市 北鍋屋町",
+              "zip": "5110066",
+              "originalLineNumber": 642
+            },
+            {
+              "address": "桑名市 掛樋",
+              "zip": "5110067",
+              "originalLineNumber": 354
+            },
+            {
+              "address": "桑名市 中央町一丁目",
+              "zip": "5110068",
+              "originalLineNumber": 546
+            },
+            {
+              "address": "桑名市 中央町三丁目",
+              "zip": "5110068",
+              "originalLineNumber": 548
+            },
+            {
+              "address": "桑名市 中央町二丁目",
+              "zip": "5110068",
+              "originalLineNumber": 547
+            },
+            {
+              "address": "桑名市 中央町五丁目",
+              "zip": "5110068",
+              "originalLineNumber": 550
+            },
+            {
+              "address": "桑名市 中央町四丁目",
+              "zip": "5110068",
+              "originalLineNumber": 549
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（8）",
+          "batchNo": 8,
+          "rows": 10,
+          "startIndex": 71,
+          "endIndex": 80,
+          "records": [
+            {
+              "address": "桑名市 新矢田一丁目",
+              "zip": "5110069",
+              "originalLineNumber": 417
+            },
+            {
+              "address": "桑名市 新矢田二丁目",
+              "zip": "5110069",
+              "originalLineNumber": 418
+            },
+            {
+              "address": "桑名市 駅元町",
+              "zip": "5110071",
+              "originalLineNumber": 350
+            },
+            {
+              "address": "桑名市 堤原",
+              "zip": "5110072",
+              "originalLineNumber": 592
+            },
+            {
+              "address": "桑名市 北寺町",
+              "zip": "5110073",
+              "originalLineNumber": 640
+            },
+            {
+              "address": "桑名市 南寺町",
+              "zip": "5110074",
+              "originalLineNumber": 627
+            },
+            {
+              "address": "桑名市 三栄町",
+              "zip": "5110075",
+              "originalLineNumber": 377
+            },
+            {
+              "address": "桑名市 八間通",
+              "zip": "5110076",
+              "originalLineNumber": 631
+            },
+            {
+              "address": "桑名市 末広町",
+              "zip": "5110077",
+              "originalLineNumber": 644
+            },
+            {
+              "address": "桑名市 桑栄町",
+              "zip": "5110078",
+              "originalLineNumber": 362
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（9）",
+          "batchNo": 9,
+          "rows": 10,
+          "startIndex": 81,
+          "endIndex": 90,
+          "records": [
+            {
+              "address": "桑名市 有楽町",
+              "zip": "5110079",
+              "originalLineNumber": 655
+            },
+            {
+              "address": "桑名市 片町",
+              "zip": "5110081",
+              "originalLineNumber": 637
+            },
+            {
+              "address": "桑名市 宮通",
+              "zip": "5110082",
+              "originalLineNumber": 359
+            },
+            {
+              "address": "桑名市 職人町",
+              "zip": "5110083",
+              "originalLineNumber": 403
+            },
+            {
+              "address": "桑名市 油町",
+              "zip": "5110084",
+              "originalLineNumber": 654
+            },
+            {
+              "address": "桑名市 紺屋町",
+              "zip": "5110085",
+              "originalLineNumber": 374
+            },
+            {
+              "address": "桑名市 入江葭町",
+              "zip": "5110086",
+              "originalLineNumber": 628
+            },
+            {
+              "address": "桑名市 吉津屋町",
+              "zip": "5110087",
+              "originalLineNumber": 356
+            },
+            {
+              "address": "桑名市 南魚町",
+              "zip": "5110088",
+              "originalLineNumber": 626
+            },
+            {
+              "address": "桑名市 田町",
+              "zip": "5110089",
+              "originalLineNumber": 595
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（10）",
+          "batchNo": 10,
+          "rows": 10,
+          "startIndex": 91,
+          "endIndex": 100,
+          "records": [
+            {
+              "address": "桑名市 多度町柚井",
+              "zip": "5110101",
+              "originalLineNumber": 478
+            },
+            {
+              "address": "桑名市 多度町香取",
+              "zip": "5110102",
+              "originalLineNumber": 463
+            },
+            {
+              "address": "桑名市 多度町戸津",
+              "zip": "5110103",
+              "originalLineNumber": 460
+            },
+            {
+              "address": "桑名市 多度町肱江",
+              "zip": "5110104",
+              "originalLineNumber": 462
+            },
+            {
+              "address": "桑名市 多度町小山",
+              "zip": "5110105",
+              "originalLineNumber": 464
+            },
+            {
+              "address": "桑名市 多度町多度",
+              "zip": "5110106",
+              "originalLineNumber": 466
+            },
+            {
+              "address": "桑名市 多度町多度一丁目",
+              "zip": "5110106",
+              "originalLineNumber": 467
+            },
+            {
+              "address": "桑名市 多度町多度二丁目",
+              "zip": "5110106",
+              "originalLineNumber": 468
+            },
+            {
+              "address": "桑名市 小山台一丁目",
+              "zip": "5110107",
+              "originalLineNumber": 389
+            },
+            {
+              "address": "桑名市 小山台二丁目",
+              "zip": "5110107",
+              "originalLineNumber": 390
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（11）",
+          "batchNo": 11,
+          "rows": 10,
+          "startIndex": 101,
+          "endIndex": 110,
+          "records": [
+            {
+              "address": "桑名市 多度町平古",
+              "zip": "5110111",
+              "originalLineNumber": 476
+            },
+            {
+              "address": "桑名市 多度町福永",
+              "zip": "5110112",
+              "originalLineNumber": 475
+            },
+            {
+              "address": "桑名市 多度町上之郷",
+              "zip": "5110113",
+              "originalLineNumber": 465
+            },
+            {
+              "address": "桑名市 多度町中須",
+              "zip": "5110114",
+              "originalLineNumber": 470
+            },
+            {
+              "address": "桑名市 多度町南之郷",
+              "zip": "5110115",
+              "originalLineNumber": 473
+            },
+            {
+              "address": "桑名市 多度町大鳥居",
+              "zip": "5110116",
+              "originalLineNumber": 469
+            },
+            {
+              "address": "桑名市 多度町下野代",
+              "zip": "5110117",
+              "originalLineNumber": 458
+            },
+            {
+              "address": "桑名市 多度町御衣野",
+              "zip": "5110118",
+              "originalLineNumber": 461
+            },
+            {
+              "address": "桑名市 多度町美鹿",
+              "zip": "5110121",
+              "originalLineNumber": 474
+            },
+            {
+              "address": "桑名市 多度町古野",
+              "zip": "5110122",
+              "originalLineNumber": 459
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（12）",
+          "batchNo": 12,
+          "rows": 10,
+          "startIndex": 111,
+          "endIndex": 120,
+          "records": [
+            {
+              "address": "桑名市 多度町北猪飼",
+              "zip": "5110123",
+              "originalLineNumber": 477
+            },
+            {
+              "address": "桑名市 多度町猪飼",
+              "zip": "5110124",
+              "originalLineNumber": 471
+            },
+            {
+              "address": "桑名市 多度町力尾",
+              "zip": "5110125",
+              "originalLineNumber": 479
+            },
+            {
+              "address": "桑名市 大字今島",
+              "zip": "5110801",
+              "originalLineNumber": 500
+            },
+            {
+              "address": "桑名市 川崎町",
+              "zip": "5110802",
+              "originalLineNumber": 454
+            },
+            {
+              "address": "桑名市 枇杷島台",
+              "zip": "5110803",
+              "originalLineNumber": 633
+            },
+            {
+              "address": "桑名市 北川原台",
+              "zip": "5110804",
+              "originalLineNumber": 641
+            },
+            {
+              "address": "桑名市 大字東汰上",
+              "zip": "5110806",
+              "originalLineNumber": 525
+            },
+            {
+              "address": "桑名市 大字西汰上",
+              "zip": "5110807",
+              "originalLineNumber": 511
+            },
+            {
+              "address": "桑名市 大字下深谷部",
+              "zip": "5110808",
+              "originalLineNumber": 491
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（13）",
+          "batchNo": 13,
+          "rows": 10,
+          "startIndex": 121,
+          "endIndex": 130,
+          "records": [
+            {
+              "address": "桑名市 大字上深谷部",
+              "zip": "5110809",
+              "originalLineNumber": 505
+            },
+            {
+              "address": "桑名市 清竹の丘",
+              "zip": "5110810",
+              "originalLineNumber": 433
+            },
+            {
+              "address": "桑名市 大字東方",
+              "zip": "5110811",
+              "originalLineNumber": 526
+            },
+            {
+              "address": "桑名市 大字尾野山",
+              "zip": "5110812",
+              "originalLineNumber": 531
+            },
+            {
+              "address": "桑名市 桜通",
+              "zip": "5110813",
+              "originalLineNumber": 375
+            },
+            {
+              "address": "桑名市 松並町一丁目",
+              "zip": "5110814",
+              "originalLineNumber": 399
+            },
+            {
+              "address": "桑名市 松並町二丁目",
+              "zip": "5110814",
+              "originalLineNumber": 400
+            },
+            {
+              "address": "桑名市 梅園通",
+              "zip": "5110815",
+              "originalLineNumber": 630
+            },
+            {
+              "address": "桑名市 汐見町一丁目",
+              "zip": "5110816",
+              "originalLineNumber": 381
+            },
+            {
+              "address": "桑名市 汐見町三丁目",
+              "zip": "5110816",
+              "originalLineNumber": 383
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（14）",
+          "batchNo": 14,
+          "rows": 10,
+          "startIndex": 131,
+          "endIndex": 140,
+          "records": [
+            {
+              "address": "桑名市 汐見町二丁目",
+              "zip": "5110816",
+              "originalLineNumber": 382
+            },
+            {
+              "address": "桑名市 青葉町一丁目",
+              "zip": "5110817",
+              "originalLineNumber": 441
+            },
+            {
+              "address": "桑名市 青葉町二丁目",
+              "zip": "5110817",
+              "originalLineNumber": 442
+            },
+            {
+              "address": "桑名市 高塚町一丁目",
+              "zip": "5110818",
+              "originalLineNumber": 365
+            },
+            {
+              "address": "桑名市 高塚町三丁目",
+              "zip": "5110818",
+              "originalLineNumber": 367
+            },
+            {
+              "address": "桑名市 高塚町二丁目",
+              "zip": "5110818",
+              "originalLineNumber": 366
+            },
+            {
+              "address": "桑名市 高塚町五丁目",
+              "zip": "5110818",
+              "originalLineNumber": 369
+            },
+            {
+              "address": "桑名市 高塚町六丁目",
+              "zip": "5110818",
+              "originalLineNumber": 370
+            },
+            {
+              "address": "桑名市 高塚町四丁目",
+              "zip": "5110818",
+              "originalLineNumber": 368
+            },
+            {
+              "address": "桑名市 大字北別所",
+              "zip": "5110819",
+              "originalLineNumber": 538
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（15）",
+          "batchNo": 15,
+          "rows": 10,
+          "startIndex": 141,
+          "endIndex": 150,
+          "records": [
+            {
+              "address": "桑名市 大字矢田",
+              "zip": "5110821",
+              "originalLineNumber": 540
+            },
+            {
+              "address": "桑名市 馬道一丁目",
+              "zip": "5110822",
+              "originalLineNumber": 629
+            },
+            {
+              "address": "桑名市 明正町",
+              "zip": "5110823",
+              "originalLineNumber": 645
+            },
+            {
+              "address": "桑名市 大字繁松新田",
+              "zip": "5110824",
+              "originalLineNumber": 530
+            },
+            {
+              "address": "桑名市 大字上野",
+              "zip": "5110825",
+              "originalLineNumber": 507
+            },
+            {
+              "address": "桑名市 大字太夫",
+              "zip": "5110826",
+              "originalLineNumber": 517
+            },
+            {
+              "address": "桑名市 霞町一丁目",
+              "zip": "5110827",
+              "originalLineNumber": 351
+            },
+            {
+              "address": "桑名市 霞町二丁目",
+              "zip": "5110827",
+              "originalLineNumber": 352
+            },
+            {
+              "address": "桑名市 立花町一丁目",
+              "zip": "5110828",
+              "originalLineNumber": 665
+            },
+            {
+              "address": "桑名市 立花町二丁目",
+              "zip": "5110828",
+              "originalLineNumber": 666
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（16）",
+          "batchNo": 16,
+          "rows": 10,
+          "startIndex": 151,
+          "endIndex": 160,
+          "records": [
+            {
+              "address": "桑名市 神楽町一丁目",
+              "zip": "5110829",
+              "originalLineNumber": 419
+            },
+            {
+              "address": "桑名市 神楽町二丁目",
+              "zip": "5110829",
+              "originalLineNumber": 420
+            },
+            {
+              "address": "桑名市 益生町",
+              "zip": "5110831",
+              "originalLineNumber": 349
+            },
+            {
+              "address": "桑名市 新地",
+              "zip": "5110832",
+              "originalLineNumber": 414
+            },
+            {
+              "address": "桑名市 福江町",
+              "zip": "5110833",
+              "originalLineNumber": 635
+            },
+            {
+              "address": "桑名市 大字大福",
+              "zip": "5110834",
+              "originalLineNumber": 521
+            },
+            {
+              "address": "桑名市 大字本願寺",
+              "zip": "5110835",
+              "originalLineNumber": 539
+            },
+            {
+              "address": "桑名市 大字江場",
+              "zip": "5110836",
+              "originalLineNumber": 499
+            },
+            {
+              "address": "桑名市 大字小泉",
+              "zip": "5110837",
+              "originalLineNumber": 504
+            },
+            {
+              "address": "桑名市 大字和泉",
+              "zip": "5110838",
+              "originalLineNumber": 544
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（17）",
+          "batchNo": 17,
+          "rows": 10,
+          "startIndex": 161,
+          "endIndex": 170,
+          "records": [
+            {
+              "address": "桑名市 大字安永",
+              "zip": "5110839",
+              "originalLineNumber": 490
+            },
+            {
+              "address": "桑名市 大字小貝須",
+              "zip": "5110841",
+              "originalLineNumber": 503
+            },
+            {
+              "address": "桑名市 大字立田町",
+              "zip": "5110842",
+              "originalLineNumber": 542
+            },
+            {
+              "address": "桑名市 大字太平町",
+              "zip": "5110843",
+              "originalLineNumber": 518
+            },
+            {
+              "address": "桑名市 大字福岡町",
+              "zip": "5110844",
+              "originalLineNumber": 533
+            },
+            {
+              "address": "桑名市 大字福地",
+              "zip": "5110845",
+              "originalLineNumber": 535
+            },
+            {
+              "address": "桑名市 大字福江",
+              "zip": "5110847",
+              "originalLineNumber": 534
+            },
+            {
+              "address": "桑名市 大字大貝須",
+              "zip": "5110848",
+              "originalLineNumber": 519
+            },
+            {
+              "address": "桑名市 大字西別所",
+              "zip": "5110851",
+              "originalLineNumber": 512
+            },
+            {
+              "address": "桑名市 大字稗田",
+              "zip": "5110852",
+              "originalLineNumber": 532
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（18）",
+          "batchNo": 18,
+          "rows": 10,
+          "startIndex": 171,
+          "endIndex": 180,
+          "records": [
+            {
+              "address": "桑名市 大字増田",
+              "zip": "5110853",
+              "originalLineNumber": 516
+            },
+            {
+              "address": "桑名市 大字蓮花寺",
+              "zip": "5110854",
+              "originalLineNumber": 543
+            },
+            {
+              "address": "桑名市 新倉持",
+              "zip": "5110855",
+              "originalLineNumber": 413
+            },
+            {
+              "address": "桑名市 大字蛎塚新田",
+              "zip": "5110861",
+              "originalLineNumber": 493
+            },
+            {
+              "address": "桑名市 大字播磨",
+              "zip": "5110862",
+              "originalLineNumber": 529
+            },
+            {
+              "address": "桑名市 新西方一丁目",
+              "zip": "5110863",
+              "originalLineNumber": 405
+            },
+            {
+              "address": "桑名市 新西方七丁目",
+              "zip": "5110863",
+              "originalLineNumber": 411
+            },
+            {
+              "address": "桑名市 新西方三丁目",
+              "zip": "5110863",
+              "originalLineNumber": 407
+            },
+            {
+              "address": "桑名市 新西方二丁目",
+              "zip": "5110863",
+              "originalLineNumber": 406
+            },
+            {
+              "address": "桑名市 新西方五丁目",
+              "zip": "5110863",
+              "originalLineNumber": 409
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（19）",
+          "batchNo": 19,
+          "rows": 10,
+          "startIndex": 181,
+          "endIndex": 190,
+          "records": [
+            {
+              "address": "桑名市 新西方八丁目",
+              "zip": "5110863",
+              "originalLineNumber": 412
+            },
+            {
+              "address": "桑名市 新西方六丁目",
+              "zip": "5110863",
+              "originalLineNumber": 410
+            },
+            {
+              "address": "桑名市 新西方四丁目",
+              "zip": "5110863",
+              "originalLineNumber": 408
+            },
+            {
+              "address": "桑名市 大字西方",
+              "zip": "5110864",
+              "originalLineNumber": 513
+            },
+            {
+              "address": "桑名市 藤が丘一丁目",
+              "zip": "5110865",
+              "originalLineNumber": 615
+            },
+            {
+              "address": "桑名市 藤が丘七丁目",
+              "zip": "5110865",
+              "originalLineNumber": 621
+            },
+            {
+              "address": "桑名市 藤が丘三丁目",
+              "zip": "5110865",
+              "originalLineNumber": 617
+            },
+            {
+              "address": "桑名市 藤が丘九丁目",
+              "zip": "5110865",
+              "originalLineNumber": 623
+            },
+            {
+              "address": "桑名市 藤が丘二丁目",
+              "zip": "5110865",
+              "originalLineNumber": 616
+            },
+            {
+              "address": "桑名市 藤が丘五丁目",
+              "zip": "5110865",
+              "originalLineNumber": 619
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（20）",
+          "batchNo": 20,
+          "rows": 10,
+          "startIndex": 191,
+          "endIndex": 200,
+          "records": [
+            {
+              "address": "桑名市 藤が丘八丁目",
+              "zip": "5110865",
+              "originalLineNumber": 622
+            },
+            {
+              "address": "桑名市 藤が丘六丁目",
+              "zip": "5110865",
+              "originalLineNumber": 620
+            },
+            {
+              "address": "桑名市 藤が丘四丁目",
+              "zip": "5110865",
+              "originalLineNumber": 618
+            },
+            {
+              "address": "桑名市 神成町一丁目",
+              "zip": "5110866",
+              "originalLineNumber": 421
+            },
+            {
+              "address": "桑名市 神成町二丁目",
+              "zip": "5110866",
+              "originalLineNumber": 422
+            },
+            {
+              "address": "桑名市 陽だまりの丘一丁目",
+              "zip": "5110867",
+              "originalLineNumber": 656
+            },
+            {
+              "address": "桑名市 陽だまりの丘七丁目",
+              "zip": "5110867",
+              "originalLineNumber": 662
+            },
+            {
+              "address": "桑名市 陽だまりの丘三丁目",
+              "zip": "5110867",
+              "originalLineNumber": 658
+            },
+            {
+              "address": "桑名市 陽だまりの丘二丁目",
+              "zip": "5110867",
+              "originalLineNumber": 657
+            },
+            {
+              "address": "桑名市 陽だまりの丘五丁目",
+              "zip": "5110867",
+              "originalLineNumber": 660
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（21）",
+          "batchNo": 21,
+          "rows": 10,
+          "startIndex": 201,
+          "endIndex": 210,
+          "records": [
+            {
+              "address": "桑名市 陽だまりの丘八丁目",
+              "zip": "5110867",
+              "originalLineNumber": 663
+            },
+            {
+              "address": "桑名市 陽だまりの丘六丁目",
+              "zip": "5110867",
+              "originalLineNumber": 661
+            },
+            {
+              "address": "桑名市 陽だまりの丘四丁目",
+              "zip": "5110867",
+              "originalLineNumber": 659
+            },
+            {
+              "address": "桑名市 さくらの丘",
+              "zip": "5110868",
+              "originalLineNumber": 346
+            },
+            {
+              "address": "桑名市 筒尾一丁目",
+              "zip": "5110901",
+              "originalLineNumber": 606
+            },
+            {
+              "address": "桑名市 筒尾七丁目",
+              "zip": "5110901",
+              "originalLineNumber": 612
+            },
+            {
+              "address": "桑名市 筒尾三丁目",
+              "zip": "5110901",
+              "originalLineNumber": 608
+            },
+            {
+              "address": "桑名市 筒尾九丁目",
+              "zip": "5110901",
+              "originalLineNumber": 614
+            },
+            {
+              "address": "桑名市 筒尾二丁目",
+              "zip": "5110901",
+              "originalLineNumber": 607
+            },
+            {
+              "address": "桑名市 筒尾五丁目",
+              "zip": "5110901",
+              "originalLineNumber": 610
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（22）",
+          "batchNo": 22,
+          "rows": 10,
+          "startIndex": 211,
+          "endIndex": 220,
+          "records": [
+            {
+              "address": "桑名市 筒尾八丁目",
+              "zip": "5110901",
+              "originalLineNumber": 613
+            },
+            {
+              "address": "桑名市 筒尾六丁目",
+              "zip": "5110901",
+              "originalLineNumber": 611
+            },
+            {
+              "address": "桑名市 筒尾四丁目",
+              "zip": "5110901",
+              "originalLineNumber": 609
+            },
+            {
+              "address": "桑名市 松ノ木一丁目",
+              "zip": "5110902",
+              "originalLineNumber": 391
+            },
+            {
+              "address": "桑名市 松ノ木七丁目",
+              "zip": "5110902",
+              "originalLineNumber": 397
+            },
+            {
+              "address": "桑名市 松ノ木三丁目",
+              "zip": "5110902",
+              "originalLineNumber": 393
+            },
+            {
+              "address": "桑名市 松ノ木二丁目",
+              "zip": "5110902",
+              "originalLineNumber": 392
+            },
+            {
+              "address": "桑名市 松ノ木五丁目",
+              "zip": "5110902",
+              "originalLineNumber": 395
+            },
+            {
+              "address": "桑名市 松ノ木八丁目",
+              "zip": "5110902",
+              "originalLineNumber": 398
+            },
+            {
+              "address": "桑名市 松ノ木六丁目",
+              "zip": "5110902",
+              "originalLineNumber": 396
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（23）",
+          "batchNo": 23,
+          "rows": 10,
+          "startIndex": 221,
+          "endIndex": 230,
+          "records": [
+            {
+              "address": "桑名市 松ノ木四丁目",
+              "zip": "5110902",
+              "originalLineNumber": 394
+            },
+            {
+              "address": "桑名市 大山田一丁目",
+              "zip": "5110903",
+              "originalLineNumber": 482
+            },
+            {
+              "address": "桑名市 大山田七丁目",
+              "zip": "5110903",
+              "originalLineNumber": 488
+            },
+            {
+              "address": "桑名市 大山田三丁目",
+              "zip": "5110903",
+              "originalLineNumber": 484
+            },
+            {
+              "address": "桑名市 大山田二丁目",
+              "zip": "5110903",
+              "originalLineNumber": 483
+            },
+            {
+              "address": "桑名市 大山田五丁目",
+              "zip": "5110903",
+              "originalLineNumber": 486
+            },
+            {
+              "address": "桑名市 大山田八丁目",
+              "zip": "5110903",
+              "originalLineNumber": 489
+            },
+            {
+              "address": "桑名市 大山田六丁目",
+              "zip": "5110903",
+              "originalLineNumber": 487
+            },
+            {
+              "address": "桑名市 大山田四丁目",
+              "zip": "5110903",
+              "originalLineNumber": 485
+            },
+            {
+              "address": "桑名市 野田一丁目",
+              "zip": "5110904",
+              "originalLineNumber": 646
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（24）",
+          "batchNo": 24,
+          "rows": 10,
+          "startIndex": 231,
+          "endIndex": 240,
+          "records": [
+            {
+              "address": "桑名市 野田三丁目",
+              "zip": "5110904",
+              "originalLineNumber": 648
+            },
+            {
+              "address": "桑名市 野田二丁目",
+              "zip": "5110904",
+              "originalLineNumber": 647
+            },
+            {
+              "address": "桑名市 野田五丁目",
+              "zip": "5110904",
+              "originalLineNumber": 650
+            },
+            {
+              "address": "桑名市 野田六丁目",
+              "zip": "5110904",
+              "originalLineNumber": 651
+            },
+            {
+              "address": "桑名市 野田四丁目",
+              "zip": "5110904",
+              "originalLineNumber": 649
+            },
+            {
+              "address": "桑名市 大字額田",
+              "zip": "5110911",
+              "originalLineNumber": 494
+            },
+            {
+              "address": "桑名市 大字星川",
+              "zip": "5110912",
+              "originalLineNumber": 509
+            },
+            {
+              "address": "桑名市 星見ヶ丘一丁目",
+              "zip": "5110912",
+              "originalLineNumber": 423
+            },
+            {
+              "address": "桑名市 星見ヶ丘七丁目",
+              "zip": "5110912",
+              "originalLineNumber": 429
+            },
+            {
+              "address": "桑名市 星見ヶ丘三丁目",
+              "zip": "5110912",
+              "originalLineNumber": 425
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（25）",
+          "batchNo": 25,
+          "rows": 10,
+          "startIndex": 241,
+          "endIndex": 250,
+          "records": [
+            {
+              "address": "桑名市 星見ヶ丘九丁目",
+              "zip": "5110912",
+              "originalLineNumber": 431
+            },
+            {
+              "address": "桑名市 星見ヶ丘二丁目",
+              "zip": "5110912",
+              "originalLineNumber": 424
+            },
+            {
+              "address": "桑名市 星見ヶ丘五丁目",
+              "zip": "5110912",
+              "originalLineNumber": 427
+            },
+            {
+              "address": "桑名市 星見ヶ丘八丁目",
+              "zip": "5110912",
+              "originalLineNumber": 430
+            },
+            {
+              "address": "桑名市 星見ヶ丘六丁目",
+              "zip": "5110912",
+              "originalLineNumber": 428
+            },
+            {
+              "address": "桑名市 星見ヶ丘四丁目",
+              "zip": "5110912",
+              "originalLineNumber": 426
+            },
+            {
+              "address": "桑名市 里町",
+              "zip": "5110913",
+              "originalLineNumber": 664
+            },
+            {
+              "address": "桑名市 中山町",
+              "zip": "5110914",
+              "originalLineNumber": 551
+            },
+            {
+              "address": "桑名市 大字東金井",
+              "zip": "5110921",
+              "originalLineNumber": 524
+            },
+            {
+              "address": "桑名市 大字西金井",
+              "zip": "5110922",
+              "originalLineNumber": 510
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（26）",
+          "batchNo": 26,
+          "rows": 10,
+          "startIndex": 251,
+          "endIndex": 260,
+          "records": [
+            {
+              "address": "桑名市 大字桑部",
+              "zip": "5110923",
+              "originalLineNumber": 496
+            },
+            {
+              "address": "桑名市 城山台",
+              "zip": "5110924",
+              "originalLineNumber": 401
+            },
+            {
+              "address": "桑名市 大字能部",
+              "zip": "5110931",
+              "originalLineNumber": 528
+            },
+            {
+              "address": "桑名市 東正和台一丁目",
+              "zip": "5110932",
+              "originalLineNumber": 596
+            },
+            {
+              "address": "桑名市 東正和台七丁目",
+              "zip": "5110932",
+              "originalLineNumber": 602
+            },
+            {
+              "address": "桑名市 東正和台三丁目",
+              "zip": "5110932",
+              "originalLineNumber": 598
+            },
+            {
+              "address": "桑名市 東正和台二丁目",
+              "zip": "5110932",
+              "originalLineNumber": 597
+            },
+            {
+              "address": "桑名市 東正和台五丁目",
+              "zip": "5110932",
+              "originalLineNumber": 600
+            },
+            {
+              "address": "桑名市 東正和台六丁目",
+              "zip": "5110932",
+              "originalLineNumber": 601
+            },
+            {
+              "address": "桑名市 東正和台四丁目",
+              "zip": "5110932",
+              "originalLineNumber": 599
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（27）",
+          "batchNo": 27,
+          "rows": 10,
+          "startIndex": 261,
+          "endIndex": 270,
+          "records": [
+            {
+              "address": "桑名市 西正和台一丁目",
+              "zip": "5110933",
+              "originalLineNumber": 434
+            },
+            {
+              "address": "桑名市 西正和台三丁目",
+              "zip": "5110933",
+              "originalLineNumber": 436
+            },
+            {
+              "address": "桑名市 西正和台二丁目",
+              "zip": "5110933",
+              "originalLineNumber": 435
+            },
+            {
+              "address": "桑名市 西正和台五丁目",
+              "zip": "5110933",
+              "originalLineNumber": 438
+            },
+            {
+              "address": "桑名市 西正和台四丁目",
+              "zip": "5110933",
+              "originalLineNumber": 437
+            },
+            {
+              "address": "桑名市 大字赤尾",
+              "zip": "5110934",
+              "originalLineNumber": 515
+            },
+            {
+              "address": "桑名市 赤尾台一丁目",
+              "zip": "5110935",
+              "originalLineNumber": 443
+            },
+            {
+              "address": "桑名市 赤尾台七丁目",
+              "zip": "5110935",
+              "originalLineNumber": 449
+            },
+            {
+              "address": "桑名市 赤尾台三丁目",
+              "zip": "5110935",
+              "originalLineNumber": 445
+            },
+            {
+              "address": "桑名市 赤尾台九丁目",
+              "zip": "5110935",
+              "originalLineNumber": 451
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（28）",
+          "batchNo": 28,
+          "rows": 10,
+          "startIndex": 271,
+          "endIndex": 280,
+          "records": [
+            {
+              "address": "桑名市 赤尾台二丁目",
+              "zip": "5110935",
+              "originalLineNumber": 444
+            },
+            {
+              "address": "桑名市 赤尾台五丁目",
+              "zip": "5110935",
+              "originalLineNumber": 447
+            },
+            {
+              "address": "桑名市 赤尾台八丁目",
+              "zip": "5110935",
+              "originalLineNumber": 450
+            },
+            {
+              "address": "桑名市 赤尾台六丁目",
+              "zip": "5110935",
+              "originalLineNumber": 448
+            },
+            {
+              "address": "桑名市 赤尾台四丁目",
+              "zip": "5110935",
+              "originalLineNumber": 446
+            },
+            {
+              "address": "桑名市 大字島田",
+              "zip": "5110936",
+              "originalLineNumber": 523
+            },
+            {
+              "address": "桑名市 大字志知",
+              "zip": "5110937",
+              "originalLineNumber": 502
+            },
+            {
+              "address": "桑名市 大字友村",
+              "zip": "5110938",
+              "originalLineNumber": 541
+            },
+            {
+              "address": "桑名市 大字坂井",
+              "zip": "5110939",
+              "originalLineNumber": 501
+            },
+            {
+              "address": "桑名市 大字嘉例川",
+              "zip": "5110941",
+              "originalLineNumber": 492
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（29）",
+          "batchNo": 29,
+          "rows": 10,
+          "startIndex": 281,
+          "endIndex": 290,
+          "records": [
+            {
+              "address": "桑名市 大字森忠",
+              "zip": "5110943",
+              "originalLineNumber": 508
+            },
+            {
+              "address": "桑名市 大字芳ケ崎",
+              "zip": "5110944",
+              "originalLineNumber": 537
+            },
+            {
+              "address": "桑名市 筑紫",
+              "zip": "5110945",
+              "originalLineNumber": 545
+            },
+            {
+              "address": "桑名市 大字五反田",
+              "zip": "5110946",
+              "originalLineNumber": 498
+            },
+            {
+              "address": "桑名市 大字大仲新田",
+              "zip": "5110947",
+              "originalLineNumber": 520
+            },
+            {
+              "address": "桑名市 長島町新所",
+              "zip": "5111101",
+              "originalLineNumber": 568
+            },
+            {
+              "address": "桑名市 長島町西川",
+              "zip": "5111102",
+              "originalLineNumber": 572
+            },
+            {
+              "address": "桑名市 長島町中川",
+              "zip": "5111103",
+              "originalLineNumber": 577
+            },
+            {
+              "address": "桑名市 長島町高座",
+              "zip": "5111104",
+              "originalLineNumber": 560
+            },
+            {
+              "address": "桑名市 長島町千倉",
+              "zip": "5111105",
+              "originalLineNumber": 574
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（30）",
+          "batchNo": 30,
+          "rows": 10,
+          "startIndex": 291,
+          "endIndex": 300,
+          "records": [
+            {
+              "address": "桑名市 長島町下坂手",
+              "zip": "5111106",
+              "originalLineNumber": 555
+            },
+            {
+              "address": "桑名市 長島町上坂手",
+              "zip": "5111107",
+              "originalLineNumber": 567
+            },
+            {
+              "address": "桑名市 長島町杉江",
+              "zip": "5111108",
+              "originalLineNumber": 569
+            },
+            {
+              "address": "桑名市 長島町松之木",
+              "zip": "5111109",
+              "originalLineNumber": 566
+            },
+            {
+              "address": "桑名市 長島町小島",
+              "zip": "5111111",
+              "originalLineNumber": 563
+            },
+            {
+              "address": "桑名市 長島町大倉",
+              "zip": "5111112",
+              "originalLineNumber": 575
+            },
+            {
+              "address": "桑名市 長島町押付",
+              "zip": "5111113",
+              "originalLineNumber": 553
+            },
+            {
+              "address": "桑名市 長島町長島下町",
+              "zip": "5111114",
+              "originalLineNumber": 578
+            },
+            {
+              "address": "桑名市 長島町長島中町",
+              "zip": "5111115",
+              "originalLineNumber": 580
+            },
+            {
+              "address": "桑名市 長島町長島萱町",
+              "zip": "5111116",
+              "originalLineNumber": 579
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（31）",
+          "batchNo": 31,
+          "rows": 10,
+          "startIndex": 301,
+          "endIndex": 310,
+          "records": [
+            {
+              "address": "桑名市 長島町東殿名",
+              "zip": "5111121",
+              "originalLineNumber": 582
+            },
+            {
+              "address": "桑名市 長島町松ケ島",
+              "zip": "5111122",
+              "originalLineNumber": 564
+            },
+            {
+              "address": "桑名市 長島町鎌ケ地",
+              "zip": "5111123",
+              "originalLineNumber": 556
+            },
+            {
+              "address": "桑名市 長島町葭ケ須",
+              "zip": "5111124",
+              "originalLineNumber": 591
+            },
+            {
+              "address": "桑名市 長島町源部外面",
+              "zip": "5111125",
+              "originalLineNumber": 559
+            },
+            {
+              "address": "桑名市 長島町又木",
+              "zip": "5111126",
+              "originalLineNumber": 588
+            },
+            {
+              "address": "桑名市 長島町殿名",
+              "zip": "5111127",
+              "originalLineNumber": 581
+            },
+            {
+              "address": "桑名市 長島町又木市街",
+              "zip": "5111128",
+              "originalLineNumber": 589
+            },
+            {
+              "address": "桑名市 長島町赤地",
+              "zip": "5111131",
+              "originalLineNumber": 573
+            },
+            {
+              "address": "桑名市 長島町福豊",
+              "zip": "5111132",
+              "originalLineNumber": 585
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（32）",
+          "batchNo": 32,
+          "rows": 10,
+          "startIndex": 311,
+          "endIndex": 320,
+          "records": [
+            {
+              "address": "桑名市 長島町横満蔵",
+              "zip": "5111133",
+              "originalLineNumber": 554
+            },
+            {
+              "address": "桑名市 長島町松蔭",
+              "zip": "5111134",
+              "originalLineNumber": 565
+            },
+            {
+              "address": "桑名市 長島町浦安",
+              "zip": "5111135",
+              "originalLineNumber": 552
+            },
+            {
+              "address": "桑名市 長島町白鶏",
+              "zip": "5111136",
+              "originalLineNumber": 583
+            },
+            {
+              "address": "桑名市 長島町福吉",
+              "zip": "5111137",
+              "originalLineNumber": 584
+            },
+            {
+              "address": "桑名市 長島町間々",
+              "zip": "5111141",
+              "originalLineNumber": 557
+            },
+            {
+              "address": "桑名市 長島町出口",
+              "zip": "5111142",
+              "originalLineNumber": 562
+            },
+            {
+              "address": "桑名市 長島町西外面",
+              "zip": "5111143",
+              "originalLineNumber": 570
+            },
+            {
+              "address": "桑名市 長島町駒江",
+              "zip": "5111144",
+              "originalLineNumber": 558
+            },
+            {
+              "address": "桑名市 長島町大島",
+              "zip": "5111145",
+              "originalLineNumber": 576
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名市（33）",
+          "batchNo": 33,
+          "rows": 4,
+          "startIndex": 321,
+          "endIndex": 324,
+          "records": [
+            {
+              "address": "桑名市 長島町十日外面",
+              "zip": "5111146",
+              "originalLineNumber": 561
+            },
+            {
+              "address": "桑名市 長島町平方",
+              "zip": "5111147",
+              "originalLineNumber": 586
+            },
+            {
+              "address": "桑名市 長島町北殿名",
+              "zip": "5111148",
+              "originalLineNumber": 587
+            },
+            {
+              "address": "桑名市 長島町西外面市街",
+              "zip": "5111149",
+              "originalLineNumber": 571
+            }
+          ]
+        }
+      ]
+    },
+    "桑名郡木曽岬町": {
+      "totalRecords": 22,
+      "totalSheets": 3,
+      "batches": [
+        {
+          "sheetName": "桑名郡木曽岬町",
+          "batchNo": 1,
+          "rows": 10,
+          "startIndex": 1,
+          "endIndex": 10,
+          "records": [
+            {
+              "address": "桑名郡木曽岬町 大字加路戸",
+              "zip": "4980801",
+              "originalLineNumber": 765
+            },
+            {
+              "address": "桑名郡木曽岬町 大字見入",
+              "zip": "4980802",
+              "originalLineNumber": 767
+            },
+            {
+              "address": "桑名郡木曽岬町 大字和泉",
+              "zip": "4980803",
+              "originalLineNumber": 762
+            },
+            {
+              "address": "桑名郡木曽岬町 大字小和泉",
+              "zip": "4980804",
+              "originalLineNumber": 770
+            },
+            {
+              "address": "桑名郡木曽岬町 大字小林",
+              "zip": "4980805",
+              "originalLineNumber": 771
+            },
+            {
+              "address": "桑名郡木曽岬町 大字外平喜",
+              "zip": "4980806",
+              "originalLineNumber": 774
+            },
+            {
+              "address": "桑名郡木曽岬町 大字西対海地",
+              "zip": "4980807",
+              "originalLineNumber": 778
+            },
+            {
+              "address": "桑名郡木曽岬町 大字近江島",
+              "zip": "4980808",
+              "originalLineNumber": 763
+            },
+            {
+              "address": "桑名郡木曽岬町 大字栄",
+              "zip": "4980811",
+              "originalLineNumber": 772
+            },
+            {
+              "address": "桑名郡木曽岬町 大字中和泉",
+              "zip": "4980812",
+              "originalLineNumber": 777
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名郡木曽岬町（2）",
+          "batchNo": 2,
+          "rows": 10,
+          "startIndex": 11,
+          "endIndex": 20,
+          "records": [
+            {
+              "address": "桑名郡木曽岬町 大字富田子",
+              "zip": "4980813",
+              "originalLineNumber": 776
+            },
+            {
+              "address": "桑名郡木曽岬町 大字三崎",
+              "zip": "4980814",
+              "originalLineNumber": 781
+            },
+            {
+              "address": "桑名郡木曽岬町 大字白鷺",
+              "zip": "4980815",
+              "originalLineNumber": 779
+            },
+            {
+              "address": "桑名郡木曽岬町 大字源緑輪中",
+              "zip": "4980816",
+              "originalLineNumber": 769
+            },
+            {
+              "address": "桑名郡木曽岬町 大字松永",
+              "zip": "4980817",
+              "originalLineNumber": 780
+            },
+            {
+              "address": "桑名郡木曽岬町 大字雁ヶ地",
+              "zip": "4980818",
+              "originalLineNumber": 766
+            },
+            {
+              "address": "桑名郡木曽岬町 大字田代",
+              "zip": "4980819",
+              "originalLineNumber": 775
+            },
+            {
+              "address": "桑名郡木曽岬町 大字新加路戸",
+              "zip": "4980821",
+              "originalLineNumber": 773
+            },
+            {
+              "address": "桑名郡木曽岬町 大字見入流作",
+              "zip": "4980822",
+              "originalLineNumber": 768
+            },
+            {
+              "address": "桑名郡木曽岬町 大字和富",
+              "zip": "4980823",
+              "originalLineNumber": 764
+            }
+          ]
+        },
+        {
+          "sheetName": "桑名郡木曽岬町（3）",
+          "batchNo": 3,
+          "rows": 2,
+          "startIndex": 21,
+          "endIndex": 22,
+          "records": [
+            {
+              "address": "桑名郡木曽岬町 新輪一丁目",
+              "zip": "4980824",
+              "originalLineNumber": 782
+            },
+            {
+              "address": "桑名郡木曽岬町 新輪二丁目",
+              "zip": "4980824",
+              "originalLineNumber": 783
+            }
+          ]
+        }
+      ]
+    },
+    "三重郡菰野町": {
+      "totalRecords": 31,
+      "totalSheets": 4,
+      "batches": [
+        {
+          "sheetName": "三重郡菰野町",
+          "batchNo": 1,
+          "rows": 10,
+          "startIndex": 1,
+          "endIndex": 10,
+          "records": [
+            {
+              "address": "三重郡菰野町 大字池底",
+              "zip": "5101221",
+              "originalLineNumber": 807
+            },
+            {
+              "address": "三重郡菰野町 大字大強原",
+              "zip": "5101222",
+              "originalLineNumber": 809
+            },
+            {
+              "address": "三重郡菰野町 大字諏訪",
+              "zip": "5101223",
+              "originalLineNumber": 820
+            },
+            {
+              "address": "三重郡菰野町 大字川北",
+              "zip": "5101224",
+              "originalLineNumber": 813
+            },
+            {
+              "address": "三重郡菰野町 大字下村",
+              "zip": "5101225",
+              "originalLineNumber": 817
+            },
+            {
+              "address": "三重郡菰野町 大字吉澤",
+              "zip": "5101226",
+              "originalLineNumber": 829
+            },
+            {
+              "address": "三重郡菰野町 大字神森",
+              "zip": "5101231",
+              "originalLineNumber": 812
+            },
+            {
+              "address": "三重郡菰野町 大字宿野",
+              "zip": "5101232",
+              "originalLineNumber": 818
+            },
+            {
+              "address": "三重郡菰野町 大字菰野",
+              "zip": "5101233",
+              "originalLineNumber": 815
+            },
+            {
+              "address": "三重郡菰野町 大字福村",
+              "zip": "5101234",
+              "originalLineNumber": 828
+            }
+          ]
+        },
+        {
+          "sheetName": "三重郡菰野町（2）",
+          "batchNo": 2,
+          "rows": 10,
+          "startIndex": 11,
+          "endIndex": 20,
+          "records": [
+            {
+              "address": "三重郡菰野町 宝永台",
+              "zip": "5101235",
+              "originalLineNumber": 837
+            },
+            {
+              "address": "三重郡菰野町 初若の郷",
+              "zip": "5101236",
+              "originalLineNumber": 836
+            },
+            {
+              "address": "三重郡菰野町 大羽根園新林町",
+              "zip": "5101241",
+              "originalLineNumber": 833
+            },
+            {
+              "address": "三重郡菰野町 大羽根園柴垣町",
+              "zip": "5101242",
+              "originalLineNumber": 832
+            },
+            {
+              "address": "三重郡菰野町 大羽根園呉竹町",
+              "zip": "5101243",
+              "originalLineNumber": 831
+            },
+            {
+              "address": "三重郡菰野町 大羽根園並木通り",
+              "zip": "5101244",
+              "originalLineNumber": 834
+            },
+            {
+              "address": "三重郡菰野町 大羽根園松ケ枝町",
+              "zip": "5101245",
+              "originalLineNumber": 835
+            },
+            {
+              "address": "三重郡菰野町 大羽根園青葉町",
+              "zip": "5101246",
+              "originalLineNumber": 830
+            },
+            {
+              "address": "三重郡菰野町 大字千草",
+              "zip": "5101251",
+              "originalLineNumber": 825
+            },
+            {
+              "address": "三重郡菰野町 大字音羽",
+              "zip": "5101252",
+              "originalLineNumber": 811
+            }
+          ]
+        },
+        {
+          "sheetName": "三重郡菰野町（3）",
+          "batchNo": 3,
+          "rows": 10,
+          "startIndex": 21,
+          "endIndex": 30,
+          "records": [
+            {
+              "address": "三重郡菰野町 大字潤田",
+              "zip": "5101253",
+              "originalLineNumber": 808
+            },
+            {
+              "address": "三重郡菰野町 大字永井",
+              "zip": "5101311",
+              "originalLineNumber": 826
+            },
+            {
+              "address": "三重郡菰野町 大字竹成",
+              "zip": "5101312",
+              "originalLineNumber": 823
+            },
+            {
+              "address": "三重郡菰野町 大字田口",
+              "zip": "5101321",
+              "originalLineNumber": 821
+            },
+            {
+              "address": "三重郡菰野町 大字田口新田",
+              "zip": "5101322",
+              "originalLineNumber": 822
+            },
+            {
+              "address": "三重郡菰野町 大字小島",
+              "zip": "5101323",
+              "originalLineNumber": 810
+            },
+            {
+              "address": "三重郡菰野町 大字田光",
+              "zip": "5101324",
+              "originalLineNumber": 824
+            },
+            {
+              "address": "三重郡菰野町 大字榊",
+              "zip": "5101325",
+              "originalLineNumber": 816
+            },
+            {
+              "address": "三重郡菰野町 大字杉谷",
+              "zip": "5101326",
+              "originalLineNumber": 819
+            },
+            {
+              "address": "三重郡菰野町 大字根の平",
+              "zip": "5101327",
+              "originalLineNumber": 827
+            }
+          ]
+        },
+        {
+          "sheetName": "三重郡菰野町（4）",
+          "batchNo": 4,
+          "rows": 1,
+          "startIndex": 31,
+          "endIndex": 31,
+          "records": [
+            {
+              "address": "三重郡菰野町 大字切畑",
+              "zip": "5101328",
+              "originalLineNumber": 814
+            }
+          ]
+        }
+      ]
+    },
+    "三重郡朝日町": {
+      "totalRecords": 11,
+      "totalSheets": 2,
+      "batches": [
+        {
+          "sheetName": "三重郡朝日町",
+          "batchNo": 1,
+          "rows": 10,
+          "startIndex": 1,
+          "endIndex": 10,
+          "records": [
+            {
+              "address": "三重郡朝日町 大字縄生",
+              "zip": "5108101",
+              "originalLineNumber": 841
+            },
+            {
+              "address": "三重郡朝日町 大字小向",
+              "zip": "5108102",
+              "originalLineNumber": 839
+            },
+            {
+              "address": "三重郡朝日町 大字柿",
+              "zip": "5108103",
+              "originalLineNumber": 840
+            },
+            {
+              "address": "三重郡朝日町 大字埋縄",
+              "zip": "5108104",
+              "originalLineNumber": 838
+            },
+            {
+              "address": "三重郡朝日町 向陽台一丁目",
+              "zip": "5108105",
+              "originalLineNumber": 842
+            },
+            {
+              "address": "三重郡朝日町 向陽台三丁目",
+              "zip": "5108105",
+              "originalLineNumber": 844
+            },
+            {
+              "address": "三重郡朝日町 向陽台二丁目",
+              "zip": "5108105",
+              "originalLineNumber": 843
+            },
+            {
+              "address": "三重郡朝日町 白梅の丘東一丁目",
+              "zip": "5108106",
+              "originalLineNumber": 847
+            },
+            {
+              "address": "三重郡朝日町 白梅の丘東二丁目",
+              "zip": "5108106",
+              "originalLineNumber": 848
+            },
+            {
+              "address": "三重郡朝日町 白梅の丘西一丁目",
+              "zip": "5108107",
+              "originalLineNumber": 845
+            }
+          ]
+        },
+        {
+          "sheetName": "三重郡朝日町（2）",
+          "batchNo": 2,
+          "rows": 1,
+          "startIndex": 11,
+          "endIndex": 11,
+          "records": [
+            {
+              "address": "三重郡朝日町 白梅の丘西二丁目",
+              "zip": "5108107",
+              "originalLineNumber": 846
+            }
+          ]
+        }
+      ]
+    },
+    "いなべ市": {
+      "totalRecords": 92,
+      "totalSheets": 10,
+      "batches": [
+        {
+          "sheetName": "いなべ市",
+          "batchNo": 1,
+          "rows": 10,
+          "startIndex": 1,
+          "endIndex": 10,
+          "records": [
+            {
+              "address": "いなべ市 員弁町市之原",
+              "zip": "5110201",
+              "originalLineNumber": 671
+            },
+            {
+              "address": "いなべ市 員弁町楚原",
+              "zip": "5110202",
+              "originalLineNumber": 681
+            },
+            {
+              "address": "いなべ市 員弁町畑新田",
+              "zip": "5110203",
+              "originalLineNumber": 683
+            },
+            {
+              "address": "いなべ市 員弁町石仏",
+              "zip": "5110204",
+              "originalLineNumber": 670
+            },
+            {
+              "address": "いなべ市 員弁町笠田新田",
+              "zip": "5110205",
+              "originalLineNumber": 676
+            },
+            {
+              "address": "いなべ市 員弁町宇野",
+              "zip": "5110206",
+              "originalLineNumber": 672
+            },
+            {
+              "address": "いなべ市 員弁町上笠田",
+              "zip": "5110207",
+              "originalLineNumber": 677
+            },
+            {
+              "address": "いなべ市 員弁町坂東新田",
+              "zip": "5110208",
+              "originalLineNumber": 684
+            },
+            {
+              "address": "いなべ市 員弁町松名新田",
+              "zip": "5110211",
+              "originalLineNumber": 687
+            },
+            {
+              "address": "いなべ市 員弁町平古",
+              "zip": "5110212",
+              "originalLineNumber": 686
+            }
+          ]
+        },
+        {
+          "sheetName": "いなべ市（2）",
+          "batchNo": 2,
+          "rows": 10,
+          "startIndex": 11,
+          "endIndex": 20,
+          "records": [
+            {
+              "address": "いなべ市 員弁町暮明",
+              "zip": "5110213",
+              "originalLineNumber": 679
+            },
+            {
+              "address": "いなべ市 員弁町岡丁田",
+              "zip": "5110214",
+              "originalLineNumber": 675
+            },
+            {
+              "address": "いなべ市 員弁町東一色",
+              "zip": "5110215",
+              "originalLineNumber": 685
+            },
+            {
+              "address": "いなべ市 員弁町松之木",
+              "zip": "5110216",
+              "originalLineNumber": 688
+            },
+            {
+              "address": "いなべ市 員弁町大泉新田",
+              "zip": "5110217",
+              "originalLineNumber": 674
+            },
+            {
+              "address": "いなべ市 員弁町下笠田",
+              "zip": "5110221",
+              "originalLineNumber": 680
+            },
+            {
+              "address": "いなべ市 員弁町御薗",
+              "zip": "5110222",
+              "originalLineNumber": 689
+            },
+            {
+              "address": "いなべ市 員弁町北金井",
+              "zip": "5110223",
+              "originalLineNumber": 678
+            },
+            {
+              "address": "いなべ市 員弁町大泉",
+              "zip": "5110224",
+              "originalLineNumber": 673
+            },
+            {
+              "address": "いなべ市 員弁町西方",
+              "zip": "5110225",
+              "originalLineNumber": 682
+            }
+          ]
+        },
+        {
+          "sheetName": "いなべ市（3）",
+          "batchNo": 3,
+          "rows": 10,
+          "startIndex": 21,
+          "endIndex": 30,
+          "records": [
+            {
+              "address": "いなべ市 大安町丹生川上",
+              "zip": "5110261",
+              "originalLineNumber": 706
+            },
+            {
+              "address": "いなべ市 大安町丹生川中",
+              "zip": "5110262",
+              "originalLineNumber": 707
+            },
+            {
+              "address": "いなべ市 大安町丹生川久下",
+              "zip": "5110263",
+              "originalLineNumber": 708
+            },
+            {
+              "address": "いなべ市 大安町石榑東",
+              "zip": "5110264",
+              "originalLineNumber": 693
+            },
+            {
+              "address": "いなべ市 大安町石榑北",
+              "zip": "5110265",
+              "originalLineNumber": 690
+            },
+            {
+              "address": "いなべ市 大安町石榑南",
+              "zip": "5110266",
+              "originalLineNumber": 694
+            },
+            {
+              "address": "いなべ市 大安町石榑北山",
+              "zip": "5110267",
+              "originalLineNumber": 691
+            },
+            {
+              "address": "いなべ市 大安町片樋",
+              "zip": "5110271",
+              "originalLineNumber": 700
+            },
+            {
+              "address": "いなべ市 大安町高柳",
+              "zip": "5110272",
+              "originalLineNumber": 701
+            },
+            {
+              "address": "いなべ市 大安町平塚",
+              "zip": "5110273",
+              "originalLineNumber": 709
+            }
+          ]
+        },
+        {
+          "sheetName": "いなべ市（4）",
+          "batchNo": 4,
+          "rows": 10,
+          "startIndex": 31,
+          "endIndex": 40,
+          "records": [
+            {
+              "address": "いなべ市 大安町大井田",
+              "zip": "5110274",
+              "originalLineNumber": 699
+            },
+            {
+              "address": "いなべ市 大安町鍋坂",
+              "zip": "5110275",
+              "originalLineNumber": 705
+            },
+            {
+              "address": "いなべ市 大安町石榑下",
+              "zip": "5110276",
+              "originalLineNumber": 692
+            },
+            {
+              "address": "いなべ市 大安町門前",
+              "zip": "5110281",
+              "originalLineNumber": 711
+            },
+            {
+              "address": "いなべ市 大安町大泉",
+              "zip": "5110282",
+              "originalLineNumber": 698
+            },
+            {
+              "address": "いなべ市 大安町南金井",
+              "zip": "5110283",
+              "originalLineNumber": 710
+            },
+            {
+              "address": "いなべ市 大安町梅戸",
+              "zip": "5110284",
+              "originalLineNumber": 697
+            },
+            {
+              "address": "いなべ市 大安町宇賀新田",
+              "zip": "5110285",
+              "originalLineNumber": 696
+            },
+            {
+              "address": "いなべ市 大安町宇賀",
+              "zip": "5110286",
+              "originalLineNumber": 695
+            },
+            {
+              "address": "いなべ市 大安町中央ヶ丘一丁目",
+              "zip": "5110287",
+              "originalLineNumber": 702
+            }
+          ]
+        },
+        {
+          "sheetName": "いなべ市（5）",
+          "batchNo": 5,
+          "rows": 10,
+          "startIndex": 41,
+          "endIndex": 50,
+          "records": [
+            {
+              "address": "いなべ市 大安町中央ヶ丘三丁目",
+              "zip": "5110287",
+              "originalLineNumber": 704
+            },
+            {
+              "address": "いなべ市 大安町中央ヶ丘二丁目",
+              "zip": "5110287",
+              "originalLineNumber": 703
+            },
+            {
+              "address": "いなべ市 北勢町川原",
+              "zip": "5110401",
+              "originalLineNumber": 738
+            },
+            {
+              "address": "いなべ市 北勢町千司久連新田",
+              "zip": "5110402",
+              "originalLineNumber": 746
+            },
+            {
+              "address": "いなべ市 北勢町二之瀬",
+              "zip": "5110403",
+              "originalLineNumber": 752
+            },
+            {
+              "address": "いなべ市 北勢町小原一色",
+              "zip": "5110404",
+              "originalLineNumber": 741
+            },
+            {
+              "address": "いなべ市 北勢町田辺",
+              "zip": "5110405",
+              "originalLineNumber": 748
+            },
+            {
+              "address": "いなべ市 北勢町塩崎",
+              "zip": "5110406",
+              "originalLineNumber": 742
+            },
+            {
+              "address": "いなべ市 北勢町京ヶ野新田",
+              "zip": "5110411",
+              "originalLineNumber": 740
+            },
+            {
+              "address": "いなべ市 北勢町向平",
+              "zip": "5110412",
+              "originalLineNumber": 761
+            }
+          ]
+        },
+        {
+          "sheetName": "いなべ市（6）",
+          "batchNo": 6,
+          "rows": 10,
+          "startIndex": 51,
+          "endIndex": 60,
+          "records": [
+            {
+              "address": "いなべ市 北勢町畑毛",
+              "zip": "5110413",
+              "originalLineNumber": 753
+            },
+            {
+              "address": "いなべ市 北勢町西貝野",
+              "zip": "5110414",
+              "originalLineNumber": 751
+            },
+            {
+              "address": "いなべ市 北勢町東貝野",
+              "zip": "5110415",
+              "originalLineNumber": 755
+            },
+            {
+              "address": "いなべ市 北勢町飯倉",
+              "zip": "5110416",
+              "originalLineNumber": 733
+            },
+            {
+              "address": "いなべ市 北勢町瀬木",
+              "zip": "5110417",
+              "originalLineNumber": 745
+            },
+            {
+              "address": "いなべ市 北勢町下平",
+              "zip": "5110418",
+              "originalLineNumber": 743
+            },
+            {
+              "address": "いなべ市 北勢町皷",
+              "zip": "5110421",
+              "originalLineNumber": 749
+            },
+            {
+              "address": "いなべ市 北勢町北中津原",
+              "zip": "5110422",
+              "originalLineNumber": 739
+            },
+            {
+              "address": "いなべ市 北勢町平野新田",
+              "zip": "5110423",
+              "originalLineNumber": 757
+            },
+            {
+              "address": "いなべ市 北勢町南中津原",
+              "zip": "5110424",
+              "originalLineNumber": 760
+            }
+          ]
+        },
+        {
+          "sheetName": "いなべ市（7）",
+          "batchNo": 7,
+          "rows": 10,
+          "startIndex": 61,
+          "endIndex": 70,
+          "records": [
+            {
+              "address": "いなべ市 北勢町大辻新田",
+              "zip": "5110425",
+              "originalLineNumber": 735
+            },
+            {
+              "address": "いなべ市 北勢町其原",
+              "zip": "5110426",
+              "originalLineNumber": 747
+            },
+            {
+              "address": "いなべ市 北勢町麻生田",
+              "zip": "5110427",
+              "originalLineNumber": 734
+            },
+            {
+              "address": "いなべ市 北勢町阿下喜",
+              "zip": "5110428",
+              "originalLineNumber": 732
+            },
+            {
+              "address": "いなべ市 北勢町別名",
+              "zip": "5110431",
+              "originalLineNumber": 759
+            },
+            {
+              "address": "いなべ市 北勢町東村",
+              "zip": "5110432",
+              "originalLineNumber": 756
+            },
+            {
+              "address": "いなべ市 北勢町中山",
+              "zip": "5110433",
+              "originalLineNumber": 750
+            },
+            {
+              "address": "いなべ市 北勢町麓村",
+              "zip": "5110434",
+              "originalLineNumber": 758
+            },
+            {
+              "address": "いなべ市 北勢町奥村",
+              "zip": "5110435",
+              "originalLineNumber": 736
+            },
+            {
+              "address": "いなべ市 北勢町新町",
+              "zip": "5110436",
+              "originalLineNumber": 744
+            }
+          ]
+        },
+        {
+          "sheetName": "いなべ市（8）",
+          "batchNo": 8,
+          "rows": 10,
+          "startIndex": 71,
+          "endIndex": 80,
+          "records": [
+            {
+              "address": "いなべ市 北勢町垣内",
+              "zip": "5110437",
+              "originalLineNumber": 737
+            },
+            {
+              "address": "いなべ市 北勢町治田外面",
+              "zip": "5110438",
+              "originalLineNumber": 754
+            },
+            {
+              "address": "いなべ市 藤原町鼎",
+              "zip": "5110501",
+              "originalLineNumber": 716
+            },
+            {
+              "address": "いなべ市 藤原町上相場",
+              "zip": "5110502",
+              "originalLineNumber": 717
+            },
+            {
+              "address": "いなべ市 藤原町下相場",
+              "zip": "5110503",
+              "originalLineNumber": 721
+            },
+            {
+              "address": "いなべ市 藤原町川合",
+              "zip": "5110504",
+              "originalLineNumber": 718
+            },
+            {
+              "address": "いなべ市 藤原町日内",
+              "zip": "5110505",
+              "originalLineNumber": 727
+            },
+            {
+              "address": "いなべ市 藤原町長尾",
+              "zip": "5110506",
+              "originalLineNumber": 725
+            },
+            {
+              "address": "いなべ市 藤原町上之山田",
+              "zip": "5110507",
+              "originalLineNumber": 714
+            },
+            {
+              "address": "いなべ市 藤原町藤ヶ丘",
+              "zip": "5110508",
+              "originalLineNumber": 728
+            }
+          ]
+        },
+        {
+          "sheetName": "いなべ市（9）",
+          "batchNo": 9,
+          "rows": 10,
+          "startIndex": 81,
+          "endIndex": 90,
+          "records": [
+            {
+              "address": "いなべ市 藤原町市場",
+              "zip": "5110511",
+              "originalLineNumber": 713
+            },
+            {
+              "address": "いなべ市 藤原町志礼石新田",
+              "zip": "5110512",
+              "originalLineNumber": 723
+            },
+            {
+              "address": "いなべ市 藤原町下野尻",
+              "zip": "5110513",
+              "originalLineNumber": 722
+            },
+            {
+              "address": "いなべ市 藤原町石川",
+              "zip": "5110514",
+              "originalLineNumber": 712
+            },
+            {
+              "address": "いなべ市 藤原町東禅寺",
+              "zip": "5110515",
+              "originalLineNumber": 724
+            },
+            {
+              "address": "いなべ市 藤原町西野尻",
+              "zip": "5110516",
+              "originalLineNumber": 726
+            },
+            {
+              "address": "いなべ市 藤原町大貝戸",
+              "zip": "5110517",
+              "originalLineNumber": 715
+            },
+            {
+              "address": "いなべ市 藤原町坂本",
+              "zip": "5110518",
+              "originalLineNumber": 719
+            },
+            {
+              "address": "いなべ市 藤原町古田",
+              "zip": "5110521",
+              "originalLineNumber": 729
+            },
+            {
+              "address": "いなべ市 藤原町篠立",
+              "zip": "5110522",
+              "originalLineNumber": 720
+            }
+          ]
+        },
+        {
+          "sheetName": "いなべ市（10）",
+          "batchNo": 10,
+          "rows": 2,
+          "startIndex": 91,
+          "endIndex": 92,
+          "records": [
+            {
+              "address": "いなべ市 藤原町本郷",
+              "zip": "5110523",
+              "originalLineNumber": 730
+            },
+            {
+              "address": "いなべ市 藤原町山口",
+              "zip": "5110524",
+              "originalLineNumber": 731
+            }
+          ]
+        }
+      ]
+    },
+    "員弁郡東員町": {
+      "totalRecords": 23,
+      "totalSheets": 3,
+      "batches": [
+        {
+          "sheetName": "員弁郡東員町",
+          "batchNo": 1,
+          "rows": 10,
+          "startIndex": 1,
+          "endIndex": 10,
+          "records": [
+            {
+              "address": "員弁郡東員町 笹尾西一丁目",
+              "zip": "5110231",
+              "originalLineNumber": 796
+            },
+            {
+              "address": "員弁郡東員町 笹尾西三丁目",
+              "zip": "5110231",
+              "originalLineNumber": 798
+            },
+            {
+              "address": "員弁郡東員町 笹尾西二丁目",
+              "zip": "5110231",
+              "originalLineNumber": 797
+            },
+            {
+              "address": "員弁郡東員町 笹尾西四丁目",
+              "zip": "5110231",
+              "originalLineNumber": 799
+            },
+            {
+              "address": "員弁郡東員町 笹尾東一丁目",
+              "zip": "5110232",
+              "originalLineNumber": 800
+            },
+            {
+              "address": "員弁郡東員町 笹尾東三丁目",
+              "zip": "5110232",
+              "originalLineNumber": 802
+            },
+            {
+              "address": "員弁郡東員町 笹尾東二丁目",
+              "zip": "5110232",
+              "originalLineNumber": 801
+            },
+            {
+              "address": "員弁郡東員町 笹尾東四丁目",
+              "zip": "5110232",
+              "originalLineNumber": 803
+            },
+            {
+              "address": "員弁郡東員町 城山一丁目",
+              "zip": "5110233",
+              "originalLineNumber": 804
+            },
+            {
+              "address": "員弁郡東員町 城山三丁目",
+              "zip": "5110233",
+              "originalLineNumber": 806
+            }
+          ]
+        },
+        {
+          "sheetName": "員弁郡東員町（2）",
+          "batchNo": 2,
+          "rows": 10,
+          "startIndex": 11,
+          "endIndex": 20,
+          "records": [
+            {
+              "address": "員弁郡東員町 城山二丁目",
+              "zip": "5110233",
+              "originalLineNumber": 805
+            },
+            {
+              "address": "員弁郡東員町 大字鳥取",
+              "zip": "5110241",
+              "originalLineNumber": 789
+            },
+            {
+              "address": "員弁郡東員町 大字六把野新田",
+              "zip": "5110242",
+              "originalLineNumber": 795
+            },
+            {
+              "address": "員弁郡東員町 大字穴太",
+              "zip": "5110243",
+              "originalLineNumber": 784
+            },
+            {
+              "address": "員弁郡東員町 大字大木",
+              "zip": "5110244",
+              "originalLineNumber": 785
+            },
+            {
+              "address": "員弁郡東員町 大字八幡新田",
+              "zip": "5110245",
+              "originalLineNumber": 792
+            },
+            {
+              "address": "員弁郡東員町 大字山田",
+              "zip": "5110251",
+              "originalLineNumber": 794
+            },
+            {
+              "address": "員弁郡東員町 大字瀬古泉",
+              "zip": "5110252",
+              "originalLineNumber": 787
+            },
+            {
+              "address": "員弁郡東員町 大字筑紫",
+              "zip": "5110253",
+              "originalLineNumber": 788
+            },
+            {
+              "address": "員弁郡東員町 大字中上",
+              "zip": "5110254",
+              "originalLineNumber": 790
+            }
+          ]
+        },
+        {
+          "sheetName": "員弁郡東員町（3）",
+          "batchNo": 3,
+          "rows": 3,
+          "startIndex": 21,
+          "endIndex": 23,
+          "records": [
+            {
+              "address": "員弁郡東員町 大字長深",
+              "zip": "5110255",
+              "originalLineNumber": 791
+            },
+            {
+              "address": "員弁郡東員町 大字南大社",
+              "zip": "5110256",
+              "originalLineNumber": 793
+            },
+            {
+              "address": "員弁郡東員町 大字北大社",
+              "zip": "5110257",
+              "originalLineNumber": 786
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

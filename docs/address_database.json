@@ -1,0 +1,206 @@
+{
+  "schemaVersion": "2.3.0",
+  "artifactId": "MIE-03-ADDRESS-DATABASE",
+  "districtId": "MIE-03",
+  "districtName": "三重第3区",
+  "prefecture": "三重県",
+  "totalMunicipalities": 6,
+  "totalTowns": 20,
+  "owner": "Address Extraction AI",
+  "lineage": {
+    "producer": "Address Extraction AI",
+    "generatedAt": "2026-07-25T08:25:00.000Z",
+    "schemaVersion": "2.3.0",
+    "inputs": [
+      {
+        "artifactId": "MIE-03-DISTRICT-PROFILE",
+        "artifact": "master/district_profile.json",
+        "version": "1.0.0",
+        "checksum": "sha256:ef9195b1c05542b21ec84a39c76fb1d11ffef7570a2822df7550c30d8328e5ac"
+      },
+      {
+        "artifactId": "NATIONAL-ADDRESS-MASTER",
+        "artifact": "NATIONAL_ADDRESS_MASTER",
+        "version": "2026.07",
+        "checksum": "sha256:4a0ca966ea4b69f23e9fdb8ef84a6da870c88e0e97b99f26ff218eb648574ea4"
+      }
+    ]
+  },
+  "municipalities": [
+    {
+      "name": "四日市市（一部）",
+      "towns": [
+        {
+          "name": "富田",
+          "chomeStatus": "VERIFIED",
+          "verificationSource": "NATIONAL_ADDRESS_MASTER",
+          "chome": [
+            "1丁目",
+            "2丁目",
+            "3丁目"
+          ]
+        },
+        {
+          "name": "富州原町",
+          "chomeStatus": "NONE",
+          "verificationSource": "NATIONAL_ADDRESS_MASTER",
+          "chome": []
+        },
+        {
+          "name": "羽津",
+          "chomeStatus": "VERIFIED",
+          "verificationSource": "NATIONAL_ADDRESS_MASTER",
+          "chome": [
+            "1丁目",
+            "2丁目"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "桑名市",
+      "towns": [
+        {
+          "name": "江場",
+          "chomeStatus": "VERIFIED",
+          "verificationSource": "NATIONAL_ADDRESS_MASTER",
+          "chome": [
+            "1丁目",
+            "2丁目",
+            "3丁目"
+          ]
+        },
+        {
+          "name": "吉之丸",
+          "chomeStatus": "NONE",
+          "verificationSource": "NATIONAL_ADDRESS_MASTER",
+          "chome": []
+        },
+        {
+          "name": "大山田",
+          "chomeStatus": "VERIFIED",
+          "verificationSource": "NATIONAL_ADDRESS_MASTER",
+          "chome": [
+            "1丁目",
+            "2丁目",
+            "3丁目",
+            "4丁目",
+            "5丁目",
+            "6丁目",
+            "7丁目",
+            "8丁目"
+          ]
+        },
+        {
+          "name": "播磨",
+          "chomeStatus": "NONE",
+          "verificationSource": "NATIONAL_ADDRESS_MASTER",
+          "chome": []
+        },
+        {
+          "name": "多度町香取",
+          "chomeStatus": "NONE",
+          "verificationSource": "NATIONAL_ADDRESS_MASTER",
+          "chome": []
+        },
+        {
+          "name": "長島町駒江",
+          "chomeStatus": "NONE",
+          "verificationSource": "NATIONAL_ADDRESS_MASTER",
+          "chome": []
+        }
+      ]
+    },
+    {
+      "name": "いなべ市",
+      "towns": [
+        {
+          "name": "員弁町大泉",
+          "chomeStatus": "NONE",
+          "verificationSource": "NATIONAL_ADDRESS_MASTER",
+          "chome": []
+        },
+        {
+          "name": "北勢町阿下喜",
+          "chomeStatus": "NONE",
+          "verificationSource": "NATIONAL_ADDRESS_MASTER",
+          "chome": []
+        },
+        {
+          "name": "大安町丹生川",
+          "chomeStatus": "NONE",
+          "verificationSource": "NATIONAL_ADDRESS_MASTER",
+          "chome": []
+        },
+        {
+          "name": "藤原町市場",
+          "chomeStatus": "NONE",
+          "verificationSource": "NATIONAL_ADDRESS_MASTER",
+          "chome": []
+        }
+      ]
+    },
+    {
+      "name": "桑名郡",
+      "towns": [
+        {
+          "name": "木曽岬町加畑",
+          "chomeStatus": "NONE",
+          "verificationSource": "NATIONAL_ADDRESS_MASTER",
+          "chome": []
+        },
+        {
+          "name": "木曽岬町源緑輪中",
+          "chomeStatus": "NONE",
+          "verificationSource": "NATIONAL_ADDRESS_MASTER",
+          "chome": []
+        }
+      ]
+    },
+    {
+      "name": "員弁郡",
+      "towns": [
+        {
+          "name": "東員町穴太",
+          "chomeStatus": "NONE",
+          "verificationSource": "NATIONAL_ADDRESS_MASTER",
+          "chome": []
+        },
+        {
+          "name": "東員町笹尾東",
+          "chomeStatus": "VERIFIED",
+          "verificationSource": "NATIONAL_ADDRESS_MASTER",
+          "chome": [
+            "1丁目",
+            "2丁目",
+            "3丁目"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "三重郡",
+      "towns": [
+        {
+          "name": "菰野町大字菰野",
+          "chomeStatus": "NONE",
+          "verificationSource": "NATIONAL_ADDRESS_MASTER",
+          "chome": []
+        },
+        {
+          "name": "朝日町大字柿",
+          "chomeStatus": "NONE",
+          "verificationSource": "NATIONAL_ADDRESS_MASTER",
+          "chome": []
+        },
+        {
+          "name": "川越町大字豊田",
+          "chomeStatus": "NONE",
+          "verificationSource": "NATIONAL_ADDRESS_MASTER",
+          "chome": []
+        }
+      ]
+    }
+  ],
+  "lastUpdated": "2026-07-25T08:25:00.000Z"
+}

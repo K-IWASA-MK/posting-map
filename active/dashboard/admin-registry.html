@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HQ REGISTRY MONITOR — FIELD OPERATIONS OS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            obsidian: '#000000',
+            panel: 'rgba(255, 255, 255, 0.02)',
+            borderWhite: 'rgba(255, 255, 255, 0.08)',
+            accentBlue: '#2563eb'
+          },
+          fontFamily: {
+            sans: ['"Inter"', '"Noto Sans JP"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #000000;
+      color: #ffffff;
+    }
+    .glass-card {
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.008));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 0 30px rgba(37, 99, 235, 0.03);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    .pulse-ready { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .6; transform: scale(1.15); } }
+  </style>
+</head>
+<body class="font-sans antialiased min-h-screen overflow-x-hidden p-8">
+
+  <!-- Main Shell -->
+  <div class="max-w-7xl mx-auto space-y-8">
+    
+    <!-- Top Header -->
+    <header class="flex justify-between items-center py-6 border-b border-white/10">
+      <div class="flex flex-col">
+        <h1 class="text-3xl font-black tracking-tighter uppercase leading-none">
+          <span class="text-white">HQ Registry</span> <span class="text-blue-500">Monitor</span>
+        </h1>
+        <p class="text-[10px] font-black text-white/40 uppercase tracking-widest mt-2">SaaS Operational System / 289 Districts</p>
+      </div>
+      <div class="flex items-center gap-4">
+        <span id="last-update" class="text-xs text-white/50 font-bold">Sync: Loading...</span>
+        <button onclick="fetchRegistry()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase px-5 py-3 rounded-full transition-all active:scale-[0.98]">
+          Refresh List
+        </button>
+      </div>
+    </header>
+
+    <!-- Operational Alerts Banner Panel -->
+    <div id="alert-banner-container" class="hidden">
+      <!-- Alerts injected dynamically -->
+    </div>
+
+    <!-- Overview Metrics Row (National KPI Focus) -->
+    <section class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div class="glass-card p-6 flex flex-col justify-between min-h-[140px]">
+        <span class="text-[10px] font-black text-white/40 uppercase tracking-widest">Active Districts</span>
+        <span id="stat-districts" class="text-4xl font-black text-white tracking-tight mt-4">--</span>
+      </div>
+      <div class="glass-card p-6 flex flex-col justify-between min-h-[140px]">
+        <span class="text-[10px] font-black text-white/40 uppercase tracking-widest">National Avg Progress</span>
+        <span id="stat-progress" class="text-4xl font-black text-green-500 tracking-tight mt-4">--</span>
+      </div>
+      <div class="glass-card p-6 flex flex-col justify-between min-h-[140px]">
+        <span class="text-[10px] font-black text-white/40 uppercase tracking-widest">Total Areas</span>
+        <span id="stat-areas" class="text-4xl font-black text-blue-400 tracking-tight mt-4">--</span>
+      </div>
+      <div class="glass-card p-6 flex flex-col justify-between min-h-[140px]">
+        <span class="text-[10px] font-black text-white/40 uppercase tracking-widest">Completed Areas</span>
+        <span id="stat-completed" class="text-4xl font-black text-white/70 tracking-tight mt-4">--</span>
+      </div>
+    </section>
+
+    <!-- Region Aggregation Panel -->
+    <section class="glass-card p-6 space-y-4">
+      <h3 class="text-xs font-black text-white/40 uppercase tracking-widest">Region Analytics Summary</h3>
+      <div id="region-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Region cards injected dynamically -->
+      </div>
+    </section>
+
+    <!-- Registry Main Grid -->
+    <main class="glass-card p-8 space-y-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold tracking-tight text-white/80">District Configuration Registry</h2>
+        <input type="text" id="search-input" oninput="filterRegistry()" placeholder="Filter by ID or Name..." class="bg-white/5 border border-white/10 rounded-full px-5 py-2.5 text-sm font-semibold outline-none focus:border-blue-500 text-white placeholder:text-white/20 w-64 transition-all">
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-white/80">
+          <thead>
+            <tr class="border-b border-white/10 text-white/40 text-xs font-black uppercase tracking-wider">
+              <th class="py-4 px-4">District</th>
+              <th class="py-4 px-4">Status</th>
+              <th class="py-4 px-4">Latency</th>
+              <th class="py-4 px-4">Version</th>
+              <th class="py-4 px-4">Last Certification</th>
+              <th class="py-4 px-4 text-right">Resources & Admin Control</th>
+            </tr>
+          </thead>
+          <tbody id="registry-table" class="divide-y divide-white/5">
+            <!-- Dynamic rows inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    let registryData = [];
+
+    async function fetchRegistry() {
+      try {
+        // 1. Fetch registry.json
+        const resReg = await fetch('clients/registry.json');
+        if (!resReg.ok) throw new Error("Failed to load registry index.");
+        const dataReg = await resReg.json();
+        registryData = dataReg.districts || [];
+        
+        document.getElementById('last-update').textContent = `Sync: ${new Date(dataReg.updatedAt).toLocaleTimeString()}`;
+        document.getElementById('stat-districts').textContent = `${registryData.filter(d => d.status === "READY").length} / ${registryData.length}`;
+        
+        renderTable(registryData);
+
+        // 2. Fetch national-summary.json
+        try {
+          const resSummary = await fetch('clients/national-summary.json');
+          if (resSummary.ok) {
+            const dataSummary = await resSummary.json();
+            document.getElementById('stat-progress').textContent = `${dataSummary.summary.progress}%`;
+            document.getElementById('stat-areas').textContent = dataSummary.summary.totalAreas;
+            document.getElementById('stat-completed').textContent = dataSummary.summary.completedAreas;
+            renderRegions(dataSummary.regions);
+          }
+        } catch (e) {
+          console.warn("national-summary.json load skipped or failed.", e);
+        }
+
+        // 3. Fetch alerts.json
+        try {
+          const resAlerts = await fetch('clients/alerts.json');
+          if (resAlerts.ok) {
+            const dataAlerts = await resAlerts.json();
+            renderAlerts(dataAlerts.alerts || []);
+          }
+        } catch (e) {
+          console.warn("alerts.json load skipped or failed.", e);
+        }
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById('last-update').textContent = "Sync: Offline";
+      }
+    }
+
+    function renderRegions(regions) {
+      const container = document.getElementById('region-grid');
+      container.innerHTML = '';
+      if (!regions || regions.length === 0) {
+        container.innerHTML = `<div class="text-xs text-white/30 font-bold p-2">No regional metrics compiled.</div>`;
+        return;
+      }
+      regions.forEach(rg => {
+        const div = document.createElement('div');
+        div.className = "border border-white/5 bg-white/[0.01] p-4 rounded-2xl flex justify-between items-center";
+        div.innerHTML = `
+          <div>
+            <div class="font-bold text-sm text-white/90">${rg.name}</div>
+            <div class="text-[10px] text-white/40 font-bold uppercase tracking-wider mt-0.5">${rg.districtsCount} Districts / ${rg.totalAreas} Areas</div>
+          </div>
+          <div class="font-mono font-black text-green-500 text-lg">${rg.progress}%</div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function renderAlerts(alerts) {
+      const container = document.getElementById('alert-banner-container');
+      container.innerHTML = '';
+      
+      if (!alerts || alerts.length === 0) {
+        container.classList.add('hidden');
+        return;
+      }
+      
+      container.classList.remove('hidden');
+      const box = document.createElement('div');
+      box.className = "border border-red-500/20 bg-red-950/20 text-red-200 p-5 rounded-[28px] space-y-3 backdrop-blur-md pulse-ready";
+      box.innerHTML = `<h4 class="text-xs font-black uppercase tracking-widest text-red-500">🚨 Active Headquarters Alerts (${alerts.length})</h4>`;
+      
+      const ul = document.createElement('ul');
+      ul.className = "list-disc pl-5 text-xs font-semibold space-y-1.5";
+      alerts.forEach(a => {
+        const li = document.createElement('li');
+        li.textContent = `[${a.severity}] ${a.districtId}: ${a.message}`;
+        ul.appendChild(li);
+      });
+      box.appendChild(ul);
+      container.appendChild(box);
+    }
+
+    function renderTable(districts) {
+      const tbody = document.getElementById('registry-table');
+      tbody.innerHTML = '';
+      
+      districts.forEach(d => {
+        const statusClass = d.status === "READY" ? "bg-green-500" : d.status === "WARNING" ? "bg-yellow-500" : "bg-red-500";
+        const latencyText = d.runtime.latency ? `${d.runtime.latency}ms` : "N/A";
+        const dateText = d.runtime.lastCertification ? new Date(d.runtime.lastCertification).toLocaleString() : "N/A";
+        
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-white/[0.01] transition-all";
+        tr.innerHTML = `
+          <td class="py-5 px-4">
+            <div class="font-bold text-white text-base">${d.id}</div>
+            <div class="text-xs text-white/40 font-semibold mt-0.5">${d.name}</div>
+          </td>
+          <td class="py-5 px-4">
+            <span class="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-white">
+              <span class="w-2.5 h-2.5 rounded-full ${statusClass} pulse-ready"></span>
+              ${d.status}
+            </span>
+          </td>
+          <td class="py-5 px-4 font-mono font-bold text-white/60">${latencyText}</td>
+          <td class="py-5 px-4 font-mono font-bold text-blue-400">v${d.deployment.version}</td>
+          <td class="py-5 px-4 text-xs text-white/50 font-bold">${dateText}</td>
+          <td class="py-5 px-4 text-right space-x-2">
+            <a href="https://docs.google.com/spreadsheets/d/${d.resources.spreadsheetId}/edit" target="_blank" class="inline-flex bg-white/5 hover:bg-white/10 text-white text-xs font-bold px-4 py-2.5 rounded-full border border-white/5 transition-all">
+              Spreadsheet
+            </a>
+            <a href="https://script.google.com/home/projects/${d.resources.scriptId}/edit" target="_blank" class="inline-flex bg-white/5 hover:bg-white/10 text-white text-xs font-bold px-4 py-2.5 rounded-full border border-white/5 transition-all">
+              Apps Script
+            </a>
+            <a href="${d.resources.webAppUrl}?action=verifyDeployment&apiKey=valid-api-key" target="_blank" class="inline-flex bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 text-xs font-bold px-4 py-2.5 rounded-full border border-blue-500/20 transition-all">
+              Web App
+            </a>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterRegistry() {
+      const q = document.getElementById('search-input').value.toLowerCase();
+      const filtered = registryData.filter(d => 
+        d.id.toLowerCase().includes(q) || d.name.toLowerCase().includes(q)
+      );
+      renderTable(filtered);
+    }
+
+    // Auto load on init
+    fetchRegistry();
+  </script>
+</body>
+</html>

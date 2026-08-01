@@ -1,0 +1,18 @@
+{
+  "success": true,
+  "workflowStatus": "COMPLETED",
+  "resultStatus": "VERIFIED",
+  "spreadsheetId": "1U4A4Dgs9O1zLl9cyewtCk7TsW182y3KkOP7qgwuUzUU",
+  "verifiedRowCount": 30,
+  "columns": [
+    "住所",
+    "地図",
+    "メモ",
+    "完了",
+    "日付",
+    "枚数",
+    "担当"
+  ],
+  "evidenceHash": "d2c5babd4331fd43008f99f3cade9095dce89a31f48619883a2bfc06ebd79ad6",
+  "timestamp": "2026-07-26T00:37:48.510Z"
+}

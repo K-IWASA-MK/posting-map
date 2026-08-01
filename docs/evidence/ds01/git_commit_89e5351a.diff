@@ -1,0 +1,18 @@
+commit 89e5351a84aa76abfd8fd80cd51d9dbff8aa2ce6
+Author: K-IWASA-MK <205480127+K-IWASA-MK@users.noreply.github.com>
+Date:   Thu Jul 30 18:30:07 2026 +0900
+
+    docs(design): register verified public Figma Design SSOT URL (cmjPPVlC...)
+
+diff --git a/projects/posting-map/DESIGN_SYSTEM.md b/projects/posting-map/DESIGN_SYSTEM.md
+index 5274b9f1..1f66c625 100644
+--- a/projects/posting-map/DESIGN_SYSTEM.md
++++ b/projects/posting-map/DESIGN_SYSTEM.md
+@@ -1,6 +1,6 @@
+ # POSTING MAP Design System v2.0
+ 
+-* **Figma Design SSOT URL**: [https://www.figma.com/design/cmjPPVIC7d373Vv5YYf0Xo/無題](https://www.figma.com/design/cmjPPVIC7d373Vv5YYf0Xo/無題)
++* **Figma Design SSOT URL**: [https://www.figma.com/design/cmjPPVlC7d373Vv5YYf0Xo/%E7%84%A1%E9%A1%8C?node-id=0-1&t=4nxLb6FmkkA7sjd4-1](https://www.figma.com/design/cmjPPVlC7d373Vv5YYf0Xo/%E7%84%A1%E9%A1%8C?node-id=0-1&t=4nxLb6FmkkA7sjd4-1)
+ 
+ 本ドキュメントは、Figma 上で手作業で定義される共通コンポーネント・デザイントークンを、実装（HTML / CSS / JavaScript）へ正確にマッピングするための設計ガイドラインです。
+ 

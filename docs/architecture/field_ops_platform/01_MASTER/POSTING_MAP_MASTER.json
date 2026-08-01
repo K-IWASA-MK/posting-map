@@ -1,0 +1,35 @@
+{
+  "masterName": "POSTING MAP MASTER",
+  "masterVersion": "1.0.0",
+  "status": "LATEST",
+  "approvedAt": "2026-07-22",
+  "approvedBy": "CEO/AI Governance",
+  "previousVersion": null,
+  "versionPolicy": {
+    "immutable": true,
+    "sheetNameFormat": "{branchId} v{masterVersionMajor}",
+    "upgradeExistingBranch": false,
+    "branchFileImmutable": true,
+    "upgradeMigrationProtocol": "CREATE_NEW_BRANCH_ENV"
+  },
+  "governancePolicy": {
+    "rule001": "MASTER promotion rule applied. New branches created strictly from latest MASTER.",
+    "rule002": "Must pass Verification, Operational Check, and CEO/Leader Approval before promotion.",
+    "rule003": "Lineage Traceability applied. Tracks exact masterVersion and source ancestry for all branches.",
+    "rule004": "Version Immutability & Sheet Naming Rule applied. Sheet name formatted as '{branchId} v{masterVersionMajor}' (e.g. MIE-03 v1).",
+    "rule005": "Branch File Immutability & Upgrade Migration Protocol applied. Operational data is permanently preserved without in-place overwrites."
+  },
+  "spreadsheetId": "14rblnvJH5hkXHU9-9lhZlDaUi-FenuQQ5DWnTP7TbW4",
+  "defaultSheetName": "MIE-03 v1",
+  "defaultDisplayName": "三重第3支部",
+  "scriptId": "158Avw8hAtZx-c9yW10DE0NzB1NYngwv31eroqn-IAmHh_eKHN_fR58sa",
+  "webAppUrl": "https://script.google.com/macros/s/AKfycbwgiOFU5iudUS6UscNU-MZhnxZJaqJHywVA9ivA-GE0uLe02fi7mmBU474lWa1TD7-R/exec",
+  "googleDrive": {
+    "rootFolderId": "1FfcVEQjod--rZSucOPFJD2DJ58hV650_",
+    "url": "https://drive.google.com/drive/folders/1FfcVEQjod--rZSucOPFJD2DJ58hV650_"
+  },
+  "archiveLocation": "FIELD_OPERATIONS_PLATFORM/01_MASTER/Archive/",
+  "createdAt": "2026-07-22T00:00:00.000Z",
+  "updatedAt": "2026-07-22T00:00:00.000Z",
+  "description": "POSTING MAP システム全体のマスター原本（v1.0.0）。Rule-005 Branch Immutability & Upgrade Migration ガバナンスに従い厳格に管理・自動同期されます。"
+}

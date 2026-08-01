@@ -1,0 +1,16 @@
+{
+  "pipeline": "DataPlatformFoundation",
+  "district": "MIE-03",
+  "inputHash": "fe3dedc33762128dcb677dc7d9f13b3a1476dfc79e7398a8afd4837e468189b9",
+  "outputHash": "a266286fe8de11f86ce4470f61a43d5dfdffa0be049b9dea1b0e8912c669e63f",
+  "recordCount": 684,
+  "validation": "PASS",
+  "generatedBy": "DistrictInitializationAgent",
+  "timestamp": "2026-07-24T23:25:22.246Z",
+  "details": {
+    "expectedCount": 684,
+    "matchedCount": 684,
+    "duplicatedCount": 0,
+    "profileVersion": "2026-07"
+  }
+}

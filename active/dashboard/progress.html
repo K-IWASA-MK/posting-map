@@ -1,0 +1,30 @@
+<!-- Next-Gen Stats Dashboard Component -->
+<div class="animate-fade-in">
+  <div class="grid grid-cols-2 gap-8 p-8">
+    <div class="bg-navy dark:bg-blue-900 rounded-[3rem] p-10 shadow-neu-light dark:shadow-neu-dark text-white border border-white/10 relative overflow-hidden group">
+      <div class="relative z-10">
+        <div id="kpi-pct" class="text-5xl font-black tracking-tighter leading-none mb-4 text-blue-300">0%</div>
+        <div class="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Mission Success</div>
+      </div>
+      <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-blue-400 rounded-full blur-[60px] opacity-20 group-hover:scale-125 transition-transform duration-1000"></div>
+    </div>
+    
+    <div class="bg-white/60 dark:bg-white/5 rounded-[3rem] p-10 shadow-neu-light dark:shadow-neu-dark border border-white/10 flex flex-col justify-center">
+      <div id="kpi-done" class="text-5xl font-black text-navy dark:text-blue-400 tracking-tighter leading-none mb-4">0</div>
+      <div class="text-[10px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-[0.2em]">Sectors Secured</div>
+    </div>
+  </div>
+  
+  <div class="px-8 pb-48">
+    <div class="bg-white/60 dark:bg-white/5 rounded-[3.5rem] p-12 shadow-neu-light dark:shadow-neu-dark border border-white/10">
+      <div class="flex items-center justify-between mb-12">
+        <h3 class="text-sm font-black text-navy dark:text-blue-400 tracking-[0.3em] uppercase">🏆 Hall of Fame</h3>
+        <span class="text-[10px] font-black text-gray-300 dark:text-gray-700 uppercase tracking-widest">Global Ranking</span>
+      </div>
+      
+      <div id="ranking-list" class="space-y-10">
+        <!-- Ranking items dynamically injected with Hybrid UI style -->
+      </div>
+    </div>
+  </div>
+</div>

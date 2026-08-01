@@ -1,0 +1,65 @@
+[
+  {
+    "capability": "Connect MCP Endpoint",
+    "dsMcp01": "PASS",
+    "dsMcp02Result": "PASS",
+    "reason": "MCP Endpoint reachable over HTTPS",
+    "evidenceLog": "mcp_authenticated_connection.log"
+  },
+  {
+    "capability": "Read File",
+    "dsMcp01": "FAIL (403)",
+    "dsMcp02Result": "FAIL",
+    "reason": "Missing PAT Token",
+    "evidenceLog": "rest_api_audit.json"
+  },
+  {
+    "capability": "Read Components",
+    "dsMcp01": "N/A",
+    "dsMcp02Result": "FAIL",
+    "reason": "Missing PAT Token",
+    "evidenceLog": "rest_api_audit.json"
+  },
+  {
+    "capability": "Read Variables",
+    "dsMcp01": "FAIL (403)",
+    "dsMcp02Result": "FAIL",
+    "reason": "Missing PAT / Enterprise Plan",
+    "evidenceLog": "rest_api_audit.json"
+  },
+  {
+    "capability": "Read Styles",
+    "dsMcp01": "N/A",
+    "dsMcp02Result": "FAIL",
+    "reason": "Missing PAT Token",
+    "evidenceLog": "rest_api_audit.json"
+  },
+  {
+    "capability": "Read Dev Mode",
+    "dsMcp01": "PASS",
+    "dsMcp02Result": "PASS",
+    "reason": "Inspect CSS extracted via Figma Dev Mode UI",
+    "evidenceLog": "rest_api_audit.json"
+  },
+  {
+    "capability": "Update Variables",
+    "dsMcp01": "FAIL",
+    "dsMcp02Result": "FAIL",
+    "reason": "Requires Enterprise Plan & Variables API Scope",
+    "evidenceLog": "rest_api_audit.json"
+  },
+  {
+    "capability": "Create Node",
+    "dsMcp01": "N/A",
+    "dsMcp02Result": "N/A",
+    "reason": "Not supported by REST API (Requires Figma Plugin API)",
+    "evidenceLog": "rest_api_audit.json"
+  },
+  {
+    "capability": "Auto Layout Edit",
+    "dsMcp01": "N/A",
+    "dsMcp02Result": "N/A",
+    "reason": "Not supported by REST API (Requires Figma Plugin API)",
+    "evidenceLog": "rest_api_audit.json"
+  }
+]

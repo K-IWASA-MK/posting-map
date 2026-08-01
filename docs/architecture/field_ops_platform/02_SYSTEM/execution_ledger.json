@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "1.0.0",
+  "totalRecords": 4,
+  "lastUpdated": "2026-07-21T08:07:10.192Z",
+  "records": [
+    {
+      "ledgerId": "LDG-1784620170068",
+      "executionId": "EXEC-1784620170068",
+      "taskId": "TSK-20260721-0001",
+      "employeeId": "AI-0002",
+      "executionStatus": "COMPLETED",
+      "timestamps": {
+        "startedAt": "2026-07-21T07:49:30.068Z",
+        "completedAt": "2026-07-21T07:49:30.068Z"
+      },
+      "artifactIds": [
+        "master/address_database.json"
+      ],
+      "durationMs": 0,
+      "checksum": "sha256:54d309f1943e520305b0bfe843fa9bbc863ae30745a7d5da89cde0b7469f242b"
+    },
+    {
+      "ledgerId": "LDG-1784620170069",
+      "executionId": "EXEC-1784620170069",
+      "taskId": "TSK-20260721-0002",
+      "employeeId": "AI-0002",
+      "executionStatus": "ABORTED",
+      "timestamps": {
+        "startedAt": "2026-07-21T07:49:30.069Z",
+        "completedAt": "2026-07-21T07:49:30.069Z"
+      },
+      "artifactIds": [],
+      "durationMs": 0,
+      "checksum": "sha256:71c14af2722ae307faaf57eb52fe95c4bc5f2fa53a13d0f1d1f6561cf2913b11"
+    },
+    {
+      "ledgerId": "LDG-1784621230191",
+      "executionId": "EXEC-1784621230191",
+      "taskId": "TSK-20260721-0001",
+      "employeeId": "AI-0002",
+      "executionStatus": "COMPLETED",
+      "timestamps": {
+        "startedAt": "2026-07-21T08:07:10.191Z",
+        "completedAt": "2026-07-21T08:07:10.191Z"
+      },
+      "artifactIds": [
+        "master/address_database.json"
+      ],
+      "durationMs": 0,
+      "checksum": "sha256:7ab2c2f28969a1431c5dfdc627bef67b2620e77904e771186a96e870ace72fb9"
+    },
+    {
+      "ledgerId": "LDG-1784621230192",
+      "executionId": "EXEC-1784621230192",
+      "taskId": "TSK-20260721-0002",
+      "employeeId": "AI-0002",
+      "executionStatus": "ABORTED",
+      "timestamps": {
+        "startedAt": "2026-07-21T08:07:10.192Z",
+        "completedAt": "2026-07-21T08:07:10.192Z"
+      },
+      "artifactIds": [],
+      "durationMs": 0,
+      "checksum": "sha256:4cea3652adf5b16f8e19771e36a6eff3b44c7b7a4a579d34ec52f19aa1e323e0"
+    }
+  ]
+}

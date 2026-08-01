@@ -1,0 +1,10 @@
+==================================================
+🔗 CEO DATA ACCEPTANCE SPATIAL VERIFICATION URL
+==================================================
+
+District         : MIE-03 (三重第3区)
+Total Points     : 684 件 (Red Pins)
+Verification URL : https://k-iwasa-mk.github.io/posting-map-system-dev/MIE-03_SPATIAL_VERIFICATION/
+Status           : PENDING_APPROVAL (CEO確認待ち)
+
+==================================================

@@ -1,0 +1,57 @@
+[
+  {
+    "capability": "Connect MCP Endpoint",
+    "result": "PASS",
+    "evidence": "mcp_connection.log"
+  },
+  {
+    "capability": "List Tools (Phase 2-A)",
+    "result": "FAIL (HTTP 401)",
+    "evidence": "mcp_tools_discovery.json"
+  },
+  {
+    "capability": "Read File",
+    "result": "FAIL (Missing PAT)",
+    "evidence": "audit_read_file.log"
+  },
+  {
+    "capability": "Read Components",
+    "result": "N/A (Requires Figma Personal Access Token)",
+    "evidence": "mcp_tools_discovery.json"
+  },
+  {
+    "capability": "Read Variables",
+    "result": "FAIL (Missing PAT)",
+    "evidence": "audit_read_variables.log"
+  },
+  {
+    "capability": "Read Dev Mode",
+    "result": "PASS (Extracted via Dev Mode Inspector)",
+    "evidence": "audit_read_file.log"
+  },
+  {
+    "capability": "Create Node",
+    "result": "N/A (Figma REST API is read-only for canvas nodes)",
+    "evidence": "audit_create_node.log"
+  },
+  {
+    "capability": "Update Node",
+    "result": "N/A (Figma REST API is read-only for canvas nodes)",
+    "evidence": "audit_create_node.log"
+  },
+  {
+    "capability": "Update Variables",
+    "result": "FAIL (Enterprise API/PAT Required)",
+    "evidence": "audit_update_variables.log"
+  },
+  {
+    "capability": "Auto Layout Edit",
+    "result": "N/A (Requires Plugin API Bridge)",
+    "evidence": "audit_create_node.log"
+  },
+  {
+    "capability": "Text Edit",
+    "result": "N/A (Requires Plugin API Bridge)",
+    "evidence": "audit_create_node.log"
+  }
+]

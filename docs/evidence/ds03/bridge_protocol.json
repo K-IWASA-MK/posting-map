@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AIOS Canvas Bridge Protocol Specification",
+  "version": "1.0.0",
+  "protocol": {
+    "header": {
+      "protocolVersion": "1.0.0",
+      "requestId": "UUIDv4",
+      "correlationId": "UUIDv4",
+      "traceId": "UUIDv4 (Mandatory for AIOS Execution Ledger)"
+    },
+    "executionControl": {
+      "timeoutMs": 10000,
+      "cancellationSupported": true,
+      "heartbeatIntervalMs": 5000,
+      "retryPolicy": {
+        "maxAttempts": 3,
+        "backoffBaseMs": 1000,
+        "exponential": true
+      }
+    },
+    "errorEnum": [
+      "NodeNotFound",
+      "PermissionDenied",
+      "PluginUnavailable",
+      "CanvasLocked",
+      "Timeout",
+      "ValidationFailed",
+      "TransactionRollback",
+      "BridgeDisconnected"
+    ]
+  },
+  "messageStructure": {
+    "request": {
+      "traceId": "string",
+      "correlationId": "string",
+      "command": {
+        "action": "string",
+        "target": "string",
+        "payload": "object"
+      }
+    },
+    "response": {
+      "traceId": "string",
+      "correlationId": "string",
+      "status": "SUCCESS | ERROR",
+      "result": "object | null",
+      "error": {
+        "code": "ErrorEnum",
+        "message": "string",
+        "details": "object"
+      }
+    }
+  }
+}

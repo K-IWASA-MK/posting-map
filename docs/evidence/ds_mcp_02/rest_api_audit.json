@@ -1,0 +1,44 @@
+{
+  "Read File": {
+    "endpoint": "GET /v1/files/cmjPPVlC7d373Vv5YYf0Xo",
+    "statusCode": 403,
+    "result": "FAIL",
+    "reason": "Missing PAT Token",
+    "responseSnippet": "{\"status\":403,\"err\":\"Invalid token\"}"
+  },
+  "Read Components": {
+    "endpoint": "GET /v1/files/cmjPPVlC7d373Vv5YYf0Xo/components",
+    "statusCode": 403,
+    "result": "FAIL",
+    "reason": "Missing PAT Token",
+    "responseSnippet": "{\"status\":403,\"err\":\"Invalid token\"}"
+  },
+  "Read Variables": {
+    "endpoint": "GET /v1/files/cmjPPVlC7d373Vv5YYf0Xo/variables/local",
+    "statusCode": 403,
+    "result": "FAIL",
+    "reason": "Missing PAT / Enterprise Plan",
+    "responseSnippet": "{\"status\":403,\"error\":true,\"message\":\"Invalid token\"}"
+  },
+  "Read Styles": {
+    "endpoint": "GET /v1/files/cmjPPVlC7d373Vv5YYf0Xo/styles",
+    "statusCode": 403,
+    "result": "FAIL",
+    "reason": "Missing PAT Token",
+    "responseSnippet": "{\"status\":403,\"err\":\"Invalid token\"}"
+  },
+  "Update Variables": {
+    "endpoint": "POST /v1/files/cmjPPVlC7d373Vv5YYf0Xo/variables",
+    "statusCode": 403,
+    "result": "FAIL",
+    "reason": "Requires Enterprise Plan & Variables API Scope",
+    "responseSnippet": "{\"status\":403,\"error\":true,\"message\":\"Invalid token\"}"
+  },
+  "Create Node": {
+    "endpoint": "POST /v1/files/:key/nodes",
+    "statusCode": 404,
+    "result": "N/A",
+    "reason": "Not supported by Figma REST API (Requires Figma Plugin API)",
+    "responseSnippet": "N/A"
+  }
+}

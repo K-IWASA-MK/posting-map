@@ -1,0 +1,12 @@
+# Dependencies & Cache
+node_modules/
+.vite/
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+
+# Local Credentials / Secret Backups
+.clasprc.json.local*

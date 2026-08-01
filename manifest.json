@@ -1,0 +1,15 @@
+{
+  "name": "ポスティング・プロ",
+  "short_name": "ポスティング",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "assets/icon180-v2.png?v=243",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+<div id="page-settings" class="page animate-in fade-in slide-in-from-bottom-4 duration-500">
+  
+  <div class="mb-8">
+    <h2 class="text-2xl font-black text-navy tracking-tight leading-none">設定・配布員登録</h2>
+    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Profile & Synchronization</p>
+  </div>
+
+  <!-- Registration Card -->
+  <div class="bg-white rounded-[2rem] p-8 shadow-sm ring-1 ring-black/[0.01] text-center mb-8">
+    <div id="reg-status-badge" class="inline-flex px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-8 unregistered bg-orange-100 text-orange-700">
+      未登録
+    </div>
+
+    <div id="reg-info" class="mb-10 text-center">
+      <p id="reg-current-name" class="text-2xl font-black text-navy tracking-tighter leading-tight mb-2">お名前を登録してください</p>
+      <p class="text-sm text-gray-500 font-medium leading-relaxed">登録されたお名前で、<br>自動的に報告が記録されます。</p>
+    </div>
+
+    <div id="reg-form" class="space-y-6 text-left">
+      <div class="space-y-2">
+        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">苗字（全角）</label>
+        <input type="text" id="reg-last-name" placeholder="例：鈴木" 
+               class="w-full bg-apple border-2 border-transparent focus:border-navy focus:bg-white rounded-2xl p-4 text-lg font-bold outline-none transition-all placeholder:text-gray-300">
+      </div>
+      <div class="space-y-2">
+        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">名前（全角）</label>
+        <input type="text" id="reg-first-name" placeholder="例：一郎"
+               class="w-full bg-apple border-2 border-transparent focus:border-navy focus:bg-white rounded-2xl p-4 text-lg font-bold outline-none transition-all placeholder:text-gray-300">
+      </div>
+      <button class="w-full bg-navy text-white rounded-2xl py-5 font-black shadow-xl shadow-navy/20 active:scale-[0.98] transition-all" onclick="performRegistration()">
+        登録を完了する
+      </button>
+    </div>
+    
+    <button id="re-reg-btn" class="hidden w-full mt-6 py-4 rounded-2xl text-xs font-black text-gray-400 uppercase tracking-widest border-2 border-gray-50 active:scale-[0.98] transition-all" onclick="toggleRegForm()">
+      登録名を変更する
+    </button>
+  </div>
+
+  <!-- App Info Section -->
+  <div class="bg-white rounded-[2rem] p-8 shadow-sm ring-1 ring-black/[0.01]">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-1.5 h-6 bg-blue-500 rounded-full"></div>
+      <h4 class="text-sm font-black text-navy uppercase tracking-widest">System Information</h4>
+    </div>
+    
+    <p id="app-version-info" class="text-xs text-gray-500 font-bold leading-loose select-none active:opacity-50 transition-opacity">
+      VERSION: 2.7.5 (Enhanced UI)<br>
+      STATUS: <span class="text-green-500">REAL-TIME SYNC</span><br>
+      CORE: CLASP/V8 ENGINE
+    </p>
+
+    <div id="admin-secret-link" class="hidden mt-6 pt-6 border-t border-gray-50 animate-in slide-in-from-top-2 duration-500">
+      <a href="?mode=admin" target="_top" class="inline-flex items-center gap-2 px-4 py-2 bg-navy text-white text-[10px] font-black rounded-full uppercase tracking-widest shadow-lg shadow-navy/20 active:scale-95 transition-all">
+        ⚙️ 管理者モードに切り替える
+      </a>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      let adminTapCount = 0;
+      const versionEl = document.getElementById('app-version-info');
+      if (versionEl) {
+        versionEl.onclick = function() {
+          adminTapCount++;
+          if (adminTapCount >= 5) {
+            const link = document.getElementById('admin-secret-link');
+            if (link) link.classList.remove('hidden');
+            if (typeof showToast === 'function') showToast("管理者メニューを解放しました");
+            adminTapCount = 0;
+          }
+        };
+      }
+    })();
+  </script>
+</div>

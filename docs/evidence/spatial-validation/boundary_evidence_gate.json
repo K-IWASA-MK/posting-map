@@ -1,0 +1,42 @@
+{
+  "districtId": "MIE-03",
+  "proofs": [
+    {
+      "district": "MIE-03",
+      "municipality": "四日市市",
+      "source": "行政区割りデータ (総務省・三重県選挙管理委員会基準)",
+      "excludedAreas": [
+        "日永",
+        "日永東",
+        "日永西",
+        "笹川",
+        "楠町",
+        "内部",
+        "塩浜",
+        "塩浜本町",
+        "海蔵",
+        "三重",
+        "智積",
+        "桜",
+        "橋北",
+        "四郷",
+        "小山田",
+        "水沢",
+        "保々",
+        "下シノギ",
+        "平津",
+        "坂部",
+        "八河内"
+      ],
+      "includedAreas": [
+        "富田",
+        "富州原町",
+        "羽津"
+      ],
+      "boundaryVerified": true
+    }
+  ],
+  "gateStatus": "PASS",
+  "verifiedAt": "2026-07-25T00:35:24.677Z",
+  "verifier": "BoundaryEvidenceGateAgent"
+}

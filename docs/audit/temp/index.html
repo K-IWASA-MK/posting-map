@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>POSTING MAP</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: {
+              DEFAULT: '#1a237e',
+              light: '#283593',
+              dark: '#0d1642'
+            },
+            apple: '#f5f5f7'
+          },
+          fontFamily: {
+            sans: ['"Inter"', '"Noto Sans JP"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { -webkit-tap-highlight-color: transparent; }
+    .safe-top { padding-top: env(safe-area-inset-top); }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .animate-spin-custom { animation: spin 1s linear infinite; }
+    .nav-item.active { color: #1a237e; }
+    .nav-item.active span:first-child { transform: scale(1.2); }
+  </style>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="projects/posting-map/client-loader.js"></script>
+</head>
+<body class="bg-apple text-[#1d1d1f] font-sans antialiased overflow-hidden select-none">
+
+  <!-- Gateway / Splash -->
+  <div id="screen-gateway" class="hidden fixed inset-0 z-[1000] bg-white flex flex-col items-center justify-between py-16 px-8 text-center">
+    <div class="flex-1 flex flex-col items-center justify-center">
+      <div class="w-32 h-32 bg-white rounded-[2rem] shadow-2xl shadow-navy/10 flex items-center justify-center overflow-hidden mb-12 ring-1 ring-black/[0.02]">
+        <img src="https://area-management.github.io/posting-map-system/assets/icon180-v2.png?v=73" class="w-full h-full object-cover">
+      </div>
+      <h1 class="text-2xl font-black tracking-tight text-navy mb-4 uppercase">Posting Map</h1>
+      <p class="text-gray-500 font-medium leading-relaxed">
+        ホーム画面に追加してから<br>ご利用ください
+      </p>
+    </div>
+    <button onclick="forceStart()" class="w-full max-w-sm bg-navy hover:bg-navy-light text-white rounded-2xl py-5 text-lg font-bold shadow-xl shadow-navy/20 transition-all active:scale-[0.98]">
+      アプリを起動する
+    </button>
+  </div>
+
+  <!-- Main Shell -->
+  <div id="app-shell" class="hidden flex flex-col h-screen">
+    <header class="bg-white/80 backdrop-blur-xl border-b border-gray-100 safe-top z-50">
+      <div class="px-6 py-4 flex justify-between items-center">
+        <div class="flex flex-col">
+          <div class="text-xl font-black tracking-tighter leading-none">
+            <span class="text-navy">POSTING</span> <span class="text-blue-500">MAP</span>
+          </div>
+          <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Field Command</p>
+        </div>
+        <div id="header-sync" class="flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-full border border-green-100">
+          <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+          <span id="sync-pct" class="text-[11px] font-black text-green-700 tracking-tighter">0%</span>
+          <span class="text-[9px] font-bold text-green-600 tracking-widest">SYNC</span>
+        </div>
+      </div>
+    </header>
+
+    <main id="main-view" class="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-6 safe-bottom pb-32">
+      <!-- Dynamic Content -->
+    </main>
+
+    <!-- Bottom Nav (Floating) -->
+    <nav class="fixed bottom-6 left-6 right-6 bg-white/90 backdrop-blur-2xl rounded-full shadow-2xl border border-white/20 flex justify-around items-center p-2 z-[100] ring-1 ring-black/5">
+      <button id="nav-manual" onclick="switchTab('manual')" class="flex flex-col items-center justify-center w-16 py-2 transition-all nav-item active text-gray-300">
+        <span class="text-2xl mb-1 transition-transform duration-300">📖</span>
+        <span class="text-[9px] font-black uppercase tracking-tighter">Guide</span>
+      </button>
+      <button id="nav-area" onclick="switchTab('area')" class="flex flex-col items-center justify-center w-16 py-2 transition-all nav-item text-gray-300">
+        <span class="text-2xl mb-1 transition-transform duration-300">🗺️</span>
+        <span class="text-[9px] font-black uppercase tracking-tighter">Areas</span>
+      </button>
+      <button id="nav-settings" onclick="switchTab('settings')" class="flex flex-col items-center justify-center w-16 py-2 transition-all nav-item text-gray-300">
+        <span class="text-2xl mb-1 transition-transform duration-300">⚙️</span>
+        <span class="text-[9px] font-black uppercase tracking-tighter">Settings</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="fixed inset-0 bg-white/90 backdrop-blur-sm z-[10000] hidden flex flex-col items-center justify-center">
+    <div class="w-12 h-12 border-4 border-gray-100 border-t-navy rounded-full animate-spin-custom"></div>
+    <p id="loading-msg" class="mt-6 text-navy font-black tracking-tight">同期中...</p>
+  </div>
+
+  <div id="toast" class="fixed bottom-28 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full text-white text-sm font-bold shadow-2xl hidden z-[11000] whitespace-nowrap border border-white/10 transition-all"></div>
+
+  <script>
+    const API_URL = (window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.api) 
+      ? window.PMS_CLIENT_CONFIG.api.gasWebAppUrl 
+      : 'https://script.google.com/macros/s/AKfycbwgiOFU5iudUS6UscNU-MZhnxZJaqJHywVA9ivA-GE0uLe02fi7mmBU474lWa1TD7-R/exec';
+    
+    const LIFF_ID = (window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.line && window.PMS_CLIENT_CONFIG.line.liffId)
+      ? window.PMS_CLIENT_CONFIG.line.liffId
+      : "2010374196-bHBYo37e";
+
+    let appData = null;
+    let currentUser = null; // In-memory session state
+    let cachedDisplayName = localStorage.getItem('posting_display_name') || null;
+    if (cachedDisplayName) {
+      currentUser = { displayName: cachedDisplayName, name: cachedDisplayName };
+    }
+    let currentTab = 'settings';
+
+    async function initLiff() {
+      if (typeof liff === 'undefined') {
+        console.warn('[LIFF] SDK not loaded.');
+        return false;
+      }
+      try {
+        await liff.init({ liffId: LIFF_ID });
+        console.log('[LIFF] Init success with ID:', LIFF_ID);
+        if (liff.isLoggedIn()) {
+          const liffProfile = await liff.getProfile();
+          console.log('[LIFF] Profile loaded:', liffProfile);
+          if (liffProfile) {
+            currentUser = {
+              userId: liffProfile.userId,
+              displayName: liffProfile.displayName,
+              pictureUrl: liffProfile.pictureUrl || '',
+              name: liffProfile.displayName
+            };
+            localStorage.setItem('posting_display_name', liffProfile.displayName);
+            localStorage.removeItem('liff_profile');
+            localStorage.removeItem('posting_user');
+            
+            api('registerStaff', { 
+              lastName: liffProfile.displayName, 
+              firstName: 'LINE', 
+              lineUserId: liffProfile.userId 
+            }, 'POST').catch(err => console.error('[GAS Sync Error]', err));
+          }
+          return true;
+        } else {
+          if (liff.isInClient()) {
+            console.log('[LIFF] In LINE client. Automatic login...');
+            liff.login();
+          }
+        }
+      } catch (err) {
+        console.error('[LIFF] Init/Login Error:', err);
+      }
+      return false;
+    }
+
+    function loginWithLine() {
+      if (typeof liff !== 'undefined' && liff.init) {
+        if (!liff.isLoggedIn()) {
+          liff.login();
+        } else {
+          initLiff().then(() => renderView());
+        }
+      } else {
+        showToast('LINE SDKが読み込まれていません', true);
+      }
+    }
+
+    async function api(action, params = {}, method = 'GET') {
+      const url = new URL(API_URL);
+      url.searchParams.append('action', action);
+      try {
+        const options = { method: method, redirect: 'follow' };
+        if (method === 'POST') {
+          options.body = JSON.stringify({ action, ...params });
+        } else {
+          Object.keys(params).forEach(k => url.searchParams.append(k, params[k]));
+        }
+        const response = await fetch(url, options);
+        return await response.json();
+      } catch (err) { return null; }
+    }
+
+    function init() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const isOAuthCallback = urlParams.has('code') || urlParams.has('liff.state');
+      const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+      if (isOAuthCallback || isStandalone) {
+        startApp();
+      } else {
+        document.getElementById('screen-gateway').classList.remove('hidden');
+      }
+    }
+
+    async function startApp() {
+      document.getElementById('screen-gateway').classList.add('hidden');
+      document.getElementById('app-shell').classList.remove('hidden');
+      showLoading('LINE認証確認中...');
+      await initLiff();
+      switchTab(currentUser ? 'area' : 'settings');
+      showLoading('同期中...');
+      const data = await api('getAppData');
+      hideLoading();
+      if (data) {
+        appData = data;
+        document.getElementById('sync-pct').textContent = currentUser ? '100%' : '0%';
+        renderView();
+      } else {
+        showToast('通信エラー: 再試行してください', true);
+        renderView();
+      }
+    }
+
+    function forceStart() { startApp(); }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      const target = document.getElementById('nav-' + tab);
+      if (target) target.classList.add('active');
+      renderView();
+    }
+
+    function renderView() {
+      const main = document.getElementById('main-view');
+      if (!main) return;
+      main.innerHTML = '';
+      if (currentTab === 'settings') {
+        renderSettings(main);
+      } else if (currentTab === 'area') {
+        renderAreaList(main);
+      } else if (currentTab === 'manual') {
+        main.innerHTML = `
+          <div class="bg-white rounded-[2rem] shadow-sm p-12 text-center flex flex-col items-center ring-1 ring-black/[0.01]">
+            <span class="text-5xl mb-6">📖</span>
+            <h2 class="text-2xl font-black text-navy mb-3 tracking-tight">準備中です</h2>
+            <p class="text-gray-500 font-medium leading-relaxed">マニュアルコンテンツを現在作成しています。<br>しばらくお待ちください。</p>
+          </div>
+        `;
+      }
+    }
+
+    function renderSettings(main) {
+      if (!currentUser) {
+        main.innerHTML = `
+          <h2 class="text-2xl font-black text-navy mb-6 tracking-tight">ログイン・認証</h2>
+          <div class="bg-white rounded-[2rem] p-8 shadow-sm ring-1 ring-black/[0.01] space-y-6">
+            <div class="inline-flex px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-orange-100 text-orange-700">Unauthenticated</div>
+            
+            <button onclick="loginWithLine()" class="w-full bg-[#06C755] hover:bg-[#05b34c] text-white rounded-2xl py-5 font-black text-lg shadow-xl shadow-green-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+              <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 5.92 2 10.75c0 4.31 3.55 7.92 8.35 8.61.32.07.76.22.87.5.12.31.08.79.04 1.1-.06.49-.28 1.95-.31 2.37-.05.67.31.66.65.43.34-.23 5.4-3.18 7.37-5.44C20.66 16.53 22 13.82 22 10.75 22 5.92 17.52 2 12 2z"/></svg>
+              LINEでログイン
+            </button>
+
+            <div class="relative flex py-2 items-center">
+              <div class="flex-grow border-t border-gray-200"></div>
+              <span class="flex-shrink mx-4 text-xs font-bold text-gray-400">または手動で登録</span>
+              <div class="flex-grow border-t border-gray-200"></div>
+            </div>
+
+            <div class="space-y-4">
+              <div class="space-y-1">
+                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">苗字（全角）</label>
+                <input type="text" id="reg-last" placeholder="例：鈴木" class="w-full bg-apple border-2 border-transparent focus:border-navy focus:bg-white rounded-2xl p-4 text-lg font-bold outline-none transition-all placeholder:text-gray-300">
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">名前（全角）</label>
+                <input type="text" id="reg-first" placeholder="例：一郎" class="w-full bg-apple border-2 border-transparent focus:border-navy focus:bg-white rounded-2xl p-4 text-lg font-bold outline-none transition-all placeholder:text-gray-300">
+              </div>
+              <button onclick="handleRegister()" class="w-full bg-navy text-white rounded-2xl py-4 font-black shadow-xl shadow-navy/20 active:scale-[0.98] transition-all">手動登録を完了する</button>
+            </div>
+          </div>
+        `;
+      } else {
+        const avatar = currentUser.pictureUrl
+          ? `<img src="${currentUser.pictureUrl}" class="w-20 h-20 rounded-full mx-auto mb-4 border-2 border-green-500 shadow-md object-cover">`
+          : `<div class="w-20 h-20 rounded-full bg-navy/10 text-navy font-black text-2xl flex items-center justify-center mx-auto mb-4">${(currentUser.name || 'U').charAt(0)}</div>`;
+
+        main.innerHTML = `
+          <h2 class="text-2xl font-black text-navy mb-6 tracking-tight">アカウント設定</h2>
+          <div class="bg-white rounded-[2rem] p-10 shadow-sm text-center ring-1 ring-black/[0.01]">
+            <div class="inline-flex px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-green-100 text-green-700 mb-6">Authenticated</div>
+            ${avatar}
+            <h3 class="text-3xl font-black text-navy mb-2 tracking-tighter">${currentUser.displayName || currentUser.name} 様</h3>
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-8 break-all">LINE User ID: ${currentUser.userId || currentUser.id}</p>
+            <button onclick="logout()" class="text-xs font-black text-red-400 uppercase tracking-widest border-b-2 border-red-50/50 hover:text-red-600 transition-colors">ログアウト</button>
+          </div>
+        `;
+      }
+    }
+
+    function renderAreaList(main) {
+      if (!appData) {
+        main.innerHTML = `<div class="bg-white rounded-[2rem] p-12 text-center shadow-sm"><p class="text-gray-400 font-bold mb-6">データを同期しています...</p><button onclick="startApp()" class="text-navy font-black border-b-2 border-navy/20">再試行する</button></div>`;
+        return;
+      }
+      const list = appData.areas.map(a => `
+        <div class="bg-white rounded-3xl p-6 flex items-center shadow-sm border border-gray-50 active:scale-[0.98] transition-all ring-1 ring-black/[0.01]">
+          <div class="w-3 h-3 rounded-full mr-5 ${a.progress >= 100 ? 'bg-green-500 shadow-lg shadow-green-200' : a.progress > 0 ? 'bg-orange-400 shadow-lg shadow-orange-200' : 'bg-gray-200'}"></div>
+          <div class="flex-1">
+            <div class="text-lg font-black text-navy tracking-tight leading-tight">${a.name}</div>
+            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Target Area</div>
+          </div>
+          <div class="text-right">
+            <div class="text-xl font-black text-navy leading-none">${a.progress}<span class="text-[10px] ml-0.5">%</span></div>
+            <div class="w-16 h-1 bg-gray-100 rounded-full mt-2 overflow-hidden">
+              <div class="h-full ${a.progress >= 100 ? 'bg-green-500' : 'bg-orange-400'}" style="width:${a.progress}%"></div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      main.innerHTML = `<h2 class="text-2xl font-black text-navy mb-6 tracking-tight">配布エリア一覧</h2><div class="space-y-4">${list}</div>`;
+    }
+
+    async function handleRegister() {
+      const last = document.getElementById('reg-last').value;
+      const first = document.getElementById('reg-first').value;
+      if (!last || !first) return showToast('苗字と名前を入力してください', true);
+      showLoading('登録中...');
+      const res = await api('registerStaff', { lastName: last, firstName: first }, 'POST');
+      hideLoading();
+      if (res && res.success) {
+        currentUser = { id: res.id, name: res.name };
+        localStorage.setItem('posting_user', JSON.stringify(currentUser));
+        showToast('登録が完了しました');
+        startApp();
+      } else { showToast('登録に失敗しました', true); }
+    }
+
+    function showLoading(msg) { document.getElementById('loading-msg').textContent = msg; document.getElementById('loading-overlay').classList.remove('hidden'); }
+    function hideLoading() { document.getElementById('loading-overlay').classList.add('hidden'); }
+    function showToast(msg, isErr=false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; 
+      t.className = `fixed bottom-28 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full text-white text-sm font-bold shadow-2xl z-[11000] whitespace-nowrap border border-white/10 transition-all ${isErr ? 'bg-red-500' : 'bg-navy'}`;
+      t.classList.remove('hidden');
+      setTimeout(() => t.classList.add('hidden'), 3000);
+    }
+    function logout() { if(confirm("ログアウトしますか？")){localStorage.removeItem('posting_display_name'); localStorage.removeItem('posting_user'); localStorage.removeItem('liff_profile'); currentUser=null; startApp();} }
+    init();
+  </script>
+</body>
+</html>

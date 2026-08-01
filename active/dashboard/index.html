@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <!-- LINEブラウザキャッシュ防止 -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>POSTING MAP</title>
+  <style>.hidden { display: none !important; }</style>
+  <script>
+    // 「早期エラーハンドラ」: app.js 読み込み前のエラーを捕捉するために定義。
+    // app.js が読み込まれると同内容で上書きされる（正常動作）。
+    window.logDebug = function(msg) { console.log("[DEBUG]", msg); };
+    window.onerror = function(message, source, lineno, colno, error) {
+      if (message === "Script error.") return false;
+      window.logDebug(`ERROR: ${message} at ${source}:${lineno}:${colno}`);
+      return false;
+    };
+    window.onunhandledrejection = function(event) {
+      window.logDebug(`UNHANDLED PROMISE: ${event.reason}`);
+    };
+  </script>
+  <!-- Force Refresh: v421 -->
+  <link rel="stylesheet" href="tailwind-utils.css?v=434">
+  <!-- A: favicon 404解消 (-191ms) -->
+  <link rel="icon" href="./assets/icon180-v2.png" type="image/png">
+  <link rel="apple-touch-icon" href="./assets/icon180-v2.png?v=258">
+  <!-- B: Google Fonts preconnect (-30ms) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+
+  <script>
+    // 画面の意図しないスクロールやバウンスを物理的に防止（スクロール可能なメインコンテンツ領域等のみ許可）
+    document.addEventListener('touchmove', function(e) {
+      const scrollable = e.target.closest('#content, #debug-log, #debug-log-content, #id-info-body-container, #detail-modal-content');
+      if (scrollable) return;
+      e.preventDefault();
+    }, { passive: false });
+  </script>
+  <script src="./client-loader.js"></script>
+  <script defer src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <link rel="stylesheet" href="./style.css?v=444">
+</head>
+<body class="bg-[#000000] text-white font-sans antialiased overflow-hidden select-none transition-colors duration-500">
+
+
+
+
+  <div id="loading" class="fixed top-0 left-0 w-full h-[100dvh] z-[5000] flex flex-col items-center justify-center bg-[#000000] transition-opacity duration-700">
+    <!-- App icon -->
+    <div class="w-16 h-16 bg-white/5 backdrop-blur-2xl rounded-[1.5rem] border border-white/10 flex items-center justify-center overflow-hidden mb-8 shadow-xl">
+      <img src="./assets/icon180-v2.png?v=257" class="w-full h-full object-cover rounded-[1.3rem]" loading="eager">
+    </div>
+    <!-- Status label -->
+    <p id="loading-status" style="transition: opacity 0.2s ease;" class="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">CONNECTING...</p>
+    <!-- Progress bar -->
+    <div class="mt-5 w-48 h-[2px] bg-white/5 rounded-full overflow-hidden">
+      <div id="loading-bar" style="width: 8%; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 0 8px rgba(37,99,235,0.6); background: #2563eb;" class="h-full rounded-full"></div>
+    </div>
+  </div>
+
+  <!-- 3. MAIN APP -->
+  <div id="app" class="fixed top-0 left-0 w-full h-[100dvh] z-[2000] flex flex-col bg-[#000000] opacity-0 transition-opacity duration-300 hidden">
+    <header class="safe-top px-6 pt-8 pb-4 flex items-center">
+      <div style="background: #1C1C1E; border: 1px solid rgba(255,255,255,0.1);" class="px-6 py-3 rounded-full flex items-center justify-between text-xs font-black tracking-tight w-full">
+        <div class="flex items-center gap-3">
+          <span class="text-white/40">全体進捗</span>
+          <span id="header-count" class="text-white/70 font-mono whitespace-pre">(  0/0)</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1.5">
+            <span id="sync-text" class="text-[8px] font-black uppercase tracking-[0.2em] text-[#22c55e] transition-all duration-300">ONLINE</span>
+            <div id="sync-status" class="w-2 h-2 bg-[#22c55e] rounded-full shadow-[0_0_8px_#22c55e] animate-soft-pulse transition-all duration-300"></div>
+          </div>
+          <span id="header-pct" class="text-[#2563eb] font-mono">0%</span>
+        </div>
+      </div>
+    </header>
+
+    <main id="content" class="flex-1 overflow-y-auto hide-scrollbar px-6 overscroll-y-contain">
+      <!-- AREAS PAGE -->
+      <section id="page-areas" class="page space-y-8">
+        <div id="area-list" class="space-y-6"></div>
+      </section>
+
+      <!-- DETAIL PAGE -->
+      <section id="page-detail" class="page hidden space-y-8">
+        <div class="flex items-center gap-4 mb-4">
+          <button onclick="switchPage('areas')" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold">‹</button>
+        </div>
+        <div id="detail-list" class="space-y-8" style="padding-bottom: 160px;"></div>
+      </section>
+
+      <!-- AUTH/SETTINGS PAGE -->
+      <section id="page-settings" class="page hidden space-y-8">
+        <div id="settings-content" class="space-y-8">
+          <!-- Dynamic Content (Card 1 or Card 2) -->
+        </div>
+      </section>
+
+      <!-- RANKING PAGE (NEW) -->
+      <section id="page-ranking" class="page hidden space-y-8">
+        <div id="ranking-list" class="space-y-6" style="padding-bottom: 160px;">
+          <!-- ランキングカードが動的に挿入されます -->
+        </div>
+      </section>
+
+      <!-- STORAGE REGISTER PAGE -->
+      <section id="page-storage-register" class="page hidden space-y-8" style="padding-bottom: 160px;">
+        <!-- Section Header Card -->
+        <div style="border: 1px solid rgba(37, 99, 235, 0.35); box-shadow: inset 0 0 15px rgba(37,99,235,0.08), 0 0 25px rgba(37,99,235,0.12);" class="premium-glass py-5 px-6 flex flex-col items-center justify-center text-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-[#2563eb]/10 border border-[#2563eb]/20 flex items-center justify-center shadow-lg shadow-[#2563eb]/10 mb-0.5">
+            <span class="text-sm">📦</span>
+          </div>
+          <div>
+            <h3 class="text-sm font-black tracking-wider text-white">チラシ保管庫</h3>
+            <p class="text-[10px] font-bold text-[#2563eb] mt-0.5 uppercase tracking-widest font-mono">STOCK REGISTRATION</p>
+          </div>
+        </div>
+
+        <!-- ID Card (Read-Only Staff Profile) -->
+        <div class="premium-glass py-3 px-6 space-y-1">
+          <span class="text-[10px] font-black uppercase tracking-widest text-[#22c55e] font-mono block text-center">公式配布員情報</span>
+          <div class="flex items-center justify-between">
+            <span id="storage-register-staff-id" class="text-base font-black text-white/80 font-mono">ID: ---</span>
+            <span id="storage-register-staff-name" class="text-base font-black text-white/80">---</span>
+          </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="premium-glass p-6 space-y-6">
+          <span class="text-[10px] font-black uppercase tracking-widest text-[#22c55e] font-mono block text-center">保管情報の登録</span>
+          
+          <!-- Dropdown -->
+          <div class="space-y-2">
+            <label class="text-[10px] font-bold text-white/40 tracking-wider">保管場所（市名）</label>
+            <select id="storage-register-location" class="w-full h-14 bg-[#1C1C1E] border border-white/10 rounded-2xl px-4 text-sm font-bold text-white focus:outline-none focus:border-[#2563eb] transition-colors">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+
+          <!-- Sheet Count Input -->
+          <div class="space-y-2">
+            <label class="text-[10px] font-bold text-white/40 tracking-wider">保管枚数 (枚)</label>
+            <input id="storage-register-count" type="number" pattern="[0-9]*" inputmode="numeric" placeholder="" class="w-full h-14 bg-[#1C1C1E] border border-white/10 rounded-2xl px-4 text-lg font-black text-white focus:outline-none focus:border-[#2563eb] transition-colors text-center font-mono">
+          </div>
+
+          <!-- Submit Button -->
+          <button id="btn-storage-register-submit" onclick="submitFlyerStock()" class="btn-neu w-full bg-[#2563eb] text-white rounded-2xl py-4 text-base font-black shadow-xl uppercase tracking-wider">在庫を登録する</button>
+          
+          <!-- Feedback Message -->
+          <div id="storage-register-message" class="hidden text-center text-xs font-bold text-[#22c55e]"></div>
+        </div>
+      </section>
+
+      <!-- STORAGE LIST PAGE -->
+      <section id="page-storage-list" class="page hidden space-y-8" style="padding-bottom: 160px;">
+        <!-- Section Header Card -->
+        <div style="border: 1px solid rgba(37, 99, 235, 0.35); box-shadow: inset 0 0 15px rgba(37,99,235,0.08), 0 0 25px rgba(37,99,235,0.12);" class="premium-glass py-5 px-6 flex flex-col items-center justify-center text-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-[#2563eb]/10 border border-[#2563eb]/20 flex items-center justify-center shadow-lg shadow-[#2563eb]/10 mb-0.5">
+            <span class="text-sm">📊</span>
+          </div>
+          <div>
+            <h3 class="text-sm font-black tracking-wider text-white">保管状況一覧</h3>
+            <p class="text-[10px] font-bold text-[#2563eb] mt-0.5 uppercase tracking-widest font-mono">FLYER STOCK INVENTORY</p>
+          </div>
+        </div>
+
+        <!-- Grouped List Container -->
+        <div id="storage-list-container" class="space-y-6">
+          <!-- Group cards dynamically populated -->
+        </div>
+      </section>
+    </main>
+
+    <!-- 下ナビ：iOSライクなガラス感に調整 -->
+    <nav id="bottom-nav" style="bottom: calc(env(safe-area-inset-bottom) + 1rem); display: none;" class="fixed left-1/2 -translate-x-1/2 w-[90%] max-w-md z-[4000]">
+      <!-- Tier 1 Container -->
+      <div id="nav-tier-1" style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);" class="rounded-[2.5rem] p-2 flex justify-around items-center h-[90px] relative shadow-2xl">
+        <button data-page="areas" onclick="navigateToAreaTab()" class="nav-btn flex flex-col items-center gap-1 flex-1 transition-all"><div class="text-xl">🗺️</div><span class="text-[10px] font-black uppercase tracking-widest text-white">エリア</span></button>
+        <button data-page="ranking" onclick="switchPage('ranking')" class="nav-btn flex flex-col items-center gap-1 flex-1 transition-all opacity-40"><div class="text-xl">🏆</div><span class="text-[10px] font-black uppercase tracking-widest text-white/40">ランキング</span></button>
+        <button data-page="settings" onclick="switchPage('settings')" class="nav-btn flex flex-col items-center gap-1 flex-1 transition-all opacity-40"><div class="text-xl">👤</div><span class="text-[10px] font-black uppercase tracking-widest text-white/40">ID</span></button>
+        <button data-page="next" onclick="toggleNavTier(2)" class="nav-btn flex flex-col items-center gap-1 flex-1 transition-all opacity-40"><div class="text-xl">⚙️</div><span class="text-[10px] font-black uppercase tracking-widest text-white/40">次へ</span></button>
+      </div>
+      <!-- Tier 2 Container -->
+      <div id="nav-tier-2" style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);" class="rounded-[2.5rem] p-2 flex justify-around items-center h-[90px] relative shadow-2xl hidden">
+        <button data-page="storage-register" onclick="switchPage('storage-register')" class="nav-btn flex flex-col items-center gap-1 flex-1 transition-all opacity-40"><div class="text-xl">📦</div><span class="text-[10px] font-black uppercase tracking-widest text-white/40">在庫登録</span></button>
+        <button data-page="storage-list" onclick="switchPage('storage-list')" class="nav-btn flex flex-col items-center gap-1 flex-1 transition-all opacity-40"><div class="text-xl">📊</div><span class="text-[10px] font-black uppercase tracking-widest text-white/40">在庫一覧</span></button>
+        <button data-page="back" onclick="backToTier1()" class="nav-btn flex flex-col items-center gap-1 flex-1 transition-all opacity-40"><div class="text-xl">↩️</div><span class="text-[10px] font-black uppercase tracking-widest text-white/40">戻る</span></button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- 4. CUSTOM NUMPAD MODAL -->
+  <div id="numpad-modal" class="fixed inset-0 z-[5000] bg-black/60 backdrop-blur-sm flex items-end justify-center transition-all duration-300 opacity-0 pointer-events-none">
+    <div style="padding-bottom: calc(env(safe-area-inset-bottom) + 2rem);" class="w-full max-w-md bg-[#0c0c0e]/95 backdrop-blur-2xl rounded-t-[2.5rem] border-t border-white/10 p-8 transform translate-y-full transition-transform duration-300 space-y-6">
+      <div class="flex justify-between items-center">
+        <span class="text-[10px] font-black uppercase tracking-widest text-white/40">配布枚数入力</span>
+        <button id="numpad-close" onclick="closeNumpad()" class="text-sm font-bold text-[#2563eb]">キャンセル</button>
+      </div>
+      <div class="flex justify-center items-baseline py-4 border-b border-white/5">
+        <div id="numpad-display" class="text-5xl font-black text-white tracking-tighter">0</div>
+        <span class="text-sm font-bold text-white/60 ml-2">枚</span>
+      </div>
+      <div class="grid grid-cols-3 gap-4">
+        <button onclick="pressNum(1)" class="numpad-key">1</button>
+        <button onclick="pressNum(2)" class="numpad-key">2</button>
+        <button onclick="pressNum(3)" class="numpad-key">3</button>
+        <button onclick="pressNum(4)" class="numpad-key">4</button>
+        <button onclick="pressNum(5)" class="numpad-key">5</button>
+        <button onclick="pressNum(6)" class="numpad-key">6</button>
+        <button onclick="pressNum(7)" class="numpad-key">7</button>
+        <button onclick="pressNum(8)" class="numpad-key">8</button>
+        <button onclick="pressNum(9)" class="numpad-key">9</button>
+        <button onclick="pressNum('C')" class="numpad-key text-red-500 font-bold">C</button>
+        <button onclick="pressNum(0)" class="numpad-key">0</button>
+        <button onclick="pressNum('OK')" class="numpad-key bg-[#2563eb] text-white font-black shadow-[0_0_15px_rgba(37,99,235,0.4)]">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. ID INFO MODAL -->
+  <div id="id-info-modal" class="fixed inset-0 z-[5000] bg-black/60 backdrop-blur-sm flex items-end justify-center transition-all duration-300 opacity-0 pointer-events-none" onclick="closeIdInfoModal()">
+    <div style="padding-bottom: calc(env(safe-area-inset-bottom) + 2rem);" class="w-full max-w-md bg-[#0c0c0e]/95 backdrop-blur-2xl rounded-t-[2.5rem] border-t border-white/10 p-8 transform translate-y-full transition-transform duration-300 flex flex-col items-center text-center space-y-4 max-h-[50dvh]" onclick="event.stopPropagation()">
+      <div onclick="closeIdInfoModal(); event.stopPropagation();" class="py-3 px-6 cursor-pointer shrink-0 -mt-3 flex items-center justify-center">
+        <div class="w-12 h-1 bg-white/10 rounded-full"></div>
+      </div>
+      
+      <!-- タイトル (上部に固定) -->
+      <h4 id="id-info-title" class="font-black text-white text-[12px] uppercase tracking-wider shrink-0 w-full text-left"></h4>
+      
+      <!-- 本文 (このコンテナ内のみスクロール) -->
+      <div id="id-info-body-container" class="w-full text-left overflow-y-auto hide-scrollbar flex-1 pr-1 overscroll-y-contain">
+        <p id="id-info-body" class="leading-relaxed text-xs text-white/40"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. DETAIL ACTION MODAL (3層目の詳細操作カード) -->
+  <div id="detail-modal" class="fixed inset-0 z-[4500] bg-black/60 backdrop-blur-sm flex items-end justify-center transition-all duration-300 opacity-0 pointer-events-none" onclick="closeDetailModal()">
+    <div style="padding-bottom: calc(env(safe-area-inset-bottom) + 1.5rem);" class="w-full max-w-md max-h-[80dvh] bg-[#0c0c0e]/95 backdrop-blur-2xl rounded-t-[2.5rem] border-t border-white/10 px-6 pt-4 pb-0 overflow-hidden transform translate-y-full transition-transform duration-300 flex flex-col space-y-4" onclick="event.stopPropagation()">
+      <div onclick="closeDetailModal(); event.stopPropagation();" class="py-2 px-6 cursor-pointer shrink-0 flex items-center justify-center">
+        <div class="w-12 h-1 bg-white/10 rounded-full"></div>
+      </div>
+      <div id="detail-modal-content" class="space-y-6 overflow-y-auto hide-scrollbar flex-1 pr-1 pb-6 overscroll-y-contain">
+        <!-- Dynamically rendered -->
+      </div>
+    </div>
+  </div>
+
+
+  <input type="file" id="camera-input" accept="image/*" capture="environment" class="hidden">
+  <script defer src="./db.js?v=521"></script>
+  <script defer src="./components/card.js?v=521"></script>
+  <script defer src="./components/badge.js?v=521"></script>
+  <script defer src="./components/progress.js?v=521"></script>
+  <script defer src="./components/navigation.js?v=521"></script>
+  <script defer src="./components/staff.js?v=521"></script>
+  <script defer src="./components/area.js?v=521"></script>
+  <script defer src="./components/ranking.js?v=521"></script>
+  <script defer src="./components/list-item.js?v=521"></script>
+  <script defer src="./app.js?v=521"></script>
+  <script defer src="./render.js?v=521"></script>
+</body>
+</html>

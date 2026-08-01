@@ -1,0 +1,113 @@
+{
+  "districtId": "MIE-03",
+  "analyzedMunicipalities": [
+    {
+      "municipalityName": "四日市市",
+      "pattern": "PATTERN_B_SPLIT",
+      "isMultiDistrict": true,
+      "isPartialBoundary": true,
+      "hasPostMergerDistricts": true,
+      "hasNameConfusionRisk": false,
+      "excludedSubdistricts": [
+        "日永",
+        "日永東",
+        "日永西",
+        "笹川",
+        "楠町",
+        "内部",
+        "塩浜",
+        "塩浜本町",
+        "海蔵",
+        "三重",
+        "智積",
+        "桜",
+        "橋北",
+        "四郷",
+        "小山田",
+        "水沢",
+        "保々",
+        "下シノギ",
+        "平津",
+        "坂部",
+        "八河内"
+      ]
+    },
+    {
+      "municipalityName": "桑名市",
+      "pattern": "PATTERN_A_WHOLE",
+      "isMultiDistrict": false,
+      "isPartialBoundary": false,
+      "hasPostMergerDistricts": false,
+      "hasNameConfusionRisk": true,
+      "excludedSubdistricts": []
+    },
+    {
+      "municipalityName": "いなべ市",
+      "pattern": "PATTERN_A_WHOLE",
+      "isMultiDistrict": false,
+      "isPartialBoundary": false,
+      "hasPostMergerDistricts": false,
+      "hasNameConfusionRisk": false,
+      "excludedSubdistricts": []
+    },
+    {
+      "municipalityName": "木曽岬町",
+      "pattern": "PATTERN_A_WHOLE",
+      "isMultiDistrict": false,
+      "isPartialBoundary": false,
+      "hasPostMergerDistricts": false,
+      "hasNameConfusionRisk": false,
+      "excludedSubdistricts": []
+    },
+    {
+      "municipalityName": "東員町",
+      "pattern": "PATTERN_A_WHOLE",
+      "isMultiDistrict": false,
+      "isPartialBoundary": false,
+      "hasPostMergerDistricts": false,
+      "hasNameConfusionRisk": false,
+      "excludedSubdistricts": []
+    },
+    {
+      "municipalityName": "菰野町",
+      "pattern": "PATTERN_A_WHOLE",
+      "isMultiDistrict": false,
+      "isPartialBoundary": false,
+      "hasPostMergerDistricts": false,
+      "hasNameConfusionRisk": false,
+      "excludedSubdistricts": []
+    },
+    {
+      "municipalityName": "朝日町",
+      "pattern": "PATTERN_A_WHOLE",
+      "isMultiDistrict": false,
+      "isPartialBoundary": false,
+      "hasPostMergerDistricts": false,
+      "hasNameConfusionRisk": false,
+      "excludedSubdistricts": []
+    },
+    {
+      "municipalityName": "川越町",
+      "pattern": "PATTERN_A_WHOLE",
+      "isMultiDistrict": false,
+      "isPartialBoundary": false,
+      "hasPostMergerDistricts": false,
+      "hasNameConfusionRisk": false,
+      "excludedSubdistricts": []
+    }
+  ],
+  "wholeMunicipalities": [
+    "桑名市",
+    "いなべ市",
+    "木曽岬町",
+    "東員町",
+    "菰野町",
+    "朝日町",
+    "川越町"
+  ],
+  "splitMunicipalities": [
+    "四日市市"
+  ],
+  "gateStatus": "PASS",
+  "evaluatedAt": "2026-07-25T00:35:24.676Z"
+}

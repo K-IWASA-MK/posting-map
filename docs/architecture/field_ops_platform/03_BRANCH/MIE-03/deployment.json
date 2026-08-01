@@ -1,0 +1,38 @@
+{
+  "branchId": "MIE-03",
+  "masterVersion": "1.0.0",
+  "createdFrom": "POSTING MAP MASTER",
+  "district": {
+    "id": "MIE-03",
+    "name": "三重第3支部",
+    "spreadsheetTitle": "MIE-03 v1",
+    "displayName": "三重第3支部"
+  },
+  "resources": {
+    "spreadsheetId": "1xQUvlCaUO103rjSGmdcFQQFkukodG4Dg9mS_teWT7uA",
+    "spreadsheetUrl": "https://docs.google.com/spreadsheets/d/1xQUvlCaUO103rjSGmdcFQQFkukodG4Dg9mS_teWT7uA/edit",
+    "storageFolderId": "1c0BeYd_n_Jofiar1wGl4loGLQ3WfMfKJ",
+    "scriptId": "158Avw8hAtZx-c9yW10DE0NzB1NYngwv31eroqn-IAmHh_eKHN_fR58sa",
+    "webAppUrl": "https://script.google.com/macros/s/AKfycbwgiOFU5iudUS6UscNU-MZhnxZJaqJHywVA9ivA-GE0uLe02fi7mmBU474lWa1TD7-R/exec",
+    "googleDrive": {
+      "rootFolderId": "1FfcVEQjod--rZSucOPFJD2DJ58hV650_",
+      "branchFolderId": "1c0BeYd_n_Jofiar1wGl4loGLQ3WfMfKJ",
+      "url": "https://drive.google.com/drive/folders/1c0BeYd_n_Jofiar1wGl4loGLQ3WfMfKJ"
+    }
+  },
+  "provisioning": {
+    "phase": "Phase 2-1",
+    "masterVersion": "1.0.0",
+    "copiedFromMaster": "POSTING MAP MASTER",
+    "createdAt": "2026-07-22T00:00:00.000Z",
+    "createdBy": "CEO/AI Governance",
+    "status": "BRANCH_CREATED_READY_FOR_DATA"
+  },
+  "uiConfig": {
+    "spreadsheetTitle": "MIE-03 v1",
+    "displayName": "三重第3支部",
+    "dashboardTitle": "三重第3支部 ポスティングダッシュボード",
+    "pdfTitle": "三重第3支部 配布完了報告書",
+    "lineNotificationPrefix": "[三重第3支部]"
+  }
+}

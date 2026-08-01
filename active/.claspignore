@@ -1,0 +1,9 @@
+**/*.bak
+**/*.gs_old
+**/*.tmp
+**/*.txt
+node_modules/
+package.json
+package-lock.json
+active/dashboard/**
+dashboard/**

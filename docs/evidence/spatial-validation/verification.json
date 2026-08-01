@@ -1,0 +1,27 @@
+{
+  "agent": "Address Extraction AI",
+  "version": "2.3.0",
+  "result": "SUCCESS",
+  "verified": true,
+  "verifiedAt": "2026-07-21T08:07:08.302Z",
+  "input": {
+    "districtProfile": "master/district_profile.json"
+  },
+  "workspace": {
+    "root": "FIELD_OPERATIONS_PLATFORM",
+    "branch": "03_BRANCH",
+    "prefecture": "三重県",
+    "district": "三重第3区"
+  },
+  "outputs": [
+    "master/address_database.json",
+    "logs/verification.json"
+  ],
+  "artifacts": [
+    {
+      "file": "master/address_database.json",
+      "size": 4693,
+      "sha256": "c9c82c5cea4e7b8b64f0658c50a6bf79385cfb5b98389331992fe9ab4e740192"
+    }
+  ]
+}
