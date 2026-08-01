@@ -7,14 +7,14 @@ Status: SSOT
 **Production の Web App URL はシステム資産である。**
 
 更新対象は URL ではなく、Deployment のコードのみとする。
-AI社員は URL を変更してはならない。
+URL を変更してはならない。
 
 ---
 
 ## Purpose
 
 本番環境の Script ID・Deployment ID・Web App URL を一元管理する。
-AI社員は本ファイルを唯一の正しい情報源（SSOT）として参照すること。
+本ファイルを唯一の正しい情報源（SSOT）として参照すること。
 
 ---
 
@@ -30,7 +30,7 @@ AI社員は本ファイルを唯一の正しい情報源（SSOT）として参�
 
 ## Standard Deployment Procedure (SOP)
 
-AI社員は「知っている」ではなく「手順通り実行する」こと。
+「知っている」ではなく「手順通り実行する」こと。
 
 1. Script ID を確認
 2. `clasp login` 状態を確認
@@ -45,7 +45,7 @@ AI社員は「知っている」ではなく「手順通り実行する」こと
 
 ## Emergency Prohibitions
 
-AI社員は以下を禁止する。
+以下を禁止する。
 
 - Deployment ID を新規作成しない（`clasp deploy` のみの実行禁止）
 - Web App URL を変更しない
@@ -57,7 +57,7 @@ AI社員は以下を禁止する。
 
 ## Deployment Report Template
 
-デプロイ完了後、AI社員は必ず以下のフォーマットを用いて完了報告を行うこと。
+デプロイ完了後、必ず以下のフォーマットを用いて完了報告を行うこと。
 
 ```text
 ## Deployment Report

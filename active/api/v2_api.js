@@ -2343,7 +2343,7 @@ class ServiceIdentityProvider {
     }
     if (serviceAuth === 'valid-service-key') {
       const context = new AuthenticationContext({
-        identityId: 'service-aios-bridge-stub',
+        identityId: 'service-internal-stub',
         identityType: 'SERVICE',
         authenticationMethod: 'INTERNAL_SERVICE',
         authenticated: true,
@@ -2563,7 +2563,7 @@ class RoleResolver {
       return 'VIEWER';
     }
     const id = authContext.identityId;
-    if (id === 'service-aios-bridge-stub') {
+    if (id === 'service-internal-stub') {
       return 'SYSTEM';
     }
     if (id === 'user-api-key-stub') {
@@ -2728,7 +2728,7 @@ class LicenseException extends ApiException {
 class EditionResolver {
   resolve(authContext) {
     const id = authContext.identityId;
-    if (id === 'service-aios-bridge-stub') {
+    if (id === 'service-internal-stub') {
       return 'ENTERPRISE';
     }
     if (id === 'user-api-key-stub') {
@@ -2947,12 +2947,6 @@ FeatureRegistry.registry = {
     requiredPermission: 'READ',
     featureToggle: 'mapbox'
   }),
-  AIOS_BRIDGE: new FeaturePolicy({
-    requiredEdition: 'ENTERPRISE',
-    requiredRole: 'SYSTEM',
-    requiredPermission: 'ADMIN',
-    featureToggle: 'aiosBridge'
-  }),
   REALTIME_DASHBOARD: new FeaturePolicy({
     requiredEdition: 'STANDARD',
     requiredPermission: 'READ',
@@ -2988,9 +2982,6 @@ class FeatureResolver {
     }
     if (path === '/maps') {
       return 'GOOGLE_MAPS';
-    }
-    if (path === '/aios') {
-      return 'AIOS_BRIDGE';
     }
     return null;
   }
@@ -3097,11 +3088,6 @@ class FeatureAccessPipeline {
 FeatureAccessPipeline.instance = null;
 
 // ==========================================
-// 🚀 AIOS BRIDGE REMOVED (Phase 3 SM-5)
-// ==========================================
-// AIOS Bridge Foundation classes removed for clean product boundary.
-
-// ==========================================
 // 🚀 PLATFORM INTEGRATION FOUNDATION CLASSES
 // ==========================================
 
@@ -3112,7 +3098,6 @@ const PlatformStage = {
   AUTHORIZATION: 'AUTHORIZATION',
   LICENSING: 'LICENSING',
   FEATURE_ACCESS: 'FEATURE_ACCESS',
-  AIOS_BRIDGE: 'AIOS_BRIDGE',
   VALIDATION: 'VALIDATION',
   ROUTING: 'ROUTING',
   HANDLER: 'HANDLER',

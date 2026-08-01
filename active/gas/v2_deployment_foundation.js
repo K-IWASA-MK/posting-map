@@ -559,7 +559,7 @@ function verifyDistrictDeployment(e) {
     }
   }
 
-  // AI社員①: Postal CSV Builder Action
+  // Postal CSV Builder Action
   if (params.buildPrefPostalCsv === "true" || params.buildPrefPostalCsv === true) {
     try {
       const targetPref = params.targetPref || "三重県";

@@ -3,7 +3,7 @@
 # Version: 3.2 (Data Integrity Audit Foundation - Self-Governing OS)
 # 
 # Core Principles:
-# 1. Brain (AIOS/Design) -> Control (Rules) -> Hands (Execution) -> Memory (Drive) -> Eyes (Verify)
+# 1. Brain (Design) -> Control (Rules) -> Hands (Execution) -> Memory (Drive) -> Eyes (Verify)
 # 2. Design and execution are strictly separated.
 # 3. Google Drive is the Single Source of Truth (SST).
 # 4. Zero direct operations (everything must route via the Event Kernel).
@@ -632,7 +632,7 @@ function runStateSelfHealing() {
     results.push(folderResult);
     
     var fId = folderResult.folder_id;
-    var content = "# " + folderName + "\n\n役割: 自動復旧テンプレート\n保存対象: 定義書参照\n運用ルール: AIOS管理";
+    var content = "# " + folderName + "\n\n役割: 自動復旧テンプレート\n保存対象: 定義書参照\n運用ルール: システム管理";
     var readmeResult = DriveActionAdapter.updateReadme(fId, folderName, content);
     results.push(readmeResult);
   }
