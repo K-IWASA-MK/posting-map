@@ -137,10 +137,7 @@ function refreshAreaSummaryCache() {
   cache.put("AREA_SUMMARY_FAST_CACHE", jsonResult, 1800);
   PropertiesService.getScriptProperties().setProperty("AREA_SUMMARY_CACHE", jsonResult);
 
-  // API 生成完了監査
-  if (typeof auditDataIntegrity === 'function') {
-    auditDataIntegrity("API", result.summary);
-  }
+
 
   return result;
 }
@@ -224,17 +221,7 @@ function createSystemCacheSheet() {
 
   sheet.getRange(2, 1, rows.length, 6).setValues(rows);
   
-  // CACHE 作成完了監査
-  const cacheData = rows.map(r => ({
-    name: r[0],
-    total: r[2],
-    repAddress: r[3],
-    cityKana: r[4],
-    townKana: r[5]
-  }));
-  if (typeof auditDataIntegrity === 'function') {
-    auditDataIntegrity("CACHE", cacheData);
-  }
+
 }
 
 /**

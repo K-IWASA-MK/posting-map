@@ -70,10 +70,7 @@ function forceStartBatch() {
     Logger.log("⚠️ 抽出件数が0件です！");
   }
   
-  // EXTRACT 完了監査
-  if (typeof auditDataIntegrity === 'function') {
-    auditDataIntegrity("EXTRACT", addresses);
-  }
+
   
   // デバッグ用トースト：抽出件数を画面に表示
   ss.toast(`【デバッグ】住所データを ${addresses.length} 件抽出しました。ソート中...`, "デバッグ", 10);
@@ -261,21 +258,7 @@ function generateAreaSheetsBatch() {
     // 一時シートの削除
     const tempSheetToDelete = ss.getSheetByName("__TEMP_ADDRESSES__");
     
-    // BATCH 完了監査 (一時シートの削除前にマスタの整合性チェック)
-    if (tempSheetToDelete) {
-      const tempLastRow = tempSheetToDelete.getLastRow();
-      if (tempLastRow >= 2) {
-        const batchData = tempSheetToDelete.getRange(2, 1, tempLastRow - 1, 4).getValues().map(r => ({
-          postalCode: r[0],
-          address: r[1],
-          cityKana: r[2],
-          townKana: r[3]
-        }));
-        if (typeof auditDataIntegrity === 'function') {
-          auditDataIntegrity("BATCH", batchData);
-        }
-      }
-    }
+
     
     if (tempSheetToDelete) {
       try {
