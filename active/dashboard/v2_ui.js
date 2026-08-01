@@ -197,7 +197,7 @@ function createRichMenuForHApp() {
   }
   
   // 3. リッチメニューに画像をアップロードする
-  const imageUrl = "https://k-iwasa-mk.github.io/posting-map-system-dev/assets/richmenu_default.png";
+  const imageUrl = "https://k-iwasa-mk.github.io/posting-map/assets/richmenu_default.png";
   try {
     const imageBlob = UrlFetchApp.fetch(imageUrl).getBlob();
     const uploadRes = UrlFetchApp.fetch("https://api-data.line.me/v2/bot/richmenu/" + richMenuId + "/content", {

@@ -71,3 +71,45 @@ Phase 2 (P2-11D 以降) の Business Layer 拡張において、新規ドメイ�
 - 配置パス: `active/business/{domain}/`
 - 例: `active/business/area/`, `active/business/flyer/`, `active/business/gps/`
 - `v2_api.js` への直接的な業務ロジック記述は禁止し、Facade 経由での委譲を義務付ける。
+
+---
+
+## ⚙️ Client Configuration Rule (マルチテナント設定分離原則)
+
+全国289地区展開を可能にするため、以下の設定分離規約を厳守すること。
+
+* **唯一の設定点**: `clients/{clientId}/config.js` は地区展開における唯一の設定点（SSOT）とする。
+* **直書きの全面禁止**:
+  * UI/JSコード内への 地区ID（`districtId`）の直書き禁止
+  * UI/JSコード内への GAS Web App URL の直書き禁止
+  * UI/JSコード内への Spreadsheet ID の直書き禁止
+* **新地区追加手続**: 新規地区の追加は `clients/{clientId}/config.js` の追加・設定のみで完結させること（共通コードの修正禁止）。
+
+---
+
+## 🔄 Deployment Synchronization Rule (設定レイヤー同期原則)
+
+POSTING MAPは以下の設定レイヤーを同期状態として管理する。
+
+1. LINE LIFF Entry
+2. GitHub Pages Frontend
+3. clients/{client}/config.js
+4. GAS Deployment
+5. Google Spreadsheet
+
+### 同期完了条件
+- LIFF ID一致
+- Client ID一致
+- Frontend公開ファイル一致
+- GAS Web App URL一致
+- Spreadsheet ID一致
+
+### 禁止事項
+- 同期対象レイヤー間で異なるURL・ID・設定値を保持しないこと
+- 本番利用前に設定レイヤー同期確認を完了すること
+
+### 注意事項
+- 実機通信確認は同期条件に含めない。
+- 実機通信確認は別工程の Production Verification として実施する。
+
+
