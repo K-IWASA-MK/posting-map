@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>POSTING MAP Entry</title>
+  <script>
+    // URLのパラメータ (client, liff.state等) を維持して active/dashboard/index.html へ転送
+    (function() {
+      const search = window.location.search || '';
+      const hash = window.location.hash || '';
+      const targetUrl = './active/dashboard/index.html' + search + hash;
+      window.location.replace(targetUrl);
+    })();
+  </script>
+</head>
+<body style="background-color: #000000; color: #ffffff; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: sans-serif;">
+  <p style="opacity: 0.6; font-size: 12px; font-weight: bold; letter-spacing: 0.2em;">LOADING POSTING MAP...</p>
+</body>
+</html>
