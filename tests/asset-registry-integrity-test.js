@@ -37,14 +37,14 @@ function runTest() {
     assert.strictEqual(typeof postalMaster.fileId, 'string', "Postal Master fileId should be a string.");
     assert.strictEqual(typeof addressMaster.fileId, 'string', "Address Master fileId should be a string.");
 
-    // 3. Load Branch Assets (MIE-04 and MIE-05)
+    // 3. Load Branch Assets (MIE-04 and MIE-02)
     console.log("3. Testing Branch/District specific asset resolution...");
-    const mie05 = AssetRegistryService.getDistrictAssets("MIE-05");
+    const mie02 = AssetRegistryService.getDistrictAssets("MIE-02");
     const mie04 = AssetRegistryService.getDistrictAssets("MIE-04");
     
-    assert.ok(mie05, "MIE-05 should be registered.");
+    assert.ok(mie02, "MIE-02 should be registered.");
     assert.ok(mie04, "MIE-04 should be registered.");
-    console.log(`   ✓ MIE-05 Storage: ${mie05.storageFolderId}, Spreadsheet: ${mie05.spreadsheetId}`);
+    console.log(`   ✓ MIE-02 Storage: ${mie02.storageFolderId}, Spreadsheet: ${mie02.spreadsheetId}`);
     console.log(`   ✓ MIE-04 Storage: ${mie04.storageFolderId}, Spreadsheet: ${mie04.spreadsheetId}`);
 
     console.log("\n==========================================");
