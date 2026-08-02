@@ -4,17 +4,33 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>POSTING MAP Entry</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
-    // URLのパラメータ (client, liff.state等) を維持して active/dashboard/index.html へ転送
-    (function() {
-      const search = window.location.search || '';
-      const hash = window.location.hash || '';
-      const targetUrl = './active/dashboard/index.html' + search + hash;
-      window.location.replace(targetUrl);
-    })();
+    document.addEventListener("DOMContentLoaded", function() {
+      // 共通のLIFF ID (MIE-03等で使用)
+      const liffId = "2010374196-bHBYo37e";
+      
+      liff.init({ liffId: liffId })
+        .then(() => {
+          if (!liff.isLoggedIn()) {
+            // 未ログイン時はLINE認証へリダイレクト
+            liff.login();
+          } else {
+            // 認証済みであればパラメータを付与してDashboardへ遷移
+            const search = window.location.search || '';
+            const hash = window.location.hash || '';
+            const targetUrl = './active/dashboard/index.html' + search + hash;
+            window.location.replace(targetUrl);
+          }
+        })
+        .catch(err => {
+          console.error("LIFF Init Error:", err);
+          document.getElementById("loading-text").innerText = "LIFF Init Error: " + err.message;
+        });
+    });
   </script>
 </head>
 <body style="background-color: #000000; color: #ffffff; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: sans-serif;">
-  <p style="opacity: 0.6; font-size: 12px; font-weight: bold; letter-spacing: 0.2em;">LOADING POSTING MAP...</p>
+  <p id="loading-text" style="opacity: 0.6; font-size: 12px; font-weight: bold; letter-spacing: 0.2em;">AUTHENTICATING...</p>
 </body>
 </html>
