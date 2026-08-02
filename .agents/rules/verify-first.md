@@ -1,5 +1,3 @@
----
-
 # Verification Before Response Rule
 
 ## 目的
@@ -94,5 +92,3 @@ npx clasp deployments
 ## 適用範囲
 
 本ルールはPOSTING MAP Repositoryにおける全AIエージェント作業へ適用する。
-
----
