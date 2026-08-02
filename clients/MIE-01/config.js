@@ -1,10 +1,10 @@
 /**
  * POSTING MAP Client Configuration
- * Client: MIE-04 (三重県第4区 - PREPARATION)
+ * Client: MIE-01 (三重県第1区 - PREPARATION)
  */
 window.PMS_CLIENT_CONFIG = {
-  districtId: "MIE-04",
-  districtName: "三重県第4区",
+  districtId: "MIE-01",
+  districtName: "三重県第1区",
   spreadsheetId: "17VISNdxQLpxkR18XR4AMXRwDBSa600AJFIwrqDriQYxo8Tsot2DvXAzX",
   environment: "production",
   api: {
