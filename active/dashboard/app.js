@@ -237,22 +237,24 @@ async function callApiPost(action, payload = {}) {
 }
 
 function startApp(profile = null) {
-  // 直ちにID画面（settings）に切り替える（スプラッシュ待ち時間 0秒）
-  switchPage('settings');
-  $('app').classList.remove('hidden');
-  
-  // 不透明度 0% を解除し、IDカード画面を前面へ可視化する (バグ修正)
-  $('app').classList.remove('opacity-0');
-  
-  // loading をスムーズに隠す
-  const loadingEl = $('loading');
-  if (loadingEl) {
-    loadingEl.classList.add('opacity-0');
-    setTimeout(() => loadingEl.classList.add('hidden'), 400);
-  }
-  
   // データ同期およびロード処理は完全にバックグラウンドで非同期実行
   loadData(false);
+
+  // 約1.5秒間ローディング（SEARCHING）を表示したあと、ID画面（settings）に切り替える
+  setTimeout(() => {
+    switchPage('settings');
+    $('app').classList.remove('hidden');
+    
+    // 不透明度 0% を解除し、IDカード画面を前面へ可視化する
+    $('app').classList.remove('opacity-0');
+    
+    // loading をスムーズに隠す
+    const loadingEl = $('loading');
+    if (loadingEl) {
+      loadingEl.classList.add('opacity-0');
+      setTimeout(() => loadingEl.classList.add('hidden'), 400);
+    }
+  }, 1500);
 }
 
 function setSyncStatus(state) {
