@@ -562,11 +562,8 @@ function renderSettings() {
   const areaCardHtml = assignedAreaData ? renderAreaCard(assignedAreaData) : '';
 
   container.innerHTML = `
-    <div class="space-y-6 flex flex-col items-center">
-      <div class="w-full">${staffCardHtml}</div>
-      ${areaCardHtml ? `<div class="w-full flex justify-center">${areaCardHtml}</div>` : ''}
-
-    </div>
+    ${staffCardHtml}
+    ${areaCardHtml}
   `;
 }
 

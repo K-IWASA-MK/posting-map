@@ -97,8 +97,8 @@
       </section>
 
       <!-- AUTH/SETTINGS PAGE -->
-      <section id="page-settings" class="page hidden space-y-8">
-        <div id="settings-content" class="space-y-8">
+      <section id="page-settings" class="page hidden" style="padding-bottom: 120px;">
+        <div id="settings-content" class="w-full">
           <!-- Dynamic Content (Card 1 or Card 2) -->
         </div>
       </section>
@@ -180,19 +180,7 @@
 
     <!-- 下ナビ：iOSライクなガラス感に調整 -->
     <nav id="bottom-nav" style="bottom: calc(env(safe-area-inset-bottom) + 1rem); display: none;" class="fixed left-1/2 -translate-x-1/2 w-[90%] max-w-md z-[4000]">
-      <!-- Tier 1 Container -->
-      <div id="nav-tier-1" style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);" class="rounded-[2.5rem] p-2 flex justify-around items-center h-[90px] relative shadow-2xl">
-        <button data-page="areas" onclick="navigateToAreaTab()" class="nav-btn flex flex-col items-center gap-1 flex-1 transition-all"><div class="text-xl">🗺️</div><span class="text-[10px] font-black uppercase tracking-widest text-white">エリア</span></button>
-        <button data-page="ranking" onclick="switchPage('ranking')" class="nav-btn flex flex-col items-center gap-1 flex-1 transition-all opacity-40"><div class="text-xl">🏆</div><span class="text-[10px] font-black uppercase tracking-widest text-white/40">ランキング</span></button>
-        <button data-page="settings" onclick="switchPage('settings')" class="nav-btn flex flex-col items-center gap-1 flex-1 transition-all opacity-40"><div class="text-xl">👤</div><span class="text-[10px] font-black uppercase tracking-widest text-white/40">ID</span></button>
-        <button data-page="next" onclick="toggleNavTier(2)" class="nav-btn flex flex-col items-center gap-1 flex-1 transition-all opacity-40"><div class="text-xl">⚙️</div><span class="text-[10px] font-black uppercase tracking-widest text-white/40">次へ</span></button>
-      </div>
-      <!-- Tier 2 Container -->
-      <div id="nav-tier-2" style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);" class="rounded-[2.5rem] p-2 flex justify-around items-center h-[90px] relative shadow-2xl hidden">
-        <button data-page="storage-register" onclick="switchPage('storage-register')" class="nav-btn flex flex-col items-center gap-1 flex-1 transition-all opacity-40"><div class="text-xl">📦</div><span class="text-[10px] font-black uppercase tracking-widest text-white/40">在庫登録</span></button>
-        <button data-page="storage-list" onclick="switchPage('storage-list')" class="nav-btn flex flex-col items-center gap-1 flex-1 transition-all opacity-40"><div class="text-xl">📊</div><span class="text-[10px] font-black uppercase tracking-widest text-white/40">在庫一覧</span></button>
-        <button data-page="back" onclick="backToTier1()" class="nav-btn flex flex-col items-center gap-1 flex-1 transition-all opacity-40"><div class="text-xl">↩️</div><span class="text-[10px] font-black uppercase tracking-widest text-white/40">戻る</span></button>
-      </div>
+      <!-- Dynamically populated by navigation.js -->
     </nav>
   </div>
 
