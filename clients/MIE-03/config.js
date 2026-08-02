@@ -7,6 +7,7 @@
 window.PMS_CLIENT_CONFIG = {
   districtId: "MIE-03",
   districtName: "三重県第3区",
+  status: "ACTIVE_DEVELOPMENT",
   spreadsheetId: "17VISNdxQLpxkR18XR4AMXRwDBSa600AJFIwrqDriQYxo8Tsot2DvXAzX",
   environment: "production",
   api: {
