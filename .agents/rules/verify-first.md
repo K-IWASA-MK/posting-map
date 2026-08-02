@@ -1,3 +1,8 @@
+---
+description: Verification Before Response Rule
+trigger: always_on
+---
+
 # Verification Before Response Rule
 
 ## 目的
