@@ -24,7 +24,7 @@ window.renderBottomNavigation = function(activePage) {
       </button>
       <button data-page="next" onclick="toggleNavTier(2)" class="nav-btn flex flex-col items-center gap-1 flex-1 transition-all opacity-40">
         <div class="text-xl">⚙️</div>
-        <span class="text-[10px] font-black uppercase tracking-widest text-white/40">設定</span>
+        <span class="text-[10px] font-black uppercase tracking-widest text-white/40">次へ</span>
       </button>
     </div>
 

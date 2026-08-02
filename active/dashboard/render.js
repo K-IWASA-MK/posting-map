@@ -536,36 +536,7 @@ function renderSettings() {
     return;
   }
 
-  // If editing mode is active
-  if (window.isEditingProfile) {
-    container.innerHTML = `
-      <div class="flex flex-col items-center justify-center -mt-10 pb-12 px-4">
-        <div class="mb-8 text-center">
-          <p class="text-sm text-white/70 leading-relaxed font-bold">
-            名前を編集してください
-          </p>
-        </div>
-        <div class="w-full premium-glass p-8 space-y-8 text-left">
-          <div class="space-y-4">
-            <div>
-              <label style="color: rgba(255,255,255,0.72);" class="text-[11px] font-black uppercase tracking-[0.2em] mb-2 block text-center">苗字</label>
-              <input type="text" id="user-last" value="${userInfo.last || ''}" style="background: #ffffff; border: 1px solid rgba(0, 0, 0, 0.15); color: #000000;" class="w-full rounded-2xl py-6 px-7 text-lg font-black text-left outline-none focus:border-[#2563eb] transition-all shadow-xl placeholder-gray-400" placeholder="例：鈴木">
-            </div>
-            <div>
-              <label style="color: rgba(255,255,255,0.72);" class="text-[11px] font-black uppercase tracking-[0.2em] mb-2 block text-center">名前</label>
-              <input type="text" id="user-first" value="${userInfo.first || ''}" style="background: #ffffff; border: 1px solid rgba(0, 0, 0, 0.15); color: #000000;" class="w-full rounded-2xl py-6 px-7 text-lg font-black text-left outline-none focus:border-[#2563eb] transition-all shadow-xl placeholder-gray-400" placeholder="例：一郎">
-            </div>
-          </div>
-          
-          <div class="pt-2 flex gap-4">
-            <button onclick="window.cancelEditingProfile()" class="w-1/2 bg-white/5 border border-white/10 text-white rounded-2xl py-4 text-base font-bold shadow-xl transition-all">キャンセル</button>
-            <button onclick="saveProfile()" class="w-1/2 bg-[#00B7FF] text-white rounded-2xl py-4 text-base font-black shadow-xl transition-all">保存する</button>
-          </div>
-        </div>
-      </div>
-    `;
-    return;
-  }
+
 
   // Normal view mode: Show ID card + assigned area shortcut + edit name button
   const rawBranch = localStorage.getItem('branch_name') || '';
@@ -594,25 +565,12 @@ function renderSettings() {
     <div class="space-y-6 flex flex-col items-center">
       <div class="w-full">${staffCardHtml}</div>
       ${areaCardHtml ? `<div class="w-full flex justify-center">${areaCardHtml}</div>` : ''}
-      
-      <div class="w-full max-w-sm px-4 pt-4 space-y-4">
-        <button onclick="window.startEditingProfile()" class="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white text-xs font-bold hover:bg-white/10 transition-colors">
-          👤 プロフィール名前編集
-        </button>
-      </div>
+
     </div>
   `;
 }
 
-// Publish helper functions to window
-window.startEditingProfile = function() {
-  window.isEditingProfile = true;
-  renderSettings();
-};
-window.cancelEditingProfile = function() {
-  window.isEditingProfile = false;
-  renderSettings();
-};
+
 
 window.switchToAssignedArea = function() {
   const assignedAreaName = localStorage.getItem('assigned_area');
