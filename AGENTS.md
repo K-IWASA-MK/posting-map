@@ -112,4 +112,13 @@ POSTING MAPは以下の設定レイヤーを同期状態として管理する。
 - 実機通信確認は同期条件に含めない。
 - 実機通信確認は別工程の Production Verification として実施する。
 
+---
+
+## ⚙️ GAS Endpoint Resolution Rule (GAS エンドポイント解像原則)
+
+* **唯一のSSOT**: `gasWebAppUrl` は `clients/{client}/config.js` 内でのみ管理・定義する。
+* **ランタイムパラメータ追加の許可**: フロントエンドは `page` や `action` などのランタイム引数を付加（Append）してもよい。
+* **直書き・置換の禁止**: フロントエンドは GAS デプロイメント URL のベース文字列を直書き・置換（Replace）してはならない。
+
+
 
