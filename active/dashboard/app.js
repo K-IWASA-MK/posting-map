@@ -1366,9 +1366,10 @@ async function safeInitApp() {
   // ※ フラグはここでは削除しない。ログイン確認成功後（isLoggedIn()=true）に削除する。
   
   // クライアント設定(PMS_CLIENT_CONFIG)からLIFF IDを取得、なければホスト名からフォールバック
-  const liffId = (window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.line && window.PMS_CLIENT_CONFIG.line.liffId)
-    ? window.PMS_CLIENT_CONFIG.line.liffId
-    : (window.location.hostname === 'area-management.github.io' ? "2010374196-gIYb6PDH" : "2010374196-gIYb6PDH");
+  const liffId = (window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.line && window.PMS_CLIENT_CONFIG.line.liffId);
+  if (!liffId) {
+    throw new Error("LIFF ID missing in client configuration.");
+  }
   
   if (typeof liff !== 'undefined') {
     try {
