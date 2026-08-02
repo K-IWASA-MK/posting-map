@@ -31,7 +31,7 @@
     .neu-flat { @apply bg-white dark:bg-[#1c1c1e] shadow-[8px_8px_20px_rgba(0,0,0,0.05)] dark:shadow-[8px_8px_20px_rgba(0,0,0,0.4)]; }
     .neu-inset { @apply bg-gray-50 dark:bg-black/20 shadow-[inset_4px_4px_10px_rgba(0,0,0,0.05)] dark:shadow-[inset_4px_4px_10px_rgba(0,0,0,0.5)]; }
     .btn-neu { @apply transition-all duration-300 active:scale-95; }
-  </style>
+  <script src="./client-loader.js"></script>
 </head>
 <body class="bg-apple-light dark:bg-apple-dark text-[#1d1d1f] dark:text-[#f5f5f7] font-sans antialiased overflow-hidden select-none transition-colors duration-500">
 
@@ -107,9 +107,16 @@
     const $ = id => document.getElementById(id);
     let allPoints = [], areaSummary = [], roster = [];
     
-    // ユニバーサル環境判定
+    // ユニバーサル環境判定 ＆ マルチテナント GAS URL 動的解像
     const isGAS = typeof google !== 'undefined' && google.script && google.script.run;
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbyjNwgZ_6CCv258lqKMrCXJYi0wDR23ZCyyzOQIV1R_WcCF5TQxYXOzZWWSJd_vMyu_/exec?page=app";
+    const getGasUrl = () => {
+      if (typeof window !== 'undefined' && window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.api && window.PMS_CLIENT_CONFIG.api.gasWebAppUrl) {
+        const base = window.PMS_CLIENT_CONFIG.api.gasWebAppUrl;
+        return base + (base.includes('?') ? '&page=app' : '?page=app');
+      }
+      return "https://script.google.com/macros/s/AKfycbyjNwgZ_6CCv258lqKMrCXJYi0wDR23ZCyyzOQIV1R_WcCF5TQxYXOzZWWSJd_vMyu_/exec?page=app";
+    };
+    const GAS_URL = getGasUrl();
 
     function initEnvironment() {
       if (isGAS) {
