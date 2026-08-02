@@ -115,7 +115,10 @@ function createRichMenuForHApp() {
   const ui = SpreadsheetApp.getUi();
   const props = PropertiesService.getScriptProperties();
   const token = props.getProperty("LINE_CHANNEL_ACCESS_TOKEN"); // MIE-2/H のトークン
-  const liffId = "2010374196-gIYb6PDH"; // Hアプリ用のLIFF ID
+  const liffId = PropertiesService.getScriptProperties().getProperty("LIFF_ID");
+  if (!liffId) {
+    throw new Error("LIFF_ID is not configured in Script Properties.");
+  }
   
   if (!token) {
     ui.alert("エラー: 配布員用(H)トークンが未設定です。スプレッドシートのメニューから先に登録してください。");
