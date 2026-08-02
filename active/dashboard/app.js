@@ -1456,6 +1456,14 @@ async function safeInitApp() {
           } catch (err) {
             console.error("LIFF PROFILE ERROR", err);
             logDebug("LIFF PROFILE ERROR: " + err.message);
+            
+            if (err.message && err.message.toUpperCase().includes("REVOKED")) {
+              logDebug("Access token revoked detected. Forcing re-login...");
+              liff.logout();
+              liff.login({ redirectUri: window.location.href });
+              return;
+            }
+            
             $('loading-status').textContent = "起動エラー: " + err.message;
           }
         }
