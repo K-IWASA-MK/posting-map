@@ -127,6 +127,57 @@ POSTING MAPは以下の設定レイヤーを同期状態として管理する。
 * `clients/{clientId}/` は契約・開発対象として明示的に承認された地区のみ作成する。
 * 未承認 `clientId` の勝手な追加・ディレクトリ作成は厳禁とする。
 
+---
 
+## ⚠️ Verification Before Response Rule
+
+実環境確認および完了報告規約の詳細は以下を参照する。
+
+詳細:
+`.agents/rules/verify-first.md`
+
+---
+
+## LIFF Entry Flow Rule
+
+内容:
+
+- LIFF Endpoint URLでliff.init完了前のURL変更禁止
+- liff.login前のdashboard遷移禁止
+- Endpoint URLとredirect_uri一致必須
+
+## Client Identifier Separation Rule
+
+内容:
+
+ID種別を明確化する。
+
+GAS Script ID:
+.clasp.jsonで管理
+
+Spreadsheet ID:
+clients/{clientId}/config.js spreadsheetIdで管理
+
+禁止:
+Script IDをSpreadsheet IDとして利用すること。
+
+## Frontend Runtime Asset Rule
+
+内容:
+
+active/dashboard/index.htmlが参照するRuntime Assetを必須管理対象とする。
+
+対象:
+
+- app.js
+- db.js
+- render.js
+- components/
+- assets/
+- CSS
+
+HTMLのみ移行することを禁止する。
+
+---
 
 
