@@ -42,7 +42,18 @@
   }
 
   const pathname = (window.location && window.location.pathname) ? window.location.pathname : '/';
-  const basePath = (pathname.includes('/app/') || pathname.endsWith('/app')) ? '../clients/' : 'clients/';
+  let basePath = '../../clients/';
+  
+  if (pathname.includes('/active/')) {
+    const rootPath = pathname.substring(0, pathname.indexOf('/active/'));
+    basePath = rootPath + '/clients/';
+  } else if (pathname.includes('/app/')) {
+    const rootPath = pathname.substring(0, pathname.indexOf('/app/'));
+    basePath = rootPath + '/clients/';
+  } else {
+    basePath = 'clients/';
+  }
+
   console.log(`[PMS Loader] Active Tenant Client Resolved: ${client} (basePath: ${basePath})`);
   document.write(`<script src="${basePath}${client}/config.js"><\/script>`);
 })();
