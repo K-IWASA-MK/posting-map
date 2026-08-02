@@ -48,11 +48,13 @@ if (typeof LegacyApiFallbackHandler === 'undefined') {
     execute(request, context) {
       if (typeof processGetActionLegacy === 'function' && request && request.method === 'GET') {
         const action = (request.parameter && request.parameter.action) || request.path.replace('/', '');
-        return processGetActionLegacy(action, request);
+        const res = processGetActionLegacy(action, request);
+        return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
       }
       if (typeof processPostAction === 'function' && request && request.method === 'POST') {
         const action = (request.parameter && request.parameter.action) || (request.body && request.body.action) || request.path.replace('/', '');
-        return processPostAction(action, request.body, request);
+        const res = processPostAction(action, request.body, request);
+        return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
       }
       return { success: true, message: 'POSTING MAP API is online (Fallback).' };
     }
