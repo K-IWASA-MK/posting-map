@@ -1157,16 +1157,9 @@ window.toggleNavTier = function(tier) {
 };
 
 window.backToTier1 = function() {
-  // 次へを押す前にいたページへ戻る
-  if (_prevPageBeforeTier2 === 'ranking') {
-    switchPage('ranking');
-  } else if (_prevPageBeforeTier2 === 'settings') {
-    switchPage('settings');
-  } else if (_prevPageBeforeTier2 === 'detail') {
-    switchPage('detail');
-  } else {
-    navigateToAreaTab();
-  }
+  // 「次へ」を押す直前に見ていた表画面へ確実に復帰
+  const targetPage = _prevPageBeforeTier2 || 'settings';
+  switchPage(targetPage);
 };
 
 // 在庫登録フォームの処理
