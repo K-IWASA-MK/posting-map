@@ -236,25 +236,32 @@ async function callApiPost(action, payload = {}) {
   }
 }
 
-function startApp(profile = null) {
-  // データ同期およびロード処理は完全にバックグラウンドで非同期実行
-  loadData(false);
+async function startApp(profile = null, registrationPromise = null) {
+  try {
+    // 1. 初回ユーザーの場合、何よりも先に登録処理の完了を待つ
+    if (registrationPromise) {
+      await registrationPromise;
+    }
 
-  // 約1.5秒間ローディング（SEARCHING）を表示したあと、ID画面（settings）に切り替える
-  setTimeout(() => {
+    // 2. 基本データ(getAppData)の取得完了を待つ
+    // ※ 既存ユーザーは登録処理スキップでここからスタート
+    const loadPromise = loadData(false);
+    await loadPromise;
+
+    // 3. すべての必須準備が整ってからID画面へ切り替える
     switchPage('settings');
     $('app').classList.remove('hidden');
-    
-    // 不透明度 0% を解除し、IDカード画面を前面へ可視化する
     $('app').classList.remove('opacity-0');
     
-    // loading をスムーズに隠す
     const loadingEl = $('loading');
     if (loadingEl) {
       loadingEl.classList.add('opacity-0');
       setTimeout(() => loadingEl.classList.add('hidden'), 400);
     }
-  }, 1500);
+  } catch (err) {
+    console.error("Startup error:", err);
+    logDebug("Startup error: " + err.message);
+  }
 }
 
 function setSyncStatus(state) {
@@ -292,7 +299,7 @@ let isRegistering = false;
 let registrationError = false;
 function triggerBackgroundRegistration(profile) {
   window.liffProfile = profile;
-  if (isRegistering) return;
+  if (isRegistering) return Promise.resolve();
   isRegistering = true;
   window.isRegistering = true;
   registrationError = false;
@@ -307,7 +314,7 @@ function triggerBackgroundRegistration(profile) {
   }
   
   logDebug("API START (初回登録・非同期)");
-  callApiPost('registerStaff', { 
+  return callApiPost('registerStaff', { 
     lastName: profile.displayName, 
     firstName: "(LINE)",
     lineUserId: profile.userId
@@ -1409,7 +1416,7 @@ async function safeInitApp() {
           };
           
           // 0.1秒で即時にID表示・メイン画面可視化
-          startApp(cachedProfile);
+          startApp(cachedProfile, null);
 
           // バックグラウンドで静かにgetProfileを走らせ、LINE公式の最新データに追従
           liff.getProfile().then(profile => {
@@ -1449,10 +1456,10 @@ async function safeInitApp() {
             console.log(profile);
 
             // 初回登録をバックグラウンド(非同期)で実行
-            triggerBackgroundRegistration(profile);
+            const regPromise = triggerBackgroundRegistration(profile);
 
             logDebug("START APP");
-            startApp(profile);
+            startApp(profile, regPromise);
           } catch (err) {
             console.error("LIFF PROFILE ERROR", err);
             logDebug("LIFF PROFILE ERROR: " + err.message);
