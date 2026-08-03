@@ -265,4 +265,13 @@ IDカード画面（`settings`）は **Completed v1.0** としてデザイン・
 * **下部ナビゲーション**:
   - 「在庫登録」「在庫一覧」「ID」「次へ」
 
+### 🔒 ID Card 専用機能スコープ (Dedicated Scope Rule)
+以下の3つのリンク・機能は **ID Card 専用機能** として UI Specification に永久固定します。他画面への移設・重複配置・他用途での再利用を禁止します。
+```
+ID CARD
+├── TERMS
+├── PRIVACY
+└── LICENSE
+```
+
 今後、明示的な UI リニューアル指示がない限り、上記要素の見た目・配置変更は一切禁止します。
