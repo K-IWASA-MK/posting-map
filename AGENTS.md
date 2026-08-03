@@ -432,3 +432,15 @@ Generation 2 API (`getTier1` / `getTier2` / `getTier3`) は将来の完成形ア
 現行の `getAppData()` は Generation 1 の安定APIとして維持し、Generation 2 への移行が完了するまでは新旧APIを混在させない。
 
 Generation 2 の実装が完了した時点で `getAppData()` を段階的に廃止する。
+
+### ✅ Generation 2 Migration Exit Criteria (旧API廃止統制基準)
+Generation 1 (`getAppData()`) を廃止できるのは、以下をすべて満たした場合のみとする。
+
+- `getTier1()` が Tier 1 および初期表示に必要なデータを提供していること。
+- `getTier2(cityName)` が全市町村で正常動作すること。
+- `getTier3(cityName, townName)` が住所一覧を正常に取得できること。
+- エリア画面、保管場所ドロップダウン、在庫登録画面が Generation 2 API のみで正常動作すること。
+- Generation 1 と同等以上の性能・機能を維持していること。
+- 回帰テスト（Regression Test）に合格していること。
+
+上記すべてを満たした時点でのみ `getAppData()` を段階的に廃止する。
