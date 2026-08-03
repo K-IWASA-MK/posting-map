@@ -1152,7 +1152,7 @@ window.toggleNavTier = function(tier) {
     if (activePage) {
       _prevPageBeforeTier2 = pageIdMap[activePage.id] || 'areas';
     }
-    switchPage('storage-list');
+    switchPage('areas');
   }
 };
 
