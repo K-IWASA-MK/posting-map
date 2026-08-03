@@ -425,3 +425,10 @@ Tier 3（住所）   ──► 町名選択時のみオンデマンド取得
 - **`getTier3(cityName, townName)`**: 町名タップ時に実行。選択された町名配下の住所一覧のみを動的取得。
 
 API名そのものに階層と責務を明示することで、保守性および開発エージェントの判断精度を最高水準に維持する。
+
+### 🔄 Migration Policy (新旧API移行原則)
+Generation 2 API (`getTier1` / `getTier2` / `getTier3`) は将来の完成形アーキテクチャである。
+
+現行の `getAppData()` は Generation 1 の安定APIとして維持し、Generation 2 への移行が完了するまでは新旧APIを混在させない。
+
+Generation 2 の実装が完了した時点で `getAppData()` を段階的に廃止する。
