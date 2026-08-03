@@ -1027,15 +1027,15 @@ function updateStorageLocationDropdown() {
   if (!locSelect) return;
 
   locSelect.innerHTML = '';
-  const cities = new Set();
+  const cityList = [];
   if (Array.isArray(areaSummary) && typeof getCityName === 'function') {
     areaSummary.forEach(s => {
       const cName = getCityName(s.name);
-      if (cName) cities.add(cName);
+      if (cName && !cityList.includes(cName)) {
+        cityList.push(cName);
+      }
     });
   }
-
-  const cityList = Array.from(cities).sort((a, b) => a.localeCompare(b, 'ja'));
 
   if (cityList.length === 0) {
     const opt = document.createElement('option');

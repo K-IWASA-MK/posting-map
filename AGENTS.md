@@ -303,6 +303,21 @@ Tier 2（町名）および Tier 3（住所）は Tier 1 から派生するデ�
 - Tier 1 の表示内容と保管場所ドロップダウンの内容は常に一致していなければならない。
 - Tier 1 は MIE-03 の市町村構成を定義するマスターレイヤーであり、他画面で市町村を利用する場合は必ず Tier 1 を参照すること。Tier 1 を経由しない市町村取得は禁止する。
 
+### 📐 Tier 1 Municipality Order Governance (市町村表示順序統制規約)
+
+Googleスプレッドシート（`getAppData`）が返す配列の出現順を Tier 1 市町村の唯一の表示順（SSOT順序）とする。
+
+#### 🚫 禁止事項
+- `sort()`
+- `localeCompare()`
+- `CITY_ORDER`
+- 固定配列
+- 独自ソート
+- 配列を Object や Set に変換して順序を再構築する実装
+- 重複除去後に順序が変化する実装
+
+エリア Tier 1 カードおよび保管場所ドロップダウンは、必ず同一配列インスタンス（またはその順序を完全保持したコピー）から直接描画しなければならない。
+
 ---
 
 ## 🛡️ UI Domain Separation & Responsibility Governance Rule (UIドメイン分離・責務統制規則)
