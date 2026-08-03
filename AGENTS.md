@@ -307,23 +307,68 @@ Tier 2（町名）および Tier 3（住所）は Tier 1 から派生するデ�
 
 ## 🛡️ UI Domain Separation & Responsibility Governance Rule (UIドメイン分離・責務統制規則)
 
-POSTING MAP の全画面は以下の2つのドメインに明確に分離・統制し、将来の機能拡張においても責務が混ざる実装を固く禁止する。
+POSTING MAP の全画面は以下の2つのドメインに明確に分離・統制し、将来の機能拡張においても責務が混在する実装を禁止する。
 
 ```
 POSTING MAP 画面構成
 │
-├── 👤 本人専用画面 (Private)
-│   ├── 🪪 IDカード (LINEプロフィール/STAFF ID/氏名/支部/認証/TERMS・PRIVACY・LICENSE [自動表示・編集不可])
-│   └── 📦 在庫登録 (保管場所/保有枚数 [本人のみ更新可能])
+├── 👤 Private Domain（本人専用）
+│   ├── 🪪 IDカード
+│   │      ・LINEプロフィール
+│   │      ・STAFF ID
+│   │      ・氏名
+│   │      ・所属支部
+│   │      ・認証状態
+│   │      ・TERMS / PRIVACY / LICENSE
+│   │      ※すべて自動表示・編集不可
+│   │
+│   └── 📦 保有枚数
+│          ・保管場所
+│          ・保有枚数
+│          ・更新日時
+│          ※ログイン本人のみ更新可能
 │
-└── 🌍 全員共通画面 (Shared Operations)
-    ├── 📊 在庫一覧 (支部全員の保有枚数・保管場所・更新日時)
-    ├── 🗺 エリア (Tier 1 市町村 ➔ Tier 2 町名 ➔ Tier 3 住所 / 配布状況)
-    └── 🏆 ランキング (配布枚数・配布率・順位 / 支部全体の実績)
+└── 🌍 Shared Operations Domain（全員共通）
+    ├── 📊 在庫一覧
+    │      ・支部全員の保有枚数
+    │      ・保管場所
+    │      ・更新日時
+    │
+    ├── 🗺 エリア
+    │      ・Tier1 市町村
+    │      ・Tier2 町名
+    │      ・Tier3 住所
+    │      ・配布状況
+    │
+    └── 🏆 ランキング
+           ・配布枚数
+           ・配布率
+           ・順位
+           ・支部全体実績
 ```
 
-### ⚙️ 責務原則
-- **本人専用 (Private)** ＝ 「自分の識別情報」および「自分の保有枚数報告」
-- **全員共通 (Shared Operations)** ＝ 「支部全体の業務・進捗・統計情報」
+### ⚙️ Responsibility Rules
 
-他人のデータやパブリックな統計を本人専用画面に混入させること、または本人の個人編集権限を全員共通画面に露出させる実装を禁止する。
+#### Private Domain
+- 本人の識別情報のみ扱う。
+- 本人の入力・更新のみ許可する。
+- 他ユーザーの情報を表示しない。
+
+#### Shared Operations Domain
+- 支部全体の業務データを扱う。
+- 統計・進捗・在庫共有を表示する。
+- 本人専用の編集UIを配置しない。
+
+### 🏛️ Single Source of Truth (SSOT)
+
+- **本人情報**: LINE Authentication ＋ STAFF Master
+- **保有枚数**: Flyer Stock Sheet
+- **エリア**: ADDRESS_MASTER ➔ Googleスプレッドシート（市町村別シート）
+- **ランキング**: 配布実績データ
+
+### 🚫 Prohibited (絶対禁止事項)
+- Private Domain に他人のデータを表示すること。
+- Shared Operations Domain に本人専用の編集UIを配置すること。
+- 同一データを Private と Shared で重複保持すること。
+- 個人情報を Shared Domain の状態管理へコピーすること。
+- 責務を跨ぐ実装・画面設計を行うこと。
