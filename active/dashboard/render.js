@@ -42,25 +42,34 @@ function renderAreas() {
   }
 
   if (currentCity === null) {
-    // 【第1層：市・自治体一覧画面】
-    // SSOT (getAppData) の出現順を100%保持して Tier 1 リストを生成
-    const cityList = [];
-    const cityMap = {};
-    areaSummary.forEach(s => {
-      const cityName = getCityName(s.name);
-      if (!cityMap[cityName]) {
-        const item = { name: cityName, done: 0, total: 0 };
-        cityMap[cityName] = item;
-        cityList.push(item);
-      }
-      cityMap[cityName].done += s.done || 0;
-      cityMap[cityName].total += s.total || 0;
-    });
+    // SSOT の出現順を100%保持して Tier 1 リストを生成
+    let cities = [];
+    if (typeof tier1Cache !== 'undefined' && Array.isArray(tier1Cache) && tier1Cache.length > 0) {
+      cities = tier1Cache.map(c => {
+        const done = c.done || 0;
+        const total = c.total || 0;
+        const progress = total > 0 ? Math.round((done / total) * 100) : 0;
+        return { name: c.name, done: done, total: total, progress: progress };
+      });
+    } else {
+      const cityList = [];
+      const cityMap = {};
+      areaSummary.forEach(s => {
+        const cityName = getCityName(s.name);
+        if (!cityMap[cityName]) {
+          const item = { name: cityName, done: 0, total: 0 };
+          cityMap[cityName] = item;
+          cityList.push(item);
+        }
+        cityMap[cityName].done += s.done || 0;
+        cityMap[cityName].total += s.total || 0;
+      });
 
-    const cities = cityList.map(c => {
-      c.progress = c.total > 0 ? Math.round((c.done / c.total) * 100) : 0;
-      return c;
-    });
+      cities = cityList.map(c => {
+        c.progress = c.total > 0 ? Math.round((c.done / c.total) * 100) : 0;
+        return c;
+      });
+    }
 
     const headerCardHtml = `
       <div style="border: 1px solid rgba(37, 99, 235, 0.35); box-shadow: inset 0 0 15px rgba(37, 99, 235, 0.08), 0 0 25px rgba(37, 99, 235, 0.12);" class="premium-glass py-5 px-6 flex flex-col items-center justify-center text-center gap-2 mb-6">

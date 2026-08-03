@@ -269,6 +269,9 @@ function processGetActionLegacy(action, e) {
       case 'getSystemSummary':
         response = typeof SystemSummaryService !== 'undefined' ? SystemSummaryService.getInstance().getSystemSummary() : { success: true, ...getDashboardData() };
         break;
+      case 'getTier1':
+        response = typeof Tier1Service !== 'undefined' ? Tier1Service.getInstance().getTier1() : { success: false };
+        break;
       case 'getRanking':
         response = { success: true, ranking: getRankingData() };
         break;
@@ -532,6 +535,8 @@ function processPostAction(action, postData, e) {
       }
     case 'getSystemSummary':
       return typeof SystemSummaryService !== 'undefined' ? SystemSummaryService.getInstance().getSystemSummary() : { success: false };
+    case 'getTier1':
+      return typeof Tier1Service !== 'undefined' ? Tier1Service.getInstance().getTier1() : { success: false };
     case 'getAppData':
       return getAppData();
     case 'getConfig':
@@ -2658,6 +2663,7 @@ class CapabilityRegistry {
     const mapping = {
       'registerStaff': 'BOOTSTRAP_REGISTER',
       'getSystemSummary': 'READ_DASHBOARD',
+      'getTier1': 'READ_TIER1',
       'getAppData': 'READ_DASHBOARD',
       'getFlyerStock': 'READ_HOLDING',
       'updateFlyerStock': 'WRITE_HOLDING'

@@ -452,6 +452,7 @@ async function loadData(skipSync = false) {
         updateStats(data.stats);
       }
       fetchSystemSummary();
+      fetchTier1();
 
       // バックグラウンドでランキングデータを先読み/更新
       prefetchRanking();
@@ -1025,13 +1026,21 @@ async function switchPage(id, force = false) {
     updateStorageLocationDropdown();
   }
 
-function updateStorageLocationDropdown() {
+function updateStorageLocationDropdown(overrideCities = null) {
   const locSelect = $('storage-register-location');
   if (!locSelect) return;
 
   locSelect.innerHTML = '';
   const cityList = [];
-  if (Array.isArray(areaSummary) && typeof getCityName === 'function') {
+
+  if (Array.isArray(overrideCities) && overrideCities.length > 0) {
+    overrideCities.forEach(c => {
+      const name = typeof c === 'string' ? c : (c.name || '');
+      if (name && !cityList.includes(name)) {
+        cityList.push(name);
+      }
+    });
+  } else if (Array.isArray(areaSummary) && typeof getCityName === 'function') {
     areaSummary.forEach(s => {
       const cName = getCityName(s.name);
       if (cName && !cityList.includes(cName)) {
@@ -1273,6 +1282,26 @@ async function fetchSystemSummary() {
     }
   } catch (err) {
     console.warn("fetchSystemSummary failed:", err);
+  }
+  return null;
+}
+
+/**
+ * Sprint G2-2: Tier 1 API Foundation (Generation 2)
+ * fetchTier1() - Tier 1 市町村サマリー取得 (Gen 2 段階移行用)
+ */
+let tier1Cache = null;
+
+async function fetchTier1() {
+  try {
+    const res = await callApi('getTier1');
+    if (res && res.success && Array.isArray(res.cities)) {
+      tier1Cache = res.cities;
+      updateStorageLocationDropdown(tier1Cache);
+      return tier1Cache;
+    }
+  } catch (err) {
+    console.warn("fetchTier1 failed:", err);
   }
   return null;
 }
