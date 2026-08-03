@@ -275,3 +275,17 @@ ID CARD
 ```
 
 今後、明示的な UI リニューアル指示がない限り、上記要素の見た目・配置変更は一切禁止します。
+
+---
+
+## ⚙️ Municipality Single Source of Truth Governance Rule (市町村SSOTガバナンス規約)
+
+市町村一覧は Googleスプレッドシート（Tier 1）のみを参照すること（SSOT原則）。
+
+### 🚫 絶対禁止事項
+- `CITY_ORDER` の再導入
+- `cityList.push(...)` 等の固定配列
+- フォールバック用市町村リストの直書き
+- 地区名・市町村名のコード内ハードコード
+
+市町村一覧をコード内で複製・保持する実装は禁止し、必ずSSOT（スプレッドシート由来の `areaSummary` / GAS `getAppData`）から毎回動的生成しなければならない。
