@@ -243,12 +243,13 @@ async function startApp(profile = null, registrationPromise = null) {
       await registrationPromise;
     }
 
-    // 2. 基本データ(getAppData)の取得完了を待つ
-    // ※ 既存ユーザーは登録処理スキップでここからスタート
-    const loadPromise = loadData(false);
-    await loadPromise;
+    // 2. 基本データ(getAppData)の取得は完全バックグラウンドで非同期実行（エラーログキャッチ）
+    loadData(false).catch(err => {
+      console.warn("Background load error:", err);
+      logDebug("[loadData] Background error: " + (err ? err.message : err));
+    });
 
-    // 3. すべての必須準備が整ってからID画面へ切り替える
+    // 3. ID画面へ即時に切り替える
     switchPage('settings');
     $('app').classList.remove('hidden');
     $('app').classList.remove('opacity-0');
