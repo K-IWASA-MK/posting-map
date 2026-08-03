@@ -21,7 +21,7 @@ window.renderStaffCard = function(userInfo, options = {}) {
     <div class="pt-2 pb-0 px-4 flex flex-col items-center">
       <div class="mb-6 flex items-center justify-center gap-3">
         <span class="text-xs font-bold text-white/50 tracking-wider">公式配布員</span>
-        ${formattedId ? `<span style="letter-spacing: 0.15em; text-indent: 0.15em; background: linear-gradient(180deg, rgba(0,183,255,0.16), rgba(0,183,255,0.06)); border: 1px solid rgba(0,183,255,0.3); box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), inset 0 0 6px rgba(0,183,255,0.35), 0 0 12px rgba(0,183,255,0.25); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);" class="inline-flex items-center justify-center h-6 px-3 text-[10px] font-black text-[#00B7FF] font-mono rounded-full">${formattedId}</span>` : ''}
+        ${formattedId ? `<span style="letter-spacing: 0.15em; text-indent: 0.15em; background: linear-gradient(180deg, rgba(234,95,8,0.16), rgba(234,95,8,0.06)); border: 1px solid #EA5F08; box-shadow: 0 0 6px rgba(234,95,8,.35), 0 0 12px rgba(234,95,8,.18); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);" class="inline-flex items-center justify-center h-6 px-3 text-[10px] font-black text-white font-mono rounded-full">${formattedId}</span>` : ''}
       </div>
       
       <div id="id-gyro-card" style="height: 300px; --glow-x: 0px; --glow-y: 0px; --glow-opacity: 0.08; --edge-opacity: 0.08; --edge-angle: 180deg;" class="w-full max-w-sm gyro-card flex flex-col items-center p-6 relative overflow-hidden">
