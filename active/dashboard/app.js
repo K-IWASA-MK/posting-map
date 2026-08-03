@@ -446,6 +446,7 @@ async function loadData(skipSync = false) {
       
       logDebug("[loadData] Rendering areas in background...");
       renderAreas();
+      updateStorageLocationDropdown();
       logDebug("[loadData] Rendering areas OK. Updating stats...");
       updateStats();
 
@@ -1017,36 +1018,40 @@ async function switchPage(id, force = false) {
     const msgEl = $('storage-register-message');
     if (msgEl) msgEl.classList.add('hidden');
 
-    // Dropdown dynamic population
-    const locSelect = $('storage-register-location');
-    if (locSelect) {
-      locSelect.innerHTML = '';
-      const cities = new Set();
-      if (Array.isArray(areaSummary)) {
-        areaSummary.forEach(s => {
-          const cName = getCityName(s.name);
-          if (cName) cities.add(cName);
-        });
-      }
-      const CITY_ORDER = { '伊賀市': 1, '亀山市': 2, '鈴鹿市': 3, '名張市': 4, '四日市市': 5 };
-      const cityList = Array.from(cities).sort((a, b) => {
-        const orderA = CITY_ORDER[a] || 99;
-        const orderB = CITY_ORDER[b] || 99;
-        if (orderA !== orderB) return orderA - orderB;
-        return a.localeCompare(b);
-      });
-      
-      if (cityList.length === 0) {
-        cityList.push('伊賀市', '亀山市', '鈴鹿市', '名張市', '四日市市');
-      }
-      cityList.forEach(city => {
-        const opt = document.createElement('option');
-        opt.value = city;
-        opt.textContent = city;
-        locSelect.appendChild(opt);
-      });
-    }
+    // Dynamic population using SSOT areaSummary
+    updateStorageLocationDropdown();
   }
+
+function updateStorageLocationDropdown() {
+  const locSelect = $('storage-register-location');
+  if (!locSelect) return;
+
+  locSelect.innerHTML = '';
+  const cities = new Set();
+  if (Array.isArray(areaSummary) && typeof getCityName === 'function') {
+    areaSummary.forEach(s => {
+      const cName = getCityName(s.name);
+      if (cName) cities.add(cName);
+    });
+  }
+
+  const cityList = Array.from(cities).sort((a, b) => a.localeCompare(b, 'ja'));
+
+  if (cityList.length === 0) {
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = 'データ読み込み中...';
+    locSelect.appendChild(opt);
+    return;
+  }
+
+  cityList.forEach(city => {
+    const opt = document.createElement('option');
+    opt.value = city;
+    opt.textContent = city;
+    locSelect.appendChild(opt);
+  });
+}
 
   if (id === 'storage-list') {
     const listContainer = $('storage-list-container');

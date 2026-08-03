@@ -20,12 +20,9 @@ function formatCompletedAt(dateStr) {
   return `${MM}/${dd} ${HH}:${mm}`;
 }
 
-const CITY_ORDER = { '桑名市': 1, 'いなべ市': 2, '桑名郡': 3, '員弁郡': 4, '三重郡': 5, '四日市市': 6 };
-
 function getCityName(areaName) {
   if (!areaName) return 'その他';
-  // 注意: 以下のハードコードは「四日市(市)」のようにエリア名に「市」が含まれる特殊ケースへの対処。
-  // 正規表現 /^[^市町...]/ では「四日市」と不完全にマッチするため意図的に残している。
+  // 注意: 以下のパターンは「四日市(市)」のようにエリア名に「市」が含まれる特殊ケースへの対処。
   if (areaName.startsWith('四日市')) return '四日市市';
   if (areaName.startsWith('鈴鹿')) return '鈴鹿市';
   if (areaName.startsWith('亀山')) return '亀山市';
@@ -61,12 +58,7 @@ function renderAreas() {
       return c;
     });
 
-    cities.sort((a, b) => {
-      const orderA = CITY_ORDER[a.name] || 99;
-      const orderB = CITY_ORDER[b.name] || 99;
-      if (orderA !== orderB) return orderA - orderB;
-      return a.name.localeCompare(b.name);
-    });
+    cities.sort((a, b) => a.name.localeCompare(b.name, 'ja'));
 
     const headerCardHtml = `
       <div style="border: 1px solid rgba(37, 99, 235, 0.35); box-shadow: inset 0 0 15px rgba(37, 99, 235, 0.08), 0 0 25px rgba(37, 99, 235, 0.12);" class="premium-glass py-5 px-6 flex flex-col items-center justify-center text-center gap-2 mb-6">
