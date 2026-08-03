@@ -21,11 +21,8 @@
             // 未ログイン時はLINE認証へリダイレクト
             liff.login();
           } else {
-            // 認証済みであればパラメータを付与してDashboardへ遷移
-            const search = window.location.search || '';
-            const hash = window.location.hash || '';
-            const targetUrl = './active/dashboard/index.html' + search + hash;
-            window.location.replace(targetUrl);
+            // 認証済みであればDashboardへ遷移
+            window.location.replace('./active/dashboard/index.html');
           }
         })
         .catch(err => {
