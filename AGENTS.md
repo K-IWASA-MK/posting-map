@@ -444,3 +444,28 @@ Generation 1 (`getAppData()`) を廃止できるのは、以下をすべて満�
 - 回帰テスト（Regression Test）に合格していること。
 
 上記すべてを満たした時点でのみ `getAppData()` を段階的に廃止する。
+
+---
+
+## 📊 System Summary Service Foundation (Generation 2 ヘッダー分離統制規則)
+
+Generation 2 の階層型 API アーキテクチャに伴い、ヘッダー表示（全体進捗・オンライン状態）を Tier データから完全に独立したサービスとして統制する。
+
+### 🏛️ API 責務分離原則 (Responsibility Rules)
+- **`getSystemSummary()`**: ヘッダー専用 API。全体件数(`total`)、完了数(`done`)、配布率(`percent`)、状態(`online`) のみを取得。Tier データは返さない。
+- **`getTier1()`**: 市町村一覧（Tier 1）のみ取得。Stats は返さない。
+- **`getTier2(cityName)`**: 選択された市町村配下の町名一覧のみ取得。
+- **`getTier3(cityName, townName)`**: 選択された町名配下の住所一覧のみ取得。
+
+### ⚙️ フロントエンド統制
+- Generation 2 において `updateStats()` は JavaScript 側で計算集計処理を行わない。`getSystemSummary()` のレスポンスをそのまま直接描画する。
+- ヘッダーを表示するために階層データ（Tier 1〜3）を全件走査・集計することを禁止する。
+
+### 🎨 UI Policy (ヘッダー表示固定規則)
+ヘッダー表示項目は以下の **4要素** に永久固定する。
+1. 全体エリア
+2. 完了数 / 総数 (`header-count`)
+3. ONLINE インジケーター
+4. 配布率 (`header-pct`)
+
+*※最終更新時刻などの不要な追加情報をヘッダーに表示してはならない。*
