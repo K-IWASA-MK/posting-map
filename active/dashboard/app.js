@@ -1097,7 +1097,7 @@ async function switchPage(id, force = false) {
   // 設定画面（登録・IDカード）では無駄なスクロールを避けるが、画面サイズが小さい場合はスクロール可能にする
   const contentEl = $('content');
   const settingsPage = document.getElementById('page-settings');
-  if (id === 'settings') {
+  if (id === 'settings' || id === 'storage-register') {
     if (!hasUser) {
       if (settingsPage) settingsPage.style.paddingBottom = '0px';
     } else {
