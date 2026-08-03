@@ -469,3 +469,22 @@ Generation 2 の階層型 API アーキテクチャに伴い、ヘッダー表�
 4. 配布率 (`header-pct`)
 
 *※最終更新時刻などの不要な追加情報をヘッダーに表示してはならない。*
+
+---
+
+## 🗺️ Generation 2 Implementation Roadmap (スプリントロードマップ)
+
+### 🚀 Sprint G2-1 : System Summary Foundation ⭐最優先
+- **Goal**: ヘッダー表示を Tier データから完全分離する。
+- **新API**: `getSystemSummary()` ➔ `{ total: 858, done: 0, percent: 0, online: true }`
+- **対象**: GAS API / Dashboard Header UI / `updateStats()` 表示専用化
+- **完了条件**: ヘッダーが `areaSummary` に非依存化、858件数・0%計算・ONLINE状態が正常表示されること。
+
+### 📦 Sprint G2-2 : Tier 1 API Foundation
+- **Goal**: `getTier1()` を新設（6市町村サマリーのみ取得）。
+
+### 🗺️ Sprint G2-3 : Tier 2 Lazy Loading
+- **Goal**: `getTier2(cityName)` （市クリック時オンデマンド取得）。
+
+### 📍 Sprint G2-4 : Tier 3 Lazy Loading
+- **Goal**: `getTier3(cityName, townName)` （町クリック時オンデマンド取得）。
