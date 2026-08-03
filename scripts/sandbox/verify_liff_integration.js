@@ -20,8 +20,8 @@ assert.ok(indexHtml.includes('static.line-scdn.net/liff/edge/2/sdk.js'), 'LIFF S
 console.log("✓ Check 1: LIFF SDK script tag present in <head>");
 
 // Check 2: LIFF ID definition
-assert.ok(indexHtml.includes('2010374196-bHBYo37e'), 'LIFF ID (2010374196-bHBYo37e) must be defined');
-console.log("✓ Check 2: LIFF ID (2010374196-bHBYo37e) defined");
+assert.ok(indexHtml.includes('2010941735-GRLuqPic'), 'LIFF ID (2010941735-GRLuqPic) must be defined');
+console.log("✓ Check 2: LIFF ID (2010941735-GRLuqPic) defined");
 
 // Check 3: initLiff function definition
 assert.ok(indexHtml.includes('async function initLiff()'), 'initLiff function must be defined');
