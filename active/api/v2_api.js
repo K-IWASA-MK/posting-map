@@ -266,7 +266,8 @@ function processGetActionLegacy(action, e) {
     switch (action) {
       case 'getDashboardData':
       case 'getSummary':
-        response = { success: true, ...getDashboardData() };
+      case 'getSystemSummary':
+        response = typeof SystemSummaryService !== 'undefined' ? SystemSummaryService.getInstance().getSystemSummary() : { success: true, ...getDashboardData() };
         break;
       case 'getRanking':
         response = { success: true, ranking: getRankingData() };
@@ -529,6 +530,8 @@ function processPostAction(action, postData, e) {
           error: "Failed to run batch step inside processPostAction: " + err.toString()
         };
       }
+    case 'getSystemSummary':
+      return typeof SystemSummaryService !== 'undefined' ? SystemSummaryService.getInstance().getSystemSummary() : { success: false };
     case 'getAppData':
       return getAppData();
     case 'getConfig':
@@ -2654,6 +2657,7 @@ class CapabilityRegistry {
   static resolve(action) {
     const mapping = {
       'registerStaff': 'BOOTSTRAP_REGISTER',
+      'getSystemSummary': 'READ_DASHBOARD',
       'getAppData': 'READ_DASHBOARD',
       'getFlyerStock': 'READ_HOLDING',
       'updateFlyerStock': 'WRITE_HOLDING'

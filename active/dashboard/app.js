@@ -447,8 +447,11 @@ async function loadData(skipSync = false) {
       logDebug("[loadData] Rendering areas in background...");
       renderAreas();
       updateStorageLocationDropdown();
-      logDebug("[loadData] Rendering areas OK. Updating stats...");
-      updateStats();
+      logDebug("[loadData] Rendering areas OK. Updating stats via System Summary...");
+      if (data.stats) {
+        updateStats(data.stats);
+      }
+      fetchSystemSummary();
 
       // バックグラウンドでランキングデータを先読み/更新
       prefetchRanking();
@@ -1239,31 +1242,39 @@ function backToCityList() {
   if (contentEl) contentEl.scrollTop = 0;
 }
 
-function updateStats() {
-  let totalDone = 0;
-  let totalPoints = 0;
-  if (!areaSummary || !Array.isArray(areaSummary)) {
-    logDebug("[updateStats] areaSummary is missing or not an array!");
-    return;
-  }
-  areaSummary.forEach(area => {
-    totalDone += area.done || 0;
-    totalPoints += area.total || 0;
-  });
-
+/**
+ * Sprint G2-1: System Summary Foundation
+ * updateStats(summaryData) - 表示専用関数 (areaSummary 集計計算ロジック全廃)
+ */
+function updateStats(summaryData = null) {
   const countEl = $('header-count');
   const pctEl = $('header-pct');
 
-  if (totalPoints === 0) {
-    if (countEl) countEl.textContent = '0/ 0';
+  if (!summaryData) {
+    if (countEl) countEl.textContent = '0/ 858';
     if (pctEl) pctEl.textContent = '0%';
     return;
   }
 
-  const pct = Math.round((totalDone / totalPoints) * 100);
+  const total = summaryData.total || 858;
+  const done = summaryData.done || 0;
+  const percent = typeof summaryData.percent === 'number' ? summaryData.percent : (total > 0 ? Math.round((done / total) * 100) : 0);
 
-  if (countEl) countEl.textContent = `${totalDone}/ ${totalPoints}`;
-  if (pctEl) pctEl.textContent = `${pct}%`;
+  if (countEl) countEl.textContent = `${done}/ ${total}`;
+  if (pctEl) pctEl.textContent = `${percent}%`;
+}
+
+async function fetchSystemSummary() {
+  try {
+    const res = await callApi('getSystemSummary');
+    if (res && res.success) {
+      updateStats(res);
+      return res;
+    }
+  } catch (err) {
+    console.warn("fetchSystemSummary failed:", err);
+  }
+  return null;
 }
 
 function cleanNameInput(str) {
