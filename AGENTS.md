@@ -387,3 +387,32 @@ POSTING MAP 画面構成
 - 同一データを Private と Shared で重複保持すること。
 - 個人情報を Shared Domain の状態管理へコピーすること。
 - 責務を跨ぐ実装・画面設計を行うこと。
+
+---
+
+## 🚀 Ultimate Tiered Lazy Loading Architecture Governance Rule (階層型Lazy Loading戦略)
+
+POSTING MAP は将来のデータ増大（数万件規模）にも初期起動速度（0.1秒）を100%維持するため、以下の 4大設計思想 に基づく段階的オンデマンド取得構造を完成形アーキテクチャとする。
+
+```
+POSTING MAP 完成形データ戦略
+ADDRESS_MASTER
+      │
+      ▼
+Googleスプレッドシート (SSOT)
+      │
+      ▼
+Tier 1（市町村） ──► ログイン時取得（エリア画面 Tier 1 ＆ 在庫登録 で共有）
+      │
+      ▼
+Tier 2（町名）   ──► 市町村選択時のみオンデマンド取得
+      │
+      ▼
+Tier 3（住所）   ──► 町名選択時のみオンデマンド取得
+```
+
+### 🏛️ 4大設計思想
+1. **SSOT (Single Source of Truth)**: Googleスプレッドシート（市町村別シート）を唯一の情報源とする。
+2. **階層構造 (Tiered Structure)**: Tier 1 (市町村) ➔ Tier 2 (町名) ➔ Tier 3 (住所) の明確な階層分離。
+3. **Lazy Loading (遅延読み込み)**: 起動時に全件データを取得せず、段階的に取得。
+4. **On-Demand (必要時のみ取得)**: ユーザーの画面操作に応じて必要な範囲のみを非同期リクエスト。
