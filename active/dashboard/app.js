@@ -1032,7 +1032,7 @@ async function switchPage(id, force = false) {
           const myStock = _stockData.find(s => String(s.staffId) === String(staffId));
           if (myStock) {
             const rawCount = parseInt(myStock.count, 10);
-            countInput.value = isNaN(rawCount) ? '' : rawCount.toLocaleString();
+            countInput.value = isNaN(rawCount) ? '' : rawCount.toLocaleString() + '枚';
             const locSelect = $('storage-register-location');
             if (locSelect && myStock.location) {
               locSelect.value = myStock.location;
@@ -1057,7 +1057,7 @@ function updateStorageRegisterButtonText() {
 
   if (btn.disabled) return;
 
-  const raw = countInput.value.replace(/,/g, '').trim();
+  const raw = countInput.value.replace(/,/g, '').replace(/枚/g, '').trim();
   if (raw !== '') {
     btn.textContent = 'チラシ枚数を更新する';
   } else {
@@ -1070,14 +1070,14 @@ function setupStorageRegisterInputFormatter(inputEl) {
   inputEl.dataset.formatted = 'true';
 
   inputEl.addEventListener('input', function() {
-    const rawVal = this.value.replace(/,/g, '').replace(/[^\d]/g, '');
+    const rawVal = this.value.replace(/,/g, '').replace(/枚/g, '').replace(/[^\d]/g, '');
     if (!rawVal) {
       this.value = '';
       updateStorageRegisterButtonText();
       return;
     }
     const num = parseInt(rawVal, 10);
-    this.value = isNaN(num) ? '' : num.toLocaleString();
+    this.value = isNaN(num) ? '' : num.toLocaleString() + '枚';
     updateStorageRegisterButtonText();
   });
 }
@@ -1245,7 +1245,7 @@ window.submitFlyerStock = async function() {
   if (!locSelect || !countInput || !btn) return;
   
   const location = locSelect.value;
-  const count = parseInt(String(countInput.value).replace(/,/g, ''), 10);
+  const count = parseInt(String(countInput.value).replace(/,/g, '').replace(/枚/g, ''), 10);
   
   if (!location) {
     alert("保管場所を選択してください。");
