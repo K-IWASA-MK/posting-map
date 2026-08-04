@@ -82,7 +82,26 @@ function authorizeAndTestDriveWrite_legacy_backup() {
  * GETリクエスト：JSONデータの取得
  */
 function doGet(e) {
-  return PlatformGetEntryHandler.handle(e);
+  isWebAppCall = true;
+  let params = (e && e.parameter) ? Object.assign({}, e.parameter) : {};
+  if (params.json) {
+    try {
+      const parsed = typeof params.json === 'string' ? JSON.parse(params.json) : params.json;
+      if (parsed && typeof parsed === 'object') {
+        Object.assign(params, parsed);
+      }
+    } catch (errJ) {}
+  }
+  if (e) {
+    e.parameter = params;
+  }
+  const action = params.action || "";
+  const res = processGetActionLegacy(action, e);
+  if (res && typeof res.setMimeType === 'function') {
+    return res;
+  }
+  return ContentService.createTextOutput(JSON.stringify(res))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 /*
@@ -370,15 +389,7 @@ function processGetActionLegacy(action, e) {
       case 'refreshCache':
         response = { success: true, data: refreshAreaSummaryCache() };
         break;
-      case 'getStrategy':
-        response = { success: true, data: generateStrategy(e.branchId, e.tenantId || "DEFAULT") };
-        break;
-      case 'getHeatmap':
-        response = { success: true, data: generateHeatmap(e.branchId, e.tenantId || "DEFAULT") };
-        break;
-      case 'getPrediction':
-        response = { success: true, data: predictOutcome(e.branchId, e.tenantId || "DEFAULT") };
-        break;
+
       default:
         response = { success: true, message: 'POSTING MAP API is online.' };
     }
@@ -390,7 +401,27 @@ function processGetActionLegacy(action, e) {
  * POSTリクエスト：データの登録・更新
  */
 function doPost(e) {
-  return PlatformPostEntryHandler.handle(e);
+  isWebAppCall = true;
+  let params = (e && e.parameter) ? Object.assign({}, e.parameter) : {};
+  let postData = null;
+  if (e && e.postData && e.postData.contents) {
+    try {
+      postData = JSON.parse(e.postData.contents);
+    } catch (errP) {}
+  }
+  if (params.json) {
+    try {
+      const parsedJson = typeof params.json === 'string' ? JSON.parse(params.json) : params.json;
+      postData = { ...(postData || {}), ...parsedJson };
+    } catch (errJson) {}
+  }
+  const action = params.action || (postData && postData.action) || "";
+  const res = processPostAction(action, postData, e);
+  if (res && typeof res.setMimeType === 'function') {
+    return res;
+  }
+  return ContentService.createTextOutput(JSON.stringify(res))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 /*
@@ -571,12 +602,7 @@ function processPostAction(action, postData, e) {
       } catch (err) {
         return { success: false, error: err.toString() };
       }
-    case 'getStrategy':
-      return { success: true, data: generateStrategy(postData.branchId || e.parameter.branchId, postData.tenantId || e.parameter.tenantId || "DEFAULT") };
-    case 'getHeatmap':
-      return { success: true, data: generateHeatmap(postData.branchId || e.parameter.branchId, postData.tenantId || e.parameter.tenantId || "DEFAULT") };
-    case 'getPrediction':
-      return { success: true, data: predictOutcome(postData.branchId || e.parameter.branchId, postData.tenantId || e.parameter.tenantId || "DEFAULT") };
+
     case 'getRanking':
       return { success: true, ranking: getRankingData() };
     case 'getRoster':
@@ -1124,7 +1150,7 @@ class ApiVersionResolver {
         return normalized;
       }
     }
-    const defaultVersion = GasConfigurationProvider.getInstance().getApiVersion();
+    const defaultVersion = 'v2';
     const resolvedDefault = defaultVersion.split('-')[0].split('.')[0];
     const finalDefault = resolvedDefault.startsWith('v') ? resolvedDefault.toLowerCase() : 'v' + resolvedDefault;
     if (finalDefault === 'v1' || finalDefault === 'v2' || finalDefault === 'v3' || finalDefault === 'future') {
@@ -1486,115 +1512,7 @@ class CleanupTestSpreadsheetHandler {
   }
 }
 
-/*
- * [LEGACY_FRAMEWORK_BACKUP: SEC-040~050 Framework Routing & Validation Rollback Point]
- * EndpointRegistry -> active/framework/routing/endpoint_registry.js
- * ApiRouter -> active/framework/routing/api_router.js
- * ValidationError, ValidationResult, RequestValidator, MethodValidator -> active/framework/validation/request_validator.js
- */
 
-class VersionValidator {
-  constructor() {
-    this.id = 'VERSION_VALIDATOR';
-  }
-  validate(request, context) {
-    const validatedAt = Date.now();
-    const supported = { v1: true, v2: true, v3: true, future: true };
-    if (!supported[request.version]) {
-      return ValidationResult.failure(
-        [{ code: ValidationError.INVALID_VERSION, message: 'API Version ' + request.version + ' is not supported.', validatorId: this.id }],
-        validatedAt,
-        0
-      );
-    }
-    return ValidationResult.success(validatedAt, 0);
-  }
-}
-
-class RouteValidator {
-  constructor() {
-    this.id = 'ROUTE_VALIDATOR';
-  }
-  validate(request, context) {
-    const validatedAt = Date.now();
-    const registry = EndpointRegistry.getInstance();
-    const routeKey = RouteResolver.resolveKey(request.method, request.version, request.path);
-    
-    let hasRegisteredRoute = registry.routes[routeKey] !== undefined;
-    if (hasRegisteredRoute) {
-      return ValidationResult.success(validatedAt, 0);
-    }
-
-    const action = request.body.action || request.query.action;
-    if (action) {
-      return ValidationResult.success(validatedAt, 0);
-    }
-
-    return ValidationResult.failure(
-      [{ code: ValidationError.ROUTE_NOT_FOUND, message: 'Route "' + request.method + ' ' + request.path + '" was not found.', validatorId: this.id }],
-      validatedAt,
-      0
-    );
-  }
-}
-
-class FeatureValidator {
-  constructor() {
-    this.id = 'FEATURE_VALIDATOR';
-  }
-  validate(request, context) {
-    const validatedAt = Date.now();
-    const config = GasConfigurationProvider.getInstance();
-    const flags = config.getFeatureFlags();
-
-    if (request.path === '/holding' && !flags.flyerHolding) {
-      return ValidationResult.failure(
-        [{ code: ValidationError.FEATURE_DISABLED, message: 'Held Flyers feature is currently disabled.', validatorId: this.id }],
-        validatedAt,
-        0
-      );
-    }
-
-    if (request.path === '/dashboard' && !flags.googleMaps && !flags.mapbox) {
-      return ValidationResult.failure(
-        [{ code: ValidationError.FEATURE_DISABLED, message: 'Map engine feature is currently disabled.', validatorId: this.id }],
-        validatedAt,
-        0
-      );
-    }
-
-    return ValidationResult.success(validatedAt, 0);
-  }
-}
-
-class ValidatorChain {
-  constructor() {
-    this.id = 'VALIDATOR_CHAIN';
-    this.validators = [];
-  }
-  addValidator(validator) {
-    this.validators.push(validator);
-    return this;
-  }
-  validate(request, context) {
-    const start = Date.now();
-    for (let i = 0; i < this.validators.length; i++) {
-      const validator = this.validators[i];
-      const result = validator.validate(request, context);
-      if (!result.valid) {
-        const duration = Date.now() - start;
-        return ValidationResult.failure(result.errors, start, duration);
-      }
-    }
-    const duration = Date.now() - start;
-    return ValidationResult.success(start, duration);
-  }
-}
-
-/*
- * [LEGACY_FRAMEWORK_BACKUP: ValidationPipeline Rollback Point]
- * ValidationPipeline has been migrated to active/framework/pipeline/pipeline_executor.js
- */
 
 // ==========================================
 // 🚀 EXCEPTION FRAMEWORK FOUNDATION CLASSES
@@ -2443,8 +2361,7 @@ class AuthenticationPipeline {
     return AuthenticationPipeline.instance;
   }
   execute(request, context) {
-    const config = GasConfigurationProvider.getInstance();
-    const flags = config.getFeatureFlags();
+    const flags = {};
     const provider = IdentityResolver.resolve(request);
 
     if (provider) {
@@ -2815,8 +2732,7 @@ class LicensingPipeline {
     return LicensingPipeline.instance;
   }
   execute(request, context) {
-    const config = GasConfigurationProvider.getInstance();
-    const flags = config.getFeatureFlags();
+    const flags = {};
 
     let authContext = context.getAuthenticationContext();
     if (!authContext) {
@@ -3024,8 +2940,7 @@ class FeatureAccessPipeline {
     return FeatureAccessPipeline.instance;
   }
   execute(request, context) {
-    const config = GasConfigurationProvider.getInstance();
-    const flags = config.getFeatureFlags();
+    const flags = {};
 
     const feature = FeatureResolver.resolveFeature(request);
     if (!feature) {

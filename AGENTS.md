@@ -488,3 +488,21 @@ Generation 2 の階層型 API アーキテクチャに伴い、ヘッダー表�
 
 ### 📍 Sprint G2-4 : Tier 3 Lazy Loading
 - **Goal**: `getTier3(cityName, townName)` （町クリック時オンデマンド取得）。
+
+---
+
+## ⚓ Stability First Governance Rule (完成フェーズ・安定性最優先原則)
+
+POSTING MAP は機能完成フェーズへ移行した。
+
+### 📌 開発優先順位 (Development Priorities)
+1. **バグ修正 (Bug Fixes)**
+2. **UI / UX 改善 (UI / UX Enhancements)**
+3. **パフォーマンス改善 (Performance Optimization)**
+4. **保守性向上 (Maintainability & Clean Architecture)**
+
+### 🚫 開発統制ルール
+- 原則として新規機能の無秩序な追加を禁止する。
+- 既存機能で実現可能であるにもかかわらず、新たな抽象化レイヤー・フレームワーク・アーキテクチャを追加することを禁止する。
+- アーキテクチャ変更や抽象化レイヤーの追加は、既存機能では実現不可能であることが明確に証明された場合に限り、事前承認を得て検討する。
+

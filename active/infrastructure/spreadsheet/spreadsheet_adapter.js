@@ -28,7 +28,7 @@ function getSS() {
 
 class SpreadsheetBatchReader {
   constructor() {
-    this.configProvider = (typeof GasConfigurationProvider !== 'undefined') ? GasConfigurationProvider.getInstance() : null;
+    this.configProvider = null;
     this.cachedSpreadsheet = null;
   }
   getSpreadsheet() {
@@ -58,7 +58,7 @@ class SpreadsheetBatchReader {
 
 class SpreadsheetBatchWriter {
   constructor() {
-    this.configProvider = (typeof GasConfigurationProvider !== 'undefined') ? GasConfigurationProvider.getInstance() : null;
+    this.configProvider = null;
     this.cachedSpreadsheet = null;
   }
   getSpreadsheet() {

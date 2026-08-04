@@ -8,7 +8,7 @@
 
 class LockServiceProvider {
   constructor() {
-    this.configProvider = (typeof GasConfigurationProvider !== 'undefined') ? GasConfigurationProvider.getInstance() : null;
+    this.configProvider = null;
   }
   static getInstance() {
     if (!LockServiceProvider.instance) {

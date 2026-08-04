@@ -8,7 +8,7 @@
 
 class CacheServiceProvider {
   constructor() {
-    this.configProvider = (typeof GasConfigurationProvider !== 'undefined') ? GasConfigurationProvider.getInstance() : null;
+    this.configProvider = null;
   }
   static getInstance() {
     if (!CacheServiceProvider.instance) {
