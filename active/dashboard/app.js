@@ -238,6 +238,9 @@ async function callApiPost(action, payload = {}) {
 
 async function startApp(profile = null, registrationPromise = null) {
   try {
+    // Gen 2 独立並列リクエスト: ヘッダー専用 System Summary の即時並列発注 (getAppData に非依存)
+    fetchSystemSummary();
+
     // 1. 初回ユーザーの場合、何よりも先に登録処理の完了を待つ
     if (registrationPromise) {
       await registrationPromise;
@@ -451,7 +454,6 @@ async function loadData(skipSync = false) {
       if (data.stats) {
         updateStats(data.stats);
       }
-      fetchSystemSummary();
       fetchTier1();
 
       // バックグラウンドでランキングデータを先読み/更新
@@ -1273,17 +1275,27 @@ function updateStats(summaryData = null) {
   if (pctEl) pctEl.textContent = `${percent}%`;
 }
 
-async function fetchSystemSummary() {
-  try {
-    const res = await callApi('getSystemSummary');
-    if (res && res.success) {
-      updateStats(res);
-      return res;
-    }
-  } catch (err) {
-    console.warn("fetchSystemSummary failed:", err);
+let _systemSummaryPromise = null;
+
+async function fetchSystemSummary(forceRefresh = false) {
+  if (_systemSummaryPromise && !forceRefresh) {
+    return _systemSummaryPromise;
   }
-  return null;
+
+  _systemSummaryPromise = (async () => {
+    try {
+      const res = await callApi('getSystemSummary');
+      if (res && res.success) {
+        updateStats(res);
+        return res;
+      }
+    } catch (err) {
+      console.warn("fetchSystemSummary failed:", err);
+    }
+    return null;
+  })();
+
+  return _systemSummaryPromise;
 }
 
 /**
