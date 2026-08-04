@@ -93,7 +93,8 @@ if (typeof FlyerRepository === 'undefined') {
           if (existingLocation !== location) {
             return { success: false, message: "このIDはすでに " + existingLocation + " で登録されています。他の市には登録できません。" };
           }
-          const finalCount = existingCount + count;
+          // updateStock() は現在保有しているチラシ枚数を絶対値で保存する。加算・減算・差分計算は一切行わない。
+          const finalCount = count;
           s.getRange(targetRow, 3, 1, 4).setValues([[staffName, location, finalCount, updatedAt]]);
         } else {
           const newRow = lastRow + 1;

@@ -1018,14 +1018,32 @@ async function switchPage(id, force = false) {
     }
     if (nameEl) nameEl.textContent = staffName || '---';
 
-    // Clear input and feedback message on entry
     const countInput = $('storage-register-count');
-    if (countInput) countInput.value = '';
     const msgEl = $('storage-register-message');
     if (msgEl) msgEl.classList.add('hidden');
 
     // Dynamic population using SSOT areaSummary
     updateStorageLocationDropdown();
+
+    // Auto-populate latest registered stock for logged-in staff
+    if (staffId && countInput) {
+      callApi('getFlyerStock').then(data => {
+        if (data && data.success && Array.isArray(data.stocks)) {
+          _stockData = data.stocks;
+          _stockFetched = true;
+          const myStock = _stockData.find(s => String(s.staffId) === String(staffId));
+          if (myStock) {
+            countInput.value = myStock.count;
+            const locSelect = $('storage-register-location');
+            if (locSelect && myStock.location) {
+              locSelect.value = myStock.location;
+            }
+          }
+        }
+      }).catch(err => {
+        console.warn('Failed to fetch staff stock on entry:', err);
+      });
+    }
   }
 
 function updateStorageLocationDropdown(overrideCities = null) {
@@ -1227,7 +1245,6 @@ window.submitFlyerStock = async function() {
     if (res && res.success) {
       msgEl.textContent = "✓ 在庫を登録しました";
       msgEl.classList.remove('hidden');
-      countInput.value = '';
       _stockFetched = false; // キャッシュを無効化し、次回遷移時に最新の在庫を取得させる
     } else {
       alert("登録に失敗しました: " + (res.message || "エラー"));
