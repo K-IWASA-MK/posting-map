@@ -1297,6 +1297,8 @@ async function fetchTier1() {
     const res = await callApi('getTier1');
     if (res && res.success && Array.isArray(res.cities)) {
       tier1Cache = res.cities;
+      // Tier 1 再取得時は Tier 2 キャッシュを破棄 (キャッシュガバナンスルール適用)
+      tier2CacheMap = {};
       updateStorageLocationDropdown(tier1Cache);
       return tier1Cache;
     }
@@ -1304,6 +1306,41 @@ async function fetchTier1() {
     console.warn("fetchTier1 failed:", err);
   }
   return null;
+}
+
+/**
+ * Sprint G2-3: Tier 2 Lazy Loading Foundation (Generation 2)
+ * fetchTier2(cityName) - 市町村指定オンデマンド町名取得
+ */
+let tier2CacheMap = {};
+
+async function fetchTier2(cityName) {
+  if (!cityName) return null;
+  if (tier2CacheMap[cityName]) {
+    return tier2CacheMap[cityName];
+  }
+
+  try {
+    const res = await callApi('getTier2', { cityName: cityName });
+    if (res && res.success && Array.isArray(res.areas)) {
+      tier2CacheMap[cityName] = res.areas;
+      return res.areas;
+    }
+  } catch (err) {
+    console.warn(`fetchTier2 failed for ${cityName}:`, err);
+  }
+  return null;
+}
+
+/**
+ * Sprint G2-4 先回りインターフェース: selectTown(cityName, townName)
+ */
+function selectTown(cityName, townName) {
+  logDebug(`[selectTown] Selected: ${cityName} -> ${townName}`);
+  const fullName = (townName && townName.includes(cityName)) ? townName : `${cityName}_${townName}`;
+  if (typeof openDetail === 'function') {
+    openDetail(fullName);
+  }
 }
 
 function cleanNameInput(str) {

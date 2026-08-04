@@ -272,6 +272,12 @@ function processGetActionLegacy(action, e) {
       case 'getTier1':
         response = typeof Tier1Service !== 'undefined' ? Tier1Service.getInstance().getTier1() : { success: false };
         break;
+      case 'getTier2':
+        {
+          const targetCity = (e && e.parameter && e.parameter.cityName) ? e.parameter.cityName : null;
+          response = typeof Tier2Service !== 'undefined' ? Tier2Service.getInstance().getTier2(targetCity) : { success: false };
+        }
+        break;
       case 'getRanking':
         response = { success: true, ranking: getRankingData() };
         break;
@@ -537,6 +543,8 @@ function processPostAction(action, postData, e) {
       return typeof SystemSummaryService !== 'undefined' ? SystemSummaryService.getInstance().getSystemSummary() : { success: false };
     case 'getTier1':
       return typeof Tier1Service !== 'undefined' ? Tier1Service.getInstance().getTier1() : { success: false };
+    case 'getTier2':
+      return typeof Tier2Service !== 'undefined' ? Tier2Service.getInstance().getTier2(postData ? postData.cityName : null) : { success: false };
     case 'getAppData':
       return getAppData();
     case 'getConfig':
@@ -2664,6 +2672,7 @@ class CapabilityRegistry {
       'registerStaff': 'BOOTSTRAP_REGISTER',
       'getSystemSummary': 'READ_DASHBOARD',
       'getTier1': 'READ_TIER1',
+      'getTier2': 'READ_TIER2',
       'getAppData': 'READ_DASHBOARD',
       'getFlyerStock': 'READ_HOLDING',
       'updateFlyerStock': 'WRITE_HOLDING'

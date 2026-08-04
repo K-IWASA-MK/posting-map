@@ -120,7 +120,7 @@ window.renderAreaListItem = function(s) {
       </button>
     `
     : `
-      <button ontouchstart="" onclick="openDetail('${s.name}')"
+      <button ontouchstart="" onclick="typeof selectTown === 'function' ? selectTown(typeof currentCity !== 'undefined' ? currentCity : '', '${s.name}') : openDetail('${s.name}')"
         style="background: rgba(37,99,235,0.12); border: 1px solid rgba(37,99,235,0.3); color: #fff; transition: transform 75ms ease-out; white-space: nowrap;"
         onpointerdown="this.style.transform='scale(0.96)'"
         onpointerup="this.style.transform=''"

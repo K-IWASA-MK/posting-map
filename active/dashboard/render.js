@@ -94,7 +94,22 @@ function renderAreas() {
     $('area-list').innerHTML = headerCardHtml + `<div class="space-y-6">${cityCardsHtml}</div>` + bottomTopButtonHtml;
   } else {
     // 【第2層：選択された市のエリアシート一覧画面】
-    const filteredAreas = areaSummary.filter(s => getCityName(s.name) === currentCity);
+    let filteredAreas = [];
+    if (typeof tier2CacheMap !== 'undefined' && tier2CacheMap[currentCity] && Array.isArray(tier2CacheMap[currentCity])) {
+      filteredAreas = tier2CacheMap[currentCity].map(t => {
+        const done = t.done || 0;
+        const total = t.total || 0;
+        const progress = total > 0 ? Math.round((done / total) * 100) : 0;
+        return { name: t.name, done: done, total: total, progress: progress, repAddress: t.repAddress || '' };
+      });
+    } else {
+      filteredAreas = areaSummary.filter(s => getCityName(s.name) === currentCity).map(s => {
+        const done = s.done || 0;
+        const total = s.total || 0;
+        const progress = total > 0 ? Math.round((done / total) * 100) : 0;
+        return { ...s, done, total, progress };
+      });
+    }
 
     const backButtonHtml = `
       <div class="flex items-center mb-6 h-12">
@@ -126,6 +141,13 @@ function selectCity(cityName) {
   renderAreas();
   const contentEl = $('content');
   if (contentEl) contentEl.scrollTop = 0;
+
+  // Gen 2 Tier 2 オンデマンド取得
+  if (typeof fetchTier2 === 'function') {
+    fetchTier2(cityName).then(() => {
+      renderAreas();
+    });
+  }
 
   // 市区町村全体の詳細データをバックグラウンドで先読み開始
   if (window.currentCityDetailsName !== cityName) {
