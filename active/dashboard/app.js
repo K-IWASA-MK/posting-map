@@ -1069,7 +1069,12 @@ function setupStorageRegisterInputFormatter(inputEl) {
   if (!inputEl || inputEl.dataset.formatted) return;
   inputEl.dataset.formatted = 'true';
 
-  inputEl.addEventListener('input', function() {
+  inputEl.addEventListener('focus', function() {
+    const rawVal = this.value.replace(/,/g, '').replace(/枚/g, '').replace(/[^\d]/g, '');
+    this.value = rawVal;
+  });
+
+  inputEl.addEventListener('blur', function() {
     const rawVal = this.value.replace(/,/g, '').replace(/枚/g, '').replace(/[^\d]/g, '');
     if (!rawVal) {
       this.value = '';
@@ -1078,6 +1083,10 @@ function setupStorageRegisterInputFormatter(inputEl) {
     }
     const num = parseInt(rawVal, 10);
     this.value = isNaN(num) ? '' : num.toLocaleString();
+    updateStorageRegisterButtonText();
+  });
+
+  inputEl.addEventListener('input', function() {
     updateStorageRegisterButtonText();
   });
 }
