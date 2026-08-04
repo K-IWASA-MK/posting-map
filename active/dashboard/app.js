@@ -1019,8 +1019,6 @@ async function switchPage(id, force = false) {
     if (nameEl) nameEl.textContent = staffName || '---';
 
     const countInput = $('storage-register-count');
-    const msgEl = $('storage-register-message');
-    if (msgEl) msgEl.classList.add('hidden');
 
     // Dynamic population using SSOT areaSummary
     updateStorageLocationDropdown();
@@ -1222,10 +1220,9 @@ window.backToTier1 = function() {
 window.submitFlyerStock = async function() {
   const locSelect = $('storage-register-location');
   const countInput = $('storage-register-count');
-  const msgEl = $('storage-register-message');
   const btn = $('btn-storage-register-submit');
   
-  if (!locSelect || !countInput || !msgEl || !btn) return;
+  if (!locSelect || !countInput || !btn) return;
   
   const location = locSelect.value;
   const count = parseInt(String(countInput.value).replace(/,/g, ''), 10);
@@ -1250,7 +1247,6 @@ window.submitFlyerStock = async function() {
   
   btn.disabled = true;
   btn.textContent = "登録中...";
-  msgEl.classList.add('hidden');
   
   try {
     const res = await callApiPost('updateFlyerStock', {
@@ -1261,8 +1257,7 @@ window.submitFlyerStock = async function() {
     });
     
     if (res && res.success) {
-      msgEl.textContent = "✓ 在庫を登録しました";
-      msgEl.classList.remove('hidden');
+      alert("✓ 在庫を登録しました");
       _stockFetched = false; // キャッシュを無効化し、次回遷移時に最新の在庫を取得させる
     } else {
       alert("登録に失敗しました: " + (res.message || "エラー"));
