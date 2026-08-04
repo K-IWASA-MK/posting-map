@@ -1032,7 +1032,7 @@ async function switchPage(id, force = false) {
           const myStock = _stockData.find(s => String(s.staffId) === String(staffId));
           if (myStock) {
             const rawCount = parseInt(myStock.count, 10);
-            countInput.value = isNaN(rawCount) ? '' : rawCount.toLocaleString() + '枚';
+            countInput.value = isNaN(rawCount) ? '' : rawCount.toLocaleString();
             const locSelect = $('storage-register-location');
             if (locSelect && myStock.location) {
               locSelect.value = myStock.location;
@@ -1077,7 +1077,7 @@ function setupStorageRegisterInputFormatter(inputEl) {
       return;
     }
     const num = parseInt(rawVal, 10);
-    this.value = isNaN(num) ? '' : num.toLocaleString() + '枚';
+    this.value = isNaN(num) ? '' : num.toLocaleString();
     updateStorageRegisterButtonText();
   });
 }

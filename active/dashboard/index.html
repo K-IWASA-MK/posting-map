@@ -126,10 +126,12 @@
             </select>
           </div>
 
-          <!-- Sheet Count Input -->
           <div class="space-y-2">
             <label class="text-[10px] font-bold text-white/40 tracking-wider">保有チラシ枚数</label>
-            <input id="storage-register-count" type="text" pattern="[0-9]*" inputmode="numeric" placeholder="" class="w-full h-14 bg-[#1C1C1E] border border-white/10 rounded-2xl px-4 text-lg font-black text-white focus:outline-none focus:border-[#2563eb] transition-colors text-center font-mono">
+            <div class="relative flex items-center">
+              <input id="storage-register-count" type="text" pattern="[0-9]*" inputmode="numeric" placeholder="" class="w-full h-14 bg-[#1C1C1E] border border-white/10 rounded-2xl pl-4 pr-10 text-lg font-black text-white focus:outline-none focus:border-[#2563eb] transition-colors text-center font-mono">
+              <span class="absolute right-4 text-xs font-bold text-white/50 pointer-events-none select-none">枚</span>
+            </div>
           </div>
 
           <!-- Submit Button -->
