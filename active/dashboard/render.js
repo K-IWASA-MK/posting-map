@@ -431,6 +431,20 @@ async function openDetail(name) {
   // openDetail() で開かれたエリアを localStorage の assigned_area に自動記録
   localStorage.setItem('assigned_area', name);
 
+  // Gen 2 Tier3 キャッシュチェック
+  const activeCity = (typeof currentCity !== 'undefined' && currentCity) ? currentCity : getCityName(name);
+  const cacheKey = `${activeCity}::${name}`;
+  if (typeof tier3CacheMap !== 'undefined' && tier3CacheMap[cacheKey]) {
+    allPoints = tier3CacheMap[cacheKey];
+    window.currentCityDetailAreaName = name;
+    if (typeof scrollPositions !== 'undefined') scrollPositions['detail'] = 0;
+    const contentEl = $('content');
+    if (contentEl) contentEl.scrollTop = 0;
+    renderDetailList(name);
+    switchPage('detail');
+    return;
+  }
+
   // 1. 同一エリアへの再タップ: メモリキャッシュを使って即時描画
   if (window.currentCityDetailAreaName === name && allPoints && allPoints.length > 0) {
     if (typeof scrollPositions !== 'undefined') scrollPositions['detail'] = 0;

@@ -1316,6 +1316,14 @@ let tier2CacheMap = {};
 
 async function fetchTier2(cityName) {
   if (!cityName) return null;
+
+  // Tier 2 再取得・呼び出し時は該当市町村配下の Tier 3 キャッシュをパージ
+  Object.keys(tier3CacheMap).forEach(key => {
+    if (key.startsWith(`${cityName}::`)) {
+      delete tier3CacheMap[key];
+    }
+  });
+
   if (tier2CacheMap[cityName]) {
     return tier2CacheMap[cityName];
   }
@@ -1333,11 +1341,52 @@ async function fetchTier2(cityName) {
 }
 
 /**
- * Sprint G2-4 先回りインターフェース: selectTown(cityName, townName)
+ * Sprint G2-4: Tier 3 Lazy Loading Foundation (Generation 2 完成)
+ * fetchTier3(cityName, townName) - 町名指定オンデマンド住所一覧取得
  */
-function selectTown(cityName, townName) {
+let tier3CacheMap = {};
+
+async function fetchTier3(cityName, townName) {
+  if (!townName) return null;
+  const cacheKey = `${cityName || ''}::${townName}`;
+  if (tier3CacheMap[cacheKey]) {
+    return tier3CacheMap[cacheKey];
+  }
+
+  try {
+    const res = await callApi('getTier3', { cityName: cityName, townName: townName });
+    if (res && res.success && Array.isArray(res.points)) {
+      tier3CacheMap[cacheKey] = res.points;
+      return res.points;
+    }
+  } catch (err) {
+    console.warn(`fetchTier3 failed for ${cityName} ${townName}:`, err);
+  }
+  return null;
+}
+
+/**
+ * Sprint G2-4: selectTown(cityName, townName)
+ */
+async function selectTown(cityName, townName) {
   logDebug(`[selectTown] Selected: ${cityName} -> ${townName}`);
   const fullName = (townName && townName.includes(cityName)) ? townName : `${cityName}_${townName}`;
+
+  // Gen 2 Tier 3 オンデマンド取得
+  const points = await fetchTier3(cityName, townName);
+  if (points && points.length > 0 && typeof allPoints !== 'undefined') {
+    allPoints = points;
+    window.currentCityDetailAreaName = fullName;
+    if (typeof renderDetailList === 'function') {
+      renderDetailList(fullName);
+    }
+    if (typeof switchPage === 'function') {
+      switchPage('detail');
+    }
+    return;
+  }
+
+  // フォールバック (Gen 1 互換維持)
   if (typeof openDetail === 'function') {
     openDetail(fullName);
   }
