@@ -387,32 +387,41 @@ function deleteAllAreaSheets() {
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   props.setProperty("SPREADSHEET_ID", ss.getId());
+
+  // 2. 保護対象シートリスト（CONFIG依存 + 文字列ダイレクト指定で漏れを100%防止）
   const exclude = [
-    CONFIG.get("SHEET_GUIDE"),
-    CONFIG.get("SHEET_ROSTER"),
-    CONFIG.get("SHEET_TEMPLATE"),
-    CONFIG.get("SHEET_POSTAL"),
-    CONFIG.get("SHEET_DISTRICT"),
-    CONFIG.get("SHEET_STORAGE"),
-    CONFIG.get("SHEET_SYSTEM_CACHE"),
-  ];
+    "名簿",
+    "原本",
+    "保有チラシ枚数",
+    "チラシ保管庫",
+    "受渡要請履歴",
+    "__SYSTEM_CACHE__",
+    "初めての方「使い方ガイド」",
+    "📖 らくらくマニュアル",
+    "らくらくマニュアル",
+    "📄 活動報告書",
+    "📥 集計用マスターデータ",
+    "管理者ID",
+    "郵便番号",
+    "区割り",
+    (typeof CONFIG !== 'undefined' && CONFIG.get) ? CONFIG.get("SHEET_ROSTER") : null,
+    (typeof CONFIG !== 'undefined' && CONFIG.get) ? CONFIG.get("SHEET_TEMPLATE") : null,
+    (typeof CONFIG !== 'undefined' && CONFIG.get) ? CONFIG.get("SHEET_STORAGE") : null,
+    (typeof CONFIG !== 'undefined' && CONFIG.get) ? CONFIG.get("SHEET_SYSTEM_CACHE") : null,
+    (typeof CONFIG !== 'undefined' && CONFIG.get) ? CONFIG.get("SHEET_GUIDE") : null,
+    (typeof CONFIG !== 'undefined' && CONFIG.get) ? CONFIG.get("SHEET_POSTAL") : null,
+    (typeof CONFIG !== 'undefined' && CONFIG.get) ? CONFIG.get("SHEET_DISTRICT") : null,
+  ].filter(Boolean);
+
+  // 3. エリアシート（動的生成タブ）のみを削除。業務データ・システムシートは保護
   ss.getSheets().forEach((s) => {
     if (!exclude.includes(s.getName())) ss.deleteSheet(s);
   });
   
-  // チラシ保管庫の中身を初期化 (ヘッダー2行目以降をクリア)
-  const storageSheet = ss.getSheetByName(CONFIG.get("SHEET_STORAGE"));
-  if (storageSheet) {
-    const storageLastRow = storageSheet.getLastRow();
-    if (storageLastRow >= 2) {
-      storageSheet.getRange(2, 1, storageLastRow - 1, storageSheet.getLastColumn()).clearContent();
-    }
-  }
-  
   createSystemCacheSheet();
   refreshAreaSummaryCache();
   
-  ss.toast("リセット完了しました。");
+  ss.toast("エリアシートのリセットが完了しました（業務データは保持されています）。");
 }
 
 /**
