@@ -1038,14 +1038,32 @@ async function switchPage(id, force = false) {
               locSelect.value = myStock.location;
             }
           }
+          updateStorageRegisterButtonText();
         }
       }).catch(err => {
         console.warn('Failed to fetch staff stock on entry:', err);
+        updateStorageRegisterButtonText();
       });
     }
 
     setupStorageRegisterInputFormatter(countInput);
+    updateStorageRegisterButtonText();
   }
+
+function updateStorageRegisterButtonText() {
+  const countInput = $('storage-register-count');
+  const btn = $('btn-storage-register-submit');
+  if (!countInput || !btn) return;
+
+  if (btn.disabled) return;
+
+  const raw = countInput.value.replace(/,/g, '').trim();
+  if (raw !== '') {
+    btn.textContent = 'チラシ枚数を更新する';
+  } else {
+    btn.textContent = 'チラシ枚数を入力する';
+  }
+}
 
 function setupStorageRegisterInputFormatter(inputEl) {
   if (!inputEl || inputEl.dataset.formatted) return;
@@ -1055,10 +1073,12 @@ function setupStorageRegisterInputFormatter(inputEl) {
     const rawVal = this.value.replace(/,/g, '').replace(/[^\d]/g, '');
     if (!rawVal) {
       this.value = '';
+      updateStorageRegisterButtonText();
       return;
     }
     const num = parseInt(rawVal, 10);
     this.value = isNaN(num) ? '' : num.toLocaleString();
+    updateStorageRegisterButtonText();
   });
 }
 
@@ -1266,7 +1286,7 @@ window.submitFlyerStock = async function() {
     alert("エラーが発生しました: " + e.message);
   } finally {
     btn.disabled = false;
-    btn.textContent = "在庫を登録する";
+    updateStorageRegisterButtonText();
   }
 };
 
