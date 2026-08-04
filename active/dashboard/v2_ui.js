@@ -249,8 +249,8 @@ function setupTransferSheets() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   let msg = "";
 
-  // 1. チラシ保管庫
-  let storageSheetName = "チラシ保管庫";
+  // 1. 保有チラシ枚数
+  let storageSheetName = "保有チラシ枚数";
   if (typeof CONFIG !== 'undefined' && CONFIG.get("SHEET_STORAGE")) {
     storageSheetName = CONFIG.get("SHEET_STORAGE");
   }

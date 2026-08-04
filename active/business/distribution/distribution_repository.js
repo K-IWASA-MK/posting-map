@@ -75,7 +75,7 @@ if (typeof DistributionRepository === 'undefined') {
       for (let i = 0; i < sheets.length; i++) {
         const sheet = sheets[i];
         const name = sheet.getName();
-        if (name === "名簿" || name === "EventLog" || name === "TraceLog" || name === "__SYSTEM_CACHE__" || name === "チラシ保管庫" || name === "原本") {
+        if (name === "名簿" || name === "EventLog" || name === "TraceLog" || name === "__SYSTEM_CACHE__" || name === "保有チラシ枚数" || name === "原本") {
           continue;
         }
 

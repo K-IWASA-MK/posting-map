@@ -184,7 +184,7 @@ function verifyDistrictDeployment(e) {
       const ss = ssId ? SpreadsheetApp.openById(ssId) : getSS();
       const sheetNames = ss.getSheets().map(s => s.getName());
       
-      const REQUIRED_SHEETS = ["名簿", "チラシ保管庫", "原本"];
+      const REQUIRED_SHEETS = ["名簿", "保有チラシ枚数", "原本"];
       const FORBIDDEN_SHEETS = ["temp", "test", "debug", "unknown_generated"];
       
       const missing = REQUIRED_SHEETS.filter(name => !sheetNames.includes(name));

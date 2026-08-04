@@ -332,7 +332,7 @@ function checkEndOfMonthAndReset() {
     
     if (disableRollover) {
       // 【契約終了予約がある場合】 ➔ 在庫一覧も含めてデータを完全消去し、システムを完全停止
-      const storageSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.get("SHEET_STORAGE") || "チラシ保管庫");
+      const storageSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.get("SHEET_STORAGE") || "保有チラシ枚数");
       if (storageSheet) {
         const lastRow = storageSheet.getLastRow();
         if (lastRow >= 2) {
@@ -459,7 +459,7 @@ function sortAllAreaSheetTabs() {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheets = ss.getSheets();
-    const systemSheetNames = ["原本", "名簿", "初めての方「使い方ガイド」", "__SYSTEM_CACHE__", "チラシ保管庫", "管理者ID", "📄 活動報告書", "📖 らくらくマニュアル"];
+    const systemSheetNames = ["原本", "名簿", "初めての方「使い方ガイド」", "__SYSTEM_CACHE__", "保有チラシ枚数", "管理者ID", "📄 活動報告書", "📖 らくらくマニュアル"];
 
     const cityOrderPriority = ["桑名市", "いなべ市", "桑名郡", "員弁郡", "三重郡", "四日市市", "鈴鹿市"];
 

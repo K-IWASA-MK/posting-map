@@ -37,7 +37,7 @@ const DEFAULT_STORE = {
     SHEET_REPORT: "📄 活動報告書",
     SHEET_MANUAL: "📖 らくらくマニュアル",
     SHEET_SYSTEM_CACHE: "__SYSTEM_CACHE__",
-    SHEET_STORAGE: "チラシ保管庫",
+    SHEET_STORAGE: "保有チラシ枚数",
     SHEET_ADMIN: "管理者ID",
 
     // 動作設定

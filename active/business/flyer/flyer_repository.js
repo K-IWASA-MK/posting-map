@@ -26,12 +26,22 @@ if (typeof FlyerRepository === 'undefined') {
       }
       if (!ss) return null;
 
-      const sheetName = (typeof CONFIG !== 'undefined' && CONFIG.get) ? (CONFIG.get("SHEET_STORAGE") || "チラシ保管庫") : "チラシ保管庫";
+      const sheetName = (typeof CONFIG !== 'undefined' && CONFIG.get) ? (CONFIG.get("SHEET_STORAGE") || "保有チラシ枚数") : "保有チラシ枚数";
+      
+      // ① 「保有チラシ枚数」シートが存在する場合はそのまま使用
       let s = ss.getSheetByName(sheetName);
-      if (!s) {
-        s = ss.insertSheet(sheetName);
-        s.getRange(1, 1, 1, 6).setValues([["ID", "スタッフID", "スタッフ名", "保管場所", "保管枚数", "更新日時"]]);
+      if (s) return s;
+
+      // ② 旧シート名（「チラシ保管庫」）が存在する場合は安全に自動リネーム（データ100%継承）
+      const oldSheet = ss.getSheetByName("チラシ保管庫");
+      if (oldSheet) {
+        oldSheet.setName(sheetName);
+        return oldSheet;
       }
+
+      // ③ 両方存在しない場合は新規作成してヘッダー行を付与
+      s = ss.insertSheet(sheetName);
+      s.getRange(1, 1, 1, 6).setValues([["ID", "スタッフID", "スタッフ名", "保管場所", "保管枚数", "更新日時"]]);
       return s;
     }
 
