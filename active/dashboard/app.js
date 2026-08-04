@@ -1033,7 +1033,8 @@ async function switchPage(id, force = false) {
           _stockFetched = true;
           const myStock = _stockData.find(s => String(s.staffId) === String(staffId));
           if (myStock) {
-            countInput.value = myStock.count;
+            const rawCount = parseInt(myStock.count, 10);
+            countInput.value = isNaN(rawCount) ? '' : rawCount.toLocaleString();
             const locSelect = $('storage-register-location');
             if (locSelect && myStock.location) {
               locSelect.value = myStock.location;
@@ -1044,7 +1045,24 @@ async function switchPage(id, force = false) {
         console.warn('Failed to fetch staff stock on entry:', err);
       });
     }
+
+    setupStorageRegisterInputFormatter(countInput);
   }
+
+function setupStorageRegisterInputFormatter(inputEl) {
+  if (!inputEl || inputEl.dataset.formatted) return;
+  inputEl.dataset.formatted = 'true';
+
+  inputEl.addEventListener('input', function() {
+    const rawVal = this.value.replace(/,/g, '').replace(/[^\d]/g, '');
+    if (!rawVal) {
+      this.value = '';
+      return;
+    }
+    const num = parseInt(rawVal, 10);
+    this.value = isNaN(num) ? '' : num.toLocaleString();
+  });
+}
 
 function updateStorageLocationDropdown(overrideCities = null) {
   const locSelect = $('storage-register-location');
@@ -1210,7 +1228,7 @@ window.submitFlyerStock = async function() {
   if (!locSelect || !countInput || !msgEl || !btn) return;
   
   const location = locSelect.value;
-  const count = parseInt(countInput.value, 10);
+  const count = parseInt(String(countInput.value).replace(/,/g, ''), 10);
   
   if (!location) {
     alert("保管場所を選択してください。");
