@@ -428,9 +428,6 @@ function navigateToSiblingArea(direction) {
 }
 
 async function openDetail(name) {
-  // openDetail() で開かれたエリアを localStorage の assigned_area に自動記録
-  localStorage.setItem('assigned_area', name);
-
   // Gen 2 Tier3 キャッシュチェック
   const activeCity = (typeof currentCity !== 'undefined' && currentCity) ? currentCity : getCityName(name);
   const cacheKey = `${activeCity}::${name}`;
@@ -585,12 +582,6 @@ function renderSettings() {
   const lastSyncTime = localStorage.getItem('__last_sync_time__') || '--:--';
   const regDate = userInfo.registrationDate || '2025/07/01';
 
-  // Find assigned area info
-  let assignedAreaData = null;
-  const assignedAreaName = localStorage.getItem('assigned_area');
-  if (assignedAreaName && areaSummary) {
-    assignedAreaData = areaSummary.find(s => s.name === assignedAreaName);
-  }
 
   const staffCardHtml = renderStaffCard(userInfo, {
     branchName: displayBranch,
@@ -598,22 +589,8 @@ function renderSettings() {
     registrationDate: regDate
   });
 
-  const areaCardHtml = assignedAreaData ? renderAreaCard(assignedAreaData) : '';
-
-  container.innerHTML = `
-    ${staffCardHtml}
-    ${areaCardHtml}
-  `;
+  container.innerHTML = staffCardHtml;
 }
-
-
-
-window.switchToAssignedArea = function() {
-  const assignedAreaName = localStorage.getItem('assigned_area');
-  if (assignedAreaName) {
-    openDetail(assignedAreaName);
-  }
-};
 
 function renderRanking() {
   const container = $('ranking-list');

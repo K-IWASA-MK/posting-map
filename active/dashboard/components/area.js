@@ -1,35 +1,6 @@
 // POSTING MAP Component: area.js (Stateless, API-free rendering)
 
-window.renderAreaCard = function(areaData) {
-  if (!areaData) return '';
 
-  const doneCount = areaData.done || 0;
-  const totalCount = areaData.total || 0;
-  const percent = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
-  const displayAreaName = areaData.name || '---';
-
-  return `
-    <div style="background: rgba(28,28,30,0.8); border: 1px solid rgba(255,255,255,0.08);" class="w-full max-w-sm p-5 rounded-2xl flex items-center justify-between shadow-2xl mt-6">
-      <div class="flex-1 space-y-1">
-        <div class="flex items-center gap-1.5 text-white/50 text-[9px] uppercase tracking-wider">
-          <span>🎯</span>
-          <span>本日の担当エリア</span>
-        </div>
-        <div class="flex items-center gap-1 cursor-pointer hover:text-white transition-colors" onclick="window.switchToAssignedArea()">
-          <span class="text-sm font-black text-white">${displayAreaName}</span>
-          <span class="text-white/40 text-xs">➔</span>
-        </div>
-      </div>
-      <div style="border-left: 1px solid rgba(255,255,255,0.08); padding-left: 16px;" class="w-[40%] space-y-1 text-right">
-        <span class="text-white/50 text-[9px] uppercase tracking-wider block">本日の進捗</span>
-        <div class="flex items-baseline justify-end gap-1.5">
-          <span class="text-sm font-black text-white font-mono">${doneCount} / ${totalCount}</span>
-          <span class="text-[10px] text-[#00B7FF] font-bold font-mono">(${percent}%)</span>
-        </div>
-      </div>
-    </div>
-  `;
-};
 
 window.renderCityListItem = function(c) {
   const isCompleted = c.done === c.total && c.total > 0;
