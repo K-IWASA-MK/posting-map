@@ -929,18 +929,14 @@ function verifyDistrictDeployment(e) {
   if (params.executeFullBatch === "true" || params.executeFullBatch === true) {
     try {
       const ss = getSS();
-      const exclude = [
-        CONFIG.get("SHEET_GUIDE"), CONFIG.get("SHEET_ROSTER"), CONFIG.get("SHEET_TEMPLATE"),
-        CONFIG.get("SHEET_POSTAL"), CONFIG.get("SHEET_DISTRICT"), CONFIG.get("SHEET_MASTER_EXPORT"),
-        CONFIG.get("SHEET_REPORT"), CONFIG.get("SHEET_MANUAL"), CONFIG.get("SHEET_SYSTEM_CACHE"),
-        CONFIG.get("SHEET_STORAGE"), "__TEMP_ADDRESSES__"
-      ];
-
-      // 1. 古いエリアシートを全削除（最新 MIE_POSTAL.CSV による完全クリーン再構築）
+      // 1. 古いエリアシートを全削除（共通ガバナンス isProtectedSheet で保護）
       const sheets = ss.getSheets();
       sheets.forEach(s => {
-        if (!exclude.includes(s.getName())) {
-          try { ss.deleteSheet(s); } catch (delE) {}
+        if (!isProtectedSheet(s.getName())) {
+          try {
+            Logger.log("DELETE SHEET: " + s.getName());
+            ss.deleteSheet(s);
+          } catch (delE) {}
         }
       });
       SpreadsheetApp.flush();

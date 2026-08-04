@@ -25,17 +25,11 @@ function forceStartBatch() {
     } catch (bErr) {}
   }
 
-  const excludeSheets = [
-    CONFIG.get("SHEET_GUIDE"), CONFIG.get("SHEET_ROSTER"), CONFIG.get("SHEET_TEMPLATE"),
-    CONFIG.get("SHEET_POSTAL"), CONFIG.get("SHEET_DISTRICT"), CONFIG.get("SHEET_MASTER_EXPORT"),
-    CONFIG.get("SHEET_REPORT"), CONFIG.get("SHEET_MANUAL"), CONFIG.get("SHEET_SYSTEM_CACHE"),
-    CONFIG.get("SHEET_STORAGE"), "管理者ID", "__TEMP_ADDRESSES__", "MIE03_ADDRESS_MASTER"
-  ];
-
   const allCurrentSheets = ss.getSheets();
   allCurrentSheets.forEach(s => {
-    if (!excludeSheets.includes(s.getName())) {
+    if (!isProtectedSheet(s.getName())) {
       try {
+        Logger.log("DELETE SHEET: " + s.getName());
         ss.deleteSheet(s);
       } catch (e) {}
     }
@@ -331,14 +325,11 @@ function checkEndOfMonthAndReset() {
     createSystemCacheSheet();
     
     if (disableRollover) {
-      // 【契約終了予約がある場合】 ➔ 在庫一覧も含めてデータを完全消去し、システムを完全停止
-      const storageSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.get("SHEET_STORAGE") || "保有チラシ枚数");
-      if (storageSheet) {
-        const lastRow = storageSheet.getLastRow();
-        if (lastRow >= 2) {
-          storageSheet.getRange(2, 1, lastRow - 1, 6).clearContent();
-        }
-      }
+      /*
+       * Business Data Protection Rule:
+       * 保有チラシ枚数（SHEET_STORAGE）は配布員本人が現在値を更新するSSOT業務データです。
+       * 月次リセット、契約状態切り替え、自動バッチ等による自動削除・自動クリアは全面禁止します。
+       */
       
       // 自動更新トリガーを全削除
       deleteTriggers("checkEndOfMonthAndReset");
