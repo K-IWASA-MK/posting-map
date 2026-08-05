@@ -28,9 +28,30 @@
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .page { display: block; opacity: 1; transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1); }
     .page.hidden { display: none; opacity: 0; }
-    .neu-flat { @apply bg-white dark:bg-[#1c1c1e] shadow-[8px_8px_20px_rgba(0,0,0,0.05)] dark:shadow-[8px_8px_20px_rgba(0,0,0,0.4)]; }
-    .neu-inset { @apply bg-gray-50 dark:bg-black/20 shadow-[inset_4px_4px_10px_rgba(0,0,0,0.05)] dark:shadow-[inset_4px_4px_10px_rgba(0,0,0,0.5)]; }
-    .btn-neu { @apply transition-all duration-300 active:scale-95; }
+    .neu-flat {
+      background-color: #ffffff;
+      box-shadow: 8px 8px 20px rgba(0,0,0,0.05);
+    }
+    .neu-inset {
+      background-color: #f9fafb;
+      box-shadow: inset 4px 4px 10px rgba(0,0,0,0.05);
+    }
+    .btn-neu {
+      transition: all 0.3s ease;
+    }
+    .btn-neu:active {
+      transform: scale(0.95);
+    }
+    @media (prefers-color-scheme: dark) {
+      .neu-flat {
+        background-color: #1c1c1e;
+        box-shadow: 8px 8px 20px rgba(0,0,0,0.4);
+      }
+      .neu-inset {
+        background-color: rgba(0, 0, 0, 0.2);
+        box-shadow: inset 4px 4px 10px rgba(0,0,0,0.5);
+      }
+    }
   </style>
   <script src="./config.js"></script>
 </head>
