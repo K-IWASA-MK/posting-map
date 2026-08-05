@@ -121,9 +121,17 @@
           <!-- Dropdown -->
           <div class="space-y-2">
             <label class="text-[10px] font-bold text-white/40 tracking-wider">保管場所（市名）</label>
-            <select id="storage-register-location" class="w-full h-14 bg-[#1C1C1E] border border-white/10 rounded-2xl px-4 text-base font-bold text-white focus:outline-none focus:border-[#2563eb] transition-colors text-center appearance-none">
-              <!-- Dynamically populated -->
-            </select>
+            <div id="storage-location-container" class="relative w-full h-14 bg-[#1C1C1E] border border-white/10 rounded-2xl flex items-center justify-center cursor-pointer transition-colors focus-within:border-[#2563eb]">
+              <div id="storage-location-display" class="flex items-center justify-center space-x-2 pointer-events-none select-none">
+                <span id="storage-location-text" class="text-base font-bold text-white">保管場所を選択</span>
+                <svg class="w-4 h-4 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </div>
+              <select id="storage-register-location" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer text-base font-bold text-white">
+                <!-- Dynamically populated -->
+              </select>
+            </div>
           </div>
 
           <div class="space-y-2">

@@ -1037,6 +1037,7 @@ async function switchPage(id, force = false) {
             const locSelect = $('storage-register-location');
             if (locSelect && myStock.location) {
               locSelect.value = myStock.location;
+              updateStorageLocationDisplayText();
             }
           }
           updateStorageCountDisplay();
@@ -1072,18 +1073,12 @@ function updateStorageCountDisplay() {
 }
 
 function updateStorageRegisterButtonText() {
-  const countInput = $('storage-register-count');
   const btn = $('btn-storage-register-submit');
-  if (!countInput || !btn) return;
-
-  if (btn.disabled) return;
+  const countInput = $('storage-register-count');
+  if (!btn || !countInput) return;
 
   const raw = countInput.value.replace(/,/g, '').replace(/枚/g, '').trim();
-  if (raw !== '') {
-    btn.textContent = 'チラシ枚数を更新する';
-  } else {
-    btn.textContent = 'チラシ枚数を入力する';
-  }
+  btn.textContent = raw ? 'チラシ枚数を更新する' : 'チラシ枚数を入力する';
 }
 
 function setupStorageRegisterInputFormatter(inputEl) {
@@ -1138,9 +1133,28 @@ function setupStorageRegisterInputFormatter(inputEl) {
   });
 }
 
+function updateStorageLocationDisplayText() {
+  const locSelect = $('storage-register-location');
+  const locText = $('storage-location-text');
+  if (!locSelect || !locText) return;
+
+  if (locSelect.value) {
+    locText.textContent = locSelect.value;
+  } else {
+    locText.textContent = '保管場所を選択';
+  }
+}
+
 window.updateStorageLocationDropdown = function updateStorageLocationDropdown(overrideCities = null) {
   const locSelect = $('storage-register-location');
   if (!locSelect) return;
+
+  if (!locSelect.dataset.listenerBound) {
+    locSelect.dataset.listenerBound = 'true';
+    locSelect.addEventListener('change', function() {
+      updateStorageLocationDisplayText();
+    });
+  }
 
   locSelect.innerHTML = '';
   const cityList = [];
@@ -1166,6 +1180,7 @@ window.updateStorageLocationDropdown = function updateStorageLocationDropdown(ov
     opt.value = '';
     opt.textContent = 'データ読み込み中...';
     locSelect.appendChild(opt);
+    updateStorageLocationDisplayText();
     return;
   }
 
@@ -1175,6 +1190,8 @@ window.updateStorageLocationDropdown = function updateStorageLocationDropdown(ov
     opt.textContent = city;
     locSelect.appendChild(opt);
   });
+
+  updateStorageLocationDisplayText();
 }
 
   if (id === 'storage-list') {
@@ -1341,8 +1358,11 @@ window.submitFlyerStock = async function() {
   } catch (e) {
     alert("エラーが発生しました: " + e.message);
   } finally {
-    btn.disabled = false;
-    updateStorageRegisterButtonText();
+    const btn = $('btn-storage-register-submit');
+    if (btn) {
+      btn.disabled = false;
+      updateStorageRegisterButtonText();
+    }
   }
 };
 
