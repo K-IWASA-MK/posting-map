@@ -32,34 +32,11 @@ function extractDistrictAddresses(targetDistrictName, targetPrefecture) {
     });
   }
 
-  const getBaseCityName = (city) => {
-    if (!city) return "";
-    if (city.indexOf("四日市市") === 0) return "四日市市";
-    const match = city.match(/^(.+?[市郡])/);
-    return match ? match[1] : city;
-  };
-
   return rawData.map(row => {
-    const cityName = row[0];
-    const townName = row[1];
-    const fullAddr = row[2];
-    const postalCode = row[3];
-    
-    let townKana = townName;
-    for (let k in townKanaMap) {
-      if (townName.indexOf(k) === 0) {
-        townKana = townName.replace(k, townKanaMap[k]);
-        break;
-      }
-    }
-
     return {
-      postalCode: postalCode,
-      address: fullAddr,
-      city: getBaseCityName(cityName),
-      cityKana: cityKanaMap[cityName] || "",
-      townKana: townKana,
-      district: "三重第3区"
+      postalCode: row[3] || "",
+      city: String(row[0] || "").trim(),
+      address: String(row[2] || "").trim()
     };
   });
 }

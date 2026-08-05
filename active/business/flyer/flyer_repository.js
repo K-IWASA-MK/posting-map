@@ -3,7 +3,7 @@
  * 
  * Domain: Flyer Domain
  * Layer: Business Layer
- * Responsibility: 「チラシ保管庫」Spreadsheet への読込・書き込みカプセル化
+ * Responsibility: 「保有チラシ枚数」Spreadsheet への読込・書き込みカプセル化
  */
 
 if (typeof FlyerRepository === 'undefined') {
@@ -31,13 +31,6 @@ if (typeof FlyerRepository === 'undefined') {
       // ① 「保有チラシ枚数」シートが存在する場合はそのまま使用
       let s = ss.getSheetByName(sheetName);
       if (s) return s;
-
-      // ② 旧シート名（「チラシ保管庫」）が存在する場合は安全に自動リネーム（データ100%継承）
-      const oldSheet = ss.getSheetByName("チラシ保管庫");
-      if (oldSheet) {
-        oldSheet.setName(sheetName);
-        return oldSheet;
-      }
 
       // ③ 両方存在しない場合は新規作成してヘッダー行を付与
       s = ss.insertSheet(sheetName);

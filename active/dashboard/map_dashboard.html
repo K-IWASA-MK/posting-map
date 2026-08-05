@@ -34,7 +34,7 @@
     #map { height: 100vh; width: 100%; transition: filter 0.5s ease; }
     @media (prefers-color-scheme: dark) { #map { filter: invert(0.9) hue-rotate(180deg) brightness(1.2); } }
     
-    .gm-style-iw { border-radius: 28px !important; padding: 0 !important; background: rgba(255,255,255,0.85) !important; backdrop-blur: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1) !important; }
+    .gm-style-iw { border-radius: 28px !important; padding: 0 !important; background: rgba(255,255,255,0.85) !important; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 10px 40px rgba(0,0,0,0.1) !important; }
     @media (prefers-color-scheme: dark) { .gm-style-iw { background: rgba(20,20,20,0.85) !important; color: #f5f5f7 !important; } }
     .gm-style-iw-d { overflow: hidden !important; }
   </style>
@@ -91,7 +91,14 @@
   <script src="https://maps.googleapis.com/maps/api/js?key=<?= apiKey ?>&callback=initMap&language=ja" async defer></script>
 
   <script>
-    let map; let markers = []; let townCircles = []; const ZOOM_THRESHOLD = 15;
+    let map;
+    let cityCircles = [];
+    let townCircles = [];
+    let markers = [];
+    const ZOOM_THRESHOLD_TOWN = 12;
+    const ZOOM_THRESHOLD_PIN = 15;
+    const loadedCities = {}; // cityName => true
+    const loadedTowns = {};  // fullName => true
 
     function initMap() {
       const appleStyle = [
@@ -102,8 +109,8 @@
       ];
 
       map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: 34.862, lng: 136.538 },
-        zoom: 12, styles: appleStyle, disableDefaultUI: true, zoomControl: true
+        center: { lat: 34.963, lng: 136.632 }, // 四日市市中心付近をデフォルト
+        zoom: 11, styles: appleStyle, disableDefaultUI: true, zoomControl: true
       });
 
       map.addListener("zoom_changed", updateVisibility);
@@ -111,64 +118,157 @@
     }
 
     function updateVisibility() {
-      const show = map.getZoom() >= ZOOM_THRESHOLD;
-      markers.forEach(m => m.setVisible(show));
-      townCircles.forEach(c => c.setVisible(!show));
+      const zoom = map.getZoom();
+      const showCities = zoom < ZOOM_THRESHOLD_TOWN;
+      const showTowns = zoom >= ZOOM_THRESHOLD_TOWN && zoom < ZOOM_THRESHOLD_PIN;
+      const showPins = zoom >= ZOOM_THRESHOLD_PIN;
+
+      cityCircles.forEach(c => c.setVisible(showCities));
+      townCircles.forEach(c => c.setVisible(showTowns));
+      markers.forEach(m => m.setVisible(showPins));
     }
 
     function drawMapContent(data) {
-      if (!data || !data.points) { hideLoading(); return; }
-      const { points, summary } = data;
-      Object.keys(summary).forEach((name, i) => {
-        const s = summary[name]; const rate = s.done / s.total;
-        if (s.lat && s.lng) createTownCircle(name, { lat: s.lat, lng: s.lng }, rate, s);
+      if (!data || !data.summary) { hideLoading(); return; }
+      const { summary, stats } = data;
+
+      summary.forEach(c => {
+        if (c.lat && c.lng) {
+          createCityCircle(c.name, { lat: c.lat, lng: c.lng }, c.done, c.total);
+        }
       });
-      points.forEach(p => { if (p.lat && p.lng) createPointMarker(p, { lat: p.lat, lng: p.lng }); });
-      updateSidebar(points, summary); hideLoading();
+
+      updateSidebar(summary, stats);
+      hideLoading();
     }
 
-    function createTownCircle(name, pos, rate, s) {
+    function createCityCircle(cityName, pos, done, total) {
+      const rate = total > 0 ? done / total : 0;
+      const color = rate >= 0.8 ? "#4ade80" : rate >= 0.3 ? "#fbbf24" : "#f87171";
+      const circle = new google.maps.Circle({
+        strokeColor: "#FFFFFF", strokeOpacity: 0.8, strokeWeight: 3,
+        fillColor: color, fillOpacity: 0.4, map: map, center: pos, radius: 2500,
+        visible: map.getZoom() < ZOOM_THRESHOLD_TOWN
+      });
+
+      const content = `
+        <div class="p-6 font-sans">
+          <div class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">自治体セクター (Tier 1)</div>
+          <div class="text-xl font-black text-navy dark:text-blue-400 tracking-tight mb-2">${cityName}</div>
+          <div class="text-2xl font-black text-navy dark:text-blue-400">${Math.round(rate*100)}% <span class="text-xs text-gray-300 ml-2">${done}/${total}</span></div>
+        </div>`;
+      const info = new google.maps.InfoWindow({ content: content });
+      circle.addListener("click", () => {
+        info.setPosition(pos);
+        info.open(map);
+        map.setCenter(pos);
+        map.setZoom(13);
+        loadTownsForCity(cityName);
+      });
+      cityCircles.push(circle);
+    }
+
+    function loadTownsForCity(cityName) {
+      if (loadedCities[cityName]) return;
+      google.script.run.withSuccessHandler(res => {
+        if (res && res.success && Array.isArray(res.areas)) {
+          drawTownCircles(cityName, res.areas);
+          loadedCities[cityName] = true;
+        }
+      }).getTier2(cityName);
+    }
+
+    function drawTownCircles(cityName, areas) {
+      areas.forEach(area => {
+        if (area.lat && area.lng) {
+          createTownCircle(area.name, area.fullName, cityName, { lat: area.lat, lng: area.lng }, area.done, area.total);
+        }
+      });
+    }
+
+    function createTownCircle(townName, fullName, cityName, pos, done, total) {
+      const rate = total > 0 ? done / total : 0;
       const color = rate >= 0.8 ? "#4ade80" : rate >= 0.3 ? "#fbbf24" : "#f87171";
       const circle = new google.maps.Circle({
         strokeColor: "#FFFFFF", strokeOpacity: 0.8, strokeWeight: 2,
         fillColor: color, fillOpacity: 0.5, map: map, center: pos, radius: 400,
-        visible: map.getZoom() < ZOOM_THRESHOLD
+        visible: map.getZoom() >= ZOOM_THRESHOLD_TOWN && map.getZoom() < ZOOM_THRESHOLD_PIN
       });
+
       const content = `
         <div class="p-6 font-sans">
-          <div class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Tactical Sector</div>
-          <div class="text-xl font-black text-navy dark:text-blue-400 tracking-tight mb-2">${name}</div>
-          <div class="text-2xl font-black text-navy dark:text-blue-400">${Math.round(rate*100)}% <span class="text-xs text-gray-300 ml-2">${s.done}/${s.total}</span></div>
+          <div class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">エリアセクター (Tier 2)</div>
+          <div class="text-xl font-black text-navy dark:text-blue-400 tracking-tight mb-2">${townName} (${cityName})</div>
+          <div class="text-2xl font-black text-navy dark:text-blue-400">${Math.round(rate*100)}% <span class="text-xs text-gray-300 ml-2">${done}/${total}</span></div>
         </div>`;
       const info = new google.maps.InfoWindow({ content: content });
-      circle.addListener("click", () => { info.setPosition(pos); info.open(map); });
+      circle.addListener("click", () => {
+        info.setPosition(pos);
+        info.open(map);
+        map.setCenter(pos);
+        map.setZoom(16);
+        loadPointsForTown(fullName);
+      });
       townCircles.push(circle);
+    }
+
+    function loadPointsForTown(fullName) {
+      if (loadedTowns[fullName]) return;
+      const parts = fullName.split('_');
+      const cityName = parts[0];
+      const townName = parts.length > 1 ? parts[1] : '';
+      google.script.run.withSuccessHandler(res => {
+        if (res && res.success && Array.isArray(res.points)) {
+          drawPointMarkers(fullName, res.points);
+          loadedTowns[fullName] = true;
+        }
+      }).getTier3(cityName, townName);
+    }
+
+    function drawPointMarkers(fullName, points) {
+      points.forEach(p => {
+        if (p.lat && p.lng) {
+          createPointMarker(p, { lat: p.lat, lng: p.lng });
+        }
+      });
     }
 
     function createPointMarker(p, pos) {
       const marker = new google.maps.Marker({
-        map: map, position: pos, visible: map.getZoom() >= ZOOM_THRESHOLD,
-        icon: { path: google.maps.SymbolPath.CIRCLE, scale: 10, fillColor: p.status === "done" ? "#4ade80" : "#f87171", fillOpacity: 0.9, strokeWeight: 2, strokeColor: "#ffffff" }
+        map: map, position: pos, visible: map.getZoom() >= ZOOM_THRESHOLD_PIN,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE, scale: 8,
+          fillColor: (p.done || p.isDone) ? "#4ade80" : "#f87171",
+          fillOpacity: 0.9, strokeWeight: 2, strokeColor: "#ffffff"
+        }
       });
       markers.push(marker);
     }
 
-    function updateSidebar(points, summary) {
-      const done = points.filter(p => p.status === "done").length;
-      const total = points.length; const rate = total > 0 ? done / total : 0;
+    function updateSidebar(summary, stats) {
+      const done = stats.done;
+      const total = stats.total;
+      const rate = total > 0 ? done / total : 0;
       document.getElementById("progress-val").innerText = Math.round(rate * 100) + "%";
       document.getElementById("progress-bar").style.width = (rate * 100) + "%";
       document.getElementById("done-count").innerHTML = `${done} <span class="text-xs text-gray-400">/ ${total}</span>`;
 
       const list = document.getElementById("area-items"); list.innerHTML = "";
-      Object.keys(summary).forEach(name => {
-        const s = summary[name]; const r = s.total > 0 ? s.done / s.total : 0;
+      summary.forEach(s => {
+        const r = s.total > 0 ? s.done / s.total : 0;
         const div = document.createElement("div");
-        div.className = "flex items-center justify-between p-5 bg-white/60 dark:bg-white/5 rounded-3xl shadow-neu-light dark:shadow-neu-dark border border-white/10 transition-all active:scale-[0.98]";
+        div.className = "flex items-center justify-between p-5 bg-white/60 dark:bg-white/5 rounded-3xl shadow-neu-light dark:shadow-neu-dark border border-white/10 transition-all active:scale-[0.98] cursor-pointer";
         div.innerHTML = `
-          <span class="text-xs font-black text-navy dark:text-blue-400 tracking-tight">${name}</span>
+          <span class="text-xs font-black text-navy dark:text-blue-400 tracking-tight">${s.name}</span>
           <span class="text-[9px] font-black px-3 py-1 rounded-full ${r >= 0.8 ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}">${Math.round(r * 100)}%</span>
         `;
+        div.onclick = () => {
+          if (s.lat && s.lng) {
+            map.setCenter({ lat: s.lat, lng: s.lng });
+            map.setZoom(12);
+            loadTownsForCity(s.name);
+          }
+        };
         list.appendChild(div);
       });
     }

@@ -26,104 +26,131 @@ function getDashboardData() {
 }
 
 /**
- * 全エリアのサマリーを再計算してキャッシュに保存する (爆速シャドウシート版)
+ * 全エリアのサマリーを再計算してキャッシュに保存する (MIE03_ADDRESS_MASTER 起点 Tier 1 SSOT 版)
  */
 function refreshAreaSummaryCache() {
-  // Phase B/C: 集計(done)は必ずEventLogのみで行う(Single Aggregation Rule)
-  // マスターデータ(total, repAddress)のみ__SYSTEM_CACHE__から取得し、EventLog実績とマージする
   const ss = getSS();
-  let shadowSheet = ss.getSheetByName(CONFIG.get("SHEET_SYSTEM_CACHE"));
-
-  if (!shadowSheet) {
-    createSystemCacheSheet();
-    shadowSheet = ss.getSheetByName(CONFIG.get("SHEET_SYSTEM_CACHE"));
+  const masterSheet = ss.getSheetByName("MIE03_ADDRESS_MASTER");
+  if (!masterSheet) {
+    throw new Error("MIE03_ADDRESS_MASTER sheet not found");
   }
 
-  const lastRow = shadowSheet.getLastRow();
-  let masterMap = {};
-  if (lastRow >= 2) {
-    // 1回のAPI通信でマスターデータを取得 (A:エリア名, B:(廃止), C:合計数, D:代表住所, E:市町村カナ, F:町域カナ)
-    const data = shadowSheet.getRange(2, 1, lastRow - 1, 6).getValues();
-    data.forEach((row) => {
-      const name = row[0];
-      const total = Number(row[2]) || 0;
-      const repAddress = row[3] ? String(row[3]).trim() : "";
-      const cityKana = row[4] ? String(row[4]).trim() : "";
-      const townKana = row[5] ? String(row[5]).trim() : "";
-      if (name) {
-        masterMap[name] = { total: total, repAddress: repAddress, cityKana: cityKana, townKana: townKana };
+  const data = masterSheet.getDataRange().getValues();
+  if (data.length <= 1) {
+    return { summary: [], stats: { done: 0, total: 0 }, updatedAt: new Date().getTime() };
+  }
+
+  const header = data[0];
+  const cityIdx = header.indexOf('city_name');
+  const addrIdx = header.indexOf('full_address');
+  const latIdx = header.indexOf('latitude');
+  const lngIdx = header.indexOf('longitude');
+
+  if (cityIdx === -1 || addrIdx === -1) {
+    throw new Error("Required columns not found in master sheet");
+  }
+
+  // 1. 各自治体 (city_name) ごとのマスターデータを構築
+  const cityMap = {};
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    const cityName = String(row[cityIdx] || "").trim();
+    const lat = parseFloat(row[latIdx]) || null;
+    const lng = parseFloat(row[lngIdx]) || null;
+
+    if (!cityName) continue;
+
+    if (!cityMap[cityName]) {
+      cityMap[cityName] = {
+        name: cityName,
+        total: 0,
+        lat: lat,
+        lng: lng
+      };
+    }
+
+    cityMap[cityName].total++;
+    // 最初の有効な座標を保持
+    if (cityMap[cityName].lat === null && lat !== null) {
+      cityMap[cityName].lat = lat;
+      cityMap[cityName].lng = lng;
+    }
+  }
+
+  // 2. 実シートの一覧を取得して自治体にマッピングし、done実績を合算
+  const sheets = ss.getSheets();
+  const excludeSheets = [];
+  if (typeof CONFIG !== 'undefined' && CONFIG.get) {
+    excludeSheets.push(
+      CONFIG.get("SHEET_GUIDE"), CONFIG.get("SHEET_ROSTER"), CONFIG.get("SHEET_TEMPLATE"),
+      CONFIG.get("SHEET_POSTAL"), CONFIG.get("SHEET_DISTRICT"), CONFIG.get("SHEET_MASTER_EXPORT"),
+      CONFIG.get("SHEET_REPORT"), CONFIG.get("SHEET_MANUAL"), CONFIG.get("SHEET_SYSTEM_CACHE"),
+      CONFIG.get("SHEET_STORAGE"), "__TEMP_ADDRESSES__", "TraceLog", "原本", "EventLog"
+    );
+  }
+
+  // 各自治体ごとの done を初期化
+  const cityDones = {};
+  Object.keys(cityMap).forEach(c => cityDones[c] = 0);
+
+  sheets.forEach(sheet => {
+    const sName = sheet.getName();
+    if (excludeSheets.includes(sName) || sheet.isSheetHidden()) return;
+    if (sName.includes("MASTER") || sName.includes("DATABASE") || sName.includes("EXPORT")) return;
+
+    const lastRow = sheet.getLastRow();
+    if (lastRow < 2) return;
+
+    // 2行目A列の代表住所を取得
+    let repAddr = String(sheet.getRange(2, 1).getValue() || "").trim();
+    if (!repAddr) return;
+
+    // 郵便番号(〒...)が含まれる場合は住所部分のみを取り出す
+    repAddr = repAddr.replace(/^〒\d{3}-?\d{4}\s*/, "").replace(/\n/g, " ").trim();
+
+    // MIE03_ADDRESS_MASTER 内でこの住所と前方一致/完全一致する city_name を特定
+    let sheetCityName = null;
+    for (let i = 1; i < data.length; i++) {
+      const masterAddr = String(data[i][addrIdx] || "").trim();
+      if (masterAddr && (masterAddr === repAddr || repAddr.indexOf(masterAddr) !== -1 || masterAddr.indexOf(repAddr) !== -1)) {
+        sheetCityName = String(data[i][cityIdx] || "").trim();
+        break;
       }
-    });
-  }
+    }
 
-  // EventLogから最新の完了実績を取得
-  const eventLogs = aggregateByBlock("DEFAULT_TENANT", null);
+    if (sheetCityName && cityMap[sheetCityName]) {
+      // D2:D11の範囲から isDone を集計
+      const targetRange = sheet.getRange(2, 4, Math.min(lastRow - 1, 10), 1);
+      const isDoneValues = targetRange.getValues();
+      let sheetDone = 0;
+      isDoneValues.forEach(row => {
+        const val = row[0];
+        if (val === true || val === 'true' || (typeof val === 'string' && val.toLowerCase() === 'true')) {
+          sheetDone++;
+        }
+      });
+      cityDones[sheetCityName] += sheetDone;
+    }
+  });
 
-  let summary = [];
+  // 3. summary配列の構築
+  const summary = [];
   let totalDone = 0;
   let totalPoints = 0;
 
-  // EventLogに存在するエリアの実績をマスターと結合
-  eventLogs.forEach(block => {
-    const name = block.name;
-    const done = block.done;
-    const master = masterMap[name] || { total: 0, repAddress: "" };
-    
-    let lat = block.lat;
-    let lng = block.lng;
-    if (!lat || !lng) {
-      const coords = getCoordsFromAddress(master.repAddress);
-      if (coords) {
-        lat = coords.lat;
-        lng = coords.lng;
-      }
-    }
-
+  Object.keys(cityMap).forEach(cityName => {
+    const info = cityMap[cityName];
+    const done = cityDones[cityName] || 0;
     summary.push({
       version: 1,
-      // Future: areaId,
-      name: name,
+      name: cityName,
       done: done,
-      total: master.total,
-      repAddress: master.repAddress,
-      lat: lat,
-      lng: lng,
-      cityKana: master.cityKana || "",
-      townKana: master.townKana || ""
+      total: info.total,
+      lat: info.lat,
+      lng: info.lng
     });
-    
     totalDone += done;
-    totalPoints += master.total;
-    
-    // 処理済みマーク
-    masterMap[name].processed = true;
-  });
-
-  // EventLogに存在しないがマスターに存在するエリア（未着手）を補完
-  Object.keys(masterMap).forEach(name => {
-    const master = masterMap[name];
-    if (!master.processed) {
-      let lat = null;
-      let lng = null;
-      const coords = getCoordsFromAddress(master.repAddress);
-      if (coords) {
-        lat = coords.lat;
-        lng = coords.lng;
-      }
-      summary.push({
-        version: 1,
-        // Future: areaId,
-        name: name,
-        done: 0,
-        total: master.total,
-        repAddress: master.repAddress,
-        lat: lat,
-        lng: lng,
-        cityKana: master.cityKana || "",
-        townKana: master.townKana || ""
-      });
-      totalPoints += master.total;
-    }
+    totalPoints += info.total;
   });
 
   const result = {
@@ -136,8 +163,6 @@ function refreshAreaSummaryCache() {
   const cache = CacheService.getScriptCache();
   cache.put("AREA_SUMMARY_FAST_CACHE", jsonResult, 1800);
   PropertiesService.getScriptProperties().setProperty("AREA_SUMMARY_CACHE", jsonResult);
-
-
 
   return result;
 }
@@ -185,19 +210,50 @@ function createSystemCacheSheet() {
     "__TEMP_ADDRESSES__" // バッチ一時シート（完了前に残った場合も除外）
   ];
 
-  const areaSheets = ss.getSheets().filter(s => 
-    !exclude.includes(s.getName()) && 
-    !s.isSheetHidden() && 
-    !s.getName().includes("MASTER") && 
-    !s.getName().includes("DATABASE")
-  );
-  
-  if (areaSheets.length === 0) {
+  // 1. MIE03_ADDRESS_MASTER から出現順に自治体名リストを取得
+  const masterSheet = ss.getSheetByName("MIE03_ADDRESS_MASTER");
+  const orderedCities = [];
+  if (masterSheet) {
+    const data = masterSheet.getDataRange().getValues();
+    if (data.length > 1) {
+      const header = data[0];
+      const cityIdx = header.indexOf("city_name");
+      if (cityIdx !== -1) {
+        const citySet = new Set();
+        for (let i = 1; i < data.length; i++) {
+          const cName = String(data[i][cityIdx] || "").trim();
+          if (cName) {
+            citySet.add(cName);
+          }
+        }
+        citySet.forEach(c => orderedCities.push(c));
+      }
+    }
+  }
+
+  // 2. 自治体の生成優先順に従ってシートを順次回収 (O(1) 回収)
+  const orderedAreaSheets = [];
+  orderedCities.forEach(cityName => {
+    // 連番なし (例: "四日市市")
+    const s1 = ss.getSheetByName(cityName);
+    if (s1 && !s1.isSheetHidden() && !exclude.includes(s1.getName())) {
+      orderedAreaSheets.push(s1);
+    }
+    // 連番あり (例: "四日市市(2)", "四日市市(3)"...)
+    for (let idx = 2; idx <= 100; idx++) {
+      const sN = ss.getSheetByName(`${cityName}(${idx})`);
+      if (sN && !sN.isSheetHidden() && !exclude.includes(sN.getName())) {
+        orderedAreaSheets.push(sN);
+      }
+    }
+  });
+
+  if (orderedAreaSheets.length === 0) {
     SpreadsheetApp.flush();
     return;
   }
 
-  const rows = areaSheets.map(s => {
+  const rows = orderedAreaSheets.map(s => {
     const name = s.getName();
     const lastRow = s.getLastRow();
     let repAddress = "";
@@ -220,8 +276,6 @@ function createSystemCacheSheet() {
   });
 
   sheet.getRange(2, 1, rows.length, 6).setValues(rows);
-  
-
 }
 
 /**

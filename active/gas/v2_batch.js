@@ -88,7 +88,7 @@ function forceStartBatch() {
     tempSheet.hideSheet();
   }
   tempSheet.clear();
-  tempSheet.getRange(1, 1, 1, 6).setValues([["郵便番号", "住所", "市町村カナ", "町域カナ", "地区名", "エリアシートキー"]]);
+  tempSheet.getRange(1, 1, 1, 3).setValues([["postal_code", "city_name", "full_address"]]);
   
   // 自治体優先度 ➔ 地区名 ➔ 郵便番号数値昇順 の3段階整列（スプレッドシート作成順を100%美しく統一）
   const cityOrderPriority = ["桑名市", "いなべ市", "桑名郡", "員弁郡", "三重郡", "四日市市", "鈴鹿市"];
@@ -113,13 +113,10 @@ function forceStartBatch() {
   if (addresses.length > 0) {
     const rows = addresses.map(addr => [
       addr.postalCode || "",
-      addr.address,
-      addr.cityKana || "",
-      addr.townKana || "",
-      addr.district || "",
-      addr.city
+      addr.city || "",
+      addr.address || ""
     ]);
-    tempSheet.getRange(2, 1, rows.length, 6).setValues(rows);
+    tempSheet.getRange(2, 1, rows.length, 3).setValues(rows);
   }
   SpreadsheetApp.flush();
 
@@ -154,8 +151,8 @@ function generateAreaSheetsBatch() {
   const tempValues = allValues.slice(1);
   const addresses = tempValues.map(r => ({
     postalCode: r[0],
-    address: r[1],
-    areaKey: r[5] || "Unknown"
+    areaKey: r[1] || "Unknown",
+    address: r[2]
   }));
   
   const startIndex = parseInt(props.getProperty("BATCH_INDEX")) || 0;
@@ -169,7 +166,7 @@ function generateAreaSheetsBatch() {
 
   for (let i = 0; i < startIndex; i++) {
     const key = addresses[i].areaKey;
-    const cityName = extractCityName(addresses[i].address);
+    const cityName = addresses[i].areaKey;
     if (key !== lastCity || itemsInBlock >= chunkSize) {
       cityCounts[key] = (cityCounts[key] || 0) + 1;
       cityNameCounts[cityName] = (cityNameCounts[cityName] || 0) + 1;
@@ -180,7 +177,9 @@ function generateAreaSheetsBatch() {
   }
 
   // 4. メインループ (1回で最大30件処理してタイムアウト回避)
-  const limit = Math.min(startIndex + 30, addresses.length);
+  const limit = Math.min(startIndex + 150, addresses.length);
+  const writeBuffer = {};
+
   for (
     let currentIndex = startIndex;
     currentIndex < limit;
@@ -188,7 +187,7 @@ function generateAreaSheetsBatch() {
   ) {
     const currentAddr = addresses[currentIndex];
     const currentKey = currentAddr.areaKey;
-    const cityName = extractCityName(currentAddr.address);
+    const cityName = currentAddr.areaKey;
 
     // 地区が切り替わった、または10件に達した場合
     if (currentKey !== lastCity || itemsInBlock >= chunkSize) {
@@ -225,21 +224,45 @@ function generateAreaSheetsBatch() {
       SpreadsheetApp.flush(); // 初期化を確定
     }
 
-    // 書き込み（絶対に行番号を指定：2〜11行目）
-    const targetRow = itemsInBlock + 2;
     const displayAddress = currentAddr.postalCode
       ? `〒${currentAddr.postalCode}\n${currentAddr.address}`
       : currentAddr.address;
-
-    sheet.getRange(targetRow, 1).setValue(displayAddress);
     const mapsUrl =
       "https://www.google.com/maps/search/?api=1&query=" +
       encodeURIComponent(currentAddr.address);
-    sheet.getRange(targetRow, 2).setFormula(`=HYPERLINK("${mapsUrl}","📍")`);
-    sheet.getRange(targetRow, 12).setValue(currentIndex + 2); // 元行番号（L列へ移動）
+
+    if (!writeBuffer[sheetName]) {
+      writeBuffer[sheetName] = {
+        sheet: sheet,
+        rows: []
+      };
+    }
+
+    writeBuffer[sheetName].rows.push({
+      offset: itemsInBlock,
+      address: displayAddress,
+      mapsUrl: mapsUrl,
+      originIndex: currentIndex + 2
+    });
 
     itemsInBlock++;
   }
+
+  // バッファされたデータをシートごとに書き込み
+  Object.keys(writeBuffer).forEach(sName => {
+    const buf = writeBuffer[sName];
+    const sheet = buf.sheet;
+    buf.rows.forEach(r => {
+      const targetRow = r.offset + 2;
+      // A列 (住所) と B列 (地図リンク) を 1回の setValues で書き込む
+      sheet.getRange(targetRow, 1, 1, 2).setValues([[
+        r.address,
+        `=HYPERLINK("${r.mapsUrl}","📍")`
+      ]]);
+      // L列 (元行番号) を書き込む
+      sheet.getRange(targetRow, 12).setValue(r.originIndex);
+    });
+  });
 
   SpreadsheetApp.flush();
 

@@ -825,7 +825,7 @@ function getDeliveryStats() {
 
 
 // =============================
-// チラシ保管庫 API
+// 保有チラシ枚数 API
 // =============================
 
 function getFlyerStock() {

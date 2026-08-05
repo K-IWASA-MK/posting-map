@@ -243,7 +243,7 @@ function createRichMenuForHApp() {
 }
 
 /**
- * 受渡要請履歴シートとチラシ保管庫シートを初期化・準備する
+ * 受渡要請履歴シートと保有チラシ枚数シートを初期化・準備する
  */
 function setupTransferSheets() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
