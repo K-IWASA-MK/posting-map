@@ -526,3 +526,19 @@ Logic / API / data flow change
 
 不要な全面調査は禁止し、最小検証で完了すること。
 
+---
+
+## UI Data Display Rule
+
+入力フォームでは表示用文字列と保存データを混在させない。
+
+禁止:
+- input.valueへ単位文字を追加
+- 数値入力欄へ「枚」「円」「人」等を保存
+
+原則:
+- input.value = raw data
+- unit label = separate DOM element
+
+スマホ入力欄はiOS Safariの削除操作を必ず確認する。
+
