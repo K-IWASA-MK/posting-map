@@ -506,3 +506,23 @@ POSTING MAP は機能完成フェーズへ移行した。
 - 既存機能で実現可能であるにもかかわらず、新たな抽象化レイヤー・フレームワーク・アーキテクチャを追加することを禁止する。
 - アーキテクチャ変更や抽象化レイヤーの追加は、既存機能では実現不可能であることが明確に証明された場合に限り、事前承認を得て検討する。
 
+---
+
+## UI Verification Policy
+
+UI修正は影響範囲に応じて検証レベルを判断する。
+
+Level 1:
+CSS class / text only
+→ Static review only
+
+Level 2:
+Layout / input / positioning change
+→ Browser screenshot verification required
+
+Level 3:
+Logic / API / data flow change
+→ Browser verification + functional test required
+
+不要な全面調査は禁止し、最小検証で完了すること。
+
