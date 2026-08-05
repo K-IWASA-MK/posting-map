@@ -542,3 +542,15 @@ Logic / API / data flow change
 
 スマホ入力欄はiOS Safariの削除操作を必ず確認する。
 
+---
+
+## UI Control Rule
+
+カード内要素は役割に応じて配置規則を統一する。
+
+種類:
+- 数値＋単位 ➔ 中央一体表示（例: `6,000枚`）
+- 市町村名 ➔ 中央表示（例: `桑名市`）
+- 選択矢印 ➔ 右固定（`absolute right-6`）
+- 編集操作 ➔ 透明レイヤー（`absolute inset-0 opacity-0`）
+
