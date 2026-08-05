@@ -448,8 +448,9 @@ async function loadData(skipSync = false) {
       if (data.branchName) localStorage.setItem('branch_name', data.branchName);
       
       logDebug("[loadData] Rendering areas in background...");
-      renderAreas();
-      updateStorageLocationDropdown();
+      if (typeof updateStorageLocationDropdown === 'function') {
+        updateStorageLocationDropdown();
+      }
       logDebug("[loadData] Rendering areas OK. Updating stats via System Summary...");
       if (data.stats) {
         updateStats(data.stats);
@@ -1137,7 +1138,7 @@ function setupStorageRegisterInputFormatter(inputEl) {
   });
 }
 
-function updateStorageLocationDropdown(overrideCities = null) {
+window.updateStorageLocationDropdown = function updateStorageLocationDropdown(overrideCities = null) {
   const locSelect = $('storage-register-location');
   if (!locSelect) return;
 
