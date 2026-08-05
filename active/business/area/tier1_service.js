@@ -17,16 +17,6 @@
 
     getCityName(areaName) {
       if (!areaName) return null;
-      if (areaName.indexOf('四日市') === 0) return '四日市市';
-      if (areaName.indexOf('鈴鹿') === 0) return '鈴鹿市';
-      if (areaName.indexOf('亀山') === 0) return '亀山市';
-      if (areaName.indexOf('桑名') === 0) return '桑名市';
-      if (areaName.indexOf('いなべ') === 0) return 'いなべ市';
-      if (areaName.indexOf('東員') === 0) return '東員町';
-      if (areaName.indexOf('菰野') === 0) return '菰野町';
-      if (areaName.indexOf('朝日') === 0) return '朝日町';
-      if (areaName.indexOf('川越') === 0) return '川越町';
-
       const match = areaName.match(/^[^市町\(\d]+(?:市|町)/);
       if (match) return match[0];
       return null;
