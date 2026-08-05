@@ -226,6 +226,9 @@ HTMLのみ移行することを禁止する。
 
 違反した場合は実装失敗（FAILED）とする。
 
+詳細:
+`.agents/rules/change-scope-enforcement.md`
+
 ---
 
 ## ⚠️ Mandatory Diff Verification（差分監査必須）
