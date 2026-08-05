@@ -54,6 +54,7 @@
     }
   </style>
   <script src="./config.js"></script>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body class="bg-apple-light dark:bg-apple-dark text-[#1d1d1f] dark:text-[#f5f5f7] font-sans antialiased overflow-hidden select-none transition-colors duration-500">
 
@@ -235,11 +236,76 @@
       google.script.run.withSuccessHandler(loadData).updateFlyerStock(area, count, staffName, staffId);
     }
 
-    function saveProfile() {
+    let liffInitialized = false; // LIFF初期化多重実行防止フラグ
+
+    async function saveProfile() {
       const last = $('user-last').value.trim(), first = $('user-first').value.trim();
       if (!last || !first) { alert('姓名を入力してください'); return; }
-      localStorage.setItem('user_info', JSON.stringify({last, first}));
-      switchPage('areas');
+      
+      if (!isGAS) {
+        // ローカル開発（isGAS = false）環境用のダミーIDとして使用
+        localStorage.setItem('user_info', JSON.stringify({ last, first, id: 'ST-LOCAL-DEV' }));
+        switchPage('areas');
+        return;
+      }
+      
+      $('loading').classList.remove('hidden');
+      
+      try {
+        if (typeof liff === 'undefined') {
+          throw new Error('LIFF SDK がロードされていません。');
+        }
+        
+        const liffId = (window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.line) 
+          ? window.PMS_CLIENT_CONFIG.line.liffId 
+          : '';
+        
+        if (!liffId) {
+          throw new Error('LIFF ID が設定されていません。');
+        }
+        
+        if (!liffInitialized) {
+          await liff.init({ liffId: liffId });
+          liffInitialized = true;
+        }
+        
+        if (!liff.isLoggedIn()) {
+          liff.login({ redirectUri: window.location.href });
+          return;
+        }
+        
+        const profile = await liff.getProfile();
+        const userId = profile.userId;
+        
+        if (!userId) {
+          throw new Error('LINE ユーザーIDを取得できませんでした。');
+        }
+        
+        google.script.run
+          .withSuccessHandler(res => {
+            $('loading').classList.add('hidden');
+            if (res && res.success) {
+              const userInfo = {
+                last: last,
+                first: first,
+                id: res.id
+              };
+              localStorage.setItem('user_info', JSON.stringify(userInfo));
+              switchPage('areas');
+            } else {
+              alert('スタッフ登録に失敗しました。');
+            }
+          })
+          .withFailureHandler(err => {
+            $('loading').classList.add('hidden');
+            alert('通信エラー: ' + err.message);
+          })
+          .registerStaff(last, first, userId);
+          
+      } catch (err) {
+        $('loading').classList.add('hidden');
+        alert('エラー: ' + err.message);
+      }
     }
 
     function loadData() {
