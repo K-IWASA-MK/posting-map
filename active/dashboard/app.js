@@ -1072,14 +1072,14 @@ function updateStorageCountDisplay() {
   }
 }
 
-function updateStorageRegisterButtonText() {
+window.updateStorageRegisterButtonText = function updateStorageRegisterButtonText() {
   const btn = $('btn-storage-register-submit');
   const countInput = $('storage-register-count');
   if (!btn || !countInput) return;
 
   const raw = countInput.value.replace(/,/g, '').replace(/枚/g, '').trim();
   btn.textContent = raw ? 'チラシ枚数を更新する' : 'チラシ枚数を入力する';
-}
+};
 
 function setupStorageRegisterInputFormatter(inputEl) {
   if (!inputEl || inputEl.dataset.formatted) return;
@@ -1361,7 +1361,11 @@ window.submitFlyerStock = async function() {
     const btn = $('btn-storage-register-submit');
     if (btn) {
       btn.disabled = false;
-      updateStorageRegisterButtonText();
+      if (typeof updateStorageRegisterButtonText === 'function') {
+        updateStorageRegisterButtonText();
+      } else {
+        btn.textContent = "チラシ枚数を更新する";
+      }
     }
   }
 };
