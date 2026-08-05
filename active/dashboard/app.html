@@ -174,7 +174,7 @@
               <span class="text-[10px] font-black uppercase tracking-widest text-navy dark:text-white">${p.status==='done'?'MISSION COMPLETED':'READY TO DEPLOY'}</span>
             </label>
             <div class="grid grid-cols-2 gap-6">
-              <select onchange="updateRecord('${name}',${i},'count',this.value)" class="neu-inset rounded-2xl p-5 text-xs font-black text-navy dark:text-white outline-none appearance-none">
+              <select onchange="handleFlyerStockChange('${name}',this.value)" class="neu-inset rounded-2xl p-5 text-xs font-black text-navy dark:text-white outline-none appearance-none">
                 <option value="">枚数</option>${[10,30,50,100,200].map(v=>`<option value="${v}" ${p.count==v?'selected':''}>${v}枚</option>`).join('')}
               </select>
               <select onchange="updateRecord('${name}',${i},'staff',this.value)" class="neu-inset rounded-2xl p-5 text-xs font-black text-navy dark:text-white outline-none appearance-none">
@@ -194,7 +194,24 @@
 
     function updateRecord(area, idx, field, val) {
       if (!isGAS) return;
-      google.script.run.withSuccessHandler(loadData).updateRecord(area, idx, {[field]: val, done: field==='done'?val:undefined});
+      if (field === 'done') {
+        google.script.run.withSuccessHandler(loadData).updateRecord(area, idx, {done: val});
+      }
+    }
+
+    function handleFlyerStockChange(area, val) {
+      if (!isGAS) return;
+      const count = parseInt(val, 10) || 0;
+      const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+      const staffName = `${userInfo.last || ''}${userInfo.first || ''}`.trim();
+      const staffId = userInfo.id || localStorage.getItem('staff_id') || '';
+      
+      if (!staffName || !staffId) {
+        alert("ログイン情報が見つかりません。設定画面からID登録を完了してください。");
+        return;
+      }
+      
+      google.script.run.withSuccessHandler(loadData).updateFlyerStock(area, count, staffName, staffId);
     }
 
     function saveProfile() {
