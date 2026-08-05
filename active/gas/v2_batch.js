@@ -36,49 +36,65 @@ function forceStartBatch() {
   });
   SpreadsheetApp.flush();
 
-  // 1. extractDistrictAddresses() を直接呼び出して確定住所データを抽出
+  // 1. MIE03_ADDRESS_MASTERから確定住所データを抽出 (Tier 1 SSOT Migration)
   ss.toast("確定住所マスターデータを抽出中...", "準備中", 5);
-  const targetDistrict = "三重第3区";
-  const targetPrefecture = "三重県";
-  const addresses = extractDistrictAddresses(targetDistrict, targetPrefecture);
+  const masterSheet = ss.getSheetByName("MIE03_ADDRESS_MASTER");
+  if (!masterSheet) {
+    ss.toast("MIE03_ADDRESS_MASTERが見つかりません", "エラー", 10);
+    return;
+  }
+  const data = masterSheet.getDataRange().getValues();
+  if (data.length <= 1) {
+    ss.toast("データが0件です", "エラー", 10);
+    return;
+  }
+
+  const addresses = [];
+  // 1行目はヘッダー
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    const cityName = String(row[1] || "").trim(); // B列
+    const townName = String(row[2] || "").trim(); // C列
+    const fullAddress = String(row[3] || "").trim(); // D列
+    const postalCode = String(row[4] || "").trim(); // E列
+    if (!cityName) continue;
+    
+    addresses.push({
+      postalCode: postalCode,
+      address: fullAddress,
+      city: cityName,
+      town: townName
+    });
+  }
 
   // 【Step 1 強化版 監査ログ】
   Logger.log("=== 【Step 1 抽出監査ログ】 ===");
-  Logger.log("対象地区: " + targetDistrict + " (" + targetPrefecture + ")");
-  Logger.log("総抽出件数: " + (addresses ? addresses.length : 0) + "件");
+  Logger.log("総抽出件数: " + addresses.length + "件");
 
-  if (addresses && addresses.length > 0) {
+  if (addresses.length > 0) {
     Logger.log("--- [先頭5件] ---");
     const top5 = addresses.slice(0, 5);
     top5.forEach((item, idx) => {
-      Logger.log(`[${idx + 1}] 〒${item.postalCode || ''} | ${item.city || ''} | ${item.address || ''} | ${item.townKana || ''}`);
+      Logger.log(`[${idx + 1}] 〒${item.postalCode} | ${item.city} | ${item.address}`);
     });
 
     Logger.log("--- [末尾5件] ---");
     const last5 = addresses.slice(-5);
     last5.forEach((item, idx) => {
       const realIndex = addresses.length - 5 + idx + 1;
-      Logger.log(`[${realIndex}] 〒${item.postalCode || ''} | ${item.city || ''} | ${item.address || ''} | ${item.townKana || ''}`);
+      Logger.log(`[${realIndex}] 〒${item.postalCode} | ${item.city} | ${item.address}`);
     });
   } else {
     Logger.log("⚠️ 抽出件数が0件です！");
   }
-  
 
-  
   // デバッグ用トースト：抽出件数を画面に表示
   ss.toast(`【デバッグ】住所データを ${addresses.length} 件抽出しました。ソート中...`, "デバッグ", 10);
-  
-
 
   /**
    * Area Metadata Foundation (SSOT)
    *
-   * cityKana
-   * townKana
-   * を生成・保持する唯一のマスタ。
-   *
-   * 他モジュールはこのデータを参照するのみ.
+   * cityKana / townKana はGeneration 2では廃止・空文字化
    *
    * DO NOT REGENERATE.
    */
@@ -90,23 +106,29 @@ function forceStartBatch() {
   tempSheet.clear();
   tempSheet.getRange(1, 1, 1, 6).setValues([["郵便番号", "住所", "市町村カナ", "町域カナ", "地区名", "エリアシートキー"]]);
   
-  // 自治体優先度 ➔ 地区名 ➔ 郵便番号数値昇順 の3段階整列（スプレッドシート作成順を100%美しく統一）
+  // 自治体優先度 ➔ 地区名 ➔ 郵便番号数値昇順 の3段階整列
   const cityOrderPriority = ["桑名市", "いなべ市", "桑名郡", "員弁郡", "三重郡", "四日市市", "鈴鹿市"];
   addresses.sort((a, b) => {
-    const cityA = a.city;
-    const cityB = b.city;
-
-    const idxA = cityOrderPriority.indexOf(cityA);
-    const idxB = cityOrderPriority.indexOf(cityB);
-
-    const pA = idxA === -1 ? 999 : idxA;
-    const pB = idxB === -1 ? 999 : idxB;
+    const getPriority = (cityName) => {
+      for (let i = 0; i < cityOrderPriority.length; i++) {
+        if (cityName.includes(cityOrderPriority[i])) return i;
+      }
+      return 999;
+    };
+    
+    const pA = getPriority(a.city);
+    const pB = getPriority(b.city);
 
     if (pA !== pB) return pA - pB;
+    
+    // 同一優先度内で自治体名が異なる場合は単純文字列比較でグループ化
+    if (a.city !== b.city) {
+        return a.city > b.city ? 1 : -1;
+    }
 
     // 同一地区内での郵便番号昇順
-    const numA = parseInt((a.postalCode || "0").replace(/-/g, ""), 10);
-    const numB = parseInt((b.postalCode || "0").replace(/-/g, ""), 10);
+    const numA = parseInt((a.postalCode || "0").replace(/-/g, ""), 10) || 0;
+    const numB = parseInt((b.postalCode || "0").replace(/-/g, ""), 10) || 0;
     return numA - numB;
   });
 
@@ -114,10 +136,10 @@ function forceStartBatch() {
     const rows = addresses.map(addr => [
       addr.postalCode || "",
       addr.address,
-      addr.cityKana || "",
-      addr.townKana || "",
-      addr.district || "",
-      addr.city
+      "", // cityKana (unused)
+      "", // townKana (unused)
+      "", // district (unused)
+      addr.city // areaKey (B列 city_name そのまま)
     ]);
     tempSheet.getRange(2, 1, rows.length, 6).setValues(rows);
   }
@@ -162,19 +184,16 @@ function generateAreaSheetsBatch() {
   const chunkSize = CONFIG.get("CHUNK_SIZE") || 10;
 
   // 3. 再開時の状態シミュレーション
-  let cityCounts = {};
   let cityNameCounts = {}; // 市町村名ごとのシート枚数カウント (シート名(2)(3)付与用)
   let lastCity = "";
   let itemsInBlock = 0; // 1シート内の何件目か (0-9)
 
   for (let i = 0; i < startIndex; i++) {
-    const key = addresses[i].areaKey;
-    const cityName = extractCityName(addresses[i].address);
-    if (key !== lastCity || itemsInBlock >= chunkSize) {
-      cityCounts[key] = (cityCounts[key] || 0) + 1;
+    const cityName = addresses[i].areaKey;
+    if (cityName !== lastCity || itemsInBlock >= chunkSize) {
       cityNameCounts[cityName] = (cityNameCounts[cityName] || 0) + 1;
       itemsInBlock = 0;
-      lastCity = key;
+      lastCity = cityName;
     }
     itemsInBlock++;
   }
@@ -187,15 +206,13 @@ function generateAreaSheetsBatch() {
     currentIndex++
   ) {
     const currentAddr = addresses[currentIndex];
-    const currentKey = currentAddr.areaKey;
-    const cityName = extractCityName(currentAddr.address);
+    const cityName = currentAddr.areaKey;
 
     // 地区が切り替わった、または10件に達した場合
-    if (currentKey !== lastCity || itemsInBlock >= chunkSize) {
-      cityCounts[currentKey] = (cityCounts[currentKey] || 0) + 1;
+    if (cityName !== lastCity || itemsInBlock >= chunkSize) {
       cityNameCounts[cityName] = (cityNameCounts[cityName] || 0) + 1;
       itemsInBlock = 0;
-      lastCity = currentKey;
+      lastCity = cityName;
     }
 
     let sheetName =
