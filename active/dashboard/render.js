@@ -22,13 +22,7 @@ function formatCompletedAt(dateStr) {
 
 function getCityName(areaName) {
   if (!areaName) return 'その他';
-  // 注意: 以下のパターンは「四日市(市)」のようにエリア名に「市」が含まれる特殊ケースへの対処。
-  if (areaName.startsWith('四日市')) return '四日市市';
-  if (areaName.startsWith('鈴鹿')) return '鈴鹿市';
-  if (areaName.startsWith('亀山')) return '亀山市';
-  const match = areaName.match(/^[^市町郡区\(\d]+(?:市|町|郡|区)/);
-  if (match) return match[0];
-  return areaName + '市';
+  return areaName.replace(/\(\d+\)$/, '').trim();
 }
 
 function renderAreas() {
@@ -49,7 +43,7 @@ function renderAreas() {
         const done = c.done || 0;
         const total = c.total || 0;
         const progress = total > 0 ? Math.round((done / total) * 100) : 0;
-        return { name: c.name, done: done, total: total, progress: progress };
+        return { name: typeof c === "string" ? c : c.name, done: done, total: total, progress: progress };
       });
     } else {
       const cityList = [];

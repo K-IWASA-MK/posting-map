@@ -1,8 +1,8 @@
 /**
  * POSTING MAP - Tier 1 Service (Generation 2)
  * エリア Tier 1 (市町村一覧) 専用サービス
- * 責務: スプレッドシート(SSOT)からの Tier 1 市町村サマリー (name, done, total) 取得
- * ルール: SSOT 配列出現順の100%維持 (sort() / localeCompare() 全面禁止)
+ * 責務: スプレッドシート(SSOT)からの Tier 1 市町村サマリー取得
+ * 基準変更: MIE03_ADDRESS_MASTER city_name 直接参照化
  */
 (function(global) {
   class Tier1Service {
@@ -15,41 +15,41 @@
       return Tier1Service.instance;
     }
 
-    getCityName(areaName) {
-      if (!areaName) return null;
-      const match = areaName.match(/^[^市町\(\d]+(?:市|町)/);
-      if (match) return match[0];
-      return null;
-    }
-
     getTier1() {
       try {
-        let areaSummary = [];
-        if (typeof AreaService !== 'undefined' && AreaService.getInstance) {
-          const appData = AreaService.getInstance().getAppData();
-          if (appData && Array.isArray(appData.areas)) {
-            areaSummary = appData.areas;
+        const ss = typeof getSS === 'function' ? getSS() : SpreadsheetApp.getActiveSpreadsheet();
+        if (!ss) throw new Error("Spreadsheet not found");
+
+        const masterSheet = ss.getSheetByName("MIE03_ADDRESS_MASTER");
+        if (!masterSheet) {
+          throw new Error("MIE03_ADDRESS_MASTER sheet not found");
+        }
+
+        const data = masterSheet.getDataRange().getValues();
+        if (data.length <= 1) {
+          return { success: true, cities: [] };
+        }
+
+        const header = data[0];
+        const cityIdx = header.indexOf('city_name');
+        if (cityIdx === -1) {
+          throw new Error("city_name column not found in SSOT");
+        }
+
+        const cityList = [];
+
+        // 858件の元データを読み込み、B列（city_name）で一意のリストを作成
+        for (let i = 1; i < data.length; i++) {
+          const row = data[i];
+          const cityName = row[cityIdx];
+          if (cityName && cityName.trim() !== "") {
+            const cleanName = cityName.trim();
+            if (!cityList.includes(cleanName)) {
+              cityList.push(cleanName);
+            }
           }
         }
 
-        // SSOT (スプレッドシート) の出現順を100%維持して Tier 1 リストを生成
-        const cityList = [];
-        const cityMap = {};
-
-        areaSummary.forEach(s => {
-          const cName = this.getCityName(s.name);
-          if (!cName) return;
-          if (!cityMap[cName]) {
-            const item = { name: cName, done: 0, total: 0 };
-            cityMap[cName] = item;
-            cityList.push(item);
-          }
-          cityMap[cName].done += s.done || 0;
-          cityMap[cName].total += s.total || 0;
-        });
-
-        // sort() / localeCompare() は一切行わず、出現順そのままの配列を返す
-        // progress は含めず name, done, total のみ
         return {
           success: true,
           cities: cityList
