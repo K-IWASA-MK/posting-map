@@ -1156,21 +1156,18 @@ window.updateStorageLocationDropdown = function updateStorageLocationDropdown(ov
     });
   }
 
+  const targetCities = (Array.isArray(overrideCities) && overrideCities.length > 0)
+    ? overrideCities
+    : (Array.isArray(tier1Cache) && tier1Cache.length > 0 ? tier1Cache : null);
+
   locSelect.innerHTML = '';
   const cityList = [];
 
-  if (Array.isArray(overrideCities) && overrideCities.length > 0) {
-    overrideCities.forEach(c => {
+  if (Array.isArray(targetCities) && targetCities.length > 0) {
+    targetCities.forEach(c => {
       const name = typeof c === 'string' ? c : (c.name || '');
       if (name && !cityList.includes(name)) {
         cityList.push(name);
-      }
-    });
-  } else if (Array.isArray(areaSummary) && typeof getCityName === 'function') {
-    areaSummary.forEach(s => {
-      const cName = getCityName(s.name);
-      if (cName && !cityList.includes(cName)) {
-        cityList.push(cName);
       }
     });
   }
@@ -1192,7 +1189,7 @@ window.updateStorageLocationDropdown = function updateStorageLocationDropdown(ov
   });
 
   updateStorageLocationDisplayText();
-}
+};
 
   if (id === 'storage-list') {
     const listContainer = $('storage-list-container');
