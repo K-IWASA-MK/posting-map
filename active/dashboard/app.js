@@ -1032,23 +1032,43 @@ async function switchPage(id, force = false) {
           const myStock = _stockData.find(s => String(s.staffId) === String(staffId));
           if (myStock) {
             const rawCount = parseInt(myStock.count, 10);
-            countInput.value = isNaN(rawCount) ? '' : rawCount.toLocaleString();
+            countInput.value = isNaN(rawCount) ? '' : String(rawCount);
             const locSelect = $('storage-register-location');
             if (locSelect && myStock.location) {
               locSelect.value = myStock.location;
             }
           }
+          updateStorageCountDisplay();
           updateStorageRegisterButtonText();
         }
       }).catch(err => {
         console.warn('Failed to fetch staff stock on entry:', err);
+        updateStorageCountDisplay();
         updateStorageRegisterButtonText();
       });
     }
 
     setupStorageRegisterInputFormatter(countInput);
+    updateStorageCountDisplay();
     updateStorageRegisterButtonText();
   }
+
+function updateStorageCountDisplay() {
+  const countInput = $('storage-register-count');
+  const countText = $('storage-register-count-text');
+  const countUnit = $('storage-register-count-unit');
+
+  if (!countInput || !countText) return;
+
+  const raw = countInput.value.replace(/,/g, '').replace(/枚/g, '').trim();
+  if (raw !== '' && !isNaN(parseInt(raw, 10))) {
+    countText.textContent = Number(raw).toLocaleString();
+    if (countUnit) countUnit.style.display = 'inline';
+  } else {
+    countText.textContent = '';
+    if (countUnit) countUnit.style.display = 'none';
+  }
+}
 
 function updateStorageRegisterButtonText() {
   const countInput = $('storage-register-count');
@@ -1069,24 +1089,50 @@ function setupStorageRegisterInputFormatter(inputEl) {
   if (!inputEl || inputEl.dataset.formatted) return;
   inputEl.dataset.formatted = 'true';
 
+  const container = $('storage-register-count-container');
+  const display = $('storage-register-count-display');
+
+  if (container && display) {
+    container.addEventListener('click', function() {
+      inputEl.classList.remove('hidden');
+      display.classList.add('hidden');
+
+      const raw = inputEl.value.replace(/,/g, '').replace(/枚/g, '').trim();
+      inputEl.value = raw;
+      inputEl.focus();
+
+      if (typeof inputEl.setSelectionRange === 'function') {
+        inputEl.setSelectionRange(inputEl.value.length, inputEl.value.length);
+      }
+    });
+  }
+
   inputEl.addEventListener('focus', function() {
+    if (display) display.classList.add('hidden');
+    inputEl.classList.remove('hidden');
     const rawVal = this.value.replace(/,/g, '').replace(/枚/g, '').replace(/[^\d]/g, '');
     this.value = rawVal;
   });
 
   inputEl.addEventListener('blur', function() {
+    inputEl.classList.add('hidden');
+    if (display) display.classList.remove('hidden');
+
     const rawVal = this.value.replace(/,/g, '').replace(/枚/g, '').replace(/[^\d]/g, '');
     if (!rawVal) {
       this.value = '';
-      updateStorageRegisterButtonText();
-      return;
+    } else {
+      const num = parseInt(rawVal, 10);
+      this.value = isNaN(num) ? '' : String(num);
     }
-    const num = parseInt(rawVal, 10);
-    this.value = isNaN(num) ? '' : num.toLocaleString();
+
+    updateStorageCountDisplay();
     updateStorageRegisterButtonText();
   });
 
   inputEl.addEventListener('input', function() {
+    const rawVal = this.value.replace(/,/g, '').replace(/枚/g, '').replace(/[^\d]/g, '');
+    this.value = rawVal;
     updateStorageRegisterButtonText();
   });
 }
