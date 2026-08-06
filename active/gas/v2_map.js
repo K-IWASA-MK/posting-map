@@ -22,7 +22,7 @@ function getDashboardData() {
       return data;
     } catch (e) {}
   }
-  return refreshAreaSummaryCache();
+  return { success: true, summary: [] };
 }
 
 /**

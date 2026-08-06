@@ -33,12 +33,6 @@ if (typeof AreaService === 'undefined') {
       let blocks = [];
       let totalDone = 0;
 
-      try {
-        blocks = this.repository.findAllBlocks();
-      } catch (e) {
-        blocks = [];
-      }
-
       let cachedMaster = {};
       try {
         const dashboardData = this.repository.getDashboardDataCached();

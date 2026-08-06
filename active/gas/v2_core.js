@@ -23,76 +23,7 @@ function getAllEventLogs() {
 // UI層の計算を完全に排除するための集計メソッド群
 // ==========================================
 
-/**
- * ブロック（エリア）ごとの集計
- */
-function aggregateByBlock(tenantId, branchId) {
-  let ss = null;
-  if (typeof getSS === 'function') {
-    ss = getSS();
-  }
-  if (!ss) return [];
 
-  const sheets = ss.getSheets();
-  const blockStats = [];
-
-  const excludeSheets = [];
-  if (typeof CONFIG !== 'undefined' && CONFIG.get) {
-    excludeSheets.push(
-      CONFIG.get("SHEET_GUIDE"),
-      CONFIG.get("SHEET_ROSTER"),
-      CONFIG.get("SHEET_TEMPLATE"),
-      CONFIG.get("SHEET_POSTAL"),
-      CONFIG.get("SHEET_DISTRICT"),
-      CONFIG.get("SHEET_MASTER_EXPORT"),
-      CONFIG.get("SHEET_REPORT"),
-      CONFIG.get("SHEET_MANUAL"),
-      CONFIG.get("SHEET_SYSTEM_CACHE"),
-      CONFIG.get("SHEET_STORAGE"),
-      "EventLog",
-      "TraceLog",
-      "名簿",
-      "受渡要請履歴",
-      "原本"
-    );
-  }
-
-  sheets.forEach(sheet => {
-    const sheetName = sheet.getName();
-    if (excludeSheets.indexOf(sheetName) !== -1 || sheet.isSheetHidden()) return;
-
-    const lastRow = sheet.getLastRow();
-    if (lastRow < 2) return;
-
-    const values = sheet.getRange(2, 1, lastRow - 1, 10).getValues();
-    let doneCount = 0;
-    let lat = null;
-    let lng = null;
-
-    values.forEach(r => {
-      const isComplete = r[3] === true || r[3] === 'true';
-      if (isComplete) {
-        doneCount += 1;
-        if (r[8] && typeof r[8] === 'string' && r[8].indexOf(',') !== -1) {
-          const parts = r[8].split(',');
-          lat = parseFloat(parts[0]) || lat;
-          lng = parseFloat(parts[1]) || lng;
-        }
-      }
-    });
-
-    blockStats.push({
-      name: sheetName,
-      done: doneCount,
-      total: lastRow - 1,
-      lat: lat,
-      lng: lng,
-      lastUpdated: 0
-    });
-  });
-
-  return blockStats;
-}
 
 /**
  * 個人別配布枚数ランキング

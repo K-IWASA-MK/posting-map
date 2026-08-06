@@ -30,16 +30,7 @@ if (typeof AreaRepository === 'undefined') {
       return "支部";
     }
 
-    findAllBlocks() {
-      if (typeof aggregateByBlock === 'function') {
-        try {
-          return aggregateByBlock("DEFAULT_TENANT", null);
-        } catch (e) {
-          return [];
-        }
-      }
-      return [];
-    }
+
 
     getDashboardDataCached() {
       if (typeof getDashboardData === 'function') {
