@@ -82,7 +82,7 @@ if (typeof AreaService === 'undefined') {
         }
       });
 
-      const denominator = (typeof CONFIG !== 'undefined' && CONFIG.get) ? (CONFIG.get("DENOMINATOR_UNITS") || 0) : 0;
+      const denominator = (typeof CONFIG !== 'undefined' && CONFIG.get) ? (CONFIG.get("DENOMINATOR_UNITS") || 858) : 858;
       const stats = { done: totalDone, total: denominator };
       const apiKey = PropertiesService.getScriptProperties().getProperty('GOOGLE_MAPS_API_KEY') || "";
 
