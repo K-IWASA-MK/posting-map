@@ -575,3 +575,67 @@ MIE03_ADDRESS_MASTER 等の業務SSOTデータは、会社の競争力そのも�
 - GitHub Pages は UI 公開用途に限定し、SSOTデータ供給経路として利用してはならない。
 - 今後の Implementation Plan、コード変更案、設計提案において、`MIE03_ADDRESS_MASTER` を外部公開URLから取得する設計を提示してはならない。
 
+---
+
+## 📜 Fetch API Standard Data Access Governance Rule (データアクセス標準実装規約)
+
+POSTING MAP におけるすべての Fetch API（非同期データ取得関数）は、以下の **7段階の固定シーケンス** に従って実装しなければならない。
+
+```
+1. Guard (入力チェック & ガード節 return)
+      │
+      ▼
+2. Cache Check (キャッシュ存在確認 ➔ ありなら即時 return)
+      │
+      ▼
+3. Loading Start (showLoading() 呼び出し [参照カウント +1])
+      │
+      ▼
+4. API Call (try ブロック内での API リクエスト)
+      │
+      ▼
+5. Cache Update (取得データのキャッシュ保存)
+      │
+      ▼
+6. Loading Close (finally ブロック内での hideLoading() 実行 [参照カウント -1])
+      │
+      ▼
+7. Return (結果データの返却)
+```
+
+### テンプレートコード規範
+```javascript
+async function fetchDomainData(param) {
+  // 1. Guard
+  if (!param) return null;
+
+  // 2. Cache Check
+  if (cacheMap[param]) {
+    return cacheMap[param];
+  }
+
+  // 3. Loading Start
+  showLoading('CONNECTING...');
+
+  try {
+    // 4. API Call
+    const res = await callApi('getDomainData', { param });
+    
+    // 5. Cache Update
+    if (res && res.success && Array.isArray(res.data)) {
+      cacheMap[param] = res.data;
+      return res.data;
+    }
+  } catch (err) {
+    console.warn(`fetchDomainData failed:`, err);
+  } finally {
+    // 6. Loading Close
+    hideLoading();
+  }
+
+  // 7. Return
+  return null;
+}
+```
+
+
