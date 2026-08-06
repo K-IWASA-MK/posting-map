@@ -79,9 +79,9 @@ function renderAreas() {
 
     if (isFetching) {
       mainContentHtml = `
-        <div class="fixed inset-0 z-[4000] flex flex-col items-center justify-center bg-black transition-all duration-500">
-          <div class="w-36 h-36 bg-[#1c1c1e] rounded-[3rem] shadow-2xl flex items-center justify-center overflow-hidden mb-8 p-1 relative border border-white/10">
-            <img src="./assets/icon180-v2.png?v=100" class="w-full h-full object-cover rounded-[2.8rem] z-10">
+        <div class="fixed inset-0 z-[4000] flex flex-col items-center justify-center bg-black transition-all duration-500 pt-16">
+          <div class="w-36 h-36 bg-[#1c1c1e] rounded-[2.5rem] shadow-2xl flex items-center justify-center overflow-hidden mb-8 p-3 relative border border-white/10">
+            <img src="./assets/icon180-v2.png?v=100" class="w-full h-full object-contain rounded-[1.8rem] z-10">
           </div>
           <p class="text-xs font-black text-white/50 uppercase tracking-[0.35em] font-mono animate-pulse">SEARCHING...</p>
         </div>`;
