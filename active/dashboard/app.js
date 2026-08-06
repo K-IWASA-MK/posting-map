@@ -437,25 +437,21 @@ async function loadData(skipSync = false) {
       setSyncStatus('offline');
     }
     
-    logDebug("[loadData] Fetching getAppData in background...");
-    const data = await (_appDataPromise || callApi('getAppData')); // ⑤ プリフェッチがあれば再利用
-    logDebug("[loadData] getAppData fetched successfully.");
+    logDebug("[loadData] Fetching getSystemSummary in background...");
+    const data = await (_appDataPromise || callApi('getSystemSummary'));
+    logDebug("[loadData] getSystemSummary fetched successfully.");
     _appDataPromise = null;
     
     if (data && data.success) {
-      logDebug("[loadData] data keys: " + Object.keys(data).join(", "));
-      areaSummary = data.areas || [];
-      if (data.branchName) localStorage.setItem('branch_name', data.branchName);
+      logDebug("[loadData] System Summary received: total=" + data.total + ", done=" + data.done);
+      updateStats({ done: data.done, total: data.total });
       
-      logDebug("[loadData] Rendering areas in background...");
+      logDebug("[loadData] Fetching Tier 1 in background...");
+      fetchTier1();
+      
       if (typeof updateStorageLocationDropdown === 'function') {
         updateStorageLocationDropdown();
       }
-      logDebug("[loadData] Rendering areas OK. Updating stats via System Summary...");
-      if (data.stats) {
-        updateStats(data.stats);
-      }
-      fetchTier1();
 
       // バックグラウンドでランキングデータを先読み/更新
       prefetchRanking();
@@ -1667,8 +1663,8 @@ async function safeInitApp() {
         
         let userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
         
-        // ⑤ getAppDataを並列プリフェッチ開始
-        _appDataPromise = callApi('getAppData');
+        // ⑤ getSystemSummaryを軽量並列プリフェッチ開始（全件読み込みgetAppDataは廃止）
+        _appDataPromise = callApi('getSystemSummary');
 
         // 【通常起動】既にユーザー登録・LINE連携キャッシュがある場合は、同期通信を待たずに即時起動
         if (userInfo.id && userInfo.lineUserId) {
