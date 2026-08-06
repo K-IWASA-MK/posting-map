@@ -79,9 +79,11 @@ function renderAreas() {
 
     if (isFetching) {
       mainContentHtml = `
-        <div style="border: 1px solid rgba(255,255,255,0.04);" class="premium-glass p-8 flex flex-col items-center justify-center text-center gap-3 rounded-3xl">
-          <div class="w-8 h-8 rounded-full border-2 border-[#2563eb]/40 border-t-[#2563eb] animate-spin"></div>
-          <p class="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">SEARCHING AREAS...</p>
+        <div class="fixed inset-0 z-[4000] flex flex-col items-center justify-center bg-black transition-all duration-500">
+          <div class="w-36 h-36 bg-[#1c1c1e] rounded-[3rem] shadow-2xl flex items-center justify-center overflow-hidden mb-8 p-1 relative border border-white/10">
+            <img src="https://k-iwasa-mk.github.io/posting-map/assets/icon180-v2.png?v=100" class="w-full h-full object-cover rounded-[2.8rem] z-10">
+          </div>
+          <p class="text-xs font-black text-white/50 uppercase tracking-[0.35em] font-mono animate-pulse">SEARCHING...</p>
         </div>`;
     } else {
       let filteredAreas = [];
