@@ -699,3 +699,63 @@ const YOKKAICHI_DISTRICT_MASTER = [
   }
 ];
 // === [Yokkaichi District Master Area SSOT: END] ===
+
+/**
+ * ドライブ上の MIE03_MUNICIPALITY_ORDER.csv から自治体順を動的に取得する（SSOT）
+ * なければデフォルト値でドライブ上にCSVファイルを自動生成して保存する。
+ * @return {string[]} 自治体順 of the municipalities
+ */
+function getMunicipalityOrder() {
+  const fileName = "MIE03_MUNICIPALITY_ORDER.csv";
+  let file = findFileByPattern("MIE03_MUNICIPALITY_ORDER", fileName);
+  
+  const defaultList = [
+    "四日市市",
+    "桑名市",
+    "いなべ市",
+    "桑名郡木曽岬町",
+    "員弁郡東員町",
+    "三重郡菰野町",
+    "三重郡朝日町",
+    "三重郡川越町"
+  ];
+  
+  if (!file) {
+    try {
+      const csvContent = "priority,city_name\n" + defaultList.map((c, i) => `${i + 1},${c}`).join("\n");
+      const parentId = typeof CONFIG !== 'undefined' ? CONFIG.get("STORAGE_PARENT_ID") : null;
+      let folder = DriveApp.getRootFolder();
+      if (parentId) {
+        try {
+          folder = DriveApp.getFolderById(parentId);
+        } catch (fErr) {}
+      }
+      file = folder.createFile(fileName, csvContent, MimeType.PLAIN_TEXT);
+      console.warn("MIE03_MUNICIPALITY_ORDER.csv が見つからないため、ドライブ上にデフォルト値で自動生成しました。");
+    } catch (err) {
+      console.error("MIE03_MUNICIPALITY_ORDER.csv の自動生成に失敗しました: " + err.message);
+      return defaultList; // エラー時はデフォルトをそのまま返す
+    }
+  }
+  
+  try {
+    const data = getCsvOrSheetDataFromFile(file);
+    if (!data || data.length <= 1) {
+      return defaultList;
+    }
+    
+    const cities = [];
+    // 1行目はヘッダー (priority,city_name)
+    for (let i = 1; i < data.length; i++) {
+      const cityName = String(data[i][1] || "").trim(); // 2列目 (city_name)
+      if (cityName) {
+        cities.push(cityName);
+      }
+    }
+    return cities;
+  } catch (e) {
+    console.error("MIE03_MUNICIPALITY_ORDER.csv のパースに失敗しました: " + e.message);
+    return defaultList;
+  }
+}
+

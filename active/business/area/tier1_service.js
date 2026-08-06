@@ -17,42 +17,10 @@
 
     getTier1() {
       try {
-        const ss = typeof getSS === 'function' ? getSS() : SpreadsheetApp.getActiveSpreadsheet();
-        if (!ss) throw new Error("Spreadsheet not found");
-
-        const masterSheet = ss.getSheetByName("MIE03_ADDRESS_MASTER");
-        if (!masterSheet) {
-          throw new Error("MIE03_ADDRESS_MASTER sheet not found");
-        }
-
-        const data = masterSheet.getDataRange().getValues();
-        if (data.length <= 1) {
-          return { success: true, cities: [] };
-        }
-
-        const header = data[0];
-        const cityIdx = header.indexOf('city_name');
-        if (cityIdx === -1) {
-          throw new Error("city_name column not found in SSOT");
-        }
-
-        const cityList = [];
-
-        // 858件の元データを読み込み、B列（city_name）で一意のリストを作成
-        for (let i = 1; i < data.length; i++) {
-          const row = data[i];
-          const cityName = row[cityIdx];
-          if (cityName && cityName.trim() !== "") {
-            const cleanName = cityName.trim();
-            if (!cityList.includes(cleanName)) {
-              cityList.push(cleanName);
-            }
-          }
-        }
-
+        const cities = getMunicipalityOrder();
         return {
           success: true,
-          cities: cityList
+          cities: cities
         };
       } catch (err) {
         return {
