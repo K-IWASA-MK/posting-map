@@ -308,14 +308,14 @@ function processGetActionLegacy(action, e) {
         break;
       case 'getTier2':
         {
-          const targetCity = (e && e.parameter && e.parameter.cityName) ? e.parameter.cityName : null;
+          const targetCity = (e && e.parameter && (e.parameter.cityName || e.parameter.city)) ? (e.parameter.cityName || e.parameter.city) : (typeof postData !== 'undefined' && postData ? postData.cityName : null);
           response = typeof Tier2Service !== 'undefined' ? Tier2Service.getInstance().getTier2(targetCity) : { success: false };
         }
         break;
       case 'getTier3':
         {
-          const targetCity = (e && e.parameter && e.parameter.cityName) ? e.parameter.cityName : null;
-          const targetTown = (e && e.parameter && e.parameter.townName) ? e.parameter.townName : null;
+          const targetCity = (e && e.parameter && (e.parameter.cityName || e.parameter.city)) ? (e.parameter.cityName || e.parameter.city) : (typeof postData !== 'undefined' && postData ? postData.cityName : null);
+          const targetTown = (e && e.parameter && (e.parameter.townName || e.parameter.town)) ? (e.parameter.townName || e.parameter.town) : (typeof postData !== 'undefined' && postData ? postData.townName : null);
           response = typeof Tier3Service !== 'undefined' ? Tier3Service.getInstance().getTier3(targetCity, targetTown) : { success: false };
         }
         break;
