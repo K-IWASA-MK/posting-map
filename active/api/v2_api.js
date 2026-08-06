@@ -620,8 +620,7 @@ function processPostAction(action, postData, e) {
       return typeof Tier2Service !== 'undefined' ? Tier2Service.getInstance().getTier2(postData ? postData.cityName : null) : { success: false };
     case 'getTier3':
       return typeof Tier3Service !== 'undefined' ? Tier3Service.getInstance().getTier3(postData ? postData.cityName : null, postData ? postData.townName : null) : { success: false };
-    case 'getAppData':
-      return getAppData();
+
     case 'getConfig':
       return { success: true, config: getConfig(postData.tenantId || e.parameter.tenantId || "DEFAULT") };
     case 'getEvidence':
@@ -746,9 +745,7 @@ function createJsonResponseFromApiResponse(apiResponse) {
 // ② データ取得ロジック
 // =============================
 
-function getAppData() {
-  return AreaService.getInstance().getAppData();
-}
+
 
 function getAreaDetails(areaName) {
   return AreaService.getInstance().getAreaDetails(areaName);

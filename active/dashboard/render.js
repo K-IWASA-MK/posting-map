@@ -45,24 +45,6 @@ function renderAreas() {
         const progress = total > 0 ? Math.round((done / total) * 100) : 0;
         return { name: typeof c === "string" ? c : c.name, done: done, total: total, progress: progress };
       });
-    } else {
-      const cityList = [];
-      const cityMap = {};
-      areaSummary.forEach(s => {
-        const cityName = getCityName(s.name);
-        if (!cityMap[cityName]) {
-          const item = { name: cityName, done: 0, total: 0 };
-          cityMap[cityName] = item;
-          cityList.push(item);
-        }
-        cityMap[cityName].done += s.done || 0;
-        cityMap[cityName].total += s.total || 0;
-      });
-
-      cities = cityList.map(c => {
-        c.progress = c.total > 0 ? Math.round((c.done / c.total) * 100) : 0;
-        return c;
-      });
     }
 
     const headerCardHtml = `
