@@ -297,27 +297,7 @@ function doGet(e) {
  */
 function processGetActionLegacy(action, e) {
   let response;
-  if (action === 'getAppData') {
-    const cacheKey = CacheServiceProvider.getInstance().makeKey(
-      e.tenantId || "DEFAULT",
-      e.branchId || "DEFAULT",
-      "appdata"
-    );
-    const cached = CacheServiceProvider.getInstance().get(cacheKey);
-    if (cached) {
-      globalCacheHit = true;
-      GasPerformanceMonitor.getInstance().recordCacheHit();
-      response = JSON.parse(cached);
-    } else {
-      globalCacheHit = false;
-      GasPerformanceMonitor.getInstance().recordCacheMiss();
-      response = getAppData();
-      if (response && response.success) {
-        CacheServiceProvider.getInstance().put(cacheKey, JSON.stringify(response));
-      }
-    }
-  } else {
-    switch (action) {
+  switch (action) {
       case 'getDashboardData':
       case 'getSummary':
       case 'getSystemSummary':
@@ -428,7 +408,6 @@ function processGetActionLegacy(action, e) {
       default:
         response = { success: true, message: 'POSTING MAP API is online.' };
     }
-  }
   return response;
 }
 
@@ -2632,7 +2611,7 @@ class CapabilityRegistry {
       'getTier1': 'READ_TIER1',
       'getTier2': 'READ_TIER2',
       'getTier3': 'READ_TIER3',
-      'getAppData': 'READ_DASHBOARD',
+
       'getFlyerStock': 'READ_HOLDING',
       'updateFlyerStock': 'WRITE_HOLDING'
     };

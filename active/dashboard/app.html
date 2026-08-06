@@ -236,7 +236,6 @@
     function loadData() {
       if (!isGAS) return;
       $('loading').classList.remove('hidden');
-      google.script.run.withSuccessHandler(renderData).withFailureHandler(err => { alert('エラー: ' + err.message); $('loading').classList.add('hidden'); }).getAppData();
       google.script.run.withSuccessHandler(list => { roster = list || []; }).getRoster();
     }
 

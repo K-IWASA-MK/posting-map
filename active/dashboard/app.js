@@ -14,7 +14,7 @@ window.onunhandledrejection = function(event) {
 };
 
 let allPoints = [], roster = [], rankingData = [];
-let _appDataPromise = null; // ⑤ getAppData並列プリフェッチ用
+let _summaryPromise = null; // ⑤ getSystemSummary並列プリフェッチ用
 let _rankingFetched = false;  // ランキング遅延取得済みフラグ
 let _stockFetched = false;    // 在庫一覧取得済みフラグ
 let _stockData = [];          // 在庫一覧キャッシュデータ
@@ -238,7 +238,7 @@ async function callApiPost(action, payload = {}) {
 
 async function startApp(profile = null, registrationPromise = null) {
   try {
-    // Gen 2 独立並列リクエスト: ヘッダー専用 System Summary の即時並列発注 (getAppData に非依存)
+    // Gen 2 独立並列リクエスト: ヘッダー専用 System Summary の即時並列発注
     fetchSystemSummary();
 
     // 1. 初回ユーザーの場合、何よりも先に登録処理の完了を待つ
@@ -246,7 +246,7 @@ async function startApp(profile = null, registrationPromise = null) {
       await registrationPromise;
     }
 
-    // 2. 基本データ(getAppData)の取得は完全バックグラウンドで非同期実行（エラーログキャッチ）
+    // 2. バックグラウンドデータの取得は非同期実行（エラーログキャッチ）
     loadData(false).catch(err => {
       console.warn("Background load error:", err);
       logDebug("[loadData] Background error: " + (err ? err.message : err));
@@ -438,9 +438,9 @@ async function loadData(skipSync = false) {
     }
     
     logDebug("[loadData] Fetching getSystemSummary in background...");
-    const data = await (_appDataPromise || callApi('getSystemSummary'));
+    const data = await (_summaryPromise || callApi('getSystemSummary'));
     logDebug("[loadData] getSystemSummary fetched successfully.");
-    _appDataPromise = null;
+    _summaryPromise = null;
     
     if (data && data.success) {
       logDebug("[loadData] System Summary received: total=" + data.total + ", done=" + data.done);
@@ -1666,8 +1666,8 @@ async function safeInitApp() {
         
         let userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
         
-        // ⑤ getSystemSummaryを軽量並列プリフェッチ開始（全件読み込みgetAppDataは廃止）
-        _appDataPromise = callApi('getSystemSummary');
+        // ⑤ getSystemSummaryを軽量並列プリフェッチ開始
+        _summaryPromise = callApi('getSystemSummary');
 
         // 【通常起動】既にユーザー登録・LINE連携キャッシュがある場合は、同期通信を待たずに即時起動
         if (userInfo.id && userInfo.lineUserId) {

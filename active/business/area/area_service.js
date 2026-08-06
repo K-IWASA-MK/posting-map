@@ -29,12 +29,7 @@ if (typeof AreaService === 'undefined') {
       return areaName + '市';
     }
 
-    getAppData() {
-      return {
-        success: true,
-        message: "Deprecated in Generation 2: Use getSystemSummary or getTier1"
-      };
-    }
+
 
     getAreaDetails(areaName) {
       return this.repository.findAreaPoints(areaName);
