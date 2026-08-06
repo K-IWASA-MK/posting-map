@@ -482,7 +482,9 @@ function sortAllAreaSheetTabs() {
     const sheets = ss.getSheets();
     const systemSheetNames = ["原本", "名簿", "初めての方「使い方ガイド」", "__SYSTEM_CACHE__", "保有チラシ枚数", "管理者ID", "📄 活動報告書", "📖 らくらくマニュアル"];
 
-    const cityOrderPriority = ["桑名市", "いなべ市", "桑名郡", "員弁郡", "三重郡", "四日市市", "鈴鹿市"];
+    // データソース（SSOT）から動的に市町村の出現順（優先順位）を取得する (規約順守)
+    const tier1Res = getTier1();
+    const cityOrderPriority = tier1Res.success ? tier1Res.cities : [];
 
     const areaSheets = [];
     sheets.forEach(sheet => {
