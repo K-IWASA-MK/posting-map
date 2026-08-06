@@ -90,28 +90,19 @@ function forceStartBatch() {
   tempSheet.clear();
   tempSheet.getRange(1, 1, 1, 3).setValues([["postal_code", "city_name", "full_address"]]);
   
-  // データソース（SSOT）から動的に市町村の出現順（優先順位）を取得する (規約順守)
-  const tier1Res = getTier1();
-  const cityOrderPriority = tier1Res.success ? tier1Res.cities : [];
+  // MIE03_SHEET_GENERATION_RULE.md に準拠: MIE03_MUNICIPALITY_ORDER.csv (SSOT) の priority 順にソート
+  const cityOrderPriority = getMunicipalityOrder();
 
-  // IMPORTANT:
-  // cityOrderPriority MUST come from getTier1() SSOT.
-  // Do not replace with indexOf against hardcoded municipality list.
-  // Municipality order = CSV source order.
-  // Within municipality = postalCode ascending.
   addresses.sort((a, b) => {
-    const cityA = a.city;
-    const cityB = b.city;
-
-    const idxA = cityOrderPriority.indexOf(cityA);
-    const idxB = cityOrderPriority.indexOf(cityB);
+    const idxA = cityOrderPriority.indexOf(a.city);
+    const idxB = cityOrderPriority.indexOf(b.city);
 
     const pA = idxA === -1 ? 999 : idxA;
     const pB = idxB === -1 ? 999 : idxB;
 
     if (pA !== pB) return pA - pB;
 
-    // 同一地区内での郵便番号昇順
+    // 同一自治体内での郵便番号数値昇順
     const numA = parseInt((a.postalCode || "0").replace(/-/g, ""), 10) || 0;
     const numB = parseInt((b.postalCode || "0").replace(/-/g, ""), 10) || 0;
     return numA - numB;
@@ -482,9 +473,8 @@ function sortAllAreaSheetTabs() {
     const sheets = ss.getSheets();
     const systemSheetNames = ["原本", "名簿", "初めての方「使い方ガイド」", "__SYSTEM_CACHE__", "保有チラシ枚数", "管理者ID", "📄 活動報告書", "📖 らくらくマニュアル"];
 
-    // データソース（SSOT）から動的に市町村の出現順（優先順位）を取得する (規約順守)
-    const tier1Res = getTier1();
-    const cityOrderPriority = tier1Res.success ? tier1Res.cities : [];
+    // MIE03_SHEET_GENERATION_RULE.md に準拠: MIE03_MUNICIPALITY_ORDER.csv (SSOT) の priority 順に整列
+    const cityOrderPriority = getMunicipalityOrder();
 
     const areaSheets = [];
     sheets.forEach(sheet => {

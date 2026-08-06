@@ -471,7 +471,7 @@ function verifyDistrictDeployment(e) {
           row: idx + 2,
           postalCode: r[0],
           address: r[1],
-          extractedCity: extractCityName(r[1])
+          extractedCity: r[1]
         }));
       }
 
