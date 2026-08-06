@@ -1190,10 +1190,7 @@ window.updateStorageLocationDropdown = function updateStorageLocationDropdown(ov
   if (id === 'storage-list') {
     const listContainer = $('storage-list-container');
     
-    // 1. キャッシュがあれば即時描画（ローディング表示なしで即時表示）
-    if (_stockFetched && _stockData && _stockData.length > 0) {
-      if (typeof renderStorageList === 'function') renderStorageList(_stockData);
-    } else {
+    if (!_stockFetched) {
       if (listContainer) {
         listContainer.innerHTML = `
           <div style="border: 1px solid rgba(255,255,255,0.04);" class="premium-glass p-8 flex flex-col items-center justify-center text-center gap-3">
@@ -1201,32 +1198,32 @@ window.updateStorageLocationDropdown = function updateStorageLocationDropdown(ov
             <p class="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Loading Inventory...</p>
           </div>`;
       }
-    }
-    
-    // 2. バックグラウンドで最新データを取得し、サイレント更新
-    callApi('getFlyerStock').then(data => {
-      if (data && data.success) {
-        _stockData = data.stocks || [];
-        _stockFetched = true;
-        if (typeof renderStorageList === 'function') renderStorageList(_stockData);
-      } else {
-        if (!_stockFetched && listContainer) {
+      callApi('getFlyerStock').then(data => {
+        if (data && data.success) {
+          _stockData = data.stocks || [];
+          _stockFetched = true;
+          if (typeof renderStorageList === 'function') renderStorageList(_stockData);
+        } else {
+          if (listContainer) {
+            listContainer.innerHTML = `
+              <div style="border: 1px solid rgba(255,255,255,0.04);" class="premium-glass p-8 flex flex-col items-center justify-center text-center gap-3">
+                <span class="text-2xl">⚠️</span>
+                <p class="text-sm font-black text-white/60">データ取得に失敗しました</p>
+              </div>`;
+          }
+        }
+      }).catch(err => {
+        if (listContainer) {
           listContainer.innerHTML = `
             <div style="border: 1px solid rgba(255,255,255,0.04);" class="premium-glass p-8 flex flex-col items-center justify-center text-center gap-3">
               <span class="text-2xl">⚠️</span>
-              <p class="text-sm font-black text-white/60">データ取得に失敗しました</p>
+              <p class="text-sm font-black text-white/60">エラーが発生しました</p>
             </div>`;
         }
-      }
-    }).catch(err => {
-      if (!_stockFetched && listContainer) {
-        listContainer.innerHTML = `
-          <div style="border: 1px solid rgba(255,255,255,0.04);" class="premium-glass p-8 flex flex-col items-center justify-center text-center gap-3">
-            <span class="text-2xl">⚠️</span>
-            <p class="text-sm font-black text-white/60">エラーが発生しました</p>
-          </div>`;
-      }
-    });
+      });
+    } else {
+      if (typeof renderStorageList === 'function') renderStorageList(_stockData);
+    }
   }
   
   // 3. ナビゲーションの表示制御
