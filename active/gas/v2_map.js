@@ -183,55 +183,18 @@ function createSystemCacheSheet() {
   sheet.clear();
   sheet.getRange(1, 1, 1, 6).setValues([["エリア名", "完了数", "合計数", "代表住所", "市町村カナ", "町域カナ"]]);
 
-  // __TEMP_ADDRESSES__ からカナ情報を取得し Map 化 (SSOT)
-  const tempSheet = ss.getSheetByName("__TEMP_ADDRESSES__");
-  const kanaMap = {};
-  if (tempSheet) {
-    const tempLastRow = tempSheet.getLastRow();
-    if (tempLastRow >= 2) {
-      // 2列目:住所, 3列目:市町村カナ, 4列目:町域カナ
-      const tempValues = tempSheet.getRange(2, 2, tempLastRow - 1, 3).getValues();
-      tempValues.forEach(row => {
-        const addr = row[0] ? String(row[0]).trim() : "";
-        const cityKana = row[1] ? String(row[1]).trim() : "";
-        const townKana = row[2] ? String(row[2]).trim() : "";
-        if (addr) {
-          kanaMap[addr] = { cityKana, townKana };
-        }
-      });
-    }
-  }
-
   const exclude = [
     CONFIG.get("SHEET_GUIDE"), CONFIG.get("SHEET_ROSTER"), CONFIG.get("SHEET_TEMPLATE"),
     CONFIG.get("SHEET_POSTAL"), CONFIG.get("SHEET_DISTRICT"), CONFIG.get("SHEET_MASTER_EXPORT"),
     CONFIG.get("SHEET_REPORT"), CONFIG.get("SHEET_MANUAL"), CONFIG.get("SHEET_SYSTEM_CACHE"),
     CONFIG.get("SHEET_STORAGE"),
-    "__TEMP_ADDRESSES__" // バッチ一時シート（完了前に残った場合も除外）
+    "__TEMP_ADDRESSES__"
   ];
 
-  // 1. MIE03_ADDRESS_MASTER から出現順に自治体名リストを取得
-  const masterSheet = ss.getSheetByName("MIE03_ADDRESS_MASTER");
-  const orderedCities = [];
-  if (masterSheet) {
-    const data = masterSheet.getDataRange().getValues();
-    if (data.length > 1) {
-      const header = data[0];
-      const cityIdx = header.indexOf("city_name");
-      if (cityIdx !== -1) {
-        const citySet = new Set();
-        for (let i = 1; i < data.length; i++) {
-          const cName = String(data[i][cityIdx] || "").trim();
-          if (cName) {
-            citySet.add(cName);
-          }
-        }
-        citySet.forEach(c => orderedCities.push(c));
-      }
-    }
-  }
+  // 1. MIE03_MUNICIPALITY_ORDER.csv (SSOT) から自治体順を取得
+  const orderedCities = getMunicipalityOrder();
 
-  // 2. 自治体の生成優先順に従ってシートを順次回収 (O(1) 回収)
+  // 2. 自治体の優先順に従ってシートを順次回収
   const orderedAreaSheets = [];
   orderedCities.forEach(cityName => {
     // 連番なし (例: "四日市市")
@@ -245,6 +208,15 @@ function createSystemCacheSheet() {
       if (sN && !sN.isSheetHidden() && !exclude.includes(sN.getName())) {
         orderedAreaSheets.push(sN);
       }
+    }
+  });
+
+  // 上記順序で漏れたエリアシートがあれば末尾に追加回収
+  const existingSheets = ss.getSheets();
+  existingSheets.forEach(s => {
+    const sName = s.getName();
+    if (!s.isSheetHidden() && !exclude.includes(sName) && !orderedAreaSheets.some(item => item.getName() === sName)) {
+      orderedAreaSheets.push(s);
     }
   });
 
@@ -263,19 +235,19 @@ function createSystemCacheSheet() {
     }
     
     const escapedName = name.replace(/'/g, "''");
-    const kData = kanaMap[name] || { cityKana: "", townKana: "" };
 
     return [
       name,
-      0, // Phase 13: 完了数はEventLogから集計するため、ここはダミー(0)とする
-      `=COUNTA('${escapedName}'!A2:A)`, // マスター件数
+      0, // 完了数はEventLogから集計するためダミー(0)とする
+      `=COUNTA('${escapedName}'!A2:A)`, // マスター件数数式
       repAddress,
-      kData.cityKana,
-      kData.townKana
+      "",
+      ""
     ];
   });
 
   sheet.getRange(2, 1, rows.length, 6).setValues(rows);
+  SpreadsheetApp.flush();
 }
 
 /**
