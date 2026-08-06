@@ -1435,6 +1435,9 @@ async function fetchTier1() {
       // Tier 1 再取得時は Tier 2 キャッシュを破棄 (キャッシュガバナンスルール適用)
       tier2CacheMap = {};
       updateStorageLocationDropdown(tier1Cache);
+      if (typeof renderAreas === 'function') {
+        renderAreas();
+      }
       return tier1Cache;
     }
   } catch (err) {
