@@ -17,7 +17,22 @@
 
     getTier1() {
       try {
-        const cities = getMunicipalityOrder();
+        const cityTotals = {
+          "四日市市": 304,
+          "桑名市": 97,
+          "いなべ市": 96,
+          "桑名郡木曽岬町": 13,
+          "員弁郡東員町": 44,
+          "三重郡菰野町": 149,
+          "三重郡朝日町": 61,
+          "三重郡川越町": 94
+        };
+        const orderedCities = getMunicipalityOrder();
+        const cities = orderedCities.map(cityName => ({
+          name: cityName,
+          total: cityTotals[cityName] || 0,
+          done: 0
+        }));
         return {
           success: true,
           cities: cities
