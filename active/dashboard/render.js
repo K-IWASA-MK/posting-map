@@ -68,62 +68,64 @@ function renderAreas() {
     $('area-list').innerHTML = headerCardHtml + `<div class="space-y-6">${cityCardsHtml}</div>` + bottomTopButtonHtml;
   } else {
     // 【第2層：選択された市のエリアシート一覧画面】
-    const isFetching = typeof tier2CacheMap === 'undefined' || !(currentCity in tier2CacheMap);
+    const backButtonHtml = `
+      <div class="flex items-center mb-6 h-12">
+        <button onclick="backToCityList()" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold">‹</button>
+      </div>
+    `;
 
-    if (isFetching) {
-      $('area-list').innerHTML = `
-        <div class="fixed inset-0 z-[4000] flex flex-col items-center justify-center bg-black transition-all duration-500 pt-28">
-          <div class="w-36 h-36 flex items-center justify-center mb-8 relative">
-            <img src="./assets/icon180-v2.png?v=100" class="w-full h-full object-contain rounded-[2.2rem]">
-          </div>
-          <p class="text-xs font-black text-white/50 uppercase tracking-[0.35em] font-mono animate-pulse">SEARCHING...</p>
-        </div>`;
-    } else {
-      const backButtonHtml = `
-        <div class="flex items-center mb-6 h-12">
-          <button onclick="backToCityList()" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold">‹</button>
-        </div>
-      `;
-
-      let filteredAreas = [];
-      if (Array.isArray(tier2CacheMap[currentCity])) {
-        filteredAreas = tier2CacheMap[currentCity].map(t => {
-          const done = t.done || 0;
-          const total = t.total || 0;
-          const progress = total > 0 ? Math.round((done / total) * 100) : 0;
-          return { name: t.name, done: done, total: total, progress: progress, repAddress: t.repAddress || '' };
-        });
-      }
-
-      const areaCardsHtml = filteredAreas.map(s => renderAreaListItem(s)).join('');
-      const bottomNavHtml = filteredAreas.length > 3 ? `
-        <div class="flex items-center justify-between mt-8 pb-10 w-full gap-4">
-          <button onclick="backToCityList()" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold">‹</button>
-          <button onclick="$('content').scrollTo({top: 0, behavior: 'smooth'})" class="flex-1 h-12 premium-glass-btn flex items-center justify-center text-xs font-bold uppercase tracking-wider text-white/80">↑ トップに戻る</button>
-          <div class="w-12 h-12"></div>
-        </div>
-      ` : `
-        <div class="flex items-center justify-start mt-8 pb-10">
-          <button onclick="backToCityList()" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold">‹</button>
-        </div>
-      `;
-      const mainContentHtml = `<div class="space-y-6">${areaCardsHtml}</div>` + bottomNavHtml;
-      $('area-list').innerHTML = backButtonHtml + mainContentHtml;
+    let filteredAreas = [];
+    if (typeof tier2CacheMap !== 'undefined' && Array.isArray(tier2CacheMap[currentCity])) {
+      filteredAreas = tier2CacheMap[currentCity].map(t => {
+        const done = t.done || 0;
+        const total = t.total || 0;
+        const progress = total > 0 ? Math.round((done / total) * 100) : 0;
+        return { name: t.name, done: done, total: total, progress: progress, repAddress: t.repAddress || '' };
+      });
     }
+
+    const areaCardsHtml = filteredAreas.map(s => renderAreaListItem(s)).join('');
+    const bottomNavHtml = filteredAreas.length > 3 ? `
+      <div class="flex items-center justify-between mt-8 pb-10 w-full gap-4">
+        <button onclick="backToCityList()" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold">‹</button>
+        <button onclick="$('content').scrollTo({top: 0, behavior: 'smooth'})" class="flex-1 h-12 premium-glass-btn flex items-center justify-center text-xs font-bold uppercase tracking-wider text-white/80">↑ トップに戻る</button>
+        <div class="w-12 h-12"></div>
+      </div>
+    ` : `
+      <div class="flex items-center justify-start mt-8 pb-10">
+        <button onclick="backToCityList()" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold">‹</button>
+      </div>
+    `;
+    const mainContentHtml = `<div class="space-y-6">${areaCardsHtml}</div>` + bottomNavHtml;
+    $('area-list').innerHTML = backButtonHtml + mainContentHtml;
   }
 }
 
-function selectCity(cityName) {
+async function selectCity(cityName) {
   currentCity = cityName;
+  const needsFetch = typeof tier2CacheMap === 'undefined' || !(cityName in tier2CacheMap);
+  const loadingEl = $('loading');
+
+  if (needsFetch && loadingEl) {
+    const statusEl = $('loading-status');
+    if (statusEl) statusEl.textContent = 'CONNECTING...';
+    loadingEl.classList.remove('hidden');
+    loadingEl.classList.remove('opacity-0');
+  }
+
   renderAreas();
   const contentEl = $('content');
   if (contentEl) contentEl.scrollTop = 0;
 
   // Gen 2 Tier 2 オンデマンド取得
   if (typeof fetchTier2 === 'function') {
-    fetchTier2(cityName).then(() => {
-      renderAreas();
-    });
+    await fetchTier2(cityName);
+    renderAreas();
+  }
+
+  if (needsFetch && loadingEl) {
+    loadingEl.classList.add('opacity-0');
+    setTimeout(() => loadingEl.classList.add('hidden'), 300);
   }
 
   // 市区町村全体の詳細データをバックグラウンドで先読み開始
