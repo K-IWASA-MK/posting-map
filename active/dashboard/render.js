@@ -68,24 +68,23 @@ function renderAreas() {
     $('area-list').innerHTML = headerCardHtml + `<div class="space-y-6">${cityCardsHtml}</div>` + bottomTopButtonHtml;
   } else {
     // 【第2層：選択された市のエリアシート一覧画面】
-    const backButtonHtml = `
-      <div class="flex items-center mb-6 h-12">
-        <button onclick="backToCityList()" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold">‹</button>
-      </div>
-    `;
-
     const isFetching = typeof tier2CacheMap === 'undefined' || !(currentCity in tier2CacheMap);
-    let mainContentHtml = '';
 
     if (isFetching) {
-      mainContentHtml = `
-        <div class="fixed inset-0 z-[4000] flex flex-col items-center justify-center bg-black transition-all duration-500 pt-16">
-          <div class="w-36 h-36 bg-[#1c1c1e] rounded-[2.5rem] shadow-2xl flex items-center justify-center overflow-hidden mb-8 p-3 relative border border-white/10">
-            <img src="./assets/icon180-v2.png?v=100" class="w-full h-full object-contain rounded-[1.8rem] z-10">
+      $('area-list').innerHTML = `
+        <div class="fixed inset-0 z-[4000] flex flex-col items-center justify-center bg-black transition-all duration-500 pt-28">
+          <div class="w-36 h-36 flex items-center justify-center mb-8 relative">
+            <img src="./assets/icon180-v2.png?v=100" class="w-full h-full object-contain rounded-[2.2rem]">
           </div>
           <p class="text-xs font-black text-white/50 uppercase tracking-[0.35em] font-mono animate-pulse">SEARCHING...</p>
         </div>`;
     } else {
+      const backButtonHtml = `
+        <div class="flex items-center mb-6 h-12">
+          <button onclick="backToCityList()" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold">‹</button>
+        </div>
+      `;
+
       let filteredAreas = [];
       if (Array.isArray(tier2CacheMap[currentCity])) {
         filteredAreas = tier2CacheMap[currentCity].map(t => {
@@ -108,10 +107,9 @@ function renderAreas() {
           <button onclick="backToCityList()" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold">‹</button>
         </div>
       `;
-      mainContentHtml = `<div class="space-y-6">${areaCardsHtml}</div>` + bottomNavHtml;
+      const mainContentHtml = `<div class="space-y-6">${areaCardsHtml}</div>` + bottomNavHtml;
+      $('area-list').innerHTML = backButtonHtml + mainContentHtml;
     }
-
-    $('area-list').innerHTML = backButtonHtml + mainContentHtml;
   }
 }
 
