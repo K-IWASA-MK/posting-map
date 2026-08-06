@@ -39,6 +39,7 @@ const DEFAULT_STORE = {
     SHEET_SYSTEM_CACHE: "__SYSTEM_CACHE__",
     SHEET_STORAGE: "保有チラシ枚数",
     SHEET_ADMIN: "管理者ID",
+    SHEET_HANDOVER_HISTORY: "受渡要請履歴",
 
     // 動作設定
     CHUNK_SIZE: 10,
