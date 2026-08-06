@@ -68,38 +68,48 @@ function renderAreas() {
     $('area-list').innerHTML = headerCardHtml + `<div class="space-y-6">${cityCardsHtml}</div>` + bottomTopButtonHtml;
   } else {
     // 【第2層：選択された市のエリアシート一覧画面】
-    let filteredAreas = [];
-    if (typeof tier2CacheMap !== 'undefined' && tier2CacheMap[currentCity] && Array.isArray(tier2CacheMap[currentCity])) {
-      filteredAreas = tier2CacheMap[currentCity].map(t => {
-        const done = t.done || 0;
-        const total = t.total || 0;
-        const progress = total > 0 ? Math.round((done / total) * 100) : 0;
-        return { name: t.name, done: done, total: total, progress: progress, repAddress: t.repAddress || '' };
-      });
-    }
-
     const backButtonHtml = `
       <div class="flex items-center mb-6 h-12">
         <button onclick="backToCityList()" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold">‹</button>
       </div>
     `;
 
-    const areaCardsHtml = filteredAreas.map(s => renderAreaListItem(s)).join('');
+    const isFetching = typeof tier2CacheMap === 'undefined' || !(currentCity in tier2CacheMap);
+    let mainContentHtml = '';
 
-    // 2層目の最下部ナビゲーション（戻る ‹ / ↑ トップに戻る）
-    const bottomNavHtml = filteredAreas.length > 3 ? `
-      <div class="flex items-center justify-between mt-8 pb-10 w-full gap-4">
-        <button onclick="backToCityList()" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold">‹</button>
-        <button onclick="$('content').scrollTo({top: 0, behavior: 'smooth'})" class="flex-1 h-12 premium-glass-btn flex items-center justify-center text-xs font-bold uppercase tracking-wider text-white/80">↑ トップに戻る</button>
-        <div class="w-12 h-12"></div>
-      </div>
-    ` : `
-      <div class="flex items-center justify-start mt-8 pb-10">
-        <button onclick="backToCityList()" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold">‹</button>
-      </div>
-    `;
+    if (isFetching) {
+      mainContentHtml = `
+        <div style="border: 1px solid rgba(255,255,255,0.04);" class="premium-glass p-8 flex flex-col items-center justify-center text-center gap-3 rounded-3xl">
+          <div class="w-8 h-8 rounded-full border-2 border-[#2563eb]/40 border-t-[#2563eb] animate-spin"></div>
+          <p class="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">SEARCHING AREAS...</p>
+        </div>`;
+    } else {
+      let filteredAreas = [];
+      if (Array.isArray(tier2CacheMap[currentCity])) {
+        filteredAreas = tier2CacheMap[currentCity].map(t => {
+          const done = t.done || 0;
+          const total = t.total || 0;
+          const progress = total > 0 ? Math.round((done / total) * 100) : 0;
+          return { name: t.name, done: done, total: total, progress: progress, repAddress: t.repAddress || '' };
+        });
+      }
 
-    $('area-list').innerHTML = backButtonHtml + `<div class="space-y-6">${areaCardsHtml}</div>` + bottomNavHtml;
+      const areaCardsHtml = filteredAreas.map(s => renderAreaListItem(s)).join('');
+      const bottomNavHtml = filteredAreas.length > 3 ? `
+        <div class="flex items-center justify-between mt-8 pb-10 w-full gap-4">
+          <button onclick="backToCityList()" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold">‹</button>
+          <button onclick="$('content').scrollTo({top: 0, behavior: 'smooth'})" class="flex-1 h-12 premium-glass-btn flex items-center justify-center text-xs font-bold uppercase tracking-wider text-white/80">↑ トップに戻る</button>
+          <div class="w-12 h-12"></div>
+        </div>
+      ` : `
+        <div class="flex items-center justify-start mt-8 pb-10">
+          <button onclick="backToCityList()" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold">‹</button>
+        </div>
+      `;
+      mainContentHtml = `<div class="space-y-6">${areaCardsHtml}</div>` + bottomNavHtml;
+    }
+
+    $('area-list').innerHTML = backButtonHtml + mainContentHtml;
   }
 }
 
