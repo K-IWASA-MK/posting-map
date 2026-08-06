@@ -697,10 +697,28 @@ const YOKKAICHI_DISTRICT_MASTER = [
 
 /**
  * ドライブ上の MIE03_MUNICIPALITY_ORDER.csv から自治体順を動的に取得する（SSOT）
- * なければデフォルト値でドライブ上にCSVファイルを自動生成して保存する。
- * @return {string[]} 自治体順 of the municipalities
+ * CacheService による派生データキャッシュ高速化層（SSOTは常にCSV）
+ * @return {string[]} 自治体順の配列
  */
 function getMunicipalityOrder() {
+  const CACHE_KEY = "MIE03_MUNICIPALITY_ORDER_CACHE";
+  const CACHE_TTL = 21600; // 6時間 (GAS CacheService 最大保持期間)
+
+  try {
+    if (typeof CacheService !== 'undefined' && CacheService.getScriptCache) {
+      const cache = CacheService.getScriptCache();
+      const cached = cache.get(CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    }
+  } catch (e) {
+    // キャッシュ取得エラー時は正本取得へフォールバック
+  }
+
   const fileName = "MIE03_MUNICIPALITY_ORDER.csv";
   let file = findFileByPattern("MIE03_MUNICIPALITY_ORDER", fileName);
   
@@ -747,10 +765,30 @@ function getMunicipalityOrder() {
         cities.push(cityName);
       }
     }
+
+    // 正本からの取得成功時、CacheServiceへ保存 (派生データ高速化)
+    try {
+      if (typeof CacheService !== 'undefined' && CacheService.getScriptCache && cities.length > 0) {
+        CacheService.getScriptCache().put(CACHE_KEY, JSON.stringify(cities), CACHE_TTL);
+      }
+    } catch (cErr) {}
+
     return cities;
   } catch (e) {
     console.error("MIE03_MUNICIPALITY_ORDER.csv のパースに失敗しました: " + e.message);
     return defaultList;
   }
 }
+
+/**
+ * 自治体順キャッシュのクリア関数 (正本CSV更新時や手動リフレッシュ用)
+ */
+function clearMunicipalityOrderCache() {
+  try {
+    if (typeof CacheService !== 'undefined' && CacheService.getScriptCache) {
+      CacheService.getScriptCache().remove("MIE03_MUNICIPALITY_ORDER_CACHE");
+    }
+  } catch (e) {}
+}
+
 

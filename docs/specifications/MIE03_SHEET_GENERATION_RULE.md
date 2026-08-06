@@ -67,14 +67,26 @@
 
 ## 9. SSOT 構造
 ```
-MIE03_MUNICIPALITY_ORDER.csv
+MIE03_MUNICIPALITY_ORDER.csv (正本 SSOT)
+        │
+        ├──► CacheService (派生高速キャッシュ)
         │
         ▼ (自治体順)
-MIE03_ADDRESS_MASTER.csv
+MIE03_ADDRESS_MASTER.csv (住所データ SSOT)
         │
-        ▼ (住所データ)
+        ▼
    生成ルール (v2_batch.js)
         │
         ▼
    エリアシート
 ```
+
+## 10. 高速化キャッシングルール (CacheService)
+* **正本 (SSOT)**: `MIE03_MUNICIPALITY_ORDER.csv`
+* **高速化層**: `CacheService` (`ScriptCache`)
+* **キャッシングルール**:
+  - `MIE03_MUNICIPALITY_ORDER.csv` からロードされた自治体順は `CacheService` (TTL: 6時間) に保持し、アプリ・APIレスポンスの表示を高速化する。
+  - キャッシュデータはあくまで性能向上のための**派生データ (Derived Data)** であり、キャッシュを SSOT と位置づけない。
+  - キャッシュミス・失効時は、必ず正本 `MIE03_MUNICIPALITY_ORDER.csv` から再ロードしてキャッシュを自動構築・更新する。
+
+
