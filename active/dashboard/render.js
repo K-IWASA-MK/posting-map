@@ -76,13 +76,6 @@ function renderAreas() {
         const progress = total > 0 ? Math.round((done / total) * 100) : 0;
         return { name: t.name, done: done, total: total, progress: progress, repAddress: t.repAddress || '' };
       });
-    } else {
-      filteredAreas = areaSummary.filter(s => getCityName(s.name) === currentCity).map(s => {
-        const done = s.done || 0;
-        const total = s.total || 0;
-        const progress = total > 0 ? Math.round((done / total) * 100) : 0;
-        return { ...s, done, total, progress };
-      });
     }
 
     const backButtonHtml = `
@@ -368,7 +361,7 @@ function renderDetailList(areaName) {
 
   // 同一市区町村内の隣接エリアへの切り替えナビゲーションを追加
   const activeCity = currentCity || getCityName(areaName);
-  const cityAreas = areaSummary ? areaSummary.filter(s => getCityName(s.name) === activeCity) : [];
+  const cityAreas = (typeof tier2CacheMap !== 'undefined' && tier2CacheMap[activeCity]) ? tier2CacheMap[activeCity] : [];
   const currentIndex = cityAreas.findIndex(s => s.name === areaName);
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex !== -1 && currentIndex < cityAreas.length - 1;
@@ -388,9 +381,9 @@ function renderDetailList(areaName) {
 
 // 隣のエリアへの切り替えを実行する関数
 function navigateToSiblingArea(direction) {
-  if (!window.currentCityDetailAreaName || !areaSummary || areaSummary.length === 0) return;
+  if (!window.currentCityDetailAreaName) return;
   const activeCity = currentCity || getCityName(window.currentCityDetailAreaName);
-  const cityAreas = areaSummary.filter(s => getCityName(s.name) === activeCity);
+  const cityAreas = (typeof tier2CacheMap !== 'undefined' && tier2CacheMap[activeCity]) ? tier2CacheMap[activeCity] : [];
   const currentIndex = cityAreas.findIndex(s => s.name === window.currentCityDetailAreaName);
   if (currentIndex === -1) return;
   

@@ -13,7 +13,7 @@ window.onunhandledrejection = function(event) {
   logDebug(`UNHANDLED PROMISE: ${event.reason}`);
 };
 
-let allPoints = [], areaSummary = [], roster = [], rankingData = [];
+let allPoints = [], roster = [], rankingData = [];
 let _appDataPromise = null; // ⑤ getAppData並列プリフェッチ用
 let _rankingFetched = false;  // ランキング遅延取得済みフラグ
 let _stockFetched = false;    // 在庫一覧取得済みフラグ
@@ -1017,7 +1017,7 @@ async function switchPage(id, force = false) {
 
     const countInput = $('storage-register-count');
 
-    // Dynamic population using SSOT areaSummary
+    // Dynamic population using SSOT tier1Cache
     updateStorageLocationDropdown();
 
     // Auto-populate latest registered stock for logged-in staff
@@ -1378,7 +1378,7 @@ function backToCityList() {
 
 /**
  * Sprint G2-1: System Summary Foundation
- * updateStats(summaryData) - 表示専用関数 (areaSummary 集計計算ロジック全廃)
+ * updateStats(summaryData) - 表示専用関数 (SystemSummaryService 参照)
  */
 function updateStats(summaryData = null) {
   const countEl = $('header-count');
