@@ -74,9 +74,11 @@ async function callApi(action, params = {}) {
   const MAX_RETRIES = 3;
   let delay = 1000;
   
-  // LIFFがログイン済みならトークンを自動的に付与
+  // 参照専用 (Read-only) API では GET クエリ肥大化・GASパラメータ脱落を防止するため liffToken 付与をスキップ
+  const readOnlyActions = ['getSystemSummary', 'getTier1', 'getTier2', 'getTier3', 'getRanking', 'getFlyerStock', 'getDeliveryStats', 'getCityAreaDetails'];
+  
   logDebug(`[callApi] Checking LIFF status. typeof liff=${typeof liff}`);
-  if (typeof liff !== 'undefined') {
+  if (typeof liff !== 'undefined' && !readOnlyActions.includes(action)) {
     const isLoggedIn = liff.isLoggedIn();
     const token = liff.getAccessToken();
     logDebug(`[callApi] isLoggedIn=${isLoggedIn}, tokenLength=${token ? token.length : '0'}`);
