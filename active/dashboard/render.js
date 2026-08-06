@@ -26,17 +26,7 @@ function getCityName(areaName) {
 }
 
 function renderAreas() {
-  if (!areaSummary || areaSummary.length === 0) {
-    $('area-list').innerHTML = `
-      <div class="premium-glass p-8 text-center space-y-4 mx-4 my-10 border border-white/10 rounded-3xl bg-white/5 backdrop-blur-2xl">
-        <p class="text-base font-black text-white">エリアデータが設定されていません</p>
-        <p class="text-xs text-white/50 leading-relaxed">管理者のセットアップをお待ちください。</p>
-      </div>`;
-    return;
-  }
-
   if (currentCity === null) {
-    // SSOT の出現順を100%保持して Tier 1 リストを生成
     let cities = [];
     if (typeof tier1Cache !== 'undefined' && Array.isArray(tier1Cache) && tier1Cache.length > 0) {
       cities = tier1Cache.map(c => {
@@ -45,6 +35,14 @@ function renderAreas() {
         const progress = total > 0 ? Math.round((done / total) * 100) : 0;
         return { name: typeof c === "string" ? c : c.name, done: done, total: total, progress: progress };
       });
+    }
+
+    if (cities.length === 0) {
+      $('area-list').innerHTML = `
+        <div class="premium-glass p-8 text-center space-y-4 mx-4 my-10 border border-white/10 rounded-3xl bg-white/5 backdrop-blur-2xl">
+          <p class="text-base font-black text-white">エリアデータ読み込み中...</p>
+        </div>`;
+      return;
     }
 
     const headerCardHtml = `
