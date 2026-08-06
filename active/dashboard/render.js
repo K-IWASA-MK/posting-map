@@ -103,16 +103,6 @@ function renderAreas() {
 
 async function selectCity(cityName) {
   currentCity = cityName;
-  const needsFetch = typeof tier2CacheMap === 'undefined' || !(cityName in tier2CacheMap);
-  const loadingEl = $('loading');
-
-  if (needsFetch && loadingEl) {
-    const statusEl = $('loading-status');
-    if (statusEl) statusEl.textContent = 'CONNECTING...';
-    loadingEl.classList.remove('hidden');
-    loadingEl.classList.remove('opacity-0');
-  }
-
   renderAreas();
   const contentEl = $('content');
   if (contentEl) contentEl.scrollTop = 0;
@@ -121,11 +111,6 @@ async function selectCity(cityName) {
   if (typeof fetchTier2 === 'function') {
     await fetchTier2(cityName);
     renderAreas();
-  }
-
-  if (needsFetch && loadingEl) {
-    loadingEl.classList.add('opacity-0');
-    setTimeout(() => loadingEl.classList.add('hidden'), 300);
   }
 
   // 市区町村全体の詳細データをバックグラウンドで先読み開始

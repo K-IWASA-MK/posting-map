@@ -26,7 +26,35 @@ window.activeCityDetailsPromise = null;
 window.currentCityDetailsName = null;
 window.activeRankingPromise = null;
 
-// ─── ローディングプログレスバー更新 ──────────────────────────────
+// ─── グローバル・ローディング二重制御ヘルパー ─────────────────────
+let _loadingCount = 0;
+
+function showLoading(label = 'CONNECTING...') {
+  _loadingCount++;
+  const loadingEl = $('loading');
+  if (loadingEl) {
+    const statusEl = $('loading-status');
+    if (statusEl) statusEl.textContent = label;
+    loadingEl.classList.remove('hidden');
+    loadingEl.classList.remove('opacity-0');
+  }
+}
+
+function hideLoading() {
+  _loadingCount = Math.max(0, _loadingCount - 1);
+  if (_loadingCount === 0) {
+    const loadingEl = $('loading');
+    if (loadingEl) {
+      loadingEl.classList.add('opacity-0');
+      setTimeout(() => {
+        if (_loadingCount === 0) {
+          loadingEl.classList.add('hidden');
+        }
+      }, 300);
+    }
+  }
+}
+
 function setLoadingProgress(pct, label) {
   const bar = document.getElementById('loading-bar');
   const txt = document.getElementById('loading-status');
@@ -1465,6 +1493,7 @@ async function fetchTier2(cityName) {
     return tier2CacheMap[cityName];
   }
 
+  showLoading('CONNECTING...');
   try {
     const res = await callApi('getTier2', { cityName: cityName });
     if (res && res.success && Array.isArray(res.areas)) {
@@ -1473,6 +1502,8 @@ async function fetchTier2(cityName) {
     }
   } catch (err) {
     console.warn(`fetchTier2 failed for ${cityName}:`, err);
+  } finally {
+    hideLoading();
   }
   return null;
 }
@@ -1490,6 +1521,7 @@ async function fetchTier3(cityName, townName) {
     return tier3CacheMap[cacheKey];
   }
 
+  showLoading('CONNECTING...');
   try {
     const res = await callApi('getTier3', { cityName: cityName, townName: townName });
     if (res && res.success && Array.isArray(res.points)) {
@@ -1498,6 +1530,8 @@ async function fetchTier3(cityName, townName) {
     }
   } catch (err) {
     console.warn(`fetchTier3 failed for ${cityName} ${townName}:`, err);
+  } finally {
+    hideLoading();
   }
   return null;
 }
