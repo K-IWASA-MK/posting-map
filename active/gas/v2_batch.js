@@ -90,8 +90,15 @@ function forceStartBatch() {
   tempSheet.clear();
   tempSheet.getRange(1, 1, 1, 3).setValues([["postal_code", "city_name", "full_address"]]);
   
-  // 自治体優先度 ➔ 地区名 ➔ 郵便番号数値昇順 の3段階整列（スプレッドシート作成順を100%美しく統一）
-  const cityOrderPriority = ["桑名市", "いなべ市", "桑名郡", "員弁郡", "三重郡", "四日市市", "鈴鹿市"];
+  // データソース（SSOT）から動的に市町村の出現順（優先順位）を取得する (規約順守)
+  const tier1Res = getTier1();
+  const cityOrderPriority = tier1Res.success ? tier1Res.cities : [];
+
+  // IMPORTANT:
+  // cityOrderPriority MUST come from getTier1() SSOT.
+  // Do not replace with indexOf against hardcoded municipality list.
+  // Municipality order = CSV source order.
+  // Within municipality = postalCode ascending.
   addresses.sort((a, b) => {
     const cityA = a.city;
     const cityB = b.city;
@@ -105,8 +112,8 @@ function forceStartBatch() {
     if (pA !== pB) return pA - pB;
 
     // 同一地区内での郵便番号昇順
-    const numA = parseInt((a.postalCode || "0").replace(/-/g, ""), 10);
-    const numB = parseInt((b.postalCode || "0").replace(/-/g, ""), 10);
+    const numA = parseInt((a.postalCode || "0").replace(/-/g, ""), 10) || 0;
+    const numB = parseInt((b.postalCode || "0").replace(/-/g, ""), 10) || 0;
     return numA - numB;
   });
 

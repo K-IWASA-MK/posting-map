@@ -12,7 +12,7 @@ window.PMS_CLIENT_CONFIG = {
   spreadsheetId: "1xQUvlCaUO103rjSGmdcFQQFkukodG4Dg9mS_teWT7uA",
   environment: "production",
   api: {
-    gasWebAppUrl: "https://script.google.com/macros/s/AKfycbzmhVJ-En6DvZROcHZth5GbflgU0t8oMhlWdCKQ0sNg9qWpbpr3stbt2gEgApbuGoop/exec"
+    gasWebAppUrl: "https://script.google.com/macros/s/AKfycbyjNwgZ_6CCv258lqKMrCXJYi0wDR23ZCyyzOQIV1R_WcCF5TQxYXOzZWWSJd_vMyu_/exec"
   },
   line: {
     liffId: "2010941735-GRLuqPic"

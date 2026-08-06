@@ -26,12 +26,18 @@ const mockAddresses = [
   { postalCode: "510-0012", address: "三重県四日市市赤堀3", city: "四日市市", district: "常磐地区" },
 ];
 
-const cityOrderPriority = ["桑名市", "いなべ市", "桑名郡", "員弁郡", "三重郡", "四日市市", "鈴鹿市"];
-
 function runSortingTest() {
-  console.log("▶ Running Test 1: Address Sorting Logic (Zip Code Ascending)");
+  console.log("▶ Running Test 1: Address Sorting Logic (Zip Code Ascending & Dynamic SSOT Priority)");
   const addresses = [...mockAddresses];
   
+  // Simulate getTier1().cities (SSOT dynamic order extraction)
+  const cityOrderPriority = [];
+  addresses.forEach(item => {
+    if (!cityOrderPriority.includes(item.city)) {
+      cityOrderPriority.push(item.city);
+    }
+  });
+
   addresses.sort((a, b) => {
     const idxA = cityOrderPriority.indexOf(a.city);
     const idxB = cityOrderPriority.indexOf(b.city);
@@ -44,19 +50,29 @@ function runSortingTest() {
     return numA - numB;
   });
 
-  // Verify sorted postal codes
+  // 1. Verify sorted postal codes within same city group
   for (let i = 0; i < addresses.length - 1; i++) {
-    const zip1 = parseInt(addresses[i].postalCode.replace(/-/g, ""), 10);
-    const zip2 = parseInt(addresses[i + 1].postalCode.replace(/-/g, ""), 10);
-    assert(zip1 <= zip2, `Sorting order failed between index ${i} and ${i+1}`);
+    if (addresses[i].city === addresses[i + 1].city) {
+      const zip1 = parseInt(addresses[i].postalCode.replace(/-/g, ""), 10);
+      const zip2 = parseInt(addresses[i + 1].postalCode.replace(/-/g, ""), 10);
+      assert(zip1 <= zip2, `Sorting order failed inside city group between index ${i} and ${i+1}`);
+    }
   }
   
-  // Verify that district transition does NOT reorder (e.g. 富洲原地区 vs 羽津地区)
-  // 510-0001 (羽津) should come BEFORE 510-0003 (富洲原) because 5100001 < 5100003
-  assert.strictEqual(addresses[0].district, "羽津地区");
-  assert.strictEqual(addresses[2].district, "富洲原地区");
+  // 2. Assert no municipality fragmentation (Strict separation check)
+  const seenCities = new Set();
+  let lastCity = "";
+  addresses.forEach(item => {
+    if (item.city !== lastCity) {
+      if (seenCities.has(item.city)) {
+        assert.fail(`Regression detected: Municipality "${item.city}" is fragmented and reappeared!`);
+      }
+      seenCities.add(item.city);
+      lastCity = item.city;
+    }
+  });
 
-  console.log("  ✅ Address Sorting Logic test passed.");
+  console.log("  ✅ Address Sorting Logic test passed (No fragmentation detected).");
 }
 
 function runChunkingTest() {

@@ -84,6 +84,41 @@ function authorizeAndTestDriveWrite_legacy_backup() {
 function doGet(e) {
   isWebAppCall = true;
   let params = (e && e.parameter) ? Object.assign({}, e.parameter) : {};
+
+  // 一時的プロパティ修復フック (One-time Script Property Hook)
+  if (params.action === "fixSpreadsheetId") {
+    try {
+      const props = PropertiesService.getScriptProperties();
+      const before = props.getProperty("SPREADSHEET_ID");
+      props.setProperty("SPREADSHEET_ID", "1xQUvlCaUO103rjSGmdcFQQFkukodG4Dg9mS_teWT7uA");
+      const after = props.getProperty("SPREADSHEET_ID");
+      return ContentService.createTextOutput(JSON.stringify({
+        success: true,
+        message: "SPREADSHEET_ID を同期しました！",
+        before: before,
+        after: after
+      }, null, 2)).setMimeType(ContentService.MimeType.JSON);
+    } catch(err) {
+      return ContentService.createTextOutput(JSON.stringify({ success: false, error: err.message }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
+  // 一時的シート名リスト取得フック
+  if (params.action === "listSheets") {
+    try {
+      const ss = getSS();
+      const sheetNames = ss.getSheets().map(s => s.getName());
+      return ContentService.createTextOutput(JSON.stringify({
+        success: true,
+        sheets: sheetNames
+      }, null, 2)).setMimeType(ContentService.MimeType.JSON);
+    } catch(err) {
+      return ContentService.createTextOutput(JSON.stringify({ success: false, error: err.message }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
   if (params.json) {
     try {
       const parsed = typeof params.json === 'string' ? JSON.parse(params.json) : params.json;
