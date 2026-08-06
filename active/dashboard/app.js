@@ -1542,24 +1542,24 @@ async function fetchTier3(cityName, townName) {
 async function selectTown(cityName, townName) {
   logDebug(`[selectTown] Selected: ${cityName} -> ${townName}`);
   const fullName = (townName && townName.includes(cityName)) ? townName : `${cityName}_${townName}`;
+  window.currentCityDetailAreaName = fullName;
 
-  // Gen 2 Tier 3 オンデマンド取得
-  const points = await fetchTier3(cityName, townName);
-  if (points && points.length > 0 && typeof allPoints !== 'undefined') {
-    allPoints = points;
-    window.currentCityDetailAreaName = fullName;
-    if (typeof renderDetailList === 'function') {
-      renderDetailList(fullName);
+  const contentEl = $('content');
+  if (contentEl) contentEl.scrollTop = 0;
+
+  // Gen 2 Tier 3 オンデマンド取得 (Tier2 標準と完全同一フロー)
+  if (typeof fetchTier3 === 'function') {
+    const points = await fetchTier3(cityName, townName);
+    if (points && points.length > 0 && typeof allPoints !== 'undefined') {
+      allPoints = points;
     }
-    if (typeof switchPage === 'function') {
-      switchPage('detail');
-    }
-    return;
   }
 
-  // フォールバック (Gen 1 互換維持)
-  if (typeof openDetail === 'function') {
-    openDetail(fullName);
+  if (typeof renderDetailList === 'function') {
+    renderDetailList(fullName);
+  }
+  if (typeof switchPage === 'function') {
+    switchPage('detail');
   }
 }
 
