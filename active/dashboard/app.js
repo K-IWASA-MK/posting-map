@@ -477,7 +477,7 @@ async function loadData(skipSync = false) {
       updateStats({ done: data.done, total: data.total });
       
       logDebug("[loadData] Fetching Tier 1 in background...");
-      fetchTier1();
+      const tier1Promise = fetchTier1();
       
       if (typeof updateStorageLocationDropdown === 'function') {
         updateStorageLocationDropdown();
