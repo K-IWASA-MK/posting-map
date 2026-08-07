@@ -1448,9 +1448,20 @@ async function fetchSystemSummary(forceRefresh = false) {
  * Sprint G2-2: Tier 1 API Foundation (Generation 2)
  * fetchTier1() - Tier 1 市町村サマリー取得 (Gen 2 段階移行用)
  */
+logDebug("[INIT]", {
+  fnType: typeof window.updateStorageLocationDropdown,
+  hasOwn: Object.prototype.hasOwnProperty.call(window, "updateStorageLocationDropdown"),
+  value: window.updateStorageLocationDropdown
+});
+
 let tier1Cache = null;
 
 async function fetchTier1() {
+  logDebug("[FETCH]", {
+    fnType: typeof window.updateStorageLocationDropdown,
+    hasOwn: Object.prototype.hasOwnProperty.call(window, "updateStorageLocationDropdown"),
+    value: window.updateStorageLocationDropdown
+  });
   try {
     const cities = await AddressMasterService.getInstance().getCities();
 
