@@ -456,33 +456,42 @@ async function syncOfflineQueue() {
 }
 
 async function loadData(skipSync = false) {
-  logDebug("[loadData] START (Non-blocking Parallel Init)");
+  logDebug("[loadData] START (Background)");
 
   try {
-    // 1. エリア1層目の CSV 読込・描画を即座に開始 (ノンブロッキング)
-    const tier1Promise = fetchTier1();
-
-    // 2. System Summary バックグラウンド通信を並行開始
-    const summaryPromise = navigator.onLine 
-      ? (_summaryPromise || callApi('getSystemSummary')) 
-      : Promise.resolve(null);
-
-    // 3. エリア1層目の描画完了を待つ (最優先表示: 1ms)
-    await tier1Promise;
-    logDebug("[loadData] Tier 1 area rendered instantly.");
-
-    // 4. バックグラウンド通信の完了を待ち、統計情報のみプログレッシブ更新
-    const data = await summaryPromise;
+    if (!skipSync && navigator.onLine) {
+      logDebug("[loadData] Syncing offline queue in background...");
+      await syncOfflineQueue();
+    } else if (!navigator.onLine) {
+      logDebug("[loadData] Offline. Setting status...");
+      setSyncStatus('offline');
+    }
+    
+    logDebug("[loadData] Fetching getSystemSummary in background...");
+    const data = await (_summaryPromise || callApi('getSystemSummary'));
+    logDebug("[loadData] getSystemSummary fetched successfully.");
     _summaryPromise = null;
-
+    
     if (data && data.success) {
-      logDebug("[loadData] System Summary received in background: total=" + data.total + ", done=" + data.done);
+      logDebug("[loadData] System Summary received: total=" + data.total + ", done=" + data.done);
       updateStats({ done: data.done, total: data.total });
+      
+      logDebug("[loadData] Fetching Tier 1 in background...");
+      fetchTier1();
+      
+      if (typeof updateStorageLocationDropdown === 'function') {
+        updateStorageLocationDropdown();
+      }
+
+      // バックグラウンドでランキングデータを先読み/更新
       prefetchRanking();
+    } else {
+      throw new Error(data ? data.message : "データが空です");
     }
   } catch (err) {
     console.error("Background Load Error:", err);
     logDebug(`[loadData] Background ERROR: ${err.message}`);
+    // バックグラウンドロードの失敗は画面をブロッキングしてフリーズさせず、ログ出力のみに留めます。
   }
 }
 
