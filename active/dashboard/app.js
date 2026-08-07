@@ -1456,25 +1456,21 @@ let tier1Cache = null;
 
 async function fetchTier1() {
   try {
-    if (typeof AddressMasterService !== 'undefined') {
-      const cities = await AddressMasterService.getInstance().getCities();
-      if (cities && cities.length > 0) {
-        tier1Cache = cities;
-        // Tier 1 再取得時は Tier 2 キャッシュを破棄 (キャッシュガバナンスルール適用)
-        tier2CacheMap = {};
-        if (typeof updateStorageLocationDropdown === 'function') {
-          updateStorageLocationDropdown(tier1Cache);
-        } else {
-          console.warn('[fetchTier1] updateStorageLocationDropdown is not defined. Skipping.');
-        }
-        if (typeof renderAreas === 'function') {
-          renderAreas();
-        }
-        return tier1Cache;
+    const res = await callApi('getTier1');
+    if (res && res.success && Array.isArray(res.cities)) {
+      tier1Cache = res.cities;
+      // Tier 1 再取得時は Tier 2 キャッシュを破棄 (キャッシュガバナンスルール適用)
+      tier2CacheMap = {};
+      if (typeof updateStorageLocationDropdown === 'function') {
+        updateStorageLocationDropdown(tier1Cache);
       }
+      if (typeof renderAreas === 'function') {
+        renderAreas();
+      }
+      return tier1Cache;
     }
   } catch (err) {
-    console.warn("fetchTier1 (CSV) failed:", err);
+    console.warn("fetchTier1 failed:", err);
   }
   return null;
 }
