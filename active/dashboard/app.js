@@ -1684,9 +1684,26 @@ async function safeInitApp() {
       // ① LINE JS Bridge 接続待ち（最適化済み）
       await new Promise(r => setTimeout(r, 50));
 
-      // Phase A (検証版): 5秒タイムアウトを除去して単体動作確認
-      await liff.init({ liffId: liffId });
-      logDebug("LIFF INIT OK"); // ② LIFF初期化成功
+      console.log("========== LIFF PRE INIT ==========");
+      console.log("typeof liff =", typeof liff);
+      console.log("LIFF ID =", liffId);
+      console.log("location.href =", location.href);
+      console.log("navigator.userAgent =", navigator.userAgent);
+      console.time("LIFF_INIT");
+
+      try {
+        await liff.init({ liffId: liffId });
+
+        console.timeEnd("LIFF_INIT");
+        console.log("========== LIFF POST INIT OK ==========");
+        logDebug("LIFF INIT OK");
+      } catch (err) {
+        console.timeEnd("LIFF_INIT");
+        console.log("========== LIFF POST INIT ERROR ==========");
+        console.error(err);
+        if (err && err.stack) console.error(err.stack);
+        throw err;
+      } // ② LIFF初期化成功
       setLoadingProgress(35, 'AUTHENTICATED');
       
       logDebug("LOGIN CHECK"); // ③ login判定
