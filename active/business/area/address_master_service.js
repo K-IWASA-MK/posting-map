@@ -47,6 +47,10 @@
     async loadMaster(csvUrl = DEFAULT_CSV_PATH) {
       if (this.cache) return this.cache;
 
+      console.log("location.href =", typeof location !== 'undefined' ? location.href : '');
+      console.log("CSV URL =", csvUrl);
+      console.log("Resolved URL =", typeof location !== 'undefined' ? new URL(csvUrl, location.href).href : csvUrl);
+
       const res = await fetch(csvUrl);
       if (!res.ok) {
         throw new Error(`Failed to load CSV: ${res.status}`);
