@@ -472,22 +472,18 @@ async function loadData(skipSync = false) {
     }
     
     logDebug("[loadData] Fetching getSystemSummary in background...");
-    const data = await (_summaryPromise || callApi('getSystemSummary'));
+    const summaryPromise = callApi('getSystemSummary');
+    
+    if (typeof updateStorageLocationDropdown === 'function') {
+      updateStorageLocationDropdown();
+    }
+
+    const data = await summaryPromise;
     logDebug("[loadData] getSystemSummary fetched successfully.");
-    _summaryPromise = null;
     
     if (data && data.success) {
       logDebug("[loadData] System Summary received: total=" + data.total + ", done=" + data.done);
       updateStats({ done: data.done, total: data.total });
-      
-      logDebug("[loadData] Fetching Tier 1 in background...");
-      const tier1Promise = fetchTier1();
-      
-      if (typeof updateStorageLocationDropdown === 'function') {
-        updateStorageLocationDropdown();
-      }
-
-      // バックグラウンドでランキングデータを先読み/更新
       prefetchRanking();
     } else {
       throw new Error(data ? data.message : "データが空です");
