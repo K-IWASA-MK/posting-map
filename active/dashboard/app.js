@@ -1462,7 +1462,11 @@ async function fetchTier1() {
         tier1Cache = cities;
         // Tier 1 再取得時は Tier 2 キャッシュを破棄 (キャッシュガバナンスルール適用)
         tier2CacheMap = {};
-        updateStorageLocationDropdown(tier1Cache);
+        if (typeof updateStorageLocationDropdown === 'function') {
+          updateStorageLocationDropdown(tier1Cache);
+        } else {
+          console.warn('[fetchTier1] updateStorageLocationDropdown is not defined. Skipping.');
+        }
         if (typeof renderAreas === 'function') {
           renderAreas();
         }
