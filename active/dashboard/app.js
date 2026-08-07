@@ -1461,9 +1461,7 @@ async function fetchTier1() {
       tier1Cache = res.cities;
       // Tier 1 再取得時は Tier 2 キャッシュを破棄 (キャッシュガバナンスルール適用)
       tier2CacheMap = {};
-      if (typeof updateStorageLocationDropdown === 'function') {
-        updateStorageLocationDropdown(tier1Cache);
-      }
+      updateStorageLocationDropdown(tier1Cache);
       if (typeof renderAreas === 'function') {
         renderAreas();
       }
@@ -1680,30 +1678,18 @@ async function safeInitApp() {
   
   if (typeof liff !== 'undefined') {
     try {
-      logDebug("LIFF INIT START");
+      logDebug("LIFF INIT START"); // ① LIFF初期化開始
       // ① LINE JS Bridge 接続待ち（最適化済み）
       await new Promise(r => setTimeout(r, 50));
 
-      console.log("========== LIFF PRE INIT ==========");
-      console.log("typeof liff =", typeof liff);
-      console.log("LIFF ID =", liffId);
-      console.log("location.href =", location.href);
-      console.log("navigator.userAgent =", navigator.userAgent);
-      console.time("LIFF_INIT");
+      // ⏳ 5秒でタイムアウトする安全装置
+      const liffInitPromise = liff.init({ liffId: liffId });
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("LINEログインの応答がタイムアウトしました(5秒)")), 5000)
+      );
 
-      try {
-        await liff.init({ liffId: liffId });
-
-        console.timeEnd("LIFF_INIT");
-        console.log("========== LIFF POST INIT OK ==========");
-        logDebug("LIFF INIT OK");
-      } catch (err) {
-        console.timeEnd("LIFF_INIT");
-        console.log("========== LIFF POST INIT ERROR ==========");
-        console.error(err);
-        if (err && err.stack) console.error(err.stack);
-        throw err;
-      } // ② LIFF初期化成功
+      await Promise.race([liffInitPromise, timeoutPromise]);
+      logDebug("LIFF INIT OK"); // ② LIFF初期化成功
       setLoadingProgress(35, 'AUTHENTICATED');
       
       logDebug("LOGIN CHECK"); // ③ login判定
