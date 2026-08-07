@@ -1680,17 +1680,12 @@ async function safeInitApp() {
   
   if (typeof liff !== 'undefined') {
     try {
-      logDebug("LIFF INIT START"); // ① LIFF初期化開始
+      logDebug("LIFF INIT START");
       // ① LINE JS Bridge 接続待ち（最適化済み）
       await new Promise(r => setTimeout(r, 50));
 
-      // ⏳ 5秒でタイムアウトする安全装置
-      const liffInitPromise = liff.init({ liffId: liffId });
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error("LINEログインの応答がタイムアウトしました(5秒)")), 5000)
-      );
-
-      await Promise.race([liffInitPromise, timeoutPromise]);
+      // Phase A (検証版): 5秒タイムアウトを除去して単体動作確認
+      await liff.init({ liffId: liffId });
       logDebug("LIFF INIT OK"); // ② LIFF初期化成功
       setLoadingProgress(35, 'AUTHENTICATED');
       
