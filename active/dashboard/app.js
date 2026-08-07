@@ -458,6 +458,10 @@ async function syncOfflineQueue() {
 async function loadData(skipSync = false) {
   logDebug("[loadData] START (Background)");
 
+  // ★ fetchTier1() を getSystemSummary より前の【最冒頭】で発注・待機
+  const tier1Promise = fetchTier1();
+  await tier1Promise;
+
   try {
     if (!skipSync && navigator.onLine) {
       logDebug("[loadData] Syncing offline queue in background...");
