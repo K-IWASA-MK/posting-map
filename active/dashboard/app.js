@@ -462,16 +462,7 @@ async function loadData(skipSync = false) {
     // 1. エリア1層目の CSV 読込・描画を即座に開始 (ノンブロッキング)
     const tier1Promise = fetchTier1();
 
-    // 2. オフラインキュー同期 & System Summary バックグラウンド通信を並行開始
-    let syncPromise = null;
-    if (!skipSync && navigator.onLine) {
-      logDebug("[loadData] Syncing offline queue in background...");
-      syncPromise = syncOfflineQueue();
-    } else if (!navigator.onLine) {
-      logDebug("[loadData] Offline. Setting status...");
-      setSyncStatus('offline');
-    }
-
+    // 2. System Summary バックグラウンド通信を並行開始
     const summaryPromise = navigator.onLine 
       ? (_summaryPromise || callApi('getSystemSummary')) 
       : Promise.resolve(null);
@@ -481,7 +472,6 @@ async function loadData(skipSync = false) {
     logDebug("[loadData] Tier 1 area rendered instantly.");
 
     // 4. バックグラウンド通信の完了を待ち、統計情報のみプログレッシブ更新
-    if (syncPromise) await syncPromise;
     const data = await summaryPromise;
     _summaryPromise = null;
 
