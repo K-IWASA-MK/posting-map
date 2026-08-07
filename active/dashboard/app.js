@@ -1453,19 +1453,38 @@ let tier1Cache = null;
 async function fetchTier1() {
   try {
     const cities = await AddressMasterService.getInstance().getCities();
+
     if (cities && cities.length > 0) {
       tier1Cache = cities;
-      // Tier 1 再取得時は Tier 2 キャッシュを破棄 (キャッシュガバナンスルール適用)
+
+      // Tier 1 再取得時は Tier 2 キャッシュを破棄
       tier2CacheMap = {};
-      updateStorageLocationDropdown(tier1Cache);
+
+      const winFn = globalThis.updateStorageLocationDropdown;
+
+      logDebug(
+        `[fetchTier1] winFnType=${typeof winFn}, globalThis===window:${globalThis === window}`
+      );
+
+      if (typeof winFn === 'function') {
+        winFn(tier1Cache);
+      } else {
+        console.warn(
+          "[fetchTier1] updateStorageLocationDropdown is unavailable",
+          globalThis.updateStorageLocationDropdown
+        );
+      }
+
       if (typeof renderAreas === 'function') {
         renderAreas();
       }
+
       return tier1Cache;
     }
   } catch (err) {
     console.warn("fetchTier1 failed:", err);
   }
+
   return null;
 }
 
