@@ -31,9 +31,9 @@
         if (typeof AreaService !== 'undefined' && AreaService.getInstance) {
           const areaSvc = AreaService.getInstance();
           // リポジトリより該当エリアの詳細住所ポイントを取得
-          const details = areaSvc.getAreaDetails(fullAreaName) || areaSvc.getAreaDetails(townName);
-          if (Array.isArray(details)) {
-            rawPoints = details;
+          const res = areaSvc.getAreaDetails(fullAreaName) || areaSvc.getAreaDetails(townName);
+          if (res && res.success && Array.isArray(res.points)) {
+            rawPoints = res.points;
           }
         }
 
