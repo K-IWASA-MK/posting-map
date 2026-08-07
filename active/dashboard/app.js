@@ -474,10 +474,6 @@ async function loadData(skipSync = false) {
     logDebug("[loadData] Fetching getSystemSummary in background...");
     const summaryPromise = callApi('getSystemSummary');
     
-    if (typeof updateStorageLocationDropdown === 'function') {
-      updateStorageLocationDropdown();
-    }
-
     const data = await summaryPromise;
     logDebug("[loadData] getSystemSummary fetched successfully.");
     
