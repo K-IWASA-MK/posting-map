@@ -286,15 +286,6 @@ function processPostAction(action, postData, e) {
       return handleRequestFlyerTransfer(postData);
     case 'resolveTransferRequest':
       return resolveTransferRequest(postData);
-    case 'resetRoster':
-      const rosterMsg = setupRosterSheet();
-      return { success: true, message: rosterMsg };
-    case 'setupFolders':
-      const setupMsg = setupGoogleDriveFolders();
-      return { success: true, message: setupMsg };
-    case 'resetAllSheets':
-      deleteAllAreaSheets();
-      return { success: true, message: 'All area sheets reset successfully' };
     case 'updateFlyerStock':
       return updateFlyerStock(
         postData.location,
