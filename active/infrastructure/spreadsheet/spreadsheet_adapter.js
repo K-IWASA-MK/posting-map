@@ -38,7 +38,6 @@ class SpreadsheetBatchReader {
     return this.cachedSpreadsheet;
   }
   readAll(sheetName) {
-    if (typeof GasPerformanceMonitor !== 'undefined') GasPerformanceMonitor.getInstance().recordSpreadsheetRead();
     const ss = this.getSpreadsheet();
     const sheet = ss.getSheetByName(sheetName);
     if (!sheet) return [];
@@ -48,7 +47,6 @@ class SpreadsheetBatchReader {
     return sheet.getRange(1, 1, lastRow, lastColumn).getValues();
   }
   readRange(sheetName, startRow, startCol, numRows, numCols) {
-    if (typeof GasPerformanceMonitor !== 'undefined') GasPerformanceMonitor.getInstance().recordSpreadsheetRead();
     const ss = this.getSpreadsheet();
     const sheet = ss.getSheetByName(sheetName);
     if (!sheet) return [];
@@ -69,7 +67,6 @@ class SpreadsheetBatchWriter {
   }
   appendRows(sheetName, rows) {
     if (rows.length === 0) return;
-    if (typeof GasPerformanceMonitor !== 'undefined') GasPerformanceMonitor.getInstance().recordSpreadsheetWrite();
     const ss = this.getSpreadsheet();
     let sheet = ss.getSheetByName(sheetName);
     if (!sheet) {
@@ -80,7 +77,6 @@ class SpreadsheetBatchWriter {
   }
   updateRange(sheetName, startRow, startCol, rows) {
     if (rows.length === 0) return;
-    if (typeof GasPerformanceMonitor !== 'undefined') GasPerformanceMonitor.getInstance().recordSpreadsheetWrite();
     const ss = this.getSpreadsheet();
     const sheet = ss.getSheetByName(sheetName);
     if (!sheet) throw new Error("Sheet not found: " + sheetName);

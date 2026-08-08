@@ -24,9 +24,6 @@ class LockServiceProvider {
     if (!hasLock) {
       throw new Error("Lock Timeout: Failed to acquire lock within " + timeoutMs + "ms.");
     }
-    if (typeof GasPerformanceMonitor !== 'undefined') {
-      GasPerformanceMonitor.getInstance().recordLockAcquired(Date.now() - startTime);
-    }
     try {
       return action();
     } finally {
