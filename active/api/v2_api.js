@@ -1085,49 +1085,7 @@ function getAuditLogs() {
  */
 
 
-class GasPerformanceMonitor {
-  constructor() {
-    this.spreadsheetReads = 0;
-    this.spreadsheetWrites = 0;
-    this.cacheHits = 0;
-    this.cacheMisses = 0;
-    this.lockWaitTime = 0;
-    this.lockAcquires = 0;
-  }
-  static getInstance() {
-    if (!GasPerformanceMonitor.instance) {
-      GasPerformanceMonitor.instance = new GasPerformanceMonitor();
-    }
-    return GasPerformanceMonitor.instance;
-  }
-  recordSpreadsheetRead() { this.spreadsheetReads++; }
-  recordSpreadsheetWrite() { this.spreadsheetWrites++; }
-  recordCacheHit() { this.cacheHits++; }
-  recordCacheMiss() { this.cacheMisses++; }
-  recordLockAcquired(waitTimeMs) {
-    this.lockAcquires++;
-    this.lockWaitTime += waitTimeMs;
-  }
-  reset() {
-    this.spreadsheetReads = 0;
-    this.spreadsheetWrites = 0;
-    this.cacheHits = 0;
-    this.cacheMisses = 0;
-    this.lockWaitTime = 0;
-    this.lockAcquires = 0;
-  }
-  getMetrics() {
-    return {
-      spreadsheetReads: this.spreadsheetReads,
-      spreadsheetWrites: this.spreadsheetWrites,
-      cacheHits: this.cacheHits,
-      cacheMisses: this.cacheMisses,
-      lockWaitTime: this.lockWaitTime,
-      lockAcquires: this.lockAcquires
-    };
-  }
-}
-GasPerformanceMonitor.instance = null;
+
 
 // ==========================================
 // 🚀 API ROUTING & ENDPOINT FOUNDATION CLASSES
