@@ -1150,73 +1150,7 @@ class RouteKey {
  * RouteResolver -> active/framework/routing/endpoint_registry.js
  */
 
-class DashboardHandler {
-  execute(request, context) {
-    const metadata = {
-      requestId: request.requestId,
-      serverTimestamp: context.getStartTimestamp(),
-      processingTime: context.getElapsedTime(),
-      version: request.version
-    };
-    return ApiResponse.errorResponse(
-      'NOT_IMPLEMENTED',
-      'DashboardHandler is currently a placeholder stub in S3-2 Routing Foundation.',
-      501,
-      metadata
-    );
-  }
-}
 
-class HoldingHandler {
-  execute(request, context) {
-    const metadata = {
-      requestId: request.requestId,
-      serverTimestamp: context.getStartTimestamp(),
-      processingTime: context.getElapsedTime(),
-      version: request.version
-    };
-    return ApiResponse.errorResponse(
-      'NOT_IMPLEMENTED',
-      'HoldingHandler is currently a placeholder stub in S3-2 Routing Foundation.',
-      501,
-      metadata
-    );
-  }
-}
-
-class HealthHandler {
-  execute(request, context) {
-    const metadata = {
-      requestId: request.requestId,
-      serverTimestamp: context.getStartTimestamp(),
-      processingTime: context.getElapsedTime(),
-      version: request.version
-    };
-    return ApiResponse.errorResponse(
-      'NOT_IMPLEMENTED',
-      'HealthHandler is currently a placeholder stub in S3-2 Routing Foundation.',
-      501,
-      metadata
-    );
-  }
-}
-
-class VersionHandler {
-  execute(request, context) {
-    const metadata = {
-      requestId: request.requestId,
-      serverTimestamp: context.getStartTimestamp(),
-      processingTime: context.getElapsedTime(),
-      version: request.version
-    };
-    return ApiResponse.errorResponse(
-      'NOT_IMPLEMENTED',
-      'VersionHandler is currently a placeholder stub in S3-2 Routing Foundation.',
-      501,
-      metadata
-    );
-  }
-}
 
 /*
  * [LEGACY_FRAMEWORK_BACKUP: UnknownEndpointHandler & LegacyApiFallbackHandler Rollback Point]
