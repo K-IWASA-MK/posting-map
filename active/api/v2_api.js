@@ -115,9 +115,6 @@ function processGetActionLegacy(action, e) {
       case 'submitDistribution':
         response = { success: false, message: 'Write operations require POST. Please update the client.' };
         break;
-      case 'verifyDeployment':
-        response = verifyDistrictDeployment(e);
-        break;
       case 'registerStaff':
         let legacyLastName = (e && e.parameter) ? (e.parameter.lastName || e.parameter.displayName || "") : "";
         let legacyFirstName = (e && e.parameter) ? (e.parameter.firstName || "LINE") : "LINE";
@@ -153,9 +150,6 @@ function processGetActionLegacy(action, e) {
         response = { success: true, config: getConfig(e.tenantId || "DEFAULT") };
         break;
 
-      case 'refreshCache':
-        response = { success: true, data: refreshAreaSummaryCache() };
-        break;
 
       default:
         response = { success: true, message: 'POSTING MAP API is online.' };
@@ -270,9 +264,6 @@ function processPostAction(action, postData, e) {
       return getCityAreaDetails(postData.cityName || e.parameter.cityName);
     case 'submitDistribution':
       return submitDistribution(postData);
-    case 'verifyDeployment':
-      // Trigger clasp push synchronization update v2
-      return verifyDistrictDeployment(postData || e.parameter);
     case 'updateRecordWithGPSPhoto':
       return updateRecordWithGPSPhoto(postData);
     case 'registerStaff':
@@ -301,16 +292,6 @@ function processPostAction(action, postData, e) {
     case 'setupFolders':
       const setupMsg = setupGoogleDriveFolders();
       return { success: true, message: setupMsg };
-    case 'forceStartBatch':
-      forceStartBatch();
-      return { success: true, message: 'Batch run initiated successfully' };
-    case 'refreshCache':
-      createSystemCacheSheet();
-      const cacheResult = refreshAreaSummaryCache();
-      return { success: true, message: 'Cache sync completed successfully', data: cacheResult };
-    case 'aggregateStats':
-      aggregateTotalVolumes();
-      return { success: true, message: 'Aggregation completed successfully' };
     case 'resetAllSheets':
       deleteAllAreaSheets();
       return { success: true, message: 'All area sheets reset successfully' };
