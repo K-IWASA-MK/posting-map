@@ -711,10 +711,7 @@ function getAuditLogs() {
 
 
 
-/*
- * [LEGACY_RUNTIME_BACKUP: SEC-036 ApiExecutionContext Rollback Point]
- * ApiExecutionContext has been migrated to active/runtime/context/execution_context.js
- */
+
 
 
 
