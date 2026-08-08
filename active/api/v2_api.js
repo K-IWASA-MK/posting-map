@@ -447,21 +447,6 @@ function handleRequestFlyerTransfer(data) {
       "申請中"
     ]);
 
-    // Push通知処理：管理者IDシートの全管理者に通知
-    const adminSheet = ss.getSheetByName(CONFIG.get("SHEET_ADMIN"));
-    if (adminSheet) {
-      const adminLastRow = adminSheet.getLastRow();
-      if (adminLastRow >= 2) {
-        const adminValues = adminSheet.getRange(2, 1, adminLastRow - 1, 2).getValues();
-        for (let i = 0; i < adminValues.length; i++) {
-          const adminLineId = String(adminValues[i][1] || '').trim();
-          if (adminLineId) {
-            sendLinePushMessage(adminLineId, data.requestUserName, data.holderName, data.requestArea, data.stockCount);
-          }
-        }
-      }
-    }
-
     return { success: true };
   } catch(e) {
     return { success: false, message: e.toString() };
@@ -469,65 +454,18 @@ function handleRequestFlyerTransfer(data) {
     lock.releaseLock();
   }
 }
-
-// =============================
-// ④ 管理者登録 (Admin Registration)
-// =============================
-
-function registerAdmin(displayName, lineUserId) {
-  if (!lineUserId) return { success: false, message: 'LINE User ID required' };
-  const lock = LockService.getScriptLock();
-  try { lock.waitLock(10000); } catch(e) { return { success: false, message: 'Lock timeout' }; }
-  try {
-    const ss = getSS();
-    let s = ss.getSheetByName(CONFIG.get("SHEET_ADMIN"));
-    if (!s) {
-      s = ss.insertSheet(CONFIG.get("SHEET_ADMIN"));
-      s.getRange(1, 1, 1, 3).setValues([['管理者名', 'LINE_USER_ID', '登録日時']]);
-      // ヘッダー行のスタイル設定
-      s.getRange(1, 1, 1, 3).setBackground('#1a237e').setFontColor('#ffffff').setFontWeight('bold');
-    }
-    const now = Utilities.formatDate(new Date(), 'JST', 'yyyy/MM/dd HH:mm:ss');
-    const lastRow = s.getLastRow();
-    // 既存チェック（LINE_USER_IDで重複防止）
-    if (lastRow >= 2) {
-      const existing = s.getRange(2, 1, lastRow - 1, 2).getValues();
-      for (let i = 0; i < existing.length; i++) {
-        if (String(existing[i][1]).trim() === lineUserId) {
-          // 名前が変わっていたら更新
-          if (existing[i][0] !== displayName) {
-            s.getRange(i + 2, 1).setValue(displayName);
-          }
-          return { success: true, message: 'existing' };
-        }
-      }
-    }
-    // 上限チェック (3名制限)
-    if (lastRow >= 4) { // ヘッダー1行 + データ3行 = 4行以上の場合は登録不可
-      return { success: false, message: '管理者アカウントの登録上限(3名)に達しています。' };
-    }
-    // 新規追加
-    s.appendRow([displayName, lineUserId, now]);
-    return { success: true, message: 'new' };
-  } finally {
-    lock.releaseLock();
-  }
-}
-
-function sendLinePushMessage(toUserId, requesterName, holderName, areaName, stockCount) {
+function sendLinePushMessage(toUserId, messageText) {
   const props = PropertiesService.getScriptProperties();
   // 管理者用アクセストークンを優先、なければ一般用トークンにフォールバック
   const token = props.getProperty("LINE_CHANNEL_ACCESS_TOKEN_ADMIN") || props.getProperty("LINE_CHANNEL_ACCESS_TOKEN");
   if (!token) return; // トークン未設定の場合はスキップ
-
-  const text = `【受渡要請通知】\n\n配布員からチラシの受渡要請がありました。\n\n要請者：\n${requesterName}\n\n保管者：\n${holderName}\n\n地区：\n${areaName}\n\n希望枚数：\n${Number(stockCount).toLocaleString()}枚\n\nポスティングADMIN PANELで確認し、保管者への連絡・調整を行ってください。`;
 
   const url = "https://api.line.me/v2/bot/message/push";
   const payload = {
     to: toUserId,
     messages: [{
       type: "text",
-      text: text
+      text: messageText
     }]
   };
 
