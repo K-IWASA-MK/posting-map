@@ -3,30 +3,6 @@
  * UI(HTML)は一切返却せず、ContentService を通じて JSON のみを応答する。
  */
 
-/*
- * [LEGACY_RUNTIME_BACKUP: SEC-001~003 Runtime Lifecycle Rollback Point]
- * Legacy implementations of setupAdminSheet, logTrace, writeDebugLogToSheet, isWebAppCall
- * have been migrated to active/runtime/lifecycle/runtime_lifecycle.js
- */
-/*
-function setupAdminSheet_legacy_backup() {
-  const admins = [
-    { name: 'K. IWASA', lineUserId: 'U7375015ea7c5380e2c8da827eb8d3f08' }
-  ];
-  admins.forEach(a => registerAdmin(a.name, a.lineUserId));
-  Logger.log('✅ 管理者IDシートのセットアップ完了');
-}
-
-function logTrace_legacy_backup(event, data) {
-  try {
-    Logger.log("[TRACE] " + event + ": " + JSON.stringify(data || {}));
-  } catch (e) {}
-}
-
-function writeDebugLogToSheet_legacy_backup(data) {
-  return;
-}
-*/
 
 // =============================
 // ① 基本設定
