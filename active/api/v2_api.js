@@ -180,9 +180,7 @@ function processGetActionLegacy(action, e) {
       case 'getConfig':
         response = { success: true, config: getConfig(e.tenantId || "DEFAULT") };
         break;
-      case 'getAuditLogs':
-        response = getAuditLogs();
-        break;
+
       case 'refreshCache':
         response = { success: true, data: refreshAreaSummaryCache() };
         break;
@@ -668,38 +666,6 @@ function resolveTransferRequest(data) {
   }
 }
 
-/**
- * 02_SYSTEM フォルダの直近のデータ整合性監査ログを取得する (診断用API)
- */
-function getAuditLogs() {
-  try {
-    // SYSTEM_LOCK.ACTIVE_DRIVE_ROOT_ID = "1FfcVEQjod--rZSucOPFJD2DJ58hV650_"
-    const root = DriveApp.getFolderById("1FfcVEQjod--rZSucOPFJD2DJ58hV650_");
-    const systemFolder = root.getFoldersByName("02_SYSTEM").next();
-    const files = systemFolder.getFiles();
-    const logs = [];
-    
-    while (files.hasNext()) {
-      const f = files.next();
-      const name = f.getName();
-      if (name.indexOf("AUDIT_DATA_") === 0) {
-        logs.push({
-          name: name,
-          content: JSON.parse(f.getBlob().getDataAsString()),
-          updated: f.getLastUpdated().toISOString()
-        });
-      }
-    }
-    
-    // 更新日時でソート（降順）
-    logs.sort((a, b) => b.updated.localeCompare(a.updated));
-    
-    const lastError = PropertiesService.getScriptProperties().getProperty("AUDIT_LAST_ERROR") || "None";
-    return { success: true, logs: logs.slice(0, 10), lastError: lastError }; // 直近10件を返す
-  } catch (e) {
-    return { success: false, error: e.toString() };
-  }
-}
 
 // ==========================================
 // 🚀 PRODUCTION BACKEND FOUNDATION CLASSES
