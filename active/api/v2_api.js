@@ -704,10 +704,7 @@ function getAuditLogs() {
 // ==========================================
 // 🚀 PRODUCTION BACKEND FOUNDATION CLASSES
 // ==========================================
-/*
- * [LEGACY_RUNTIME_BACKUP: SEC-030 GasConfigurationProvider Rollback Point]
- * GasConfigurationProvider has been migrated to active/runtime/config/config_provider.js
- */
+
 
 
 
