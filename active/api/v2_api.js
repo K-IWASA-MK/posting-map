@@ -31,44 +31,7 @@ function writeDebugLogToSheet_legacy_backup(data) {
 // =============================
 // ① 基本設定
 // =============================
-/*
- * [LEGACY_INFRA_BACKUP: SEC-004 Infrastructure Utilities Rollback Point]
- * getSS has been migrated to active/infrastructure/spreadsheet/spreadsheet_adapter.js
- * getStorageFolderId and authorizeAndTestDriveWrite have been migrated to active/infrastructure/drive/drive_adapter.js
- */
-/*
-function getSS_legacy_backup() {
-  if (!isWebAppCall) {
-    try {
-      const ss = SpreadsheetApp.getActiveSpreadsheet();
-      if (ss && ss.getId()) {
-        return ss;
-      }
-    } catch (e) {}
-  }
-  const props = PropertiesService.getScriptProperties();
-  let id = props.getProperty("SPREADSHEET_ID");
-  if (!id) {
-    throw new Error('SPREADSHEET_ID is not configured.');
-  }
-  return SpreadsheetApp.openById(id);
-}
 
-function getStorageFolderId_legacy_backup() {
-  const id = PropertiesService.getScriptProperties().getProperty("STORAGE_PARENT_ID");
-  return id || CONFIG.STORAGE_PARENT_ID;
-}
-
-function authorizeAndTestDriveWrite_legacy_backup() {
-  try {
-    const folderId = getStorageFolderId();
-    const folder = DriveApp.getFolderById(folderId);
-    const blob = Utilities.newBlob("DRIVE_AUTH_TEST", "text/plain", "_auth_test.txt");
-    const file = folder.createFile(blob);
-    file.setTrashed(true);
-  } catch (e) {}
-}
-*/
 
 
 /*
