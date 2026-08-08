@@ -137,18 +137,6 @@ function processGetActionLegacy(action, e) {
       case 'getTransferRequests':
         response = { success: true, requests: getTransferRequests() };
         break;
-      case 'runMigration':
-        response = { success: true, message: runMigrationToEventLog() };
-        break;
-      case 'runReconciliation':
-        response = generateReconciliationReport();
-        break;
-      case 'runFreeze':
-        response = executeSystemFreeze();
-        break;
-      case 'getConfig':
-        response = { success: true, config: getConfig(e.tenantId || "DEFAULT") };
-        break;
 
 
       default:
@@ -238,8 +226,6 @@ function processPostAction(action, postData, e) {
     case 'getTier3':
       return typeof Tier3Service !== 'undefined' ? Tier3Service.getInstance().getTier3(postData ? postData.cityName : null, postData ? postData.townName : null) : { success: false };
 
-    case 'getConfig':
-      return { success: true, config: getConfig(postData.tenantId || e.parameter.tenantId || "DEFAULT") };
     case 'getEvidence':
       try {
         const ss = getSS();
@@ -280,8 +266,6 @@ function processPostAction(action, postData, e) {
         } catch (errPj) {}
       }
       return registerStaff(rLastName, rFirstName, rLineUserId);
-    case 'registerAdmin':
-      return registerAdmin(postData.displayName, postData.lineUserId);
     case 'requestFlyerTransfer':
       return handleRequestFlyerTransfer(postData);
     case 'resolveTransferRequest':
