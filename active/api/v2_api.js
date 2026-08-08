@@ -81,7 +81,6 @@ function processGetActionLegacy(action, e) {
   let response;
   switch (action) {
       case 'getDashboardData':
-      case 'getSummary':
       case 'getSystemSummary':
         response = typeof SystemSummaryService !== 'undefined' ? SystemSummaryService.getInstance().getSystemSummary() : { success: true, ...getDashboardData() };
         break;
@@ -132,33 +131,6 @@ function processGetActionLegacy(action, e) {
           } catch (eP) {}
         }
         response = registerStaff(legacyLastName, legacyFirstName, legacyLineUserId);
-        break;
-      case 'testDriveAccess':
-        try {
-          const testFolderId = getStorageFolderId();
-          const testFolder = DriveApp.getFolderById(testFolderId);
-          response = {
-            success: true,
-            message: 'Drive access OK',
-            folderId: testFolderId,
-            folderName: testFolder.getName(),
-            folderUrl: testFolder.getUrl()
-          };
-        } catch (driveErr) {
-          response = { success: false, message: 'Drive access FAILED: ' + driveErr.toString(), folderId: getStorageFolderId() };
-        }
-        break;
-      case 'testDriveWrite':
-        try {
-          const wFolder = DriveApp.getFolderById(getStorageFolderId());
-          const testBlob = Utilities.newBlob("POSTING_MAP_TEST_" + Date.now(), "text/plain", "test_write.txt");
-          const file = wFolder.createFile(testBlob);
-          response = { success: true, message: 'Write OK', fileId: file.getId(), fileName: file.getName() };
-          file.setTrashed(true);
-        } catch (writeErr) {
-          response = { success: false, message: 'Write FAILED: ' + writeErr.toString() };
-        }
-        break;
       case 'getDeliveryStats':
         response = getDeliveryStats();
         break;
