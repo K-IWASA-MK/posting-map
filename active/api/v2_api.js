@@ -775,12 +775,7 @@ function getAuditLogs() {
  * GasConfigurationProvider has been migrated to active/runtime/config/config_provider.js
  */
 
-/*
- * [LEGACY_INFRA_BACKUP: SEC-031~035 Infrastructure Adapters Rollback Point]
- * SpreadsheetBatchReader, SpreadsheetBatchWriter, SpreadsheetRepository -> active/infrastructure/spreadsheet/spreadsheet_adapter.js
- * LockServiceProvider -> active/infrastructure/lock/lock_adapter.js
- * CacheServiceProvider -> active/infrastructure/cache/cache_adapter.js
- */
+
 
 /*
  * [LEGACY_RUNTIME_BACKUP: SEC-036 ApiExecutionContext Rollback Point]
