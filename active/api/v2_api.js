@@ -10,12 +10,7 @@
 
 
 
-/*
- * [LEGACY_RUNTIME_BACKUP: SEC-005 Context Variables Rollback Point]
- * executionContext and globalCacheHit have been migrated to active/runtime/context/execution_context.js
- * var executionContext_backup = null;
- * var globalCacheHit_backup = false;
- */
+
 
 /**
  * GETリクエスト：JSONデータの取得
