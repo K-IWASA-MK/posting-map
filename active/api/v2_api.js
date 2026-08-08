@@ -716,15 +716,3 @@ function getAuditLogs() {
 // ==========================================
 // 🚀 API ROUTING & ENDPOINT FOUNDATION CLASSES
 // ==========================================
-class ApiRequest {
-  constructor(params) {
-    this.method = params.method.toUpperCase();
-    this.path = params.path;
-    this.version = params.version.toLowerCase();
-    this.query = params.query || {};
-    this.body = params.body || {};
-    this.headers = params.headers || {};
-    this.requestId = params.requestId;
-  }
-}
-
