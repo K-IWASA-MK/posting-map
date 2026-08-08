@@ -2053,27 +2053,7 @@ class AuthenticationResult {
 }
 
 
-class StaffIdentityResolver {
-  static resolve(lineUserId) {
-    if (typeof StaffService !== 'undefined') {
-      const identity = StaffService.getInstance().resolveStaffIdentity(lineUserId);
-      if (identity && identity.found) {
-        return {
-          found: true,
-          staffId: identity.staffId,
-          lastName: identity.staffName,
-          firstName: ""
-        };
-      }
-    }
-    return { found: false };
-  }
-}
 
-/*
- * [LEGACY_STAFF_BACKUP: StaffIdentityResolver Rollback Point]
- * StaffIdentityResolver migrated to active/business/staff/staff_service.js
- */
 
 
 
