@@ -226,6 +226,8 @@ function processPostAction(action, postData, e) {
       return handleRequestFlyerTransfer(postData);
     case 'resolveTransferRequest':
       return resolveTransferRequest(postData);
+    case 'getFlyerStock':
+      return { success: true, stocks: getFlyerStock() };
     case 'updateFlyerStock':
       return updateFlyerStock(
         postData.location,
