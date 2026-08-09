@@ -22,6 +22,7 @@ function authenticateRequest(payload) {
   // 2. Session Cache の確認 (HIT)
   const cachedSession = getSession(token);
   if (cachedSession) {
+    console.log("AUTH CACHE HIT: user=" + cachedSession.lineUserId);
     return {
       success: true,
       user: {
@@ -33,6 +34,7 @@ function authenticateRequest(payload) {
   }
 
   // 3. Cache MISS の場合: LINE API による Token 検証
+  console.log("AUTH CACHE MISS: Fetching from LINE API...");
   try {
     const url = 'https://api.line.me/v2/profile';
     const options = {
