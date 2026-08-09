@@ -805,7 +805,14 @@ window.initMainMap = function() {
 
   if (window.ADDRESS_MASTER_DATA && Array.isArray(window.ADDRESS_MASTER_DATA)) {
     const PIN_SVG_PATH = "M 12 2 C 8.13 2 5 5.13 5 9 C 5 14.25 12 22 12 22 C 12 22 19 14.25 19 9 C 19 5.13 15.87 2 12 2 Z";
-    const PIN_SCALE = 0.85;
+    const masterMarkers = [];
+
+    const getPinScale = (zoom) => {
+      if (zoom <= 11) return 0.55;
+      if (zoom === 12) return 0.70;
+      if (zoom === 13) return 0.85;
+      return 1.05;
+    };
 
     window.ADDRESS_MASTER_DATA.forEach(row => {
       if (row.lat && row.lng) {
@@ -814,7 +821,7 @@ window.initMainMap = function() {
           position: { lat: row.lat, lng: row.lng },
           icon: {
             path: PIN_SVG_PATH,
-            scale: PIN_SCALE,
+            scale: getPinScale(map.getZoom()),
             fillColor: "#22c55e",
             fillOpacity: 0.9,
             strokeWeight: 1,
@@ -835,7 +842,20 @@ window.initMainMap = function() {
             window.openDetail(fullName);
           }
         });
+
+        masterMarkers.push(marker);
       }
+    });
+
+    map.addListener('zoom_changed', () => {
+      const currentZoom = map.getZoom();
+      const newScale = getPinScale(currentZoom);
+      masterMarkers.forEach(m => {
+        const icon = m.getIcon();
+        if (icon && icon.scale !== newScale) {
+          m.setIcon({ ...icon, scale: newScale });
+        }
+      });
     });
   }
 };
