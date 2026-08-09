@@ -56,16 +56,15 @@ function renderAreas() {
       </div>
     `;
 
-    const cityCardsHtml = cities.map(c => renderCityListItem(c)).join('');
-
-    // 1層目の最下部にスムーズスクロールで上部に戻る「↑ トップに戻る」ボタンを追加
-    const bottomTopButtonHtml = `
-      <div class="flex items-center justify-center mt-8 pb-10">
-        <button onclick="$('content').scrollTo({top: 0, behavior: 'smooth'})" class="px-6 h-12 premium-glass-btn flex items-center justify-center text-xs font-bold uppercase tracking-wider text-white/80">↑ トップに戻る</button>
-      </div>
+    const mapHtml = `
+      <div id="main-map" style="width:100%; height:60vh; border-radius:1.5rem; overflow:hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);"></div>
     `;
 
-    $('area-list').innerHTML = headerCardHtml + `<div class="space-y-6">${cityCardsHtml}</div>` + bottomTopButtonHtml;
+    $('area-list').innerHTML = headerCardHtml + mapHtml + bottomTopButtonHtml;
+
+    if (typeof window.initMainMap === 'function') {
+      setTimeout(window.initMainMap, 100);
+    }
   } else {
     // 【第2層：選択された市のエリアシート一覧画面】
     const backButtonHtml = `
@@ -702,4 +701,130 @@ window.sendLineContact = function(staffName, staffId, location, count) {
   const text = `【チラシ受渡のお願い】\n${staffName}さんの保管チラシ（${location} ${Number(count).toLocaleString()}枚）を一部分けていただけないでしょうか？`;
   const lineUrl = `https://line.me/R/share?text=${encodeURIComponent(text)}`;
   window.open(lineUrl, '_blank');
+};
+
+window.initMainMap = function() {
+  const mapEl = document.getElementById("main-map");
+  if (!mapEl || !window.google || !window.google.maps) return;
+
+  const appleStyle = [
+    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+    {
+      featureType: "administrative.locality",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#d59563" }]
+    },
+    {
+      featureType: "poi",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#d59563" }]
+    },
+    {
+      featureType: "poi.park",
+      elementType: "geometry",
+      stylers: [{ color: "#263c3f" }]
+    },
+    {
+      featureType: "poi.park",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#6b9a76" }]
+    },
+    {
+      featureType: "road",
+      elementType: "geometry",
+      stylers: [{ color: "#38414e" }]
+    },
+    {
+      featureType: "road",
+      elementType: "geometry.stroke",
+      stylers: [{ color: "#212a37" }]
+    },
+    {
+      featureType: "road",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#9ca5b3" }]
+    },
+    {
+      featureType: "road.highway",
+      elementType: "geometry",
+      stylers: [{ color: "#746855" }]
+    },
+    {
+      featureType: "road.highway",
+      elementType: "geometry.stroke",
+      stylers: [{ color: "#1f2835" }]
+    },
+    {
+      featureType: "road.highway",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#f3d19c" }]
+    },
+    {
+      featureType: "transit",
+      elementType: "geometry",
+      stylers: [{ color: "#2f3948" }]
+    },
+    {
+      featureType: "transit.station",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#d59563" }]
+    },
+    {
+      featureType: "water",
+      elementType: "geometry",
+      stylers: [{ color: "#17263c" }]
+    },
+    {
+      featureType: "water",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#515c6d" }]
+    },
+    {
+      featureType: "water",
+      elementType: "labels.text.stroke",
+      stylers: [{ color: "#17263c" }]
+    }
+  ];
+
+  const map = new google.maps.Map(mapEl, {
+    center: { lat: 35.05, lng: 136.65 },
+    zoom: 11,
+    disableDefaultUI: true,
+    zoomControl: true,
+    styles: appleStyle
+  });
+
+  if (window.ADDRESS_MASTER_DATA && Array.isArray(window.ADDRESS_MASTER_DATA)) {
+    window.ADDRESS_MASTER_DATA.forEach(row => {
+      if (row.lat && row.lng) {
+        const marker = new google.maps.Marker({
+          map: map,
+          position: { lat: row.lat, lng: row.lng },
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE, 
+            scale: 8,
+            fillColor: "#fbbf24", // Default pending color
+            fillOpacity: 0.9, 
+            strokeWeight: 2, 
+            strokeColor: "#ffffff"
+          }
+        });
+        
+        marker.addListener('click', () => {
+          // 既存の詳細表示・配布入力フローへの接続
+          const fullName = row.city_name + '_' + row.town_name;
+          
+          // 第2層(Area list)をすっ飛ばして、直接第3層(Point list / 詳細表示)を開く
+          // 既存の window.openDetail は tier2CacheMap 内に該当エリアがある前提の場合がある。
+          // もしエラーになる場合は、事前に selectCity を呼ぶなどの対応が必要だが、
+          // まずは直接呼び出しを試みる。
+          if (typeof window.openDetail === 'function') {
+            window.openDetail(fullName);
+          }
+        });
+      }
+    });
+  }
 };
