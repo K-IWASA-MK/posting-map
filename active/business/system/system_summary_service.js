@@ -54,7 +54,8 @@
           total: totalPoints,
           done: totalDone,
           percent: percent,
-          online: true
+          online: true,
+          mapsApiKey: PropertiesService.getScriptProperties().getProperty('GOOGLE_MAPS_API_KEY') || ""
         };
       } catch (err) {
         return {

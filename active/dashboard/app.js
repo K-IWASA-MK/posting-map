@@ -492,6 +492,17 @@ async function loadData(skipSync = false) {
     if (data && data.success) {
       logDebug("[loadData] System Summary received: total=" + data.total + ", done=" + data.done);
       updateStats({ done: data.done, total: data.total });
+      
+      // 動的にGoogle Maps APIをロード（フロントエンドへのキー露出を回避しつつ、GASバックエンドからキーを取得）
+      if (data.mapsApiKey && !window.googleMapsApiLoaded) {
+        window.googleMapsApiLoaded = true;
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${data.mapsApiKey}&callback=initMainMap&language=ja`;
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+      }
+      
       prefetchRanking();
     } else {
       throw new Error(data ? data.message : "データが空です");
