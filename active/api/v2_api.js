@@ -173,6 +173,8 @@ function processPostAction(action, postData, e) {
 
     case 'getSystemSummary':
       return typeof SystemSummaryService !== 'undefined' ? SystemSummaryService.getInstance().getSystemSummary() : { success: false };
+    case 'getMapsApiKey':
+      return { success: true, mapsApiKey: PropertiesService.getScriptProperties().getProperty('GOOGLE_MAPS_API_KEY') || "" };
     case 'getTier1':
       return typeof Tier1Service !== 'undefined' ? Tier1Service.getInstance().getTier1() : { success: false };
     case 'getTier2':
