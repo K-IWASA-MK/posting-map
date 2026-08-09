@@ -136,11 +136,16 @@ function doPost(e) {
     } catch (errJson) {}
   }
 
+  const action = params.action || (postData && postData.action) || "";
+
   // Authentication Gate
   const auth = authenticateRequest(postData || {});
   if (!auth.success) {
-    return ContentService.createTextOutput(JSON.stringify(auth))
-      .setMimeType(ContentService.MimeType.JSON);
+    // getMapsApiKey のみ未ログインでも通過を許可する (バイパス)
+    if (action !== 'getMapsApiKey') {
+      return ContentService.createTextOutput(JSON.stringify(auth))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
   }
   
   if (postData) {
@@ -148,7 +153,6 @@ function doPost(e) {
   } else {
     postData = { user: auth.user };
   }
-  const action = params.action || (postData && postData.action) || "";
   const res = processPostAction(action, postData, e);
   if (res && typeof res.setMimeType === 'function') {
     return res;
