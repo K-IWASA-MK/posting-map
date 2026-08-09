@@ -47,3 +47,4 @@ Reference:
 - **Deployment**: `.agents/rules/deployment-rule.md`
 - **Verification**: `.agents/rules/verify-first.md`
 - **Legacy Cleanup**: `.agents/rules/legacy-cleanup-rule.md`
+- **Report Governance**: `.agents/rules/report-governance-rule.md`
