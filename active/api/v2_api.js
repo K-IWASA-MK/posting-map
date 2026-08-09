@@ -102,6 +102,7 @@ function processGetActionLegacy(action, e) {
           } catch (eP) {}
         }
         response = registerStaff(legacyLastName, legacyFirstName, legacyLineUserId);
+        break;
       case 'getDeliveryStats':
         response = getDeliveryStats();
         break;
