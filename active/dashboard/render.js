@@ -67,7 +67,7 @@ function renderAreas() {
       </div>
     `;
 
-    $('area-list').innerHTML = headerCardHtml + mapHtml + bottomTopButtonHtml;
+    $('area-list').innerHTML = mapHtml + bottomTopButtonHtml;
 
     if (typeof window.initMainMap === 'function') {
       setTimeout(window.initMainMap, 100);
