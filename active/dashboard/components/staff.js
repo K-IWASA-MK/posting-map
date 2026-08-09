@@ -37,8 +37,8 @@ window.renderStaffCard = function(userInfo, options = {}) {
         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" class="flex flex-col items-center z-10 w-full max-w-[280px]">
           ${avatarHtml}
           <div style="font-size: 28px; font-weight: 900; color: #ffffff; text-align: center; letter-spacing: 0.05em; line-height: 1.1;" class="flex flex-col items-center w-full">
-            <div class="truncate w-full">${userInfo.last}</div>
-            <div class="text-xs text-white/40 font-medium mt-1 truncate w-full">${userInfo.first || ''}</div>
+            <div class="truncate w-full">${escapeHtml(userInfo.last)}</div>
+            <div class="text-xs text-white/40 font-medium mt-1 truncate w-full">${escapeHtml(userInfo.first || '')}</div>
           </div>
         </div>
         

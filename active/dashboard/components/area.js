@@ -21,7 +21,7 @@ window.renderCityListItem = function(c) {
       <div class="w-full flex justify-center mb-1">
         <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);" class="inline-flex items-center justify-center h-7 px-3 ${fontSizeClass} font-black text-white rounded-full tracking-tight">
           <span class="text-xs mr-1 select-none">🏢</span>
-          <span>${c.name}</span>
+          <span>${escapeHtml(c.name)}</span>
         </div>
       </div>
       <div class="text-sm text-[#00B7FF]">${c.progress}%</div>
@@ -91,7 +91,7 @@ window.renderAreaListItem = function(s) {
       </button>
     `
     : `
-      <button ontouchstart="" onclick="typeof selectTown === 'function' ? selectTown(typeof currentCity !== 'undefined' ? currentCity : '', '${s.name}') : openDetail('${s.name}')"
+      <button ontouchstart="" onclick="typeof selectTown === 'function' ? selectTown(typeof currentCity !== 'undefined' ? currentCity : '', '${escapeHtml(s.name)}') : openDetail('${escapeHtml(s.name)}')"
         style="background: rgba(37,99,235,0.12); border: 1px solid rgba(37,99,235,0.3); color: #fff; transition: transform 75ms ease-out; white-space: nowrap;"
         onpointerdown="this.style.transform='scale(0.96)'"
         onpointerup="this.style.transform=''"
@@ -102,11 +102,11 @@ window.renderAreaListItem = function(s) {
     `;
 
   return `
-    <div id="area-card-${s.name}" class="premium-glass py-5 px-6 flex items-center justify-center">
+    <div id="area-card-${escapeHtml(s.name)}" class="premium-glass py-5 px-6 flex items-center justify-center">
       <div style="display: inline-flex; flex-direction: column; align-items: stretch; gap: 8px; text-align: center;">
         ${googleMapsButtonHtml}
         <div class="${fontSizeClass} font-black text-white tracking-tight leading-snug" style="text-wrap: balance; padding: 4px 0;">
-          ${cleanAddress}
+          ${escapeHtml(cleanAddress)}
         </div>
         <div class="text-sm text-[#00B7FF]">${s.progress}%</div>
         <div class="flex items-center justify-center">

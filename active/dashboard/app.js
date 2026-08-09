@@ -1,5 +1,15 @@
 const $ = id => document.getElementById(id);
 
+// SEC-004: XSS対策用エスケープ関数
+window.escapeHtml = function(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+};
+
 // デバッグログ出力関数 (本番用: コンソールのみ出力)
 window.logDebug = function(msg) {
   console.log("[DEBUG]", msg);
@@ -917,7 +927,7 @@ function applyOptimisticCheck(areaName, rowId, isDone, count) {
     
     const card = $(`point-card-${rowId}`);
     if (card) {
-      card.innerHTML = renderPointCardHtml(areaName, p);
+      card.innerHTML = renderPointCard(p);
       if (!navigator.onLine) {
         const statusText = card.querySelector('label span');
         if (statusText) {
@@ -1943,10 +1953,10 @@ function openIdInfoModal(type, event) {
     if (type === 'license') {
       const rawBranch = localStorage.getItem('branch_name') || '';
       const displayBranch = rawBranch ? (rawBranch.includes('支部') ? rawBranch : `${rawBranch} 支部`) : 'MIE-02 支部';
-      bodyText = bodyText.replace('__BRANCH_NAME__', displayBranch);
+      bodyText = bodyText.replace('__BRANCH_NAME__', escapeHtml(displayBranch));
     }
     
-    bodyEl.innerHTML = bodyText;
+    bodyEl.textContent = bodyText;
   }
   
   modal.classList.remove('pointer-events-none', 'opacity-0');
@@ -1985,7 +1995,7 @@ window.openTransferRequestDialog = function(name, id, loc, count) {
       </div>
       <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:24px;text-align:center;">
         <div style="color:rgba(255,255,255,0.45);font-size:10px;font-weight:900;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">保管者</div>
-        <div style="color:white;font-size:17px;font-weight:900;">${name}</div>
+        <div style="color:white;font-size:17px;font-weight:900;">${escapeHtml(name)}</div>
         <div style="color:rgba(255,255,255,0.45);font-size:10px;font-weight:900;letter-spacing:0.1em;text-transform:uppercase;margin-top:12px;margin-bottom:4px;">保管枚数</div>
         <div style="color:#22c55e;font-size:22px;font-weight:900;font-family:monospace;">${Number(count).toLocaleString()}枚</div>
       </div>

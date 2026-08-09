@@ -280,9 +280,9 @@ function renderDetailModalContent(p) {
     <!-- 1行目: 住所バッジ（中央寄せ） -->
     <div class="w-full flex flex-col items-center gap-3">
       <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); height: 26px; font-size: 12px; color: rgba(255, 255, 255, 0.9);" class="inline-flex items-center px-3 font-bold rounded-full tracking-wide truncate max-w-full select-text">
-        🏠 ${cleanAddr}
+        🏠 ${escapeHtml(cleanAddr)}
       </div>
-      ${p.memo ? `<div class="text-xs text-white/50 bg-white/5 rounded-xl p-3 border border-white/5 select-text w-full text-center mt-1">${p.memo}</div>` : ''}
+      ${p.memo ? `<div class="text-xs text-white/50 bg-white/5 rounded-xl p-3 border border-white/5 select-text w-full text-center mt-1">${escapeHtml(p.memo)}</div>` : ''}
     </div>
     
     ${googleMapsButtonHtml}
@@ -291,7 +291,7 @@ function renderDetailModalContent(p) {
       ${!p.isDone ? `
         <!-- 【未完了】全体がタップ可能な極上シンメトリーカード -->
         <label ontouchstart="" class="cursor-pointer rounded-3xl py-6 px-5 bg-white/5 border border-white/10 flex flex-col items-center justify-center gap-4 w-full">
-          <input type="checkbox" class="hidden" onchange="toggleDone('${areaName}', ${p.rowId}, this)">
+          <input type="checkbox" class="hidden" onchange="toggleDone('${escapeHtml(areaName)}', ${p.rowId}, this)">
           
           <!-- 1. テキスト（中央揃え） -->
           <div class="flex flex-col items-center select-none text-center">
@@ -319,7 +319,7 @@ function renderDetailModalContent(p) {
               <span class="text-xs">🔒</span>
               <span class="text-[10px] font-black uppercase tracking-widest text-[#10b981]">MISSION COMPLETED</span>
             </div>
-            <span class="text-xs font-bold text-white/80 mt-1">${p.completedAt ? `${formatCompletedAt(p.completedAt)}${p.staffName ? ` · ${p.staffName}` : ''}` : ''}</span>
+            <span class="text-xs font-bold text-white/80 mt-1">${p.completedAt ? `${formatCompletedAt(p.completedAt)}${p.staffName ? ` · ${escapeHtml(p.staffName)}` : ''}` : ''}</span>
           </div>
           
           ${syncLabelHtml ? `<div class="w-full flex justify-center mt-1">${syncLabelHtml.replace('ml-auto', '')}</div>` : ''}
@@ -337,7 +337,7 @@ function renderDetailModalContent(p) {
             配布数 ${p.count || 0}枚
           </div>
           ${!isLocked ? `
-            <button onclick="openNumpad('${areaName}', ${p.rowId}, ${p.count || 0})" class="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white/80 active:scale-95 transition-all mt-2">枚数変更</button>
+            <button onclick="openNumpad('${escapeHtml(areaName)}', ${p.rowId}, ${p.count || 0})" class="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white/80 active:scale-95 transition-all mt-2">枚数変更</button>
           ` : ''}
         </div>
 

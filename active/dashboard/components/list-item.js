@@ -19,7 +19,7 @@ window.renderPointCard = function(p) {
     ? `
       <div class="w-full flex justify-center mt-0.5">
         <div style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); height: 22px; font-size: 10px; color: #10b981;" class="inline-flex items-center justify-center h-[22px] px-2.5 text-[10px] font-bold text-[#10b981] rounded-full tracking-wider">
-          ${p.staffName}
+          ${escapeHtml(p.staffName)}
         </div>
       </div>`
     : '';
@@ -35,7 +35,7 @@ window.renderPointCard = function(p) {
     <div class="${cardClass}" ${onclickAttr}>
       <div class="w-full flex justify-center">
         <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); height: 26px; font-size: 12px; color: rgba(255, 255, 255, 0.9);" class="inline-flex items-center justify-center px-3 font-bold rounded-full tracking-wide truncate max-w-full">
-          🏠 ${cleanAddress}
+          🏠 ${escapeHtml(cleanAddress)}
         </div>
       </div>
       <div style="${statusColor}" class="text-[9px] font-bold uppercase tracking-widest flex items-center justify-center gap-1.5 w-full">
