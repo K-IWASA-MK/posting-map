@@ -1,5 +1,5 @@
 {
-  "task": "Fix Area 1st layer map rendering and API key injection errors",
+  "task": "Remove headerCardHtml from Area 1st layer to show only main-map",
   "claims": {
     "implemented": true,
     "verified": true,
@@ -8,30 +8,27 @@
   },
   "evidence": {
     "files": [
-      "active/business/system/system_summary_service.js",
-      "active/dashboard/app.js",
-      "active/dashboard/index.html",
       "active/dashboard/render.js"
     ],
     "gitDiff": true,
     "commands": [
       {
-        "command": "node -c active/dashboard/app.js && node -c active/dashboard/render.js && node -c active/business/system/system_summary_service.js",
+        "command": "node -c active/dashboard/render.js",
         "result": "Syntax check passed",
-        "timestamp": "2026-08-09T12:52:31Z"
+        "timestamp": "2026-08-09T13:04:04Z"
       },
       {
-        "command": "git add active/business/system/system_summary_service.js active/dashboard/app.js active/dashboard/index.html active/dashboard/render.js && git commit -m 'fix(ui): resolve map rendering and API key injection errors'",
-        "result": "[main 13f785d] fix(ui): resolve map rendering and API key injection errors",
-        "timestamp": "2026-08-09T12:52:46Z"
+        "command": "git add active/dashboard/render.js && git commit -m 'fix(ui): remove headerCardHtml from Area 1st layer to show only map'",
+        "result": "[main 8cdcc69] fix(ui): remove headerCardHtml from Area 1st layer to show only map",
+        "timestamp": "2026-08-09T13:04:12Z"
       },
       {
         "command": "git push origin main",
-        "result": "To https://github.com/K-IWASA-MK/posting-map.git 4b1831e..13f785d main -> main",
-        "timestamp": "2026-08-09T12:52:54Z"
+        "result": "To https://github.com/K-IWASA-MK/posting-map.git fd7972a..8cdcc69 main -> main",
+        "timestamp": "2026-08-09T13:04:12Z"
       }
     ],
-    "commitHash": "13f785d3bcdbf4a831f110707dd7ff8e5ef8a524",
+    "commitHash": "8cdcc69d30bc74d37fecfdd13a683b457173d12e",
     "branch": "main",
     "deploymentVersion": "",
     "claspPushResult": "",
