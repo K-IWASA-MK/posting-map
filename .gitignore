@@ -11,3 +11,6 @@ node_modules/
 # Local Credentials / Secret Backups
 .clasprc.json.local*
 scratch/
+
+# Auditor Logs
+.agents/audit-log/
