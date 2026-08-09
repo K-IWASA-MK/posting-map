@@ -56,13 +56,15 @@ function renderAreas() {
       </div>
     `;
 
-    const mapHtml = `
-      <div id="main-map" style="width:100%; height:60vh; border-radius:1.5rem; overflow:hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);"></div>
-    `;
+    let mapEl = document.getElementById("main-map");
+    if (!mapEl) {
+      const mapHtml = `
+        <div id="main-map" style="width:100%; height:60vh; border-radius:1.5rem; overflow:hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);"></div>
+      `;
+      $('area-list').innerHTML = mapHtml;
+    }
 
-    $('area-list').innerHTML = mapHtml;
-
-    if (typeof window.initMainMap === 'function') {
+    if (!window.mainMapInstance && typeof window.initMainMap === 'function') {
       setTimeout(window.initMainMap, 100);
     }
   } else {
@@ -707,6 +709,11 @@ window.initMainMap = function() {
   const mapEl = document.getElementById("main-map");
   if (!mapEl || !window.google || !window.google.maps) return;
 
+  // 既存Mapインスタンスが同一DOM要素にバインド済みの場合はMap生成・858 Marker生成・Listener登録のすべてをスキップ
+  if (window.mainMapInstance && window.mainMapInstance.getDiv() === mapEl) {
+    return;
+  }
+
   const appleStyle = [
     { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
     { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
@@ -789,24 +796,36 @@ window.initMainMap = function() {
   ];
 
   const map = new google.maps.Map(mapEl, {
-    center: { lat: 35.05, lng: 136.65 },
-    zoom: 11,
+    center: window.currentMapState?.center || { lat: 35.05, lng: 136.65 },
+    zoom: window.currentMapState?.zoom || 11,
     disableDefaultUI: true,
     zoomControl: true,
     styles: appleStyle
   });
+  window.mainMapInstance = map;
 
-  if (window.ADDRESS_MASTER_DATA && Array.isArray(window.ADDRESS_MASTER_DATA)) {
-    const PIN_SVG_PATH = "M 12 2 C 8.13 2 5 5.13 5 9 C 5 14.25 12 22 12 22 C 12 22 19 14.25 19 9 C 19 5.13 15.87 2 12 2 Z";
-    const masterMarkers = [];
-
-    const getPinScale = (zoom) => {
-      if (zoom <= 11) return 0.55;
-      if (zoom === 12) return 0.70;
-      if (zoom === 13) return 0.85;
-      return 1.05;
+  map.addListener('idle', () => {
+    window.currentMapState = {
+      center: map.getCenter().toJSON(),
+      zoom: map.getZoom()
     };
+  });
 
+  if (!Array.isArray(window.masterMarkers)) {
+    window.masterMarkers = [];
+  }
+
+  const PIN_SVG_PATH = "M 12 2 C 8.13 2 5 5.13 5 9 C 5 14.25 12 22 12 22 C 12 22 19 14.25 19 9 C 19 5.13 15.87 2 12 2 Z";
+
+  const getPinScale = (zoom) => {
+    if (zoom <= 11) return 0.55;
+    if (zoom === 12) return 0.70;
+    if (zoom === 13) return 0.85;
+    return 1.05;
+  };
+
+  // 初回のみ 858件の Marker 生成を実行（2回目以降は既存Markerを保持・再利用）
+  if (window.masterMarkers.length === 0 && window.ADDRESS_MASTER_DATA && Array.isArray(window.ADDRESS_MASTER_DATA)) {
     window.ADDRESS_MASTER_DATA.forEach(row => {
       if (row.lat && row.lng) {
         const marker = new google.maps.Marker({
@@ -824,31 +843,35 @@ window.initMainMap = function() {
         });
         
         marker.addListener('click', () => {
-          // 既存の詳細表示・配布入力フローへの接続
           const fullName = row.city_name + '_' + row.town_name;
-          
-          // 第2層(Area list)をすっ飛ばして、直接第3層(Point list / 詳細表示)を開く
-          // 既存の window.openDetail は tier2CacheMap 内に該当エリアがある前提の場合がある。
-          // もしエラーになる場合は、事前に selectCity を呼ぶなどの対応が必要だが、
-          // まずは直接呼び出しを試みる。
           if (typeof window.openDetail === 'function') {
             window.openDetail(fullName);
           }
         });
 
-        masterMarkers.push(marker);
+        window.masterMarkers.push(marker);
       }
     });
+  }
 
-    map.addListener('zoom_changed', () => {
+  let zoomFrameId = null;
+  let currentAppliedScale = getPinScale(map.getZoom());
+
+  // 初回生成時に zoom_changed リスナーを1回だけ登録（重複登録防止）
+  map.addListener('zoom_changed', () => {
+    if (zoomFrameId) cancelAnimationFrame(zoomFrameId);
+    zoomFrameId = requestAnimationFrame(() => {
       const currentZoom = map.getZoom();
       const newScale = getPinScale(currentZoom);
-      masterMarkers.forEach(m => {
-        const icon = m.getIcon();
-        if (icon && icon.scale !== newScale) {
-          m.setIcon({ ...icon, scale: newScale });
-        }
-      });
+      if (newScale !== currentAppliedScale && window.masterMarkers) {
+        currentAppliedScale = newScale;
+        window.masterMarkers.forEach(m => {
+          const icon = m.getIcon();
+          if (icon && icon.scale !== newScale) {
+            m.setIcon({ ...icon, scale: newScale });
+          }
+        });
+      }
     });
-  }
+  });
 };
