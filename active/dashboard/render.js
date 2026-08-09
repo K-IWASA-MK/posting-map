@@ -60,14 +60,7 @@ function renderAreas() {
       <div id="main-map" style="width:100%; height:60vh; border-radius:1.5rem; overflow:hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);"></div>
     `;
 
-    // 1層目の最下部にスムーズスクロールで上部に戻る「↑ トップに戻る」ボタンを追加
-    const bottomTopButtonHtml = `
-      <div class="flex items-center justify-center mt-8 pb-10">
-        <button onclick="$('content').scrollTo({top: 0, behavior: 'smooth'})" class="px-6 h-12 premium-glass-btn flex items-center justify-center text-xs font-bold uppercase tracking-wider text-white/80">↑ トップに戻る</button>
-      </div>
-    `;
-
-    $('area-list').innerHTML = mapHtml + bottomTopButtonHtml;
+    $('area-list').innerHTML = mapHtml;
 
     if (typeof window.initMainMap === 'function') {
       setTimeout(window.initMainMap, 100);
