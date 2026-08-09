@@ -19,7 +19,20 @@ function authenticateRequest(payload) {
 
   const token = payload.liffToken;
 
-  // 2. LINE API による Token 検証
+  // 2. Session Cache の確認 (HIT)
+  const cachedSession = getSession(token);
+  if (cachedSession) {
+    return {
+      success: true,
+      user: {
+        lineUserId: cachedSession.lineUserId,
+        displayName: cachedSession.displayName,
+        pictureUrl: cachedSession.pictureUrl
+      }
+    };
+  }
+
+  // 3. Cache MISS の場合: LINE API による Token 検証
   try {
     const url = 'https://api.line.me/v2/profile';
     const options = {
@@ -43,14 +56,19 @@ function authenticateRequest(payload) {
 
     const profileData = JSON.parse(response.getContentText());
 
-    // 3. 成功時、ユーザー情報を返却
+    const user = {
+      lineUserId: profileData.userId,
+      displayName: profileData.displayName,
+      pictureUrl: profileData.pictureUrl
+    };
+
+    // 4. 検証成功後に Session 保存
+    saveSession(token, user);
+
+    // 5. 成功時、ユーザー情報を返却
     return {
       success: true,
-      user: {
-        lineUserId: profileData.userId,
-        displayName: profileData.displayName,
-        pictureUrl: profileData.pictureUrl
-      }
+      user: user
     };
 
   } catch (err) {
