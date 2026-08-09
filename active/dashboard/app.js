@@ -125,10 +125,9 @@ async function callApi(action, params = {}) {
   logDebug(`[callApi] Checking LIFF status for action=${action}`);
   const token = getLiffAuthToken();
   if (token) {
-    params.liffToken = token;
-    logDebug(`[callApi] Token injected: ${token.substring(0, 10)}...`);
+    logDebug(`[callApi] Token NOT injected into GET for security. (Token available)`);
   } else {
-    logDebug(`[callApi] Token injection skipped. No token available.`);
+    logDebug(`[callApi] No token available.`);
   }
   
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
@@ -485,7 +484,7 @@ async function loadData(skipSync = false) {
     }
     
     logDebug("[loadData] Fetching getSystemSummary in background...");
-    const summaryPromise = callApi('getSystemSummary');
+    const summaryPromise = callApiPost('getSystemSummary');
     
     const data = await summaryPromise;
     logDebug("[loadData] getSystemSummary fetched successfully.");
@@ -506,7 +505,7 @@ async function loadData(skipSync = false) {
 
 // ランキングデータのバックグラウンド先読み関数
 function prefetchRanking() {
-  window.activeRankingPromise = callApi('getRanking')
+  window.activeRankingPromise = callApiPost('getRanking')
     .then(data => {
       if (data && data.success) {
         rankingData = data.ranking || [];
@@ -997,7 +996,7 @@ async function switchPage(id, force = false) {
             <p class="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Loading Leaderboard...</p>
           </div>`;
       }
-      const p = window.activeRankingPromise || callApi('getRanking');
+      const p = window.activeRankingPromise || callApiPost('getRanking');
       p.then(data => {
         if (data && data.success) {
           rankingData = data.ranking || [];
@@ -1061,7 +1060,7 @@ async function switchPage(id, force = false) {
 
     // Auto-populate latest registered stock for logged-in staff
     if (staffId && countInput) {
-      callApi('getFlyerStock').then(data => {
+      callApiPost('getFlyerStock').then(data => {
         if (data && data.success && Array.isArray(data.stocks)) {
           _stockData = data.stocks;
           _stockFetched = true;
@@ -1237,7 +1236,7 @@ window.updateStorageLocationDropdown = function updateStorageLocationDropdown(ov
             <p class="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Loading Inventory...</p>
           </div>`;
       }
-      callApi('getFlyerStock').then(data => {
+      callApiPost('getFlyerStock').then(data => {
         if (data && data.success) {
           _stockData = data.stocks || [];
           _stockFetched = true;
@@ -1443,7 +1442,7 @@ async function fetchSystemSummary(forceRefresh = false) {
 
   _systemSummaryPromise = (async () => {
     try {
-      const res = await callApi('getSystemSummary');
+      const res = await callApiPost('getSystemSummary');
       if (res && res.success) {
         updateStats(res);
         return res;
@@ -1512,7 +1511,7 @@ async function fetchTier2(cityName) {
 
   showLoading('CONNECTING...');
   try {
-    const res = await callApi('getTier2', { cityName: cityName });
+    const res = await callApiPost('getTier2', { cityName: cityName });
     if (res && res.success && Array.isArray(res.areas)) {
       tier2CacheMap[cityName] = res.areas;
       return res.areas;
@@ -1540,7 +1539,7 @@ async function fetchTier3(cityName, townName) {
 
   showLoading('CONNECTING...');
   try {
-    const res = await callApi('getTier3', { cityName: cityName, townName: townName });
+    const res = await callApiPost('getTier3', { cityName: cityName, townName: townName });
     if (res && res.success && Array.isArray(res.points)) {
       tier3CacheMap[cacheKey] = res.points;
       return res.points;
@@ -1717,7 +1716,7 @@ async function safeInitApp() {
         let userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
         
         // ⑤ getSystemSummaryを軽量並列プリフェッチ開始
-        _summaryPromise = callApi('getSystemSummary');
+        _summaryPromise = callApiPost('getSystemSummary');
 
         // 【通常起動】既にユーザー登録・LINE連携キャッシュがある場合は、同期通信を待たずに即時起動
         if (userInfo.id && userInfo.lineUserId) {

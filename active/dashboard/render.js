@@ -117,7 +117,7 @@ async function selectCity(cityName) {
   if (window.currentCityDetailsName !== cityName) {
     window.cityAreaCache = {}; // キャッシュリセット
     window.currentCityDetailsName = cityName;
-    window.activeCityDetailsPromise = callApi('getCityAreaDetails', { cityName: cityName })
+    window.activeCityDetailsPromise = callApiPost('getCityAreaDetails', { cityName: cityName })
       .then(data => {
         if (data && data.success) {
           window.cityAreaCache = data.details || {};
@@ -458,7 +458,7 @@ async function openDetail(name) {
     }
 
     // 先読みPromiseがない、または取得に失敗した場合は個別取得を実行
-    const data = await callApi('getAreaDetails', { name: name });
+    const data = await callApiPost('getAreaDetails', { name: name });
     if (data && data.points) {
       window.currentCityDetailAreaName = name;
       allPoints = data.points;

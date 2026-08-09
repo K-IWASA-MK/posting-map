@@ -31,6 +31,14 @@ function doGet(e) {
     e.parameter = params;
   }
 
+  // SEC-006: Prohibit token transmission via GET
+  if (params.liffToken) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      error: "Token transmission via GET is prohibited."
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+
   // Authentication Gate
   const auth = authenticateRequest(params);
   if (!auth.success) {
