@@ -98,24 +98,27 @@ const API_URL = (window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.api && win
   ? window.PMS_CLIENT_CONFIG.api.gasWebAppUrl
   : "https://script.google.com/macros/s/AKfycbyjNwgZ_6CCv258lqKMrCXJYi0wDR23ZCyyzOQIV1R_WcCF5TQxYXOzZWWSJd_vMyu_/exec";
 
+function getLiffAuthToken() {
+  if (typeof liff === "undefined") {
+    return null;
+  }
+  if (!liff.isLoggedIn()) {
+    return null;
+  }
+  return liff.getAccessToken();
+}
+
 async function callApi(action, params = {}) {
   const MAX_RETRIES = 3;
   let delay = 1000;
   
-  // 参照専用 (Read-only) API では GET クエリ肥大化・GASパラメータ脱落を防止するため liffToken 付与をスキップ
-  const readOnlyActions = ['getSystemSummary', 'getTier1', 'getTier2', 'getTier3', 'getRanking', 'getFlyerStock', 'getDeliveryStats', 'getCityAreaDetails'];
-  
-  logDebug(`[callApi] Checking LIFF status. typeof liff=${typeof liff}`);
-  if (typeof liff !== 'undefined' && !readOnlyActions.includes(action)) {
-    const isLoggedIn = liff.isLoggedIn();
-    const token = liff.getAccessToken();
-    logDebug(`[callApi] isLoggedIn=${isLoggedIn}, tokenLength=${token ? token.length : '0'}`);
-    if (isLoggedIn && token) {
-      params.liffToken = token;
-      logDebug(`[callApi] Token injected: ${token.substring(0, 10)}...`);
-    } else {
-      logDebug(`[callApi] Token injection skipped. isLoggedIn=${isLoggedIn}, hasToken=${!!token}`);
-    }
+  logDebug(`[callApi] Checking LIFF status for action=${action}`);
+  const token = getLiffAuthToken();
+  if (token) {
+    params.liffToken = token;
+    logDebug(`[callApi] Token injected: ${token.substring(0, 10)}...`);
+  } else {
+    logDebug(`[callApi] Token injection skipped. No token available.`);
   }
   
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
@@ -205,9 +208,9 @@ async function callApiPost(action, payload = {}) {
   const MAX_RETRIES = 3;
   let delay = 1000;
 
-  // LIFFがログイン済みならトークンを自動的に付与
-  if (typeof liff !== 'undefined' && liff.isLoggedIn()) {
-    payload.liffToken = liff.getAccessToken();
+  const token = getLiffAuthToken();
+  if (token) {
+    payload.liffToken = token;
   }
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
