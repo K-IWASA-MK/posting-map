@@ -804,18 +804,22 @@ window.initMainMap = function() {
   });
 
   if (window.ADDRESS_MASTER_DATA && Array.isArray(window.ADDRESS_MASTER_DATA)) {
+    const PIN_SVG_PATH = "M 12 2 C 8.13 2 5 5.13 5 9 C 5 14.25 12 22 12 22 C 12 22 19 14.25 19 9 C 19 5.13 15.87 2 12 2 Z M 12 11.5 C 10.62 11.5 9.5 10.38 9.5 9 C 9.5 7.62 10.62 6.5 12 6.5 C 13.38 6.5 14.5 7.62 14.5 9 C 14.5 10.38 13.38 11.5 12 11.5 Z";
+    const PIN_SCALE = 0.85;
+
     window.ADDRESS_MASTER_DATA.forEach(row => {
       if (row.lat && row.lng) {
         const marker = new google.maps.Marker({
           map: map,
           position: { lat: row.lat, lng: row.lng },
           icon: {
-            path: google.maps.SymbolPath.CIRCLE, 
-            scale: 8,
-            fillColor: "#fbbf24", // Default pending color
-            fillOpacity: 0.9, 
-            strokeWeight: 2, 
-            strokeColor: "#ffffff"
+            path: PIN_SVG_PATH,
+            scale: PIN_SCALE,
+            fillColor: "#22c55e",
+            fillOpacity: 0.9,
+            strokeWeight: 1,
+            strokeColor: "#ffffff",
+            anchor: new google.maps.Point(12, 22)
           }
         });
         
