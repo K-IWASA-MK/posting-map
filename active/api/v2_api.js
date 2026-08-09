@@ -479,6 +479,30 @@ function resolveTransferRequest(data) {
     const s = ss.getSheetByName(sheetName);
     if (!s) return { success: false, message: "Sheet not found" };
     
+    // SEC-003: 1. rowNumber検証
+    const lastRow = s.getLastRow();
+    if (rowNumber > lastRow) {
+      return { success: false, message: "Invalid row number" };
+    }
+    
+    // SEC-003: 2. 操作者ID取得
+    const operatorId = data.liffUserId;
+    if (!operatorId) {
+      return { success: false, message: "Permission denied" };
+    }
+    
+    // SEC-003: 3. 対象行権限確認
+    const requesterId = String(s.getRange(rowNumber, 3).getValue()).trim();
+    const holderId = String(s.getRange(rowNumber, 5).getValue()).trim();
+    
+    // SEC-003: 4. Admin Override
+    const admins = typeof getDeploymentAdmins === 'function' ? getDeploymentAdmins() : [];
+    const isAdmin = admins.includes(operatorId);
+    
+    if (operatorId !== requesterId && operatorId !== holderId && !isAdmin) {
+      return { success: false, message: "Permission denied" };
+    }
+    
     // ステータス（H列 = 8列目）を更新
     s.getRange(rowNumber, 8).setValue(status);
     return { success: true };
