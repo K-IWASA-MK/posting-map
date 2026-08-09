@@ -172,38 +172,7 @@ function processPostAction(action, postData, e) {
     } catch (errJson) {}
   }
   switch (action) {
-    case 'triggerBatch':
-      try {
-        const startTime = Date.now();
-        const props = PropertiesService.getScriptProperties();
-        const isStart = e.parameter.triggerBatch === "true" || (postData && postData.triggerBatch === "true") || (postData && postData.triggerBatch === true);
-        if (isStart) {
-          props.deleteProperty("BATCH_STATUS");
-          props.deleteProperty("BATCH_INDEX");
-        }
-        if (props.getProperty("BATCH_STATUS") !== "running") {
-          forceStartBatch();
-        }
-        while (props.getProperty("BATCH_STATUS") === "running") {
-          generateAreaSheetsBatch();
-          if (Date.now() - startTime > 22000) {
-            break;
-          }
-        }
-        const status = props.getProperty("BATCH_STATUS") || "completed";
-        const index = props.getProperty("BATCH_INDEX") || "0";
-        return {
-          success: true,
-          status: status,
-          index: index,
-          message: status === "running" ? "Batch is running (chunk processed)" : "Batch completed successfully!"
-        };
-      } catch (err) {
-        return {
-          success: false,
-          error: "Failed to run batch step inside processPostAction: " + err.toString()
-        };
-      }
+
     case 'getSystemSummary':
       return typeof SystemSummaryService !== 'undefined' ? SystemSummaryService.getInstance().getSystemSummary() : { success: false };
     case 'getTier1':
