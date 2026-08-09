@@ -94,6 +94,19 @@ npx clasp deployments
 ただし、実行ログおよび確認結果を提示できる場合を除く。
 
 
+## Completion Definition
+
+Implementation complete ≠ Production complete.
+
+Separate states:
+
+- **IMPLEMENTED**: Code changed, Static verification passed
+- **VERIFIED**: Runtime test passed
+- **DEPLOYED**: clasp/Git deployment confirmed
+- **PRODUCTION READY**: Real environment verified
+
+AIは状態を混同してはいけない。
+
 ## 適用範囲
 
 本ルールはPOSTING MAP Repositoryにおける全AIエージェント作業へ適用する。
