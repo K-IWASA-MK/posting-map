@@ -48,3 +48,14 @@ Reference:
 - **Verification**: `.agents/rules/verify-first.md`
 - **Legacy Cleanup**: `.agents/rules/legacy-cleanup-rule.md`
 - **Report Governance**: `.agents/rules/report-governance-rule.md`
+
+## Completion Reporting
+
+AI社員の完了報告は
+Report Governance Ruleに従う。
+
+参照:
+
+- .agents/rules/report-governance-rule.md
+- .agents/auditor/report-auditor.js
+- .agents/auditor/report-schema.json

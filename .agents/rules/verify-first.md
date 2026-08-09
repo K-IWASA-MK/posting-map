@@ -110,3 +110,20 @@ AIは状態を混同してはいけない。
 ## 適用範囲
 
 本ルールはPOSTING MAP Repositoryにおける全AIエージェント作業へ適用する。
+
+## Report Governance Requirement
+
+AI社員は完了報告前に
+Report Auditorによる証跡確認を実施すること。
+
+必須:
+
+- report-schema.json準拠
+- Evidence情報提示
+- Completion Status確認
+
+以下は禁止:
+
+- 証跡なしのPASS報告
+- 実機未確認のPRODUCTION VERIFIED報告
+- Commit/Push自己申告のみでの完了報告
