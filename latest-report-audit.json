@@ -1,5 +1,5 @@
 {
-  "task": "Migrate Area 1st layer to map view using ADDRESS_MASTER static data",
+  "task": "Fix Area 1st layer map rendering and API key injection errors",
   "claims": {
     "implemented": true,
     "verified": true,
@@ -8,30 +8,30 @@
   },
   "evidence": {
     "files": [
+      "active/business/system/system_summary_service.js",
+      "active/dashboard/app.js",
       "active/dashboard/index.html",
-      "active/dashboard/render.js",
-      "scripts/build_map_data.js",
-      "active/dashboard/data/address_master_map.js"
+      "active/dashboard/render.js"
     ],
     "gitDiff": true,
     "commands": [
       {
-        "command": "node -c active/dashboard/render.js && node -c scripts/build_map_data.js",
+        "command": "node -c active/dashboard/app.js && node -c active/dashboard/render.js && node -c active/business/system/system_summary_service.js",
         "result": "Syntax check passed",
-        "timestamp": "2026-08-09T12:40:19Z"
+        "timestamp": "2026-08-09T12:52:31Z"
       },
       {
-        "command": "git add active/dashboard/index.html active/dashboard/render.js scripts/build_map_data.js active/dashboard/data/address_master_map.js && git commit -m 'feat(ui): migrate area 1st layer to map view using static ADDRESS_MASTER data'",
-        "result": "[main 337e8ee] feat(ui): migrate area 1st layer to map view using static ADDRESS_MASTER data",
-        "timestamp": "2026-08-09T12:40:25Z"
+        "command": "git add active/business/system/system_summary_service.js active/dashboard/app.js active/dashboard/index.html active/dashboard/render.js && git commit -m 'fix(ui): resolve map rendering and API key injection errors'",
+        "result": "[main 13f785d] fix(ui): resolve map rendering and API key injection errors",
+        "timestamp": "2026-08-09T12:52:46Z"
       },
       {
         "command": "git push origin main",
-        "result": "To https://github.com/K-IWASA-MK/posting-map.git ef1b959..337e8ee main -> main",
-        "timestamp": "2026-08-09T12:40:32Z"
+        "result": "To https://github.com/K-IWASA-MK/posting-map.git 4b1831e..13f785d main -> main",
+        "timestamp": "2026-08-09T12:52:54Z"
       }
     ],
-    "commitHash": "337e8eee4a267b5df8f2d108121e4da9d8385783",
+    "commitHash": "13f785d3bcdbf4a831f110707dd7ff8e5ef8a524",
     "branch": "main",
     "deploymentVersion": "",
     "claspPushResult": "",
