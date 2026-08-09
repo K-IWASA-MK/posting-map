@@ -307,7 +307,7 @@ function generateAreaSheetsBatch() {
 
 function createAddressLinks(targetSheet) {
   const sheet =
-    targetSheet || SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    targetSheet || getSS().getActiveSheet();
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return;
   const values = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
@@ -469,7 +469,7 @@ function setupCleanupTrigger() {
  */
 function sortAllAreaSheetTabs() {
   try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const ss = getSS();
     const sheets = ss.getSheets();
     const systemSheetNames = ["原本", "名簿", "初めての方「使い方ガイド」", "__SYSTEM_CACHE__", "保有チラシ枚数", "管理者ID", "受渡要請履歴", "📄 活動報告書", "📖 らくらくマニュアル"];
 
