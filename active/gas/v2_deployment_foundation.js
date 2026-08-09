@@ -172,6 +172,61 @@ class DistrictDeploymentFoundation {
 }
 
 /**
+ * SEC-002: Check if the action requires admin privileges
+ */
+function isProtectedDeploymentAction(params) {
+  return (
+    params.cleanupResources === "true" || params.cleanupResources === true ||
+    params.provisionDistrict === "true" || params.provisionDistrict === true ||
+    params.bootstrapProperties === "true" || params.bootstrapProperties === true ||
+    params.executeFullBatch === "true" || params.executeFullBatch === true ||
+    params.rebuildCache === "true" || params.rebuildCache === true
+  );
+}
+
+/**
+ * SEC-002: Fetch admin LINE user IDs from the admin sheet
+ */
+function getDeploymentAdmins() {
+  try {
+    const ss = typeof getSS === 'function' ? getSS() : SpreadsheetApp.getActiveSpreadsheet();
+    const sheetName = (typeof CONFIG !== 'undefined' && CONFIG.get) ? CONFIG.get("SHEET_ADMIN") : "管理者ID";
+    const sheet = ss.getSheetByName(sheetName);
+    if (!sheet) return [];
+    
+    const data = sheet.getDataRange().getValues();
+    const admins = [];
+    for (let i = 0; i < data.length; i++) {
+      const id = String(data[i][0] || "").trim();
+      if (id && id.startsWith("U") && id.length > 20) {
+        admins.push(id);
+      }
+    }
+    return admins;
+  } catch (e) {
+    return [];
+  }
+}
+
+/**
+ * SEC-002: Verify if the user is an admin
+ */
+function verifyDeploymentAdminGate(params) {
+  const userId = params.liffUserId;
+  
+  if (!userId) {
+    throw new Error("ADMIN_AUTH_REQUIRED");
+  }
+  
+  const admins = getDeploymentAdmins();
+  if (!admins.includes(userId)) {
+    throw new Error("ADMIN_PERMISSION_DENIED");
+  }
+  
+  return true;
+}
+
+/**
  * Global function entry point
  */
 function verifyDistrictDeployment(e) {
@@ -222,6 +277,20 @@ function verifyDistrictDeployment(e) {
     }
   }
   
+  // SEC-002: Admin Authentication Gate for Protected Actions
+  if (isProtectedDeploymentAction(params)) {
+    try {
+      verifyDeploymentAdminGate(params);
+    } catch (err) {
+      return {
+        success: false,
+        error: err.message,
+        message: "Access Denied: " + err.message,
+        status: "DENIED"
+      };
+    }
+  }
+
   // Cleanup/Rollback Action (deletes spreadsheet and folder under native user credentials)
   if (params.cleanupResources === "true" || params.cleanupResources === true) {
     try {
