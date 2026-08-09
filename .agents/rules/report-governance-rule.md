@@ -120,6 +120,22 @@ WARNING または FAIL とする。
 
 ---
 
+# Rule 5: Repository Evidence Verification
+
+AI社員がGit操作完了を報告する場合、
+GitHub Repository上の実体確認を必須とする。
+
+確認対象:
+
+- commit hash
+- branch
+- changed files
+- remote synchronization status
+
+報告のみでCommit/Push完了とは判定しない。
+
+---
+
 # Auditor Output Requirement
 
 監査結果には必ず以下を含める。
