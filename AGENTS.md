@@ -46,3 +46,4 @@ Reference:
 - **UI**: `.agents/rules/ui-rule.md`
 - **Deployment**: `.agents/rules/deployment-rule.md`
 - **Verification**: `.agents/rules/verify-first.md`
+- **Legacy Cleanup**: `.agents/rules/legacy-cleanup-rule.md`
