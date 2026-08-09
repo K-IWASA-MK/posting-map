@@ -1,5 +1,5 @@
 {
-  "task": "Remove headerCardHtml from Area 1st layer to show only main-map",
+  "task": "Restore getSystemSummary legacy response compatibility and isolate maps API key endpoint",
   "claims": {
     "implemented": true,
     "verified": true,
@@ -8,27 +8,29 @@
   },
   "evidence": {
     "files": [
-      "active/dashboard/render.js"
+      "active/api/v2_api.js",
+      "active/business/system/system_summary_service.js",
+      "active/dashboard/app.js"
     ],
     "gitDiff": true,
     "commands": [
       {
-        "command": "node -c active/dashboard/render.js",
+        "command": "node -c active/dashboard/app.js && node -c active/api/v2_api.js && node -c active/business/system/system_summary_service.js",
         "result": "Syntax check passed",
-        "timestamp": "2026-08-09T13:04:04Z"
+        "timestamp": "2026-08-09T13:15:24Z"
       },
       {
-        "command": "git add active/dashboard/render.js && git commit -m 'fix(ui): remove headerCardHtml from Area 1st layer to show only map'",
-        "result": "[main 8cdcc69] fix(ui): remove headerCardHtml from Area 1st layer to show only map",
-        "timestamp": "2026-08-09T13:04:12Z"
+        "command": "git add active/business/system/system_summary_service.js active/api/v2_api.js active/dashboard/app.js && git commit -m 'fix(api): restore getSystemSummary response shape and use dedicated getMapsApiKey endpoint'",
+        "result": "[main c78e0c9] fix(api): restore getSystemSummary response shape and use dedicated getMapsApiKey endpoint",
+        "timestamp": "2026-08-09T13:15:31Z"
       },
       {
         "command": "git push origin main",
-        "result": "To https://github.com/K-IWASA-MK/posting-map.git fd7972a..8cdcc69 main -> main",
-        "timestamp": "2026-08-09T13:04:12Z"
+        "result": "To https://github.com/K-IWASA-MK/posting-map.git 8a778ec..c78e0c9 main -> main",
+        "timestamp": "2026-08-09T13:15:33Z"
       }
     ],
-    "commitHash": "8cdcc69d30bc74d37fecfdd13a683b457173d12e",
+    "commitHash": "c78e0c91db20f717517cf87005bc15e6e1050881",
     "branch": "main",
     "deploymentVersion": "",
     "claspPushResult": "",
