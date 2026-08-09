@@ -90,18 +90,7 @@ function processGetActionLegacy(action, e) {
         response = { success: false, message: 'Write operations require POST. Please update the client.' };
         break;
       case 'registerStaff':
-        let legacyLastName = (e && e.parameter) ? (e.parameter.lastName || e.parameter.displayName || "") : "";
-        let legacyFirstName = (e && e.parameter) ? (e.parameter.firstName || "LINE") : "LINE";
-        let legacyLineUserId = (e && e.parameter) ? (e.parameter.lineUserId || "") : "";
-        if (e && e.parameter && e.parameter.json) {
-          try {
-            const p = JSON.parse(e.parameter.json);
-            if (p.lastName) legacyLastName = p.lastName;
-            if (p.firstName) legacyFirstName = p.firstName;
-            if (p.lineUserId) legacyLineUserId = p.lineUserId;
-          } catch (eP) {}
-        }
-        response = registerStaff(legacyLastName, legacyFirstName, legacyLineUserId);
+        response = { success: false, error: 'Registration requires POST request for security reasons.' };
         break;
       case 'getDeliveryStats':
         response = getDeliveryStats();

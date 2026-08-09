@@ -1638,8 +1638,8 @@ async function saveProfile() {
   await new Promise(r => setTimeout(r, 50));
   
   try {
-    logDebug("saveProfile: invoking callApi('registerStaff')");
-    const res = await callApi('registerStaff', { lastName: last, firstName: first });
+    logDebug("saveProfile: invoking callApiPost('registerStaff')");
+    const res = await callApiPost('registerStaff', { lastName: last, firstName: first });
     logDebug(`saveProfile: API result: ${JSON.stringify(res)}`);
     if (res && res.success) {
       logDebug("saveProfile: success! storing user_info to localStorage");
