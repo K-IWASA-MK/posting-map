@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const { execSync } = require('child_process');
 const { checkEvidence } = require('./evidence-checker');
 
@@ -84,6 +85,16 @@ function runGate(reportPath) {
     issues: issues,
     allowCommit: status === "PASS"
   };
+
+  const auditLogPath = path.join(__dirname, '../audit-log/latest-report-audit.json');
+  const finalOutput = {
+    status: result.status,
+    allowCommit: result.allowCommit,
+    report: path.basename(reportPath),
+    commitAllowed: result.allowCommit,
+    timestamp: new Date().toISOString()
+  };
+  fs.writeFileSync(auditLogPath, JSON.stringify(finalOutput, null, 2));
 
   console.log(JSON.stringify(result, null, 2));
   return result;

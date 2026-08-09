@@ -146,6 +146,9 @@ GitHub Repository上の実体確認を必須とする。
 - 不足証跡
 - Completion Status
 
+## Gate Evidence Requirement
+最終完了報告（および Commit 承認の要請時）には、必ず `.agents/audit-log/latest-report-audit.json` の中身（Gate通過証跡）を提示することを必須とする。
+
 ---
 
 # Completion Policy
