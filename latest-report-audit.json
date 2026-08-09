@@ -1,0 +1,40 @@
+{
+  "task": "Migrate Area 1st layer to map view using ADDRESS_MASTER static data",
+  "claims": {
+    "implemented": true,
+    "verified": true,
+    "deployed": true,
+    "productionVerified": false
+  },
+  "evidence": {
+    "files": [
+      "active/dashboard/index.html",
+      "active/dashboard/render.js",
+      "scripts/build_map_data.js",
+      "active/dashboard/data/address_master_map.js"
+    ],
+    "gitDiff": true,
+    "commands": [
+      {
+        "command": "node -c active/dashboard/render.js && node -c scripts/build_map_data.js",
+        "result": "Syntax check passed",
+        "timestamp": "2026-08-09T12:40:19Z"
+      },
+      {
+        "command": "git add active/dashboard/index.html active/dashboard/render.js scripts/build_map_data.js active/dashboard/data/address_master_map.js && git commit -m 'feat(ui): migrate area 1st layer to map view using static ADDRESS_MASTER data'",
+        "result": "[main 337e8ee] feat(ui): migrate area 1st layer to map view using static ADDRESS_MASTER data",
+        "timestamp": "2026-08-09T12:40:25Z"
+      },
+      {
+        "command": "git push origin main",
+        "result": "To https://github.com/K-IWASA-MK/posting-map.git ef1b959..337e8ee main -> main",
+        "timestamp": "2026-08-09T12:40:32Z"
+      }
+    ],
+    "commitHash": "337e8eee4a267b5df8f2d108121e4da9d8385783",
+    "branch": "main",
+    "deploymentVersion": "",
+    "claspPushResult": "",
+    "runtimeCheck": null
+  }
+}
