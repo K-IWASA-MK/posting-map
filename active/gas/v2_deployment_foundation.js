@@ -1054,6 +1054,8 @@ function verifyDistrictDeployment(e) {
         message: "Failed to rebuild system cache: " + err.toString()
       };
     }
+  }
+
   // Dashboard & Summary Observer Action
   if (params.action === "getDashboardData" || params.getDashboardData === "true") {
     try {
@@ -1297,5 +1299,4 @@ function verifyDistrictDeployment(e) {
   }
 
   return DistrictDeploymentFoundation.runDiagnostics();
-}
 }
