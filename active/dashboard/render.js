@@ -26,7 +26,11 @@ function getCityName(areaName) {
 }
 
 function renderAreas() {
+  const contentEl = $('content');
+
   if (currentCity === null) {
+    if (contentEl) contentEl.classList.add('is-map-view');
+
     let cities = [];
     if (typeof tier1Cache !== 'undefined' && Array.isArray(tier1Cache) && tier1Cache.length > 0) {
       cities = tier1Cache.map(c => {
@@ -45,21 +49,10 @@ function renderAreas() {
       return;
     }
 
-    const headerCardHtml = `
-      <div style="border: 1px solid rgba(37, 99, 235, 0.35); box-shadow: inset 0 0 15px rgba(37, 99, 235, 0.08), 0 0 25px rgba(37, 99, 235, 0.12);" class="premium-glass py-5 px-6 flex flex-col items-center justify-center text-center gap-2 mb-6">
-        <div class="w-8 h-8 rounded-xl bg-[#2563eb]/10 border border-[#2563eb]/20 flex items-center justify-center shadow-lg shadow-[#2563eb]/10 mb-0.5">
-          <svg class="w-4 h-4 text-[#2563eb]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-          </svg>
-        </div>
-        <div class="text-lg font-black text-white tracking-tight">全体エリア</div>
-      </div>
-    `;
-
     let mapEl = document.getElementById("main-map");
     if (!mapEl) {
       const mapHtml = `
-        <div id="main-map" style="width:100%; height:60vh; border-radius:1.5rem; overflow:hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);"></div>
+        <div id="main-map" style="width:100%; height:100%; border-radius:1.5rem; overflow:hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);"></div>
       `;
       $('area-list').innerHTML = mapHtml;
     }
@@ -68,6 +61,7 @@ function renderAreas() {
       setTimeout(window.initMainMap, 100);
     }
   } else {
+    if (contentEl) contentEl.classList.remove('is-map-view');
     // 【第2層：選択された市のエリアシート一覧画面】
     const backButtonHtml = `
       <div class="flex items-center mb-6 h-12">
