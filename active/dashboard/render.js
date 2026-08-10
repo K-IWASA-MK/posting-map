@@ -845,8 +845,10 @@ window.initMainMap = function() {
         });
         
         marker.addListener('click', () => {
-          const fullName = row.city_name + '_' + row.town_name;
-          if (typeof window.openDetail === 'function') {
+          if (typeof window.selectTown === 'function') {
+            window.selectTown(row.city_name, row.town_name);
+          } else if (typeof window.openDetail === 'function') {
+            const fullName = row.city_name + '_' + row.town_name;
             window.openDetail(fullName);
           }
         });
