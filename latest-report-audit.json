@@ -1,42 +1,10 @@
 {
-  "task": "Fix Map and Stock List errors by adding getFlyerStock to POST handler and deploying GAS",
-  "claims": {
-    "implemented": true,
-    "verified": true,
-    "deployed": true,
-    "productionVerified": true
-  },
+  "timestamp": "2026-08-10T19:50:00+09:00",
+  "completionStatus": "VERIFIED",
   "evidence": {
-    "files": [
-      "active/api/v2_api.js"
-    ],
-    "gitDiff": true,
-    "commands": [
-      {
-        "command": "npx clasp push",
-        "result": "Pushed 45 files",
-        "timestamp": "2026-08-09T13:35:32Z"
-      },
-      {
-        "command": "npx clasp deploy",
-        "result": "Deployed AKfycbw69oF70mm28Tab0jIgCRP1XtM6xbZKuhybwyp1gXYHfYCVDVCNLOO4l-C80s5ejok5 @138",
-        "timestamp": "2026-08-09T13:35:44Z"
-      },
-      {
-        "command": "node mock_smoke_test.js",
-        "result": "getFlyerStock: { success: true, stocks: [ { id: 'mock' } ] }\ngetMapsApiKey: { success: true, mapsApiKey: 'FAKE_KEY' }",
-        "timestamp": "2026-08-09T13:35:53Z"
-      },
-      {
-        "command": "git push origin main",
-        "result": "To https://github.com/K-IWASA-MK/posting-map.git 14de0cf..1a91fc6 main -> main",
-        "timestamp": "2026-08-09T13:36:03Z"
-      }
-    ],
-    "commitHash": "1a91fc632acc7790685304b863742dcf7c97f1f4",
-    "branch": "main",
-    "deploymentVersion": "138",
-    "claspPushResult": "Success",
-    "runtimeCheck": "API action smoke test passed via Node evaluation mocking"
+    "commandExecuted": "node verify_settings_fix.js (Puppeteer Mobile E2E Test)",
+    "verificationTarget": "is-map-view removal on settings load and card-navigation overlapping check",
+    "executionLog": "content.className: flex-1 overflow-y-auto...\ncontent has is-map-view: false\ncardBottom: 449.1875, navTop: 714\nSUCCESS: idCard.bottom < bottomNav.top",
+    "passFailJudgement": "PASS"
   }
 }

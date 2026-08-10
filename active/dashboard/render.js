@@ -530,6 +530,11 @@ function toggleDone(areaName, rowId, checkbox) {
 }
 
 function renderSettings() {
+  const contentEl = $('content');
+  if (contentEl) {
+    contentEl.classList.remove('is-map-view');
+  }
+
   const userInfo = JSON.parse(localStorage.getItem('user_info'));
   const container = $('settings-content');
   
