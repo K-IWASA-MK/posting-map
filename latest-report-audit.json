@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-08-10T19:50:00+09:00",
-  "completionStatus": "VERIFIED",
+  "timestamp": "2026-08-10T20:58:00+09:00",
+  "completionStatus": "REAL APP BROWSER VERIFIED",
   "evidence": {
-    "commandExecuted": "node verify_settings_fix.js (Puppeteer Mobile E2E Test)",
-    "verificationTarget": "is-map-view removal on settings load and card-navigation overlapping check",
-    "executionLog": "content.className: flex-1 overflow-y-auto...\ncontent has is-map-view: false\ncardBottom: 449.1875, navTop: 714\nSUCCESS: idCard.bottom < bottomNav.top",
+    "commandExecuted": "node verify_production_infowindow.js (Puppeteer Production E2E Test)",
+    "verificationTarget": "Phase 1-A PIN tap InfoWindow popup and map view retention on production GitHub Pages build",
+    "executionLog": "content.className: ...is-map-view\nMarker click triggered: success: true, count: 858\nInfoWindow text: 四日市市 相生町\nSUCCESS: InfoWindow is displayed!",
     "passFailJudgement": "PASS"
   }
 }
