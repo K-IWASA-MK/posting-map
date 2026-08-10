@@ -52,7 +52,7 @@ function renderAreas() {
     let mapEl = document.getElementById("main-map");
     if (!mapEl) {
       const mapHtml = `
-        <div id="main-map" style="width:100%; height:420px; border-radius:1.5rem; overflow:hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);"></div>
+        <div id="main-map" style="width:100%; height:527px; border-radius:1.5rem; overflow:hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);"></div>
       `;
       $('area-list').innerHTML = mapHtml;
     }
