@@ -34,7 +34,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
-    /* 第1層MAP 32px 上下完全対称レイアウト */
+    :root {
+      --primary-card-height: 356px;
+      --card-vertical-margin: 32px;
+    }
+
+    /* 第1層MAP 356px 統一レイアウト (A=32px, B=32px, A-B=0px) */
     main#content.is-map-view {
       overflow: hidden !important;
       display: flex !important;
@@ -42,7 +47,7 @@
       padding-left: 1.5rem !important;
       padding-right: 1.5rem !important;
       padding-top: 16px !important;
-      padding-bottom: calc(env(safe-area-inset-bottom) + 130px) !important;
+      padding-bottom: calc(env(safe-area-inset-bottom) + 98px + var(--card-vertical-margin)) !important;
     }
 
     main#content.is-map-view #page-areas,
@@ -58,7 +63,7 @@
 
     main#content.is-map-view #main-map {
       flex: none !important;
-      height: 527px !important;
+      height: var(--primary-card-height) !important;
       width: 100% !important;
       margin: 0 !important;
       border-radius: 1.5rem !important;
@@ -282,6 +287,6 @@
   <script defer src="../business/area/address_master_service.js?v=600"></script>
   <script defer src="./data/address_master_map.js?v=600"></script>
   <script defer src="./app.js?v=600"></script>
-  <script defer src="./render.js?v=606"></script>
+  <script defer src="./render.js?v=607"></script>
 </body>
 </html>
