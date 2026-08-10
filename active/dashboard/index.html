@@ -47,17 +47,19 @@
 
     main#content.is-map-view #page-areas,
     main#content.is-map-view #area-list {
-      flex: 1 !important;
       display: flex !important;
       flex-direction: column !important;
-      height: 100% !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      width: 100% !important;
       margin: 0 !important;
       padding: 0 !important;
     }
 
     main#content.is-map-view #main-map {
-      flex: 1 !important;
-      height: 100% !important;
+      flex: none !important;
+      height: 420px !important;
+      width: 100% !important;
       margin: 0 !important;
       border-radius: 1.5rem !important;
     }
@@ -280,6 +282,6 @@
   <script defer src="../business/area/address_master_service.js?v=600"></script>
   <script defer src="./data/address_master_map.js?v=600"></script>
   <script defer src="./app.js?v=600"></script>
-  <script defer src="./render.js?v=604"></script>
+  <script defer src="./render.js?v=605"></script>
 </body>
 </html>
