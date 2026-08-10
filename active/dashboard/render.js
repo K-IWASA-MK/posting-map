@@ -29,7 +29,15 @@ function renderAreas() {
   const contentEl = $('content');
 
   if (currentCity === null) {
-    if (contentEl) contentEl.classList.add('is-map-view');
+    const pageAreas = $('page-areas');
+    const isPageAreasVisible = pageAreas && !pageAreas.classList.contains('hidden');
+    if (contentEl) {
+      if (isPageAreasVisible) {
+        contentEl.classList.add('is-map-view');
+      } else {
+        contentEl.classList.remove('is-map-view');
+      }
+    }
 
     let cities = [];
     if (typeof tier1Cache !== 'undefined' && Array.isArray(tier1Cache) && tier1Cache.length > 0) {
