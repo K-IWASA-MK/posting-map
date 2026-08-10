@@ -854,7 +854,7 @@ window.initMainMap = function() {
         marker.addListener('click', () => {
           const content = `
             <div style="color: #1e293b; font-family: sans-serif; padding: 2px; font-size: 14px; font-weight: 700; line-height: 1.2;">
-              ${row.city_name} ${row.town_name}
+              ${row.city_name} ${row.town_name.replace(/^大字/, '')}
             </div>
           `;
           infoWindow.setContent(content);
