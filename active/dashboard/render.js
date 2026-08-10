@@ -822,6 +822,8 @@ window.initMainMap = function() {
     window.masterMarkers = [];
   }
 
+  const infoWindow = new google.maps.InfoWindow();
+
   const PIN_SVG_PATH = "M 12 2 C 8.13 2 5 5.13 5 9 C 5 14.25 12 22 12 22 C 12 22 19 14.25 19 9 C 19 5.13 15.87 2 12 2 Z";
 
   const getPinScale = (zoom) => {
@@ -850,12 +852,13 @@ window.initMainMap = function() {
         });
         
         marker.addListener('click', () => {
-          if (typeof window.selectTown === 'function') {
-            window.selectTown(row.city_name, row.town_name);
-          } else if (typeof window.openDetail === 'function') {
-            const fullName = row.city_name + '_' + row.town_name;
-            window.openDetail(fullName);
-          }
+          const content = `
+            <div style="color: #1e293b; font-family: sans-serif; padding: 2px; font-size: 14px; font-weight: 700; line-height: 1.2;">
+              ${row.city_name} ${row.town_name}
+            </div>
+          `;
+          infoWindow.setContent(content);
+          infoWindow.open(map, marker);
         });
 
         window.masterMarkers.push(marker);
