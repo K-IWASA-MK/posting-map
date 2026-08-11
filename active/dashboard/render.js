@@ -145,42 +145,39 @@ function openPointDetailModal(rowId) {
 
   // MASTER_858 fallback generated temporary point
   if (!p) {
-    const service = AddressMasterService.getInstance();
-    if (service && service.cache) {
-      const masterRow = service.cache.find(item => item.rowId === rowId);
-      if (masterRow) {
-        const areaName = (masterRow.town_name && masterRow.town_name.includes(masterRow.city_name))
-          ? masterRow.town_name
-          : `${masterRow.city_name}_${masterRow.town_name}`;
+    const masterRow = window.ADDRESS_MASTER_DATA?.find(item => item.rowId === rowId);
+    if (masterRow) {
+      const areaName = (masterRow.town_name && masterRow.town_name.includes(masterRow.city_name))
+        ? masterRow.town_name
+        : `${masterRow.city_name}_${masterRow.town_name}`;
 
-        window.currentCityDetailAreaName = areaName;
+      window.currentCityDetailAreaName = areaName;
 
-        // 既存の全体進捗(areaSummary)から進捗状況を逆引き
-        let isDone = false;
-        let count = 0;
-        if (typeof areaSummary !== 'undefined' && Array.isArray(areaSummary)) {
-          const summary = areaSummary.find(s => s.name === areaName || s.name === masterRow.town_name);
-          if (summary) {
-            isDone = (summary.done > 0);
-            count = summary.count || 0;
-          }
+      // 既存の全体進捗(areaSummary)から進捗状況を逆引き
+      let isDone = false;
+      let count = 0;
+      if (typeof areaSummary !== 'undefined' && Array.isArray(areaSummary)) {
+        const summary = areaSummary.find(s => s.name === areaName || s.name === masterRow.town_name);
+        if (summary) {
+          isDone = (summary.done > 0);
+          count = summary.count || 0;
         }
-
-        p = {
-          rowId: rowId,
-          address: `${masterRow.city_name} ${masterRow.town_name}`,
-          isDone: isDone,
-          count: count,
-          staffName: '',
-          staffId: '',
-          gps: '',
-          photoUrl: '',
-          lat: masterRow.latitude,
-          lng: masterRow.longitude,
-          source: "MASTER_858_FALLBACK"
-        };
-        allPoints.push(p);
       }
+
+      p = {
+        rowId: rowId,
+        address: `${masterRow.city_name} ${masterRow.town_name}`,
+        isDone: isDone,
+        count: count,
+        staffName: '',
+        staffId: '',
+        gps: '',
+        photoUrl: '',
+        lat: masterRow.latitude,
+        lng: masterRow.longitude,
+        source: "MASTER_858_FALLBACK"
+      };
+      allPoints.push(p);
     }
   }
 
