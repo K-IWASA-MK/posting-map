@@ -377,50 +377,14 @@ select:-webkit-autofill:focus {
   transition: background-color 5000s ease-in-out 0s;
 }
 
-/* Google Maps InfoWindow Custom Styling */
-.gm-style-iw {
-  border-radius: 24px !important;
-  padding: 0 !important;
-  background: rgba(28, 28, 30, 0.65) !important;
+/* Custom Marker Overlay Styling (H-app glass design) */
+.custom-iw-wrapper {
+  background: rgba(28, 28, 30, 0.65);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
-  width: 270px !important; /* 横幅を強制固定 */
-  max-width: calc(100vw - 80px) !important;
-}
-
-.gm-style-iw-tc::after {
-  background: rgba(28, 28, 30, 0.65) !important;
-}
-
-.gm-style-iw-d {
-  width: 100% !important;
-  max-width: 100% !important;
-  overflow: visible !important; /* 強制カットを防ぎ、バツマーク等を表示 */
-  padding: 0 !important;
-}
-
-/* Hide default close button */
-.gm-ui-hover-effect {
-  display: none !important;
-}
-
-/* Custom pop-in bounce animation (220ms, Option B+E) */
-@keyframes custom-iw-pop {
-  0% {
-    opacity: 0;
-    transform: scale(0.9) translateY(12px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.custom-iw-wrapper {
-  animation: custom-iw-pop 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  transform-origin: bottom center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  border-radius: 24px;
   width: 270px;
   max-width: calc(100vw - 80px);
   padding: 20px;
@@ -453,37 +417,5 @@ select:-webkit-autofill:focus {
 .custom-iw-close-btn:hover {
   background: rgba(255, 255, 255, 0.2);
   color: #ffffff;
-}
-
-/* Custom pop-out slide animation (150ms) */
-@keyframes custom-iw-close {
-  0% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.95) translateY(8px);
-  }
-}
-
-.close-animation-150 {
-  animation: custom-iw-close 150ms ease-out forwards !important;
-  transform-origin: bottom center;
-}
-
-/* Custom switch fade animation (80ms fade-out, 120ms fade-in) */
-.fade-out-80 {
-  opacity: 0 !important;
-  transition: opacity 80ms ease-out !important;
-}
-
-@keyframes custom-iw-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.switch-fade-in {
-  animation: custom-iw-fade-in 120ms ease-out forwards;
 }
 

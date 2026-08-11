@@ -822,8 +822,48 @@ window.initMainMap = function() {
     window.masterMarkers = [];
   }
 
-  const infoWindow = new google.maps.InfoWindow();
-  window.infoWindowInstance = infoWindow; // E2Eテスト用の露出
+  // ── Custom Marker Overlay クラス定義 (H-app専用オーバーレイ) ──
+  class CustomMarkerOverlay extends google.maps.OverlayView {
+    constructor(position, content, map) {
+      super();
+      this.position = position;
+      this.content = content;
+      this.div = null;
+      this.setMap(map);
+    }
+
+    onAdd() {
+      const div = document.createElement('div');
+      div.style.position = 'absolute';
+      div.innerHTML = this.content;
+      this.div = div;
+
+      // ユーザ指定のoverlayMouseTargetに格納し、クリックを有効にする
+      const panes = this.getPanes();
+      panes.overlayMouseTarget.appendChild(div);
+    }
+
+    draw() {
+      if (!this.div) return;
+      const projection = this.getProjection();
+      if (!projection) return;
+
+      const positionPixels = projection.fromLatLngToDivPixel(this.position);
+      // translate(-50%, -100%) を使い、PINの上部に中央配置
+      this.div.style.left = positionPixels.x + 'px';
+      this.div.style.top = positionPixels.y + 'px';
+      this.div.style.transform = 'translate(-50%, calc(-100% - 10px))';
+    }
+
+    onRemove() {
+      if (this.div) {
+        this.div.parentNode.removeChild(this.div);
+        this.div = null;
+      }
+    }
+  }
+
+  let activeOverlay = null;
   let activeMarker = null;
 
   // アラート／アイコンカラーの復帰処理を統一
@@ -836,26 +876,23 @@ window.initMainMap = function() {
           fillColor: "#22c55e"
         });
       }
-      activeMarker = null; // 重複実行防止のため即座にクリア
+      activeMarker = null;
     }
   };
 
   // カスタム「×」ボタンから呼び出す退場用関数
   window.closeCustomInfoWindow = function() {
-    const wrapper = document.querySelector('.custom-iw-wrapper');
-    if (wrapper) {
-      wrapper.classList.add('close-animation-150');
+    if (activeOverlay) {
+      activeOverlay.setMap(null);
+      activeOverlay = null;
     }
     revertActiveMarkerColor();
-    setTimeout(() => {
-      infoWindow.close();
-    }, 150);
   };
 
-  // 吹き出しがネイティブイベント（Esc等）で閉じられた際の処理
-  infoWindow.addListener('closeclick', () => {
-    revertActiveMarkerColor();
-  });
+  // E2Eテスト用および下位互換性スタブ
+  window.infoWindowInstance = {
+    close: () => window.closeCustomInfoWindow()
+  };
 
   const PIN_SVG_PATH = "M 12 2 C 8.13 2 5 5.13 5 9 C 5 14.25 12 22 12 22 C 12 22 19 14.25 19 9 C 19 5.13 15.87 2 12 2 Z";
 
@@ -885,8 +922,8 @@ window.initMainMap = function() {
         });
         
         marker.addListener('click', () => {
-          const createContent = (isSwitch) => `
-            <div class="custom-iw-wrapper ${isSwitch ? 'switch-fade-in' : ''}">
+          const createContent = () => `
+            <div class="custom-iw-wrapper">
               <div class="custom-iw-close-btn" onclick="closeCustomInfoWindow()">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -902,7 +939,13 @@ window.initMainMap = function() {
             </div>
           `;
 
-          const executeOpen = (isSwitch) => {
+          const executeOpen = () => {
+            // 既にアクティブなオーバーレイがあれば閉じる
+            if (activeOverlay) {
+              activeOverlay.setMap(null);
+              activeOverlay = null;
+            }
+
             // 既に別のPINが選択されている場合は、元の緑色（#22c55e）に戻す
             if (activeMarker && activeMarker !== marker) {
               const prevIcon = activeMarker.getIcon();
@@ -924,21 +967,11 @@ window.initMainMap = function() {
             }
             activeMarker = marker;
 
-            infoWindow.setContent(createContent(isSwitch));
-            infoWindow.open(map, marker);
+            // 新規カスタムオーバーレイを登録して表示
+            activeOverlay = new CustomMarkerOverlay(marker.getPosition(), createContent(), map);
           };
 
-          const oldWrapper = document.querySelector('.custom-iw-wrapper');
-          if (oldWrapper && activeMarker && activeMarker !== marker) {
-            // 別PIN切り替え時：既存テキストをフェードアウトさせてから移動・表示
-            oldWrapper.classList.add('fade-out-80');
-            setTimeout(() => {
-              executeOpen(true);
-            }, 80);
-          } else {
-            // 初回表示時
-            executeOpen(false);
-          }
+          executeOpen();
         });
 
         window.masterMarkers.push(marker);
