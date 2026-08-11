@@ -922,6 +922,10 @@ window.initMainMap = function() {
         });
         
         marker.addListener('click', () => {
+          const cleanTown = row.town_name.replace(/^大字/, '');
+          const mapQuery = encodeURIComponent(`${row.city_name} ${cleanTown}`);
+          const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
+
           const createContent = () => `
             <div class="custom-iw-wrapper">
               <div class="custom-iw-close-btn" onclick="closeCustomInfoWindow()">
@@ -934,10 +938,10 @@ window.initMainMap = function() {
                 ${row.city_name}
               </div>
               <div style="font-size: 20px; font-weight: 900; line-height: 1.2; text-align: center; margin-bottom: 12px;">
-                ${row.town_name.replace(/^大字/, '')}
+                ${cleanTown}
               </div>
               <div style="display: flex; gap: 8px; width: 100%;">
-                <a href="https://www.google.com/maps/search/?api=1&query=${row.lat},${row.lng}" target="_blank" class="premium-glass-btn btn-maps" style="flex: 1;">
+                <a href="${googleMapsUrl}" target="_blank" class="premium-glass-btn btn-maps" style="flex: 1;">
                   <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon>
                     <line x1="9" y1="3" x2="9" y2="18"></line>
