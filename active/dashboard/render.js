@@ -1,9 +1,3 @@
-// 住所から郵便番号(〒000-0000およびその後の改行/スペース)を除去したクリーンな住所を返す
-function getCleanAddress(addr) {
-  if (!addr) return '';
-  return addr.replace(/^〒\d{3}-\d{4}\s*/, '');
-}
-
 function formatCompletedAt(dateStr) {
   if (!dateStr) return '';
   if (/^\d{2}\/\d{2} \d{2}:\d{2}$/.test(dateStr)) {
@@ -136,8 +130,6 @@ async function selectCity(cityName) {
 
 // Open point detail modal
 function openPointDetailModal(rowId) {
-  console.log("[DEBUG] openPointDetailModal START", rowId);
-
   if (!allPoints) {
     allPoints = [];
   }
@@ -173,15 +165,11 @@ function openPointDetailModal(rowId) {
         staffId: '',
         gps: '',
         photoUrl: '',
-        lat: masterRow.latitude,
-        lng: masterRow.longitude,
         source: "MASTER_858_FALLBACK"
       };
       allPoints.push(p);
     }
   }
-
-  console.log("[DEBUG] POINT DATA", p);
 
   if (!p) return;
 
@@ -193,14 +181,11 @@ function openPointDetailModal(rowId) {
   }
 
   const modal = $('detail-modal');
-  console.log("[DEBUG] MODAL ELEMENT", modal);
 
   if (!modal) {
     console.error("[ERROR] detail-modal not found");
     return;
   }
-
-  console.log("[DEBUG] MODAL CLASSES BEFORE OPEN", modal.className);
 
   if (getComputedStyle(modal).display === "none") {
     modal.style.display = ""; // クラスで定義された 'flex' 等に戻す
@@ -210,8 +195,6 @@ function openPointDetailModal(rowId) {
   if (modal.firstElementChild) {
     modal.firstElementChild.classList.remove('translate-y-full');
   }
-
-  console.log("[DEBUG] MODAL OPEN COMPLETE");
 }
 
 // Close point detail modal
@@ -334,7 +317,7 @@ function renderDetailModalContent(p) {
   const areaName = window.currentCityDetailAreaName || '';
 
   // 「大字」除去 + 余分な空白整理
-  const cleanAddr = getCleanAddress(p.address).replace(/大字/g, '').replace(/\s+/g, ' ').trim();
+  const cleanAddr = (p.address || '').replace(/大字/g, '').replace(/\s+/g, ' ').trim();
   // 住所の文字数に応じてフォントサイズを自動調整（折り返し・はみ出し防止）
   let addrFontSizeClass = 'text-lg';
   if (cleanAddr.length > 16) {
@@ -763,16 +746,7 @@ function renderStorageList(stocks) {
   }).join('');
 
   container.innerHTML = groupsHtml;
-
-  // (イベント登録は削除。インラインonclickで確実に実行します)
 }
-
-// LINE受渡連絡用の共有リンク生成
-window.sendLineContact = function(staffName, staffId, location, count) {
-  const text = `【チラシ受渡のお願い】\n${staffName}さんの保管チラシ（${location} ${Number(count).toLocaleString()}枚）を一部分けていただけないでしょうか？`;
-  const lineUrl = `https://line.me/R/share?text=${encodeURIComponent(text)}`;
-  window.open(lineUrl, '_blank');
-};
 
 window.initMainMap = function() {
   const mapEl = document.getElementById("main-map");
@@ -1067,7 +1041,6 @@ window.initMainMap = function() {
                 activeOverlay = null;
               }
               activeOverlay = new CustomMarkerOverlay(marker.getPosition(), createContent(), map, () => {
-                console.log("OPEN DETAIL MODAL", row.rowId);
                 openPointDetailModal(row.rowId);
               });
             };

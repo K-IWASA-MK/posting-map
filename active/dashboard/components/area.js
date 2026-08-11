@@ -61,28 +61,6 @@ window.renderAreaListItem = function(s) {
     fontSizeClass = 'text-sm';
   }
 
-  const mapUrl = zipCode
-    ? `https://www.google.com/maps/search/?api=1&query=${zipCode}`
-    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cleanAddress + ' 日本')}`;
-
-  const googleMapsButtonHtml = isCompleted
-    ? `
-      <a style="background: rgba(37,99,235,0.02); border: 1px solid rgba(37,99,235,0.1); color: rgba(37,99,235,0.3); pointer-events: none; font-family: monospace; display: inline-flex; align-items: center; justify-content: center;"
-        class="h-7 px-4 rounded-full text-[10px] font-black tracking-widest select-none opacity-40">
-        📮 〒${zipCode || '---'} → 🗺
-      </a>
-    `
-    : `
-      <a href="${mapUrl}" target="_blank"
-        style="background: rgba(37,99,235,0.06); border: 1px solid rgba(37,99,235,0.25); color: rgba(37,99,235,0.88); transition: transform 75ms ease-out; white-space: nowrap; font-family: monospace; display: inline-flex; align-items: center; justify-content: center;"
-        onpointerdown="this.style.transform='scale(0.94)'"
-        onpointerup="this.style.transform=''"
-        onpointerleave="this.style.transform=''"
-        class="h-7 px-4 rounded-full text-[10px] font-black tracking-widest select-none">
-        📮 〒${zipCode || '---'} → 🗺
-      </a>
-    `;
-
   const actionButtonHtml = isCompleted
     ? `
       <button style="background: rgba(37,99,235,0.05); border: 1px solid rgba(37,99,235,0.15); color: rgba(255,255,255,0.3); pointer-events: none;"
@@ -104,7 +82,6 @@ window.renderAreaListItem = function(s) {
   return `
     <div id="area-card-${escapeHtml(s.name)}" class="premium-glass py-5 px-6 flex items-center justify-center">
       <div style="display: inline-flex; flex-direction: column; align-items: stretch; gap: 8px; text-align: center;">
-        ${googleMapsButtonHtml}
         <div class="${fontSizeClass} font-black text-white tracking-tight leading-snug" style="text-wrap: balance; padding: 4px 0;">
           ${escapeHtml(cleanAddress)}
         </div>
