@@ -417,7 +417,8 @@ select:-webkit-autofill:focus {
 .custom-iw-wrapper {
   animation: custom-iw-pop 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   transform-origin: bottom center;
-  width: 300px;
+  width: 270px;
+  max-width: calc(100vw - 80px);
   padding: 20px;
   box-sizing: border-box;
   color: #ffffff;
