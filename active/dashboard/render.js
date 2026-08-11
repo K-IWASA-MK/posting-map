@@ -996,16 +996,30 @@ window.initMainMap = function() {
             // スクリュー移動が必要かどうかの判定（すでに中心付近にある場合は即表示）
             const center = map.getCenter();
             const pos = marker.getPosition();
-            const threshold = 0.00001; // 軽微な差は同一位置とみなす
-            const isAlreadyCentered = Math.abs(center.lat() - pos.lat()) < threshold && 
-                                      Math.abs(center.lng() - pos.lng()) < threshold;
+
+            // 投影法を用いてカメラの中心位置を22px上にずらし、PINが画面中央より22px下に下がるようにする
+            const scale = Math.pow(2, map.getZoom());
+            const projection = map.getProjection();
+            let targetPos = pos;
+            if (projection) {
+              const projPoint = projection.fromLatLngToPoint(pos);
+              const offsetPoint = new google.maps.Point(
+                projPoint.x,
+                projPoint.y - (22 / scale) // 22px分カメラを北へずらす（Y座標を引き算）
+              );
+              targetPos = projection.fromPointToLatLng(offsetPoint);
+            }
+
+            const threshold = 0.00002; // スクロール判定のしきい値
+            const isAlreadyCentered = Math.abs(center.lat() - targetPos.lat()) < threshold && 
+                                      Math.abs(center.lng() - targetPos.lng()) < threshold;
 
             if (isAlreadyCentered) {
               showOverlay();
             } else {
               // 移動完了（idle）イベントを一度だけ購読し、スクロール完了後に表示
               google.maps.event.addListenerOnce(map, 'idle', showOverlay);
-              map.panTo(pos);
+              map.panTo(targetPos);
             }
           };
 
