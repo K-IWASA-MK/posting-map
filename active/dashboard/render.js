@@ -933,8 +933,25 @@ window.initMainMap = function() {
               <div style="font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.4); margin-bottom: 2px; text-align: center;">
                 ${row.city_name}
               </div>
-              <div style="font-size: 20px; font-weight: 900; line-height: 1.2; text-align: center;">
+              <div style="font-size: 20px; font-weight: 900; line-height: 1.2; text-align: center; margin-bottom: 12px;">
                 ${row.town_name.replace(/^大字/, '')}
+              </div>
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <a href="https://www.google.com/maps/search/?api=1&query=${row.lat},${row.lng}" target="_blank" class="premium-glass-btn btn-maps" style="flex: 1;">
+                  <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon>
+                    <line x1="9" y1="3" x2="9" y2="18"></line>
+                    <line x1="15" y1="6" x2="15" y2="21"></line>
+                  </svg>
+                  <span>詳細地図</span>
+                </a>
+                <button onclick="openPointDetailModal(${row.rowId})" class="premium-glass-btn btn-input" style="flex: 1;">
+                  <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                  <span>入力操作</span>
+                </button>
               </div>
             </div>
           `;
