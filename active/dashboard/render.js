@@ -849,10 +849,10 @@ window.initMainMap = function() {
       if (!projection) return;
 
       const positionPixels = projection.fromLatLngToDivPixel(this.position);
-      // translate(-50%, -100%) を使い、PINの上部に中央配置
+      // translate(-50%, -100%) を使い、PINの20px上部に中央配置
       this.div.style.left = positionPixels.x + 'px';
-      this.div.style.top = positionPixels.y + 'px';
-      this.div.style.transform = 'translate(-50%, calc(-100% - 10px))';
+      this.div.style.top = (positionPixels.y - 20) + 'px';
+      this.div.style.transform = 'translate(-50%, -100%)';
     }
 
     onRemove() {
@@ -940,7 +940,7 @@ window.initMainMap = function() {
           `;
 
           const executeOpen = () => {
-            // 既にアクティブなオーバーレイがあれば閉じる
+            // 既にアクティブなオーバーレイがあれば即座に閉じる
             if (activeOverlay) {
               activeOverlay.setMap(null);
               activeOverlay = null;
@@ -967,8 +967,29 @@ window.initMainMap = function() {
             }
             activeMarker = marker;
 
-            // 新規カスタムオーバーレイを登録して表示
-            activeOverlay = new CustomMarkerOverlay(marker.getPosition(), createContent(), map);
+            const showOverlay = () => {
+              // 重複表示防止のガード：表示前に再度クリアする
+              if (activeOverlay) {
+                activeOverlay.setMap(null);
+                activeOverlay = null;
+              }
+              activeOverlay = new CustomMarkerOverlay(marker.getPosition(), createContent(), map);
+            };
+
+            // スクリュー移動が必要かどうかの判定（すでに中心付近にある場合は即表示）
+            const center = map.getCenter();
+            const pos = marker.getPosition();
+            const threshold = 0.00001; // 軽微な差は同一位置とみなす
+            const isAlreadyCentered = Math.abs(center.lat() - pos.lat()) < threshold && 
+                                      Math.abs(center.lng() - pos.lng()) < threshold;
+
+            if (isAlreadyCentered) {
+              showOverlay();
+            } else {
+              // 移動完了（idle）イベントを一度だけ購読し、スクロール完了後に表示
+              google.maps.event.addListenerOnce(map, 'idle', showOverlay);
+              map.panTo(pos);
+            }
           };
 
           executeOpen();
