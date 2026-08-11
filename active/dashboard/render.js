@@ -852,6 +852,15 @@ window.initMainMap = function() {
         });
         
         marker.addListener('click', () => {
+          // タップされたPINのアイコンのfillColorを#00B7FF（青色）に変更
+          const currentIcon = marker.getIcon();
+          if (currentIcon) {
+            marker.setIcon({
+              ...currentIcon,
+              fillColor: "#00B7FF"
+            });
+          }
+
           const content = `
             <div style="color: #1e293b; font-family: sans-serif; padding: 2px; font-size: 14px; font-weight: 700; line-height: 1.2;">
               ${row.city_name} ${row.town_name.replace(/^大字/, '')}
