@@ -826,8 +826,8 @@ window.initMainMap = function() {
   window.infoWindowInstance = infoWindow; // E2Eテスト用の露出
   let activeMarker = null;
 
-  // 吹き出しが閉じられた際に、選択中のマーカーの色を緑色（#22c55e）に戻す
-  infoWindow.addListener('closeclick', () => {
+  // アラート／アイコンカラーの復帰処理を統一
+  const revertActiveMarkerColor = () => {
     if (activeMarker) {
       const prevIcon = activeMarker.getIcon();
       if (prevIcon) {
@@ -836,8 +836,25 @@ window.initMainMap = function() {
           fillColor: "#22c55e"
         });
       }
-      activeMarker = null;
+      activeMarker = null; // 重複実行防止のため即座にクリア
     }
+  };
+
+  // カスタム「×」ボタンから呼び出す退場用関数
+  window.closeCustomInfoWindow = function() {
+    const wrapper = document.querySelector('.custom-iw-wrapper');
+    if (wrapper) {
+      wrapper.classList.add('close-animation-150');
+    }
+    revertActiveMarkerColor();
+    setTimeout(() => {
+      infoWindow.close();
+    }, 150);
+  };
+
+  // 吹き出しがネイティブイベント（Esc等）で閉じられた際の処理
+  infoWindow.addListener('closeclick', () => {
+    revertActiveMarkerColor();
   });
 
   const PIN_SVG_PATH = "M 12 2 C 8.13 2 5 5.13 5 9 C 5 14.25 12 22 12 22 C 12 22 19 14.25 19 9 C 19 5.13 15.87 2 12 2 Z";
@@ -868,34 +885,55 @@ window.initMainMap = function() {
         });
         
         marker.addListener('click', () => {
-          // 既に別のPINが選択されている場合は、元の緑色（#22c55e）に戻す
-          if (activeMarker && activeMarker !== marker) {
-            const prevIcon = activeMarker.getIcon();
-            if (prevIcon) {
-              activeMarker.setIcon({
-                ...prevIcon,
-                fillColor: "#22c55e"
-              });
-            }
-          }
-
-          // タップされたPINのアイコンのfillColorを#00B7FF（青色）に変更
-          const currentIcon = marker.getIcon();
-          if (currentIcon) {
-            marker.setIcon({
-              ...currentIcon,
-              fillColor: "#00B7FF"
-            });
-          }
-          activeMarker = marker;
-
-          const content = `
-            <div style="color: #1e293b; font-family: sans-serif; padding: 2px; font-size: 14px; font-weight: 700; line-height: 1.2;">
-              ${row.city_name} ${row.town_name.replace(/^大字/, '')}
+          const createContent = (isSwitch) => `
+            <div class="custom-iw-wrapper ${isSwitch ? 'switch-fade-in' : ''}">
+              <div class="custom-iw-close-btn" onclick="closeCustomInfoWindow()">✕</div>
+              <div style="font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.4); margin-bottom: 2px; text-align: center;">
+                ${row.city_name}
+              </div>
+              <div style="font-size: 20px; font-weight: 900; line-height: 1.2; text-align: center;">
+                ${row.town_name.replace(/^大字/, '')}
+              </div>
             </div>
           `;
-          infoWindow.setContent(content);
-          infoWindow.open(map, marker);
+
+          const executeOpen = (isSwitch) => {
+            // 既に別のPINが選択されている場合は、元の緑色（#22c55e）に戻す
+            if (activeMarker && activeMarker !== marker) {
+              const prevIcon = activeMarker.getIcon();
+              if (prevIcon) {
+                activeMarker.setIcon({
+                  ...prevIcon,
+                  fillColor: "#22c55e"
+                });
+              }
+            }
+
+            // タップされたPINのアイコンのfillColorを#00B7FF（青色）に変更
+            const currentIcon = marker.getIcon();
+            if (currentIcon) {
+              marker.setIcon({
+                ...currentIcon,
+                fillColor: "#00B7FF"
+              });
+            }
+            activeMarker = marker;
+
+            infoWindow.setContent(createContent(isSwitch));
+            infoWindow.open(map, marker);
+          };
+
+          const oldWrapper = document.querySelector('.custom-iw-wrapper');
+          if (oldWrapper && activeMarker && activeMarker !== marker) {
+            // 別PIN切り替え時：既存テキストをフェードアウトさせてから移動・表示
+            oldWrapper.classList.add('fade-out-80');
+            setTimeout(() => {
+              executeOpen(true);
+            }, 80);
+          } else {
+            // 初回表示時
+            executeOpen(false);
+          }
         });
 
         window.masterMarkers.push(marker);
