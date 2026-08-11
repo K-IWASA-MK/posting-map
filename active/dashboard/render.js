@@ -869,10 +869,11 @@ window.initMainMap = function() {
 
   // ── Custom Marker Overlay クラス定義 (H-app専用オーバーレイ) ──
   class CustomMarkerOverlay extends google.maps.OverlayView {
-    constructor(position, content, map) {
+    constructor(position, content, map, onInputClick) {
       super();
       this.position = position;
       this.content = content;
+      this.onInputClick = onInputClick;
       this.div = null;
       this.setMap(map);
     }
@@ -882,6 +883,14 @@ window.initMainMap = function() {
       div.style.position = 'absolute';
       div.innerHTML = this.content;
       this.div = div;
+
+      // 「入力操作」ボタンへイベント接続 (インラインonclickの排除)
+      const inputButton = div.querySelector('.input-operation-btn');
+      if (inputButton && this.onInputClick) {
+        inputButton.addEventListener('click', () => {
+          this.onInputClick();
+        });
+      }
 
       // ユーザ指定のoverlayMouseTargetに格納し、クリックを有効にする
       const panes = this.getPanes();
@@ -905,6 +914,7 @@ window.initMainMap = function() {
         this.div.parentNode.removeChild(this.div);
         this.div = null;
       }
+      this.onInputClick = null;
     }
   }
 
@@ -994,7 +1004,7 @@ window.initMainMap = function() {
                   </svg>
                   <span>詳細地図</span>
                 </a>
-                <button onclick="openPointDetailModal(${row.rowId})" class="premium-glass-btn btn-input" style="flex: 1;">
+                <button class="premium-glass-btn btn-input input-operation-btn" style="flex: 1;">
                   <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                     <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
@@ -1039,7 +1049,10 @@ window.initMainMap = function() {
                 activeOverlay.setMap(null);
                 activeOverlay = null;
               }
-              activeOverlay = new CustomMarkerOverlay(marker.getPosition(), createContent(), map);
+              activeOverlay = new CustomMarkerOverlay(marker.getPosition(), createContent(), map, () => {
+                console.log("OPEN DETAIL MODAL", row.rowId);
+                openPointDetailModal(row.rowId);
+              });
             };
 
             // スクリュー移動が必要かどうかの判定（すでに中心付近にある場合は即表示）
