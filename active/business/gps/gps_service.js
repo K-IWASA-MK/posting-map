@@ -1,6 +1,6 @@
 /**
  * Business Layer - GPS Service Module
- * 
+ *
  * Domain: GPS / Photo Domain
  * Layer: Business Layer
  * Responsibility: GPS・写真保存に関する業務フロー統括、排他制御、およびシステムログ管理
@@ -30,19 +30,48 @@ if (typeof GPSService === 'undefined') {
 
       try {
         console.log("[GPSService] Start processing GPS/Photo record update for staff:", data ? data.staffName : "Unknown");
-        
-        let photoUrl = "";
+
+        // rowId strict validation
+        const rowIdNum = Number(data.rowId);
+        if (!Number.isInteger(rowIdNum) || rowIdNum < 1 || rowIdNum > 858 || String(data.rowId).trim() === "") {
+           return { success: false, message: "Invalid rowId" };
+        }
+
+        // Idempotency Check
+        const existing = this.repository.checkExistingStatus(rowIdNum);
+        let photoStatus = existing ? existing.photoStatus : "NO";
+        let gpsStatus = existing ? existing.gpsStatus : "NO";
+
+        if (existing && existing.gpsStatus === "OK" && existing.photoStatus === "OK") {
+           console.log(`[GPSService] RowId ${rowIdNum} already completed with OK/OK. Returning existing.`);
+           return {
+             success: true,
+             rowId: rowIdNum,
+             count: parseFloat(data.count) || 0,
+             gpsStatus: "OK",
+             photoStatus: "OK",
+             timestamp: Utilities.formatDate(new Date(), "JST", "yyyy/MM/dd HH:mm:ss")
+           };
+        }
+
         const isComplete = data.isDone === 'true' || data.isDone === true;
-        if (isComplete && data.photoData) {
+
+        // photoData check
+        if (isComplete && data.photoData && photoStatus !== "OK") {
           console.log("[GPSService] Uploading photo to Google Drive...");
-          photoUrl = this.repository.savePhotoToDrive(data);
-          console.log("[GPSService] Photo upload complete, fileId/url:", photoUrl);
+          try {
+            const photoRes = this.repository.savePhotoToDrive(data, rowIdNum);
+            if (photoRes && photoRes.success) {
+               photoStatus = "OK";
+            }
+          } catch(photoErr) {
+            console.error("[GPSService] Photo upload failed:", photoErr);
+          }
         }
 
         console.log("[GPSService] Updating Spreadsheet record & EventLog...");
-        const result = this.repository.updateSheetRecordAndLog(data, photoUrl);
-        console.log("[GPSService] GPS/Photo record update completed successfully.");
-        
+        const result = this.repository.updateSheetRecordAndLog(data, rowIdNum, gpsStatus, photoStatus, existing);
+
         return result;
       } catch (e) {
         console.error("[GPSService] Error processing updateRecordWithGPSPhoto:", e);

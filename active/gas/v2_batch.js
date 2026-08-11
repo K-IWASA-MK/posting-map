@@ -12,10 +12,10 @@ function forceStartBatch() {
   const props = PropertiesService.getScriptProperties();
   props.setProperty("BATCH_STATUS", "running");
   props.setProperty("BATCH_INDEX", "0");
-  
+
   const ss = getSS(); // Web APIでも安全に取得できるよう getSS() を使用
   props.setProperty("SPREADSHEET_ID", ss.getId()); // アクティブなスプレッドシートIDをプロパティサービスに同期
-  
+
   // 0. 古いエリアシートを徹底的に全削除して完全クリーン化（フェイルセーフ保護）
   const baseSheet = ss.getSheetByName(CONFIG.get("SHEET_TEMPLATE"));
   if (baseSheet) {
@@ -63,12 +63,12 @@ function forceStartBatch() {
   } else {
     Logger.log("⚠️ 抽出件数が0件です！");
   }
-  
 
-  
+
+
   // デバッグ用トースト：抽出件数を画面に表示
   ss.toast(`【デバッグ】住所データを ${addresses.length} 件抽出しました。ソート中...`, "デバッグ", 10);
-  
+
 
 
   /**
@@ -89,7 +89,7 @@ function forceStartBatch() {
   }
   tempSheet.clear();
   tempSheet.getRange(1, 1, 1, 3).setValues([["postal_code", "city_name", "full_address"]]);
-  
+
   // MIE03_SHEET_GENERATION_RULE.md に準拠: MIE03_MUNICIPALITY_ORDER.csv (SSOT) の priority 順にソート
   const cityOrderPriority = getMunicipalityOrder();
 
@@ -142,7 +142,7 @@ function generateAreaSheetsBatch() {
     ss.toast("一時データが見つかりません。一括作成を最初からやり直してください。", "エラー", 5);
     return;
   }
-  
+
   const allValues = tempSheet.getDataRange().getValues();
   if (!allValues || allValues.length < 2) return;
 
@@ -152,7 +152,7 @@ function generateAreaSheetsBatch() {
     areaKey: r[1] || "Unknown",
     address: r[2]
   }));
-  
+
   const startIndex = parseInt(props.getProperty("BATCH_INDEX")) || 0;
   const chunkSize = CONFIG.get("CHUNK_SIZE") || 10;
 
@@ -199,7 +199,7 @@ function generateAreaSheetsBatch() {
       cityNameCounts[cityName] === 1
         ? cityName
         : `${cityName}(${cityNameCounts[cityName]})`;
-    
+
     // シートの取得/作成ロジックを堅牢化
     let sheet = ss.getSheetByName(sheetName);
     if (!sheet) {
@@ -269,12 +269,12 @@ function generateAreaSheetsBatch() {
     // 完了処理
     props.deleteProperty("BATCH_STATUS");
     props.deleteProperty("BATCH_INDEX");
-    
+
     // 一時シートの削除
     const tempSheetToDelete = ss.getSheetByName("__TEMP_ADDRESSES__");
-    
 
-    
+
+
     if (tempSheetToDelete) {
       try {
         ss.deleteSheet(tempSheetToDelete);
@@ -283,21 +283,21 @@ function generateAreaSheetsBatch() {
         // 削除エラーは無視
       }
     }
-    
+
     // 6. タブを自治体順・連番順に物理的に整列
     sortAllAreaSheetTabs();
 
     // シャドウシートを最新のリストで更新
     createSystemCacheSheet();
     SpreadsheetApp.flush();
-    
+
     ss.toast(
       "すべてのエリアシートの展開（市町村境界考慮・10件分割版）が完了しました！",
       "完了",
       10,
     );
     refreshAreaSummaryCache();
-    
+
     // 全処理が完了したので、バッチ用の一時トリガーを削除してクリーンアップ
     deleteTriggers("generateAreaSheetsBatch");
   } else {
@@ -334,40 +334,40 @@ function deleteTriggers(name) {
  */
 function checkEndOfMonthAndReset() {
   const now = new Date();
-  
+
   // 1日になった日付（午前0時〜1時頃）に実行された場合のみ処理
   if (now.getDate() === 1) {
     const props = PropertiesService.getScriptProperties();
     const disableRollover = props.getProperty("DISABLE_ROLLOVER") === "true";
-    
+
     // 1. 前月データをすべてクリア（リセット。在庫一覧はdeleteAllAreaSheets内では消去されず維持されます）
     deleteAllAreaSheets();
     // シャドウシートも即座に再構築（旧エリア名が残らないよう空状態にする）
     createSystemCacheSheet();
-    
+
     if (disableRollover) {
       /*
        * Business Data Protection Rule:
        * 保有チラシ枚数（SHEET_STORAGE）は配布員本人が現在値を更新するSSOT業務データです。
        * 月次リセット、契約状態切り替え、自動バッチ等による自動削除・自動クリアは全面禁止します。
        */
-      
+
       // 自動更新トリガーを全削除
       deleteTriggers("checkEndOfMonthAndReset");
       // 各種管理用プロパティをクリア
       props.deleteProperty("DISABLE_ROLLOVER");
       props.deleteProperty("BATCH_STATUS");
       props.deleteProperty("BATCH_INDEX");
-      
+
       console.warn("ご契約終了に伴い、データを完全消去し、システムを自動停止しました。");
     } else {
       // 【契約継続（通常）の場合】 ➔ 在庫一覧は継続したまま、翌月分のエリアシートを自動で一括再展開
       props.setProperty("BATCH_STATUS", "running");
       props.setProperty("BATCH_INDEX", "0");
       props.setProperty("BATCH_CITY_COUNTS", JSON.stringify({}));
-      
+
       generateAreaSheetsBatch();
-      
+
       console.warn("毎月の自動データ切り替えを実行しました。旧データ消去＆翌月シート自動展開開始。");
     }
   }
@@ -519,4 +519,52 @@ function sortAllAreaSheetTabs() {
   } catch (err) {
     console.error("Failed sortAllAreaSheetTabs: " + err.toString());
   }
+}
+
+/**
+ * C-5 Field Result Sync Foundation
+ * 30日経過写真の自動削除バッチ
+ */
+function cleanupOldPhotosBatch() {
+  const folderId = (typeof getStorageFolderId === 'function') ? getStorageFolderId() : null;
+  if (!folderId) {
+    console.error("cleanupOldPhotosBatch: Storage folder not found.");
+    return;
+  }
+
+  try {
+    const folder = DriveApp.getFolderById(folderId);
+    const now = new Date();
+    const MS_30_DAYS = 30 * 24 * 60 * 60 * 1000;
+
+    // 写真専用フォルダ直下のファイルのみを走査
+    const files = folder.getFiles();
+    let trashedCount = 0;
+    while (files.hasNext()) {
+      const file = files.next();
+      const age = now - file.getDateCreated();
+      if (age > MS_30_DAYS && !file.isTrashed()) {
+        file.setTrashed(true);
+        trashedCount++;
+      }
+    }
+
+    console.log(`cleanupOldPhotosBatch: ${trashedCount} old photos moved to trash.`);
+  } catch(e) {
+    console.error("cleanupOldPhotosBatch error:", e);
+  }
+}
+
+/**
+ * 30日削除バッチの時間主導型トリガーを設定する
+ */
+function setupPhotoCleanupTrigger() {
+  // 既存の同名トリガーがあれば削除（二重作成防止）
+  deleteTriggers("cleanupOldPhotosBatch");
+  ScriptApp.newTrigger("cleanupOldPhotosBatch")
+    .timeBased()
+    .everyDays(1)
+    .atHour(3) // 3 AM JST
+    .create();
+  console.log("cleanupOldPhotosBatch trigger set: daily at 3:00 AM JST");
 }
