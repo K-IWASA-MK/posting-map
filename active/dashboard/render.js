@@ -136,6 +136,8 @@ async function selectCity(cityName) {
 
 // Open point detail modal
 function openPointDetailModal(rowId) {
+  console.log("[DEBUG] openPointDetailModal START", rowId);
+
   if (!allPoints) {
     allPoints = [];
   }
@@ -182,6 +184,8 @@ function openPointDetailModal(rowId) {
     }
   }
 
+  console.log("[DEBUG] POINT DATA", p);
+
   if (!p) return;
 
   window.currentPointDetailRowId = rowId;
@@ -192,8 +196,25 @@ function openPointDetailModal(rowId) {
   }
 
   const modal = $('detail-modal');
+  console.log("[DEBUG] MODAL ELEMENT", modal);
+
+  if (!modal) {
+    console.error("[ERROR] detail-modal not found");
+    return;
+  }
+
+  console.log("[DEBUG] MODAL CLASSES BEFORE OPEN", modal.className);
+
+  if (getComputedStyle(modal).display === "none") {
+    modal.style.display = ""; // クラスで定義された 'flex' 等に戻す
+  }
+
   modal.classList.remove('pointer-events-none', 'opacity-0');
-  modal.firstElementChild.classList.remove('translate-y-full');
+  if (modal.firstElementChild) {
+    modal.firstElementChild.classList.remove('translate-y-full');
+  }
+
+  console.log("[DEBUG] MODAL OPEN COMPLETE");
 }
 
 // Close point detail modal
@@ -201,7 +222,15 @@ function closeDetailModal() {
   const modal = $('detail-modal');
   if (!modal) return;
   modal.classList.add('opacity-0', 'pointer-events-none');
-  modal.firstElementChild.classList.add('translate-y-full');
+  if (modal.firstElementChild) {
+    modal.firstElementChild.classList.add('translate-y-full');
+  }
+  // アニメーション完了後にdisplay: noneにする
+  setTimeout(() => {
+    if (modal.classList.contains('opacity-0')) {
+      modal.style.display = "none";
+    }
+  }, 300);
   window.currentPointDetailRowId = null;
 }
 
