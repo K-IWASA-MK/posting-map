@@ -336,7 +336,8 @@ function renderDetailModalContent(p) {
 
   const areaName = window.currentCityDetailAreaName || '';
 
-  const cleanAddr = getCleanAddress(p.address);
+  // 「大字」除去 + 余分な空白整理
+  const cleanAddr = getCleanAddress(p.address).replace(/大字/g, '').replace(/\s+/g, ' ').trim();
   // 住所の文字数に応じてフォントサイズを自動調整（折り返し・はみ出し防止）
   let addrFontSizeClass = 'text-lg';
   if (cleanAddr.length > 16) {
