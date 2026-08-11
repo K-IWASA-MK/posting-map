@@ -132,7 +132,7 @@ Phase 2 のすべての設計および実装判定は、以下の SSOT を絶対
 ```
                     ┌──────────────────────────────────────────┐
                     │        Data Domain Master SSOT           │
-                    │  data/MIE03_ADDRESS_MASTER.csv (858件)   │
+                    │  data/MIE03_ADDRESS_MASTER_858.csv (858件)   │
                     └────────────────────┬─────────────────────┘
                                          │
 ┌────────────────────────────────────────┼────────────────────────────────────────┐
@@ -151,7 +151,7 @@ Phase 2 のすべての設計および実装判定は、以下の SSOT を絶対
 └────────────────────────────────────────┴────────────────────────────────────────┘
 ```
 
-1. **Data Domain Master SSOT**: `data/MIE03_ADDRESS_MASTER.csv` (実データ858件 + ヘッダー1行 = 計859行)
+1. **Data Domain Master SSOT**: `data/MIE03_ADDRESS_MASTER_858.csv` (実データ858件 + ヘッダー1行 = 計859行)
 2. **Business Domain SSOT**: `docs/audit/business_domain_mapping.md`
 3. **Framework Specs SSOT**: `docs/audit/entry_point_routing_mapping.md`
 4. **Infrastructure Storage SSOT**: `docs/audit/shared_infrastructure_analysis.md`

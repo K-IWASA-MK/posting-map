@@ -57,7 +57,7 @@ Repository Freeze v1.0 Rules に規定された 5 ディレクトリ（`active/`
 
 | ファイル名 | 存在確認 | 状態・内容評価 | 注意事項・改修推奨事項 |
 | :--- | :---: | :--- | :--- |
-| **`AGENTS.md`** | ✅ | ルートガバナンスルール記載済み | Line 28 に `projects/posting-map/data/MIE03_ADDRESS_MASTER.csv` という旧モノレポ時のパス記述あり |
+| **`AGENTS.md`** | ✅ | ルートガバナンスルール記載済み | Line 28 に `projects/posting-map/data/MIE03_ADDRESS_MASTER_858.csv` という旧モノレポ時のパス記述あり |
 | **`package.json`** | ✅ | `@kiwasa/posting-map` v1.0.0 定義 | 正常 |
 | **`appsscript.json`** | ⚠️ 二重 | ルート直下および `active/` 直下に存在 | ルート側はタイムゾーン `America/New_York` かつスコープ未定義。`.clasp.json` の `rootDir` は `./active` のため、ルート側は無効・不要ファイル |
 | **`manifest.json`** | ✅ | PWAマニフェスト (ポスティング・プロ) | 正常 |

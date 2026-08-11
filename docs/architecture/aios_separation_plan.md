@@ -34,7 +34,7 @@ POSTING MAP と AIOS の正式なアセット分離境界定義です。
 ```
 posting-map/
 ├── active/                    ← GAS Backend / LIFF / Dashboard / Business Logic
-├── data/                      ← SSOT (MIE03_ADDRESS_MASTER.csv) & 空間マスターデータ
+├── data/                      ← SSOT (MIE03_ADDRESS_MASTER_858.csv) & 空間マスターデータ
 ├── docs/                      ← 仕様書・アーキテクチャ設計書・監査レポート
 ├── scripts/                   ← 開発・検証・運用テストスクリプト
 ├── tests/                     ← テストコード・テストランナー

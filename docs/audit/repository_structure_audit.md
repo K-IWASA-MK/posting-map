@@ -48,7 +48,7 @@ Category E: Application Boundary Audit       (過去アプリ・重複構造・�
 | **`active/business/`** | `staff/`, `distribution/` モジュール | ビジネスロジック層 (Wave-5) |
 | **`active/dashboard/`** | LIFF / Web ダッシュボード HTML・JS 群 | HTML サービス描画対象 |
 | **`active/gas/`** | GAS 互換レイヤー (`v2_core.js`, `v2_kernel.js` 等) | レガシーコア関数群 |
-| **`data/`** | `MIE03_ADDRESS_MASTER.csv` (859行) | 住所マスターデータ SSOT |
+| **`data/`** | `MIE03_ADDRESS_MASTER_858.csv` (859行) | 住所マスターデータ SSOT |
 | **`.clasp.json`** / **`.clasp.mie03.json`** | clasp プロジェクト接続設定 | MIE-03 デプロイ必須 |
 | **`.claspignore`** | clasp アップロード除外定義 | |
 | **`appsscript.json`** | GAS プロジェクトマニフェスト | |
@@ -142,7 +142,7 @@ AIOS 固有のマルチエージェント基盤定義および不要となった
 
 `active/` (本番コード) が `active/` 外のファイルにどのような依存を持っているか確認結果です。
 
-1. **`data/MIE03_ADDRESS_MASTER.csv`**: **依存あり** (`AGENTS.md` にて SSOT 指定。本番・開発ともに必須)。
+1. **`data/MIE03_ADDRESS_MASTER_858.csv`**: **依存あり** (`AGENTS.md` にて SSOT 指定。本番・開発ともに必須)。
 2. **`.clasp.mie03.json`**: **依存あり** (`.clasp.json` 同期元としてデプロイ時必須)。
 3. **その他ルート直下の全ディレクトリ (`app/`, `field/`, `development/`, `src/`, `agents/` 等)**: **依存ゼロ**。
    - `active/` 内のコードはこれらを一切 `require` または参照していません。
@@ -155,7 +155,7 @@ AIOS 分離およびリポジトリスリム化におけるリスク評価：
 
 - **GAS デプロイへの影響**: **ゼロ** (`clasp push` は `active/` 配下および `.claspignore` 設定にのみ従うため、ルート直下の不要ファイル削除によるデプロイ障害リスクはありません)。
 - **本番動作への影響**: **ゼロ** (`v2_api.js` 内の AIOS Bridge 430 行は元々実行されないデッドコードであり、削除しても互換性・実行速度・メモリ消費すべてに改善をもたらします)。
-- **データリスク**: `data/MIE03_ADDRESS_MASTER.csv` は SSOT として厳重に保護されるためデータ損失リスクはありません。
+- **データリスク**: `data/MIE03_ADDRESS_MASTER_858.csv` は SSOT として厳重に保護されるためデータ損失リスクはありません。
 
 ---
 

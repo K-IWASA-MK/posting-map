@@ -136,7 +136,52 @@ async function selectCity(cityName) {
 
 // Open point detail modal
 function openPointDetailModal(rowId) {
-  const p = allPoints.find(point => point.rowId === rowId);
+  if (!allPoints) {
+    allPoints = [];
+  }
+  let p = allPoints.find(point => point.rowId === rowId);
+
+  // MASTER_858 fallback generated temporary point
+  if (!p) {
+    const service = AddressMasterService.getInstance();
+    if (service && service.cache) {
+      const masterRow = service.cache.find(item => item.rowId === rowId);
+      if (masterRow) {
+        const areaName = (masterRow.town_name && masterRow.town_name.includes(masterRow.city_name))
+          ? masterRow.town_name
+          : `${masterRow.city_name}_${masterRow.town_name}`;
+
+        window.currentCityDetailAreaName = areaName;
+
+        // 既存の全体進捗(areaSummary)から進捗状況を逆引き
+        let isDone = false;
+        let count = 0;
+        if (typeof areaSummary !== 'undefined' && Array.isArray(areaSummary)) {
+          const summary = areaSummary.find(s => s.name === areaName || s.name === masterRow.town_name);
+          if (summary) {
+            isDone = (summary.done > 0);
+            count = summary.count || 0;
+          }
+        }
+
+        p = {
+          rowId: rowId,
+          address: `${masterRow.city_name} ${masterRow.town_name}`,
+          isDone: isDone,
+          count: count,
+          staffName: '',
+          staffId: '',
+          gps: '',
+          photoUrl: '',
+          lat: masterRow.latitude,
+          lng: masterRow.longitude,
+          source: "MASTER_858_FALLBACK"
+        };
+        allPoints.push(p);
+      }
+    }
+  }
+
   if (!p) return;
 
   window.currentPointDetailRowId = rowId;
@@ -906,10 +951,10 @@ window.initMainMap = function() {
   // 初回のみ 858件の Marker 生成を実行（2回目以降は既存Markerを保持・再利用）
   if (window.masterMarkers.length === 0 && window.ADDRESS_MASTER_DATA && Array.isArray(window.ADDRESS_MASTER_DATA)) {
     window.ADDRESS_MASTER_DATA.forEach(row => {
-      if (row.lat && row.lng) {
+      if (typeof row.latitude === 'number' && typeof row.longitude === 'number') {
         const marker = new google.maps.Marker({
           map: map,
-          position: { lat: row.lat, lng: row.lng },
+          position: { lat: row.latitude, lng: row.longitude },
           icon: {
             path: PIN_SVG_PATH,
             scale: getPinScale(map.getZoom()),

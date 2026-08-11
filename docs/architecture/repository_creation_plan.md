@@ -26,7 +26,7 @@ SM-1〜SM-3 の監査・設計結果を根拠とし、新リポジトリの作�
 ```
 posting-map/ (v1.0.0 Initial Release Target)
 ├── active/                    ← 唯一の本番ソースコード (5-Layer Architecture)
-├── data/                      ← マスターデータ (MIE03_ADDRESS_MASTER.csv SSOT)
+├── data/                      ← マスターデータ (MIE03_ADDRESS_MASTER_858.csv SSOT)
 ├── docs/                      ← ドキュメント (設計・仕様・監査レポート)
 ├── scripts/                   ← 開発・検証・運用スクリプト
 ├── tests/                     ← テストコード・テストランナー

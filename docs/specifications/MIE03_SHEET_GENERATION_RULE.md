@@ -1,7 +1,7 @@
 # MIE03 シート生成ルール定義（SSOT）
 
 ## 1. 入力データ
-* **SSOT**: `MIE03_ADDRESS_MASTER.csv`
+* **SSOT**: `MIE03_ADDRESS_MASTER_858.csv`
 * **対象件数**: 858件（固定）
 
 ## 2. 自治体グループ順
@@ -73,7 +73,7 @@ MIE03_MUNICIPALITY_ORDER.csv (正本 SSOT)
         ├──► CacheService (派生高速キャッシュ)
         │
         ▼ (自治体順)
-MIE03_ADDRESS_MASTER.csv (住所データ SSOT)
+MIE03_ADDRESS_MASTER_858.csv (住所データ SSOT)
         │
         ▼
    生成ルール (v2_batch.js)

@@ -185,7 +185,7 @@ Phase 1 監査結果に基づき、7つの Issue の優先度、影響度、依�
 ### 6.1 Refactoring Constraints (確認された制約)
 1. **Entry Point 固定**: `doGet(e)` / `doPost(e)` のグローバル関数シグネチャは GAS 仕様上変更不可。
 2. **GAS Runtime 制約**: `V8` ランタイムの制限（ファイル分割時のホイスティング順序、グローバル変数初期化の挙動）。
-3. **Shared Infrastructure 依存**: 既存シート構造 (`data/MIE03_ADDRESS_MASTER.csv` 858件マスター含む) を破壊しない。
+3. **Shared Infrastructure 依存**: 既存シート構造 (`data/MIE03_ADDRESS_MASTER_858.csv` 858件マスター含む) を破壊しない。
 4. **Deployment Governance**: `DEPLOYMENT_REGISTRY.md` の本番 Script ID / Deployment ID を固定維持。
 
 ### 6.2 Improvement Budget Mapping (改善予算制限の適用)

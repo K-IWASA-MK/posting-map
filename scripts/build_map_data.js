@@ -1,26 +1,22 @@
 const fs = require('fs');
 const path = require('path');
 
-const csvPath = path.join(__dirname, '../data/MIE03_ADDRESS_MASTER.csv');
+const csvPath = path.join(__dirname, '../data/MIE03_ADDRESS_MASTER_858.csv');
 const outPath = path.join(__dirname, '../active/dashboard/data/address_master_map.js');
 
 const csvData = fs.readFileSync(csvPath, 'utf8');
 const lines = csvData.trim().split('\n');
-const headers = lines[0].split(',');
 
 const data = [];
 for (let i = 1; i < lines.length; i++) {
   const values = lines[i].split(',');
-  if (values.length >= 7) {
+  if (values.length >= 5) {
     data.push({
-      municipality_code: values[0].trim(),
+      rowId: Number(values[0].trim()),
       city_name: values[1].trim(),
       town_name: values[2].trim(),
-      full_address: values[3].trim(),
-      postal_code: values[4].trim(),
-      lat: parseFloat(values[5].trim()),
-      lng: parseFloat(values[6].trim()),
-      source: values[7] ? values[7].trim() : ''
+      latitude: parseFloat(values[3].trim()),
+      longitude: parseFloat(values[4].trim())
     });
   }
 }

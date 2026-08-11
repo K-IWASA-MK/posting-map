@@ -25,7 +25,7 @@ SM-2 にてロックされた本番必須アセットの保全状態を再確認
 ```
 🔒 Protected Production Assets
 ├── active/                    ← 唯一の本番ソースコード（GAS Deploy対象）
-├── data/                      ← マスターデータ (MIE03_ADDRESS_MASTER.csv SSOT)
+├── data/                      ← マスターデータ (MIE03_ADDRESS_MASTER_858.csv SSOT)
 ├── docs/                      ← 設計・監査・仕様ドキュメント
 ├── scripts/                   ← 開発・検証・運用スクリプト
 ├── tests/                     ← テストコード

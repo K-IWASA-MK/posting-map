@@ -120,7 +120,7 @@
 | **GAS Entry Point** | `doGet(e)` / `doPost(e)` グローバル関数シグネチャの維持 | ビルドエラー / 即時 Rollback |
 | **`config.js` 接続設定** | `gasWebAppUrl` を最新デプロイ URL と 100% 同期固定維持 | ガバナンス違反として作業中断 |
 | **Deployment URL** | 本番 Web App URL を一切変更・差し替えしない | ガバナンス違反として作業中断 |
-| **Spreadsheet Schema** | `data/MIE03_ADDRESS_MASTER.csv` (858件) 等のシート構造維持 | 即時 Rollback |
+| **Spreadsheet Schema** | `data/MIE03_ADDRESS_MASTER_858.csv` (858件) 等のシート構造維持 | 即時 Rollback |
 
 ---
 

@@ -14,7 +14,7 @@ POSTING MAP プロダクトリポジトリのトップレベル構造は以下�
 ```
 posting-map/
 ├── active/                    ← 唯一の本番コードベース (clasp deploy 対象)
-├── data/                      ← マスターデータ (SSOT MIE03_ADDRESS_MASTER.csv & 空間データ)
+├── data/                      ← マスターデータ (SSOT MIE03_ADDRESS_MASTER_858.csv & 空間データ)
 ├── docs/                      ← 仕様書・アーキテクチャ・監査・研究・アーカイブ
 ├── scripts/                   ← 開発・検証・運用補助スクリプト
 └── tests/                     ← テストコード

@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const csvPath = '/Volumes/SSD_DATA/AI Development OS/projects/posting-map/data/MIE03_ADDRESS_MASTER.csv';
+const csvPath = '/Volumes/SSD_DATA/AI Development OS/projects/posting-map/data/MIE03_ADDRESS_MASTER_858.csv';
 const content = fs.readFileSync(csvPath, 'utf8');
 const lines = content.trim().split('\n').map(line => line.trim()).filter(line => line.length > 0);
 
@@ -9,14 +9,14 @@ if (lines.length === 0) {
   throw new Error('Input master CSV is empty');
 }
 
-// Header: municipality_code,city_name,town_name,full_address,postal_code,latitude,longitude,source
+// Header: rowId,city_name,town_name,latitude,longitude
 const header = lines[0].split(',').map(h => h.trim());
 const cityIdx = header.indexOf('city_name');
-const fullAddressIdx = header.indexOf('full_address');
-const postalIdx = header.indexOf('postal_code');
+const fullAddressIdx = header.indexOf('full_address') !== -1 ? header.indexOf('full_address') : header.indexOf('town_name');
+const postalIdx = header.indexOf('postal_code') !== -1 ? header.indexOf('postal_code') : -1;
 
-if (cityIdx === -1 || fullAddressIdx === -1 || postalIdx === -1) {
-  throw new Error('CSV columns city_name, full_address, and postal_code are required.');
+if (cityIdx === -1) {
+  throw new Error('CSV column city_name is required.');
 }
 
 const records = [];
@@ -44,8 +44,8 @@ for (let i = 1; i < lines.length; i++) {
   if (row.length < header.length) continue;
   
   const city = row[cityIdx];
-  const fullAddress = row[fullAddressIdx].replace(/"/g, '').trim();
-  const postal = row[postalIdx].replace(/-/g, '').trim();
+  const fullAddress = row[fullAddressIdx] ? row[fullAddressIdx].replace(/"/g, '').trim() : '';
+  const postal = postalIdx !== -1 ? row[postalIdx].replace(/-/g, '').trim() : '0000000';
   
   records.push({
     originalIdx: i, // 1-indexed row number from CSV (excluding header)

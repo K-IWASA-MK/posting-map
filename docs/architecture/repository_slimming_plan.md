@@ -67,7 +67,7 @@ posting-map/
 
 ### 🔒 ロック対象アセット一覧 (Immutable Production Assets)
 1. **`active/`** — 唯一の本番コードベース（GAS `clasp push` 対象）
-2. **`data/`** — マスターデータ (`MIE03_ADDRESS_MASTER.csv` SSOT)
+2. **`data/`** — マスターデータ (`MIE03_ADDRESS_MASTER_858.csv` SSOT)
 3. **`docs/`** — アーキテクチャ設計・監査・仕様ドキュメント
 4. **`scripts/`** — 開発・検証・運用スクリプト
 5. **`tests/`** — テストコードおよびテストランナー

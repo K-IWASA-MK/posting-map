@@ -43,7 +43,7 @@ function createTaskRecord(taskId: string, allowedTool: string): TaskRecord {
       expectedOutput: 'Stage completed successfully'
     },
     inputSpec: {
-      inputSource: 'MIE03_ADDRESS_MASTER.csv',
+      inputSource: 'MIE03_ADDRESS_MASTER_858.csv',
       fileId: 'EXT-DST-03',
       checksum: 'hash',
       expectedRecordCount: 10
@@ -274,7 +274,7 @@ async function main() {
           sourceSheet: '原本',
           targetSheet: sheetName
         },
-        'MIE03_ADDRESS_MASTER.csv',
+        'MIE03_ADDRESS_MASTER_858.csv',
         10,
         'hash'
       );
@@ -301,7 +301,7 @@ async function main() {
           sheetName: sheetName,
           records: batch.records
         },
-        'MIE03_ADDRESS_MASTER.csv',
+        'MIE03_ADDRESS_MASTER_858.csv',
         10,
         'hash'
       );
@@ -327,7 +327,7 @@ async function main() {
           sheetName: sheetName,
           expectedRowCount: batch.records.length
         },
-        'MIE03_ADDRESS_MASTER.csv',
+        'MIE03_ADDRESS_MASTER_858.csv',
         10,
         'hash'
       );

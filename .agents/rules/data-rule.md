@@ -2,7 +2,7 @@
 
 ## データSSOT（Single Source of Truth）厳守ルール
 * **MIE-03 住所マスターデータSSOT**:
-  * 必須参照パス: `data/MIE03_ADDRESS_MASTER.csv`
+  * 必須参照パス: `data/MIE03_ADDRESS_MASTER_858.csv`
   * 確定データ総数: **ヘッダー1行 ＋ 実データ858件（計859行）**
 
 ## Municipality Single Source of Truth Governance Rule (市町村SSOTガバナンス規約)
