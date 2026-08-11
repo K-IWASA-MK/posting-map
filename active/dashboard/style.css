@@ -386,6 +386,8 @@ select:-webkit-autofill:focus {
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+  width: 270px !important; /* 横幅を強制固定 */
+  max-width: calc(100vw - 80px) !important;
 }
 
 .gm-style-iw-tc::after {
@@ -393,7 +395,9 @@ select:-webkit-autofill:focus {
 }
 
 .gm-style-iw-d {
-  overflow: hidden !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: visible !important; /* 強制カットを防ぎ、バツマーク等を表示 */
   padding: 0 !important;
 }
 
