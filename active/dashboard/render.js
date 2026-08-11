@@ -887,7 +887,12 @@ window.initMainMap = function() {
         marker.addListener('click', () => {
           const createContent = (isSwitch) => `
             <div class="custom-iw-wrapper ${isSwitch ? 'switch-fade-in' : ''}">
-              <div class="custom-iw-close-btn" onclick="closeCustomInfoWindow()">✕</div>
+              <div class="custom-iw-close-btn" onclick="closeCustomInfoWindow()">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </div>
               <div style="font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.4); margin-bottom: 2px; text-align: center;">
                 ${row.city_name}
               </div>
