@@ -121,7 +121,7 @@ function getLiffAuthToken() {
 async function callApi(action, params = {}) {
   const MAX_RETRIES = 3;
   let delay = 1000;
-  
+
   logDebug(`[callApi] Checking LIFF status for action=${action}`);
   const token = getLiffAuthToken();
   if (token) {
@@ -129,14 +129,14 @@ async function callApi(action, params = {}) {
   } else {
     logDebug(`[callApi] No token available.`);
   }
-  
+
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     const queryParams = new URLSearchParams({
       action: action,
       _t: Date.now().toString(), // キャッシュバスター：iOS WebKitの302キャッシュ回避
       ...params
     });
-    
+
     const url = `${API_URL}?${queryParams.toString()}`;
     const options = {
       method: 'GET',
@@ -145,7 +145,7 @@ async function callApi(action, params = {}) {
       cache: 'no-store', // キャッシュを利用しない
       redirect: 'follow'
     };
-    
+
     try {
       logDebug(`[callApi] START (Attempt ${attempt}/${MAX_RETRIES}): action=${action}`);
       logDebug(`[callApi] URL: ${url.substring(0, 80)}...`);
@@ -157,17 +157,17 @@ async function callApi(action, params = {}) {
       clearTimeout(timeoutId);
 
       logDebug(`[callApi] FETCH OK. status=${response.status}, type=${response.type}`);
-      
+
       if (!response.ok) {
         logDebug(`[callApi] HTTP ERROR: status=${response.status}`);
         throw new Error(`HTTP Error: ${response.status}`);
       }
-      
+
       logDebug(`[callApi] Calling response.text()...`);
       const text = await response.text();
       logDebug(`[callApi] TEXT RECEIVED (length=${text.length})`);
       logDebug(`[callApi] TEXT PREVIEW: ${text.substring(0, 150)}`);
-      
+
       logDebug(`[callApi] Parsing JSON...`);
       let data;
       try {
@@ -178,7 +178,7 @@ async function callApi(action, params = {}) {
         logDebug(`[callApi] Failed Text snippet: ${text.substring(0, 200)}`);
         throw new Error("JSON形式ではない応答を受け取りました: " + parseErr.message);
       }
-      
+
       // GAS v2 形式のレスポンス（data.data ペイロードが存在する）の場合はアンラップ
       if (data && typeof data === 'object' && 'data' in data && data.data !== null) {
         const innerSuccess = data.data.success !== undefined ? data.data.success : data.success;
@@ -188,7 +188,7 @@ async function callApi(action, params = {}) {
         }
         return data.data;
       }
-      
+
       if (data.success === false) {
         logDebug(`[callApi] API returned success=false. msg=${data.message}`);
         throw new Error(data.message || "API Error");
@@ -298,7 +298,7 @@ async function startApp(profile = null, registrationPromise = null) {
     switchPage('settings');
     $('app').classList.remove('hidden');
     $('app').classList.remove('opacity-0');
-    
+
     const loadingEl = $('loading');
     if (loadingEl) {
       loadingEl.classList.add('opacity-0');
@@ -350,7 +350,7 @@ function triggerBackgroundRegistration(profile) {
   window.isRegistering = true;
   registrationError = false;
   window.registrationError = false;
-  
+
   const idEl = $('storage-register-staff-id');
   if (idEl) {
     idEl.textContent = 'ID: 登録中...';
@@ -358,10 +358,10 @@ function triggerBackgroundRegistration(profile) {
     idEl.style.cursor = 'default';
     idEl.onclick = null;
   }
-  
+
   logDebug("API START (初回登録・非同期)");
-  return callApiPost('registerStaff', { 
-    lastName: profile.displayName, 
+  return callApiPost('registerStaff', {
+    lastName: profile.displayName,
     firstName: "(LINE)",
     lineUserId: profile.userId
   }).then(res => {
@@ -378,7 +378,7 @@ function triggerBackgroundRegistration(profile) {
       };
       localStorage.setItem('user_info', JSON.stringify(registeredInfo));
       logDebug("Registered! Staff ID: " + res.id);
-      
+
       const updatedIdEl = $('storage-register-staff-id');
       if (updatedIdEl) {
         updatedIdEl.textContent = 'ID: ' + (res.id || '---');
@@ -386,7 +386,7 @@ function triggerBackgroundRegistration(profile) {
         updatedIdEl.style.cursor = 'default';
         updatedIdEl.onclick = null;
       }
-      
+
       // 非同期登録成功に伴い、設定画面（IDカード）を即座に再描画してローダーから移行
       if (typeof renderSettings === 'function') {
         renderSettings();
@@ -400,7 +400,7 @@ function triggerBackgroundRegistration(profile) {
     registrationError = true;
     window.registrationError = true;
     logDebug("Background registration failed: " + err.message);
-    
+
     const updatedIdEl = $('storage-register-staff-id');
     if (updatedIdEl) {
       updatedIdEl.textContent = 'ID: 登録失敗 (タップして再試行)';
@@ -410,7 +410,7 @@ function triggerBackgroundRegistration(profile) {
         triggerBackgroundRegistration(profile);
       };
     }
-    
+
     // エラー状態を描画するために再表示
     if (typeof renderSettings === 'function') {
       renderSettings();
@@ -482,18 +482,18 @@ async function loadData(skipSync = false) {
       logDebug("[loadData] Offline. Setting status...");
       setSyncStatus('offline');
     }
-    
+
     logDebug("[loadData] Fetching getSystemSummary in background...");
     const summaryPromise = callApiPost('getSystemSummary');
-    
+
     const data = await summaryPromise;
     logDebug("[loadData] getSystemSummary fetched successfully.");
-    
+
     if (data && data.success) {
       logDebug("[loadData] System Summary received: total=" + data.total + ", done=" + data.done);
       updateStats({ done: data.done, total: data.total });
       prefetchRanking();
-      
+
       // 動的にGoogle Maps APIをロード（独立したAPIで取得し、既存レスポンスに影響を与えない）
       if (!window.googleMapsApiLoaded) {
         window.googleMapsApiLoaded = true;
@@ -553,9 +553,9 @@ function openNumpad(areaName, rowId, initialCount, isDoneToggle = false, checkbo
     checkbox,
     currentVal: initialCount ? String(initialCount) : '0'
   };
-  
+
   $('numpad-display').textContent = numpadContext.currentVal;
-  
+
   const modal = $('numpad-modal');
   modal.classList.remove('pointer-events-none', 'opacity-0');
   const content = modal.firstElementChild;
@@ -564,16 +564,16 @@ function openNumpad(areaName, rowId, initialCount, isDoneToggle = false, checkbo
 
 function closeNumpad() {
   if (!numpadContext) return;
-  
+
   if (numpadContext.isDoneToggle && numpadContext.checkbox) {
     numpadContext.checkbox.checked = false;
   }
-  
+
   const modal = $('numpad-modal');
   modal.classList.add('opacity-0', 'pointer-events-none');
   const content = modal.firstElementChild;
   content.classList.add('translate-y-full');
-  
+
   numpadContext = null;
 }
 
@@ -609,7 +609,7 @@ function capturePhoto() {
       resolve(null);
       return;
     }
-    
+
     const onFileChange = async (e) => {
       input.removeEventListener('change', onFileChange);
       const file = e.target.files[0];
@@ -627,7 +627,7 @@ function capturePhoto() {
         input.value = '';
       }
     };
-    
+
     input.addEventListener('change', onFileChange);
     input.click();
   });
@@ -644,7 +644,7 @@ function compressImage(file) {
         let width = img.width;
         let height = img.height;
         const MAX_LEN = 1200; // 要件6: 1024→1200px
-        
+
         if (width > height) {
           if (width > MAX_LEN) {
             height = Math.round((height * MAX_LEN) / width);
@@ -656,12 +656,12 @@ function compressImage(file) {
             height = MAX_LEN;
           }
         }
-        
+
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
-        
+
         canvas.toBlob((blob) => {
           if (blob) {
             console.log(`Compressed image: ${(blob.size / 1024).toFixed(1)} KB`);
@@ -682,7 +682,7 @@ function compressImage(file) {
 window.triggerUISyncRefresh = async function() {
   if (!allPoints || allPoints.length === 0) return; // let変数は window に付かないため直接参照
   if (typeof getQueue !== 'function') return;
-  
+
   const currentAreaName = window.currentCityDetailAreaName;
   if (!currentAreaName) return;
 
@@ -696,7 +696,7 @@ window.triggerUISyncRefresh = async function() {
         delete p.syncStatus;
       }
     });
-    
+
     // リスト全体の再描画
     const areaName = window.currentCityDetailAreaName || '';
     if (areaName) {
@@ -721,10 +721,10 @@ async function addPhotoToDetail(rowId) {
   const p = allPoints.find(point => point.rowId === rowId); // let変数は window に付かないため直接参照
   if (!p) return;
   const areaName = window.currentCityDetailAreaName || '';
-  
+
   const imageBlob = await capturePhoto();
   if (!imageBlob) return;
-  
+
   // ローカルBlobプレビューを即座に適用
   p.tempPhotoUrl = URL.createObjectURL(imageBlob);
   renderDetailList(areaName);
@@ -732,18 +732,18 @@ async function addPhotoToDetail(rowId) {
   if (modalContent) {
     modalContent.innerHTML = renderDetailModalContent(p);
   }
-  
+
   // 非同期でIndexedDB送信キューに登録
   const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
   const staffName = `${userInfo.last || ''} ${userInfo.first || ''}`.trim();
   const staffId = userInfo.id || '';
-  
+
   if (typeof enqueueSync === 'function') {
     p.syncStatus = 'pending';
     if (modalContent) {
       modalContent.innerHTML = renderDetailModalContent(p);
     }
-    
+
     const gps = p.gps ? { latitude: p.gps.split(',')[0], longitude: p.gps.split(',')[1] } : { latitude: '', longitude: '' };
 
     // BlobはSafari/LINE WebViewのIndexedDBで失われるため送信前にbase64変換
@@ -751,7 +751,7 @@ async function addPhotoToDetail(rowId) {
     if (imageBlob && typeof blobToBase64 === 'function') {
       photoBase64 = await blobToBase64(imageBlob);
     }
-    
+
     await enqueueSync({
       areaName,
       rowId,
@@ -771,32 +771,20 @@ async function addPhotoToDetail(rowId) {
 
 function pressNum(key) {
   if (!numpadContext) return;
-  
+
   if (key === 'C') {
     numpadContext.currentVal = '0';
   } else if (key === 'OK') {
     const valNum = parseFloat(numpadContext.currentVal) || 0;
     const { areaName, rowId } = numpadContext;
-    
+
     const p = allPoints.find(point => point.rowId === rowId);
     const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
     const staffName = `${userInfo.last || ''} ${userInfo.first || ''}`.trim();
     const staffId = userInfo.id || '';
     const now = new Date();
     const timeStr = `${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    
-    // 1. UIを即座に「完了」へ更新 (待ち時間ゼロUX)
-    if (p) {
-      p.isDone = true;
-      p.count = valNum;
-      p.staffName = staffName;
-      p.completedAt = timeStr;
-      p.syncStatus = 'pending';
-      
-      // リストを再描画（裏画面用）
-      renderDetailList(areaName);
-    }
-    
+
     numpadContext.isDoneToggle = false;
 
     // GPS・カメラを先に開始（ユーザーのタップジェスチャーが生きている間に呼ぶ）
@@ -807,7 +795,7 @@ function pressNum(key) {
 
     closeNumpad(); // カメラ起動後にテンキーを閉じる
 
-    // 2. バックグラウンドで写真取得完了とGPS結果を待ちキューイングする
+    // 2. バックグラウンドで写真取得完了とGPS結果を待つ
     (async () => {
       let imageBlob = null;
       try {
@@ -824,46 +812,72 @@ function pressNum(key) {
         gps = await getGPSLocation();
       }
 
+      // カメラがキャンセルされた場合は処理を中断
+      if (!imageBlob || typeof window.blobToBase64 !== 'function') {
+        console.warn("Photo capture cancelled or failed. Mission completion aborted.");
+        return;
+      }
+
+      let photoBase64 = '';
+      try {
+        photoBase64 = await window.blobToBase64(imageBlob);
+      } catch (err) {
+        console.warn("Photo Base64 conversion threw an error.", err);
+      }
+
+      if (!photoBase64) {
+        console.warn("Photo Base64 conversion returned empty data. Mission completion aborted.");
+        return;
+      }
+
+      // GPSが正しく取得できなかった場合は処理を中断
+      const latNum = Number(gps?.latitude);
+      const lngNum = Number(gps?.longitude);
+      const hasValidGps = 
+        Number.isFinite(latNum) && 
+        Number.isFinite(lngNum) && 
+        latNum !== 0 && 
+        lngNum !== 0 &&
+        latNum >= -90 && latNum <= 90 &&
+        lngNum >= -180 && lngNum <= 180;
+
+      if (!hasValidGps) {
+        console.warn("GPS acquisition failed or out of range. Mission completion aborted.");
+        return;
+      }
+
+      // 3. 写真・GPS確定後に初めて状態を更新し、MISSION COMPLETED画面を生成
       if (p) {
+        p.isDone = true;
+        p.count = valNum;
+        p.staffName = staffName;
+        p.staffId = staffId; // Payload用に保持
+        p.completedAt = timeStr;
+        p.syncStatus = 'pending';
+
         if (gps.latitude && gps.longitude) {
           p.gps = `${gps.latitude},${gps.longitude}`;
+          p.latitude = gps.latitude;
+          p.longitude = gps.longitude;
+          p.accuracy = gps.accuracy || null;
         }
+
         if (imageBlob) {
           p.tempPhotoUrl = URL.createObjectURL(imageBlob);
+          p.photoBase64 = photoBase64;
         }
+
+        // リストとモーダルを再描画（ここで初めてMISSION COMPLETEDが表示される）
         renderDetailList(areaName);
         const modalContent = $('detail-modal-content');
         if (modalContent) {
           modalContent.innerHTML = renderDetailModalContent(p);
         }
       }
-
-      // BlobはSafari/LINE WebViewのIndexedDBで失われるため送信前にbase64変換
-      let photoBase64 = '';
-      if (imageBlob && typeof window.blobToBase64 === 'function') {
-        photoBase64 = await window.blobToBase64(imageBlob);
-      }
-      
-      if (typeof enqueueSync === 'function') {
-        await enqueueSync({
-          areaName,
-          rowId,
-          isDone:     true,
-          count:      valNum,
-          latitude:   gps.latitude,
-          longitude:  gps.longitude,
-          accuracy:   gps.accuracy   || null,                    // 要件2
-          branchCode: localStorage.getItem('branch_name') || '', // 要件2
-          areaId:     String(rowId),                             // 要件2
-          photoBase64, // BlobではなくBase64文字列で保存
-          staffName,
-          staffId
-        });
-      }
     })().catch(err => {
       console.error("Async sync background task failed:", err);
     });
-    
+
     return;
   } else {
     if (numpadContext.currentVal === '0') {
@@ -874,8 +888,45 @@ function pressNum(key) {
       }
     }
   }
-  
+
   $('numpad-display').textContent = numpadContext.currentVal;
+}
+
+// モーダルの「この内容で提出する」ボタン押下時に呼ばれる
+async function submitMissionComplete(areaName, rowId) {
+  const p = allPoints.find(point => point.rowId === rowId);
+  if (!p) return;
+
+  // 二重送信の防止
+  if (p.syncStatus === 'submitting') return;
+  p.syncStatus = 'submitting';
+
+  try {
+    if (typeof enqueueSync === 'function') {
+      await enqueueSync({
+        areaName,
+        rowId,
+        isDone:     true,
+        count:      p.count || 0,
+        latitude:   p.latitude || '',
+        longitude:  p.longitude || '',
+        accuracy:   p.accuracy || null,
+        branchCode: localStorage.getItem('branch_name') || '',
+        areaId:     String(rowId),
+        photoBase64: p.photoBase64 || '',
+        staffName:  p.staffName || '',
+        staffId:    p.staffId || ''
+      });
+    }
+
+    // IndexedDBへの保存成功時のみモーダルを閉じる
+    if (typeof closeDetailModal === 'function') {
+      closeDetailModal();
+    }
+  } catch (err) {
+    console.error("Submission failed:", err);
+    p.syncStatus = 'pending';
+  }
 }
 
 async function updateRecord(areaName, rowId, isDone, count) {
@@ -941,7 +992,7 @@ function applyOptimisticCheck(areaName, rowId, isDone, count) {
       p.completedAt = '';
       p.staffName = '';
     }
-    
+
     const card = $(`point-card-${rowId}`);
     if (card) {
       card.innerHTML = renderPointCard(p);
@@ -1045,7 +1096,7 @@ async function switchPage(id, force = false) {
     const staffName = `${userInfo.last || ''} ${userInfo.first || ''}`.trim();
     const idEl = $('storage-register-staff-id');
     const nameEl = $('storage-register-staff-name');
-    
+
     if (idEl) {
       if (staffId) {
         idEl.textContent = 'ID: ' + staffId;
@@ -1255,7 +1306,7 @@ window.updateStorageLocationDropdown = function updateStorageLocationDropdown(ov
 
   if (id === 'storage-list') {
     const listContainer = $('storage-list-container');
-    
+
     if (!_stockFetched) {
       if (listContainer) {
         listContainer.innerHTML = `
@@ -1291,7 +1342,7 @@ window.updateStorageLocationDropdown = function updateStorageLocationDropdown(ov
       if (typeof renderStorageList === 'function') renderStorageList(_stockData);
     }
   }
-  
+
   // 3. ナビゲーションの表示制御
   const nav = $('bottom-nav');
   const hasUser = !!localStorage.getItem('user_info');
@@ -1316,13 +1367,13 @@ window.updateStorageLocationDropdown = function updateStorageLocationDropdown(ov
   target.style.opacity = '0';
   target.style.transform = 'translateY(12px)';
   target.classList.remove('hidden');
-  
+
   // リフローを強制してアニメーションを適用
-  target.offsetHeight; 
-  
+  target.offsetHeight;
+
   target.style.opacity = '1';
   target.style.transform = 'translateY(0)';
-  
+
 
   // 下ナビのタブのアクティブ状態の不透明度とカラーを調整
   const navContainer = $('bottom-nav');
@@ -1370,12 +1421,12 @@ window.submitFlyerStock = async function() {
   const locSelect = $('storage-register-location');
   const countInput = $('storage-register-count');
   const btn = $('btn-storage-register-submit');
-  
+
   if (!locSelect || !countInput || !btn) return;
-  
+
   const location = locSelect.value;
   const count = parseInt(String(countInput.value).replace(/,/g, '').replace(/枚/g, ''), 10);
-  
+
   if (!location) {
     alert("保管場所を選択してください。");
     return;
@@ -1384,19 +1435,19 @@ window.submitFlyerStock = async function() {
     alert("正しい枚数を入力してください。");
     return;
   }
-  
+
   const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
   const staffId = userInfo.id || '';
   const staffName = `${userInfo.last || ''} ${userInfo.first || ''}`.trim();
-  
+
   if (!staffId || !staffName) {
     alert("ID情報がありません。ID登録を行ってください。");
     return;
   }
-  
+
   btn.disabled = true;
   btn.textContent = "登録中...";
-  
+
   try {
     const res = await callApiPost('updateFlyerStock', {
       location: location,
@@ -1404,7 +1455,7 @@ window.submitFlyerStock = async function() {
       staffName: staffName,
       staffId: staffId
     });
-    
+
     if (res && res.success) {
       alert("✓ 在庫を登録しました");
       _stockFetched = false; // キャッシュを無効化し、次回遷移時に最新の在庫を取得させる
@@ -1611,7 +1662,7 @@ function cleanNameInput(str) {
   if (!str) return "";
   // 1. スペース（半角・全角）をすべて除去
   let s = str.replace(/[\s\u3000]/g, "");
-  
+
   // 2. 半角カタカナを全角カタカナに変換
   const kanaMap = {
     'ｱ': 'ア', 'ｲ': 'イ', 'ｳ': 'ウ', 'ｴ': 'エ', 'ｵ': 'オ',
@@ -1630,14 +1681,14 @@ function cleanNameInput(str) {
   };
   let reg = new RegExp('[' + Object.keys(kanaMap).join('') + ']', 'g');
   s = s.replace(reg, m => kanaMap[m]);
-  
+
   // 濁点・半濁点の結合処理
   s = s.replace(/カ゛/g, 'ガ').replace(/キ゛/g, 'ギ').replace(/ク゛/g, 'グ').replace(/ケ゛/g, 'ゲ').replace(/コ゛/g, 'ゴ')
        .replace(/サ゛/g, 'ザ').replace(/シ゛/g, 'ジ').replace(/ス゛/g, 'ズ').replace(/セ゛/g, 'ゼ').replace(/ソ゛/g, 'ゾ')
        .replace(/タ゛/g, 'ダ').replace(/チ゛/g, 'ヂ').replace(/ツ゛/g, 'ヅ').replace(/テ゛/g, 'デ').replace(/ト゛/g, 'ド')
        .replace(/ハ゛/g, 'バ').replace(/ヒ゛/g, 'ビ').replace(/フ゛/g, 'ブ').replace(/ヘ゛/g, 'ベ').replace(/ホ゛/g, 'ボ')
        .replace(/ハ゜/g, 'パ').replace(/ヒ゜/g, 'ピ').replace(/フ゜/g, 'プ').replace(/ヘ゜/g, 'ペ').replace(/ホ゜/g, 'ポ');
-       
+
   return s;
 }
 
@@ -1651,19 +1702,19 @@ async function saveProfile() {
   const last = cleanNameInput(rawLast);
   const first = cleanNameInput(rawFirst);
   logDebug(`saveProfile: cleaned: last='${last}', first='${first}'`);
-  
+
   if (!last || !first) {
     logDebug("saveProfile: validation failed (empty last/first name)");
     alert('姓名を入力してください');
     return;
   }
-  
+
   logDebug("saveProfile: showing loading indicator");
   $('loading').classList.remove('hidden');
   $('loading').classList.remove('opacity-0');
-  
+
   await new Promise(r => setTimeout(r, 50));
-  
+
   try {
     logDebug("saveProfile: invoking callApiPost('registerStaff')");
     const res = await callApiPost('registerStaff', { lastName: last, firstName: first });
@@ -1699,7 +1750,7 @@ async function safeInitApp() {
 
   logDebug("safeInitApp invoked.");
   console.log("POSTING MAP PRO safeInitApp started.");
-  
+
   // URLに死んだパラメータが残っている、かつ初期化前（または失敗時）の保険
   const urlParams = new URLSearchParams(window.location.search);
   const hasOAuthParams = urlParams.has('code') || urlParams.has('liff.state');
@@ -1713,13 +1764,13 @@ async function safeInitApp() {
       return;
   }
   // ※ フラグはここでは削除しない。ログイン確認成功後（isLoggedIn()=true）に削除する。
-  
+
   // クライアント設定(PMS_CLIENT_CONFIG)からLIFF IDを取得、なければホスト名からフォールバック
   const liffId = (window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.line && window.PMS_CLIENT_CONFIG.line.liffId);
   if (!liffId) {
     throw new Error("LIFF ID missing in client configuration.");
   }
-  
+
   if (typeof liff !== 'undefined') {
     try {
       logDebug("LIFF INIT START"); // ① LIFF初期化開始
@@ -1728,21 +1779,21 @@ async function safeInitApp() {
 
       // ⏳ 5秒でタイムアウトする安全装置
       const liffInitPromise = liff.init({ liffId: liffId });
-      const timeoutPromise = new Promise((_, reject) => 
+      const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("LINEログインの応答がタイムアウトしました(5秒)")), 5000)
       );
 
       await Promise.race([liffInitPromise, timeoutPromise]);
       logDebug("LIFF INIT OK"); // ② LIFF初期化成功
       setLoadingProgress(35, 'AUTHENTICATED');
-      
+
       logDebug("LOGIN CHECK"); // ③ login判定
       if (liff.isLoggedIn()) {
         logDebug("LOGIN OK");
         sessionStorage.removeItem('liff_initializing'); // ✅ ログイン確認後にフラグを削除（ここが正しいタイミング）
-        
+
         let userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
-        
+
         // ⑤ getSystemSummaryを軽量並列プリフェッチ開始
         _summaryPromise = callApiPost('getSystemSummary');
 
@@ -1754,7 +1805,7 @@ async function safeInitApp() {
             userId: userInfo.lineUserId,
             pictureUrl: userInfo.picture || ''
           };
-          
+
           // 0.1秒で即時にID表示・メイン画面可視化
           startApp(cachedProfile, null);
 
@@ -1764,7 +1815,7 @@ async function safeInitApp() {
             userInfo.lineUserId = profile.userId;
             userInfo.picture = profile.pictureUrl;
             localStorage.setItem('user_info', JSON.stringify(userInfo));
-            
+
             // 最新の名前・アバター写真をIDカードにリアルタイム反映（再描画）
             if (typeof renderSettings === 'function') {
               renderSettings();
@@ -1782,7 +1833,7 @@ async function safeInitApp() {
             logDebug("PROFILE START");
             const profile = await liff.getProfile();
             logDebug("PROFILE OK");
-            
+
             // トークン確立後に OAuth パラメータを安全に消去
             try {
               const cleanUrl = window.location.origin + window.location.pathname + window.location.search.replace(/[\?&](code|liff\.state)=[^&]*/g, '');
@@ -1803,14 +1854,14 @@ async function safeInitApp() {
           } catch (err) {
             console.error("LIFF PROFILE ERROR", err);
             logDebug("LIFF PROFILE ERROR: " + err.message);
-            
+
             if (err.message && err.message.toUpperCase().includes("REVOKED")) {
               logDebug("Access token revoked detected. Forcing re-login...");
               liff.logout();
               liff.login({ redirectUri: window.location.href });
               return;
             }
-            
+
             $('loading-status').textContent = "起動エラー: " + err.message;
           }
         }
@@ -1858,7 +1909,7 @@ const ID_INFO_DATA = {
     body: `
       <div class="space-y-4 text-[11px] leading-relaxed text-white/50 select-none">
         <p>POSTING MAP は、<br>認証された配布員・管理者向けの<br><span class="text-white font-bold">FIELD OPERATIONS SYSTEM</span> です。</p>
-        
+
         <div class="space-y-1">
           <p class="text-white/70 font-black">本システムは：</p>
           <div class="pl-3 text-white/40 space-y-0.5">
@@ -1891,7 +1942,7 @@ const ID_INFO_DATA = {
     body: `
       <div class="space-y-4 text-[11px] leading-relaxed text-white/50 select-none">
         <p>POSTING MAP は、<br>FIELD OPERATIONS SYSTEM として、<br>以下の情報を取得・管理します。</p>
-        
+
         <div class="space-y-1">
           <p class="text-white/70 font-black">【取得・管理する情報】</p>
           <div class="pl-3 text-white/40 space-y-0.5">
@@ -1925,7 +1976,7 @@ const ID_INFO_DATA = {
     body: `
       <div class="space-y-4 text-[11px] leading-relaxed text-white/50 select-none">
         <p class="text-white font-bold">FIELD OPERATIONS LICENSE</p>
-        
+
         <p class="text-white/60 font-black">LICENSED ORGANIZATION<br>【__BRANCH_NAME__】</p>
 
         <div class="space-y-1">
@@ -1962,30 +2013,30 @@ const ID_INFO_DATA = {
 // ID情報モーダルの制御
 function openIdInfoModal(type, event) {
   if (event) event.stopPropagation(); // イベントのバブリング防止
-  
+
   const modal = $('id-info-modal');
   if (!modal) return;
-  
+
   const data = ID_INFO_DATA[type];
   if (!data) return;
-  
+
   const titleEl = $('id-info-title');
   const bodyEl = $('id-info-body');
-  
+
   if (titleEl) titleEl.textContent = data.title;
   if (bodyEl) {
     let bodyText = data.body;
-    
+
     // ライセンス表示時のみ、支部名を動的に差し替える
     if (type === 'license') {
       const rawBranch = localStorage.getItem('branch_name') || '';
       const displayBranch = rawBranch ? (rawBranch.includes('支部') ? rawBranch : `${rawBranch} 支部`) : 'MIE-02 支部';
       bodyText = bodyText.replace('__BRANCH_NAME__', escapeHtml(displayBranch));
     }
-    
+
     bodyEl.textContent = bodyText;
   }
-  
+
   modal.classList.remove('pointer-events-none', 'opacity-0');
   modal.firstElementChild.classList.remove('translate-y-full');
 }
