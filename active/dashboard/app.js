@@ -306,7 +306,7 @@ window.fetchGlobalPinStatus = async function() {
 
 window.setPinInProgress = async function(rowId, action) {
   try {
-    await callApiPost('setPinInProgress', { rowId: rowId, action: action });
+    await callApiPost('setPinInProgress', { rowId: rowId, pinAction: action });
   } catch (err) {
     logDebug(`[setPinInProgress] Error: ${err.message}`);
   }

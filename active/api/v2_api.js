@@ -597,11 +597,11 @@ function setPinInProgress(data) {
         }
       }
 
-      if (data.action === "add") {
+      if (data.pinAction === "add") {
         if (rowIndex === -1) {
           pinSheet.appendRow([rowId, "IN_PROGRESS"]);
         }
-      } else if (data.action === "remove") {
+      } else if (data.pinAction === "remove") {
         if (rowIndex !== -1) {
           pinSheet.deleteRow(rowIndex);
         }
