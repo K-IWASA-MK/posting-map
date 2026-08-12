@@ -42,7 +42,9 @@ if (typeof GPSService === 'undefined') {
         let photoStatus = existing ? existing.photoStatus : "NO";
         let gpsStatus = existing ? existing.gpsStatus : "NO";
 
-        if (existing && existing.gpsStatus === "OK" && existing.photoStatus === "OK") {
+        const isComplete = data.isDone === 'true' || data.isDone === true;
+
+        if (isComplete && existing && existing.gpsStatus === "OK" && existing.photoStatus === "OK") {
            console.log(`[GPSService] RowId ${rowIdNum} already completed with OK/OK. Returning existing.`);
            return {
              success: true,
@@ -54,7 +56,7 @@ if (typeof GPSService === 'undefined') {
            };
         }
 
-        const isComplete = data.isDone === 'true' || data.isDone === true;
+        let photoFileId = "";
 
         // photoData check
         if (isComplete && data.photoData && photoStatus !== "OK") {
@@ -63,14 +65,15 @@ if (typeof GPSService === 'undefined') {
             const photoRes = this.repository.savePhotoToDrive(data, rowIdNum);
             if (photoRes && photoRes.success) {
                photoStatus = "OK";
+               photoFileId = photoRes.fileId || "";
             }
           } catch(photoErr) {
             console.error("[GPSService] Photo upload failed:", photoErr);
           }
         }
 
-        console.log("[GPSService] Updating Spreadsheet record & EventLog...");
-        const result = this.repository.updateSheetRecordAndLog(data, rowIdNum, gpsStatus, photoStatus, existing);
+        console.log("[GPSService] Updating Spreadsheet record...");
+        const result = this.repository.updateSheetRecordAndLog(data, rowIdNum, gpsStatus, photoStatus, existing, photoFileId);
 
         return result;
       } catch (e) {

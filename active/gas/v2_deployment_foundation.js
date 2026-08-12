@@ -390,7 +390,7 @@ function verifyDistrictDeployment(e) {
       }
       
       const TEMPLATE_SS_ID = "14rblnvJH5hkXHU9-9lhZlDaUi-FenuQQ5DWnTP7TbW4";
-      const PARENT_FOLDER_ID = "18SZgoZBw-lWMMvuWwlnah5tFM2RYgsnY";
+      const PARENT_FOLDER_ID = "1FyM4wCIqWJovbcsMZ6h9JKFQxhgwciGb"; // 04_STORAGE
       
       // 1. Copy template Spreadsheet with file title: {districtId} v1 (e.g. MIE-03 v1)
       const templateFile = DriveApp.getFileById(TEMPLATE_SS_ID);

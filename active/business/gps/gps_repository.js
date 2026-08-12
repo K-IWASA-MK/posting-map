@@ -59,9 +59,19 @@ if (typeof GPSRepository === 'undefined') {
         const cell = finder.findNext();
         if (cell) {
            const row = cell.getRow();
-           const gpsStatus = sheet.getRange(row, 7).getValue() === "OK" ? "OK" : "NO";
-           const photoStatus = sheet.getRange(row, 8).getValue() === "OK" ? "OK" : "NO";
-           return { found: true, rowNum: row, gpsStatus, photoStatus };
+           // H(8): GPS, I(9): 写真, J(10): lat, K(11): lng, L(12): gpsTime, M(13): fileId, N(14): photoUrl, O(15): photoTime
+           const rowValues = sheet.getRange(row, 8, 1, 8).getValues()[0];
+           const gpsStatus = rowValues[0] === "OK" ? "OK" : "NO";
+           const photoStatus = rowValues[1] === "OK" ? "OK" : "NO";
+           return {
+             found: true, rowNum: row, gpsStatus, photoStatus,
+             existingLat: rowValues[2] || "",
+             existingLng: rowValues[3] || "",
+             existingGpsTime: rowValues[4] || "",
+             existingFileId: rowValues[5] || "",
+             existingPhotoUrl: rowValues[6] || "",
+             existingPhotoTime: rowValues[7] || ""
+           };
         }
       } catch (e) {
         console.error("checkExistingStatus error:", e);
@@ -69,72 +79,55 @@ if (typeof GPSRepository === 'undefined') {
       return null;
     }
 
-    updateSheetRecordAndLog(data, rowIdNum, gpsStatus, photoStatus, existing) {
+    updateSheetRecordAndLog(data, rowIdNum, gpsStatus, photoStatus, existing, photoFileId) {
       const isComplete = data.isDone === 'true' || data.isDone === true;
-      const actType = isComplete ? "photo" : "revert_photo";
-      const actCount = isComplete ? (parseFloat(data.count) || 1) : -(parseFloat(data.count) || 1);
       const timestamp = Date.now();
+      const completedAt = Utilities.formatDate(new Date(timestamp), "JST", "yyyy/MM/dd HH:mm:ss");
 
       let finalGpsStatus = gpsStatus;
+
+      let latNum = existing ? existing.existingLat : "";
+      let lngNum = existing ? existing.existingLng : "";
+      let gpsTimestamp = existing ? existing.existingGpsTime : "";
+
+      let pFileId = existing ? existing.existingFileId : "";
+      let pUrl = existing ? existing.existingPhotoUrl : "";
+      let pTimestamp = existing ? existing.existingPhotoTime : "";
+
+      if (isComplete && gpsStatus !== "OK") {
+         const latTemp = Number(data.latitude);
+         const lngTemp = Number(data.longitude);
+         const isValidGps = typeof data.latitude !== "undefined" && data.latitude !== null && data.latitude !== "" &&
+                            typeof data.longitude !== "undefined" && data.longitude !== null && data.longitude !== "" &&
+                            !Number.isNaN(latTemp) && Number.isFinite(latTemp) && latTemp !== 0 &&
+                            !Number.isNaN(lngTemp) && Number.isFinite(lngTemp) && lngTemp !== 0;
+
+         if (isValidGps) {
+           finalGpsStatus = "OK";
+           latNum = data.latitude;
+           lngNum = data.longitude;
+           gpsTimestamp = completedAt;
+         } else {
+           finalGpsStatus = "NO";
+         }
+      } else if (existing && existing.gpsStatus === "OK") {
+         finalGpsStatus = "OK";
+      }
+
+      if (isComplete && photoStatus === "OK" && photoFileId) {
+         pFileId = photoFileId;
+         pUrl = "https://drive.google.com/file/d/" + pFileId + "/view";
+         pTimestamp = completedAt;
+      }
+
+      const countVal = parseFloat(data.count) || 0;
+      let updateSuccess = false;
+      let targetRow = existing ? existing.rowNum : null;
 
       let ss = null;
       if (typeof getSS === 'function') {
         ss = getSS();
       }
-
-      // 1. Update EventLog for GPS
-      if (ss && isComplete && gpsStatus !== "OK") {
-         const latNum = Number(data.latitude);
-         const lngNum = Number(data.longitude);
-         const isValidGps = typeof data.latitude !== "undefined" && data.latitude !== null && data.latitude !== "" &&
-                            typeof data.longitude !== "undefined" && data.longitude !== null && data.longitude !== "" &&
-                            !Number.isNaN(latNum) && Number.isFinite(latNum) && latNum !== 0 &&
-                            !Number.isNaN(lngNum) && Number.isFinite(lngNum) && lngNum !== 0;
-
-         if (isValidGps) {
-           const eventLogSheet = ss.getSheetByName("EventLog");
-           if (eventLogSheet) {
-             try {
-               const eventId = Utilities.getUuid();
-               const tenantId = data.tenantId || ((typeof CONFIG !== 'undefined' && CONFIG.get) ? CONFIG.get("DEFAULT_TENANT_ID") : "DEFAULT_TENANT");
-               const branchId = data.branchId || ((typeof CONFIG !== 'undefined' && CONFIG.get) ? CONFIG.get("DEFAULT_BRANCH_ID", tenantId) : "DEFAULT_BRANCH");
-
-               const meta = JSON.stringify({
-                  rowId: rowIdNum,
-                  staffName: data.staffName,
-                  source: "updateRecordWithGPSPhoto"
-               });
-
-               eventLogSheet.appendRow([
-                 eventId,
-                 timestamp,
-                 tenantId,
-                 branchId,
-                 data.prefectureId || "MIE",
-                 data.blockId || data.areaName || "",
-                 data.userId || data.staffId || "",
-                 actType,
-                 actCount,
-                 latNum,
-                 lngNum,
-                 meta
-               ]);
-               finalGpsStatus = "OK";
-             } catch(e) {
-               console.error("EventLog append error:", e);
-               finalGpsStatus = "NO";
-             }
-           }
-         } else {
-           finalGpsStatus = "NO";
-         }
-      }
-
-      // 2. Update 配布実績 Spreadsheet
-      const completedAt = Utilities.formatDate(new Date(timestamp), "JST", "yyyy/MM/dd HH:mm:ss");
-      const countVal = parseFloat(data.count) || 0;
-      let updateSuccess = false;
-      let targetRow = existing ? existing.rowNum : null;
 
       if (ss) {
         try {
@@ -147,15 +140,29 @@ if (typeof GPSRepository === 'undefined') {
             }
             if (targetRow) {
               if (isComplete) {
-                sheet.getRange(targetRow, 4, 1, 5).setValues([[completedAt, countVal, data.staffName || "", finalGpsStatus, photoStatus]]);
+                sheet.getRange(targetRow, 4, 1, 12).setValues([[
+                  completedAt,
+                  countVal,
+                  data.staffId || "",
+                  data.staffName || "",
+                  finalGpsStatus,
+                  photoStatus,
+                  latNum,
+                  lngNum,
+                  gpsTimestamp,
+                  pFileId,
+                  pUrl,
+                  pTimestamp
+                ]]);
               } else {
-                sheet.getRange(targetRow, 4, 1, 5).setValues([["", "", "", "", ""]]); // Revert (Clear D to H)
+                sheet.getRange(targetRow, 4, 1, 12).setValues([["", "", "", "", "", "", "", "", "", "", "", ""]]); // Revert D to O
               }
               updateSuccess = true;
             }
           }
         } catch(e) {
           updateSuccess = false;
+          console.error("Spreadsheet write error:", e);
         }
       }
 
