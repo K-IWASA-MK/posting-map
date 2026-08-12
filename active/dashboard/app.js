@@ -955,9 +955,28 @@ async function submitMissionComplete(areaName, rowId) {
         staffName:  p.staffName || '',
         staffId:    p.staffId || ''
       });
+
+      // CEO Phase 4-B: GAS保存成功(キュー消滅)を待機
+      while (true) {
+        if (typeof window.getRowStatus !== 'function') {
+          throw new Error("Sync check mechanism is missing.");
+        }
+        const status = await window.getRowStatus(rowId);
+        if (status === null) {
+          // キューから消滅 ＝ GAS保存成功（データ送信成功＝ロック）
+          if (typeof window.lockActivePinAndBubble === 'function') {
+            window.lockActivePinAndBubble(rowId);
+          }
+          break;
+        }
+        if (status === 'RETRY') {
+          throw new Error("GAS Save Failed");
+        }
+        await new Promise(r => setTimeout(r, 500));
+      }
     }
 
-    // IndexedDBへの保存成功時のみモーダルを閉じる
+    // 保存成功確定後に既存の戻る処理を実行
     if (typeof closeDetailModal === 'function') {
       closeDetailModal();
     }

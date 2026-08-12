@@ -947,9 +947,10 @@ window.initMainMap = function() {
     if (activeMarker) {
       const prevIcon = activeMarker.getIcon();
       if (prevIcon) {
+        const isOrange = prevIcon.fillColor === "#f97316";
         activeMarker.setIcon({
           ...prevIcon,
-          fillColor: "#22c55e"
+          fillColor: isOrange ? "#f97316" : "#22c55e"
         });
       }
       activeMarker = null;
@@ -968,6 +969,36 @@ window.initMainMap = function() {
   // E2Eテスト用および下位互換性スタブ
   window.infoWindowInstance = {
     close: () => window.closeCustomInfoWindow()
+  };
+
+  window.lockActivePinAndBubble = function(rowId) {
+    if (activeMarker && activeMarker.rowId === rowId) {
+      const currentIcon = activeMarker.getIcon();
+      if (currentIcon) {
+        activeMarker.setIcon({ ...currentIcon, fillColor: "#f97316" });
+      }
+    }
+    if (activeOverlay && activeOverlay.rowId === rowId) {
+      activeOverlay.div.innerHTML = `
+        <div class="custom-iw-wrapper">
+          <div class="custom-iw-close-btn" onclick="closeCustomInfoWindow()">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </div>
+          <div style="font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.4); margin-bottom: 2px; text-align: center;">
+            ${activeOverlay.cityName || ''}
+          </div>
+          <div style="font-size: 20px; font-weight: 900; line-height: 1.2; text-align: center; margin-bottom: 12px;">
+            ${activeOverlay.townName || ''}
+          </div>
+          <div style="background: rgba(249, 115, 22, 0.2); border: 1px solid rgba(249, 115, 22, 0.5); border-radius: 4px; padding: 4px 8px; text-align: center; color: #f97316; font-weight: bold; font-size: 13px;">
+            配布済み 🔒
+          </div>
+        </div>
+      `;
+    }
   };
 
   const PIN_SVG_PATH = "M 12 2 C 8.13 2 5 5.13 5 9 C 5 14.25 12 22 12 22 C 12 22 19 14.25 19 9 C 19 5.13 15.87 2 12 2 Z";
@@ -996,6 +1027,7 @@ window.initMainMap = function() {
             anchor: new google.maps.Point(12, 22)
           }
         });
+        marker.rowId = row.rowId;
 
         marker.addListener('click', () => {
           const cleanTown = row.town_name.replace(/^大字/, '');
@@ -1043,13 +1075,14 @@ window.initMainMap = function() {
               activeOverlay = null;
             }
 
-            // 既に別のPINが選択されている場合は、元の緑色（#22c55e）に戻す
+            // 既に別のPINが選択されている場合は、元の色に戻す (オレンジならそのまま、青なら緑)
             if (activeMarker && activeMarker !== marker) {
               const prevIcon = activeMarker.getIcon();
               if (prevIcon) {
+                const isOrange = prevIcon.fillColor === "#f97316";
                 activeMarker.setIcon({
                   ...prevIcon,
-                  fillColor: "#22c55e"
+                  fillColor: isOrange ? "#f97316" : "#22c55e"
                 });
               }
             }
@@ -1073,6 +1106,9 @@ window.initMainMap = function() {
               activeOverlay = new CustomMarkerOverlay(marker.getPosition(), createContent(), map, () => {
                 openPointDetailModal(row.rowId);
               });
+              activeOverlay.rowId = row.rowId;
+              activeOverlay.cityName = row.city_name;
+              activeOverlay.townName = cleanTown;
             };
 
             // スクリュー移動が必要かどうかの判定（すでに中心付近にある場合は即表示）
