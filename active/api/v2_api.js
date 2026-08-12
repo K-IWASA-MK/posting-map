@@ -147,7 +147,7 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
   }
-  
+
   if (postData) {
     postData.user = auth.user;
   } else {
@@ -239,6 +239,10 @@ function processPostAction(action, postData, e) {
         postData.staffName,
         postData.staffId
       );
+    case 'getGlobalPinStatus':
+      return getGlobalPinStatus();
+    case 'setPinInProgress':
+      return setPinInProgress(postData);
     default:
       return { success: false, message: 'Invalid POST action' };
   }
@@ -270,14 +274,14 @@ function getRoster() {
   if (!s) return [];
   const lastRow = s.getLastRow();
   if (lastRow < 2) return [];
-  
+
   const values = s.getRange(2, 1, lastRow - 1, 3).getValues();
   const roster = [];
-  
+
   for (let i = 0; i < values.length; i++) {
     const id = String(values[i][0] || "").trim();
     const name = String(values[i][1] || "").trim();
-    
+
     if (id !== "" && name !== "") {
       roster.push({ id: id, name: name });
     }
@@ -474,40 +478,40 @@ function resolveTransferRequest(data) {
   const rowNumber = parseInt(data.rowNumber);
   const status = data.status || "完了";
   if (!rowNumber || rowNumber < 2) return { success: false, message: "Invalid row number" };
-  
+
   const lock = LockService.getScriptLock();
   try { lock.waitLock(10000); } catch(e) { return { success: false, message: "Lock timeout" }; }
-  
+
   try {
     const ss = getSS();
     const sheetName = "受渡要請履歴";
     const s = ss.getSheetByName(sheetName);
     if (!s) return { success: false, message: "Sheet not found" };
-    
+
     // SEC-003: 1. rowNumber検証
     const lastRow = s.getLastRow();
     if (rowNumber > lastRow) {
       return { success: false, message: "Invalid row number" };
     }
-    
+
     // SEC-003: 2. 操作者ID取得
     const operatorId = data.liffUserId;
     if (!operatorId) {
       return { success: false, message: "Permission denied" };
     }
-    
+
     // SEC-003: 3. 対象行権限確認
     const requesterId = String(s.getRange(rowNumber, 3).getValue()).trim();
     const holderId = String(s.getRange(rowNumber, 5).getValue()).trim();
-    
+
     // SEC-003: 4. Admin Override
     const admins = typeof getDeploymentAdmins === 'function' ? getDeploymentAdmins() : [];
     const isAdmin = admins.includes(operatorId);
-    
+
     if (operatorId !== requesterId && operatorId !== holderId && !isAdmin) {
       return { success: false, message: "Permission denied" };
     }
-    
+
     // ステータス（H列 = 8列目）を更新
     s.getRange(rowNumber, 8).setValue(status);
     return { success: true };
@@ -534,3 +538,79 @@ function resolveTransferRequest(data) {
 // ==========================================
 // 🚀 API ROUTING & ENDPOINT FOUNDATION CLASSES
 // ==========================================
+
+function getGlobalPinStatus() {
+  try {
+    const ss = getSS();
+    let pinSheet = ss.getSheetByName("PinStatus");
+    let inProgress = [];
+    if (pinSheet) {
+      const lr = pinSheet.getLastRow();
+      if (lr > 0) {
+        const values = pinSheet.getRange(1, 1, lr, 1).getValues();
+        inProgress = values.map(r => parseInt(r[0], 10)).filter(id => !isNaN(id));
+      }
+    }
+
+    let completed = [];
+    const distSheet = ss.getSheetByName("配布実績");
+    if (distSheet) {
+      const lr = distSheet.getLastRow();
+      if (lr > 0) {
+        const values = distSheet.getRange(1, 1, lr, 4).getValues();
+        completed = values
+          .filter(r => r[0] && r[3] !== "" && r[3] !== null) // D列 (completedAt)
+          .map(r => parseInt(r[0], 10))
+          .filter(id => !isNaN(id));
+      }
+    }
+
+    return { success: true, inProgress, completed };
+  } catch (e) {
+    return { success: false, message: e.toString() };
+  }
+}
+
+function setPinInProgress(data) {
+  try {
+    const rowId = parseInt(data.rowId, 10);
+    if (isNaN(rowId)) return { success: false, message: 'Invalid rowId' };
+
+    const ss = getSS();
+    let pinSheet = ss.getSheetByName("PinStatus");
+    if (!pinSheet) {
+      pinSheet = ss.insertSheet("PinStatus");
+    }
+
+    const lock = LockService.getScriptLock();
+    lock.waitLock(10000);
+    try {
+      const lr = pinSheet.getLastRow();
+      let rowIndex = -1;
+      if (lr > 0) {
+        const values = pinSheet.getRange(1, 1, lr, 1).getValues();
+        for (let i = 0; i < values.length; i++) {
+          if (parseInt(values[i][0], 10) === rowId) {
+            rowIndex = i + 1;
+            break;
+          }
+        }
+      }
+
+      if (data.action === "add") {
+        if (rowIndex === -1) {
+          pinSheet.appendRow([rowId, "IN_PROGRESS"]);
+        }
+      } else if (data.action === "remove") {
+        if (rowIndex !== -1) {
+          pinSheet.deleteRow(rowIndex);
+        }
+      }
+      return { success: true };
+    } finally {
+      lock.releaseLock();
+    }
+  } catch (e) {
+    return { success: false, message: e.toString() };
+  }
+}

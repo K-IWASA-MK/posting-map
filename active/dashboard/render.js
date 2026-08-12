@@ -882,6 +882,9 @@ window.initMainMap = function() {
       center: map.getCenter().toJSON(),
       zoom: map.getZoom()
     };
+    if (typeof window.fetchGlobalPinStatus === 'function') {
+      window.fetchGlobalPinStatus();
+    }
   });
 
   if (!Array.isArray(window.masterMarkers)) {
@@ -942,7 +945,6 @@ window.initMainMap = function() {
   let activeOverlay = null;
   let activeMarker = null;
 
-  // アラート／アイコンカラーの復帰処理を統一
   const revertActiveMarkerColor = () => {
     if (activeMarker) {
       const prevIcon = activeMarker.getIcon();
@@ -953,8 +955,40 @@ window.initMainMap = function() {
           fillColor: isOrange ? "#f97316" : "#22c55e"
         });
       }
+
+      // Phase 4-B: 選択解除したrowId → IN_PROGRESSをremove
+      if (typeof window.setPinInProgress === 'function') {
+        window.setPinInProgress(activeMarker.rowId, "remove");
+      }
+
       activeMarker = null;
     }
+  };
+
+  window.refreshMainMapPins = function() {
+    if (!window.masterMarkers) return;
+    window.masterMarkers.forEach(marker => {
+      const isCompleted = window.globalPinStatus?.completed?.includes(marker.rowId);
+      const isInProgress = window.globalPinStatus?.inProgress?.includes(marker.rowId);
+      const isMine = activeMarker && activeMarker.rowId === marker.rowId;
+
+      const currentIcon = marker.getIcon();
+      if (currentIcon) {
+        let targetColor = "#22c55e";
+        if (isCompleted) {
+          targetColor = "#f97316";
+        } else if (isInProgress || isMine) {
+          targetColor = "#00B7FF";
+        }
+
+        if (currentIcon.fillColor !== targetColor) {
+          marker.setIcon({
+            ...currentIcon,
+            fillColor: targetColor
+          });
+        }
+      }
+    });
   };
 
   // カスタム「×」ボタンから呼び出す退場用関数
@@ -1034,41 +1068,67 @@ window.initMainMap = function() {
           const mapQuery = encodeURIComponent(`${row.city_name} ${cleanTown}`);
           const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
 
-          const createContent = () => `
-            <div class="custom-iw-wrapper">
-              <div class="custom-iw-close-btn" onclick="closeCustomInfoWindow()">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </div>
-              <div style="font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.4); margin-bottom: 2px; text-align: center;">
-                ${row.city_name}
-              </div>
-              <div style="font-size: 20px; font-weight: 900; line-height: 1.2; text-align: center; margin-bottom: 12px;">
-                ${cleanTown}
-              </div>
-              <div style="display: flex; gap: 8px; width: 100%;">
-                <a href="${googleMapsUrl}" target="_blank" class="premium-glass-btn btn-maps" style="flex: 1;">
-                  <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon>
-                    <line x1="9" y1="3" x2="9" y2="18"></line>
-                    <line x1="15" y1="6" x2="15" y2="21"></line>
+          const createContent = (isCompleted, isRemoteInProgress) => {
+            let bottomUI = '';
+
+            if (isCompleted) {
+              bottomUI = `
+                <div style="font-size: 14px; font-weight: 700; text-align: center; color: #f97316; margin-top: 10px; background: rgba(249,115,22,0.1); padding: 8px; border-radius: 6px;">
+                  配布済み 🔒
+                </div>
+              `;
+            } else if (isRemoteInProgress) {
+              bottomUI = `
+                <div style="font-size: 14px; font-weight: 700; text-align: center; color: #00B7FF; margin-top: 10px; background: rgba(0,183,255,0.1); padding: 8px; border-radius: 6px;">
+                  配布中 🔵
+                </div>
+              `;
+            } else {
+              bottomUI = `
+                <div style="display: flex; gap: 8px; width: 100%;">
+                  <a href="${googleMapsUrl}" target="_blank" class="premium-glass-btn btn-maps" style="flex: 1;">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon>
+                      <line x1="9" y1="3" x2="9" y2="18"></line>
+                      <line x1="15" y1="6" x2="15" y2="21"></line>
+                    </svg>
+                    <span>詳細地図</span>
+                  </a>
+                  <button class="premium-glass-btn btn-input input-operation-btn" style="flex: 1;">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    <span>入力操作</span>
+                  </button>
+                </div>
+              `;
+            }
+
+            return `
+              <div class="custom-iw-wrapper">
+                <div class="custom-iw-close-btn" onclick="closeCustomInfoWindow()">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
                   </svg>
-                  <span>詳細地図</span>
-                </a>
-                <button class="premium-glass-btn btn-input input-operation-btn" style="flex: 1;">
-                  <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                  </svg>
-                  <span>入力操作</span>
-                </button>
+                </div>
+                <div style="font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.4); margin-bottom: 2px; text-align: center;">
+                  ${row.city_name}
+                </div>
+                <div style="font-size: 20px; font-weight: 900; line-height: 1.2; text-align: center; margin-bottom: 12px;">
+                  ${cleanTown}
+                </div>
+                ${bottomUI}
               </div>
-            </div>
-          `;
+            `;
+          };
 
           const executeOpen = () => {
+            const isCompleted = window.globalPinStatus?.completed?.includes(row.rowId);
+            const isRemoteInProgress = window.globalPinStatus?.inProgress?.includes(row.rowId) && (!activeMarker || activeMarker.rowId !== row.rowId);
+            const isLocked = isCompleted || isRemoteInProgress;
+
             // 既にアクティブなオーバーレイがあれば即座に閉じる
             if (activeOverlay) {
               activeOverlay.setMap(null);
@@ -1085,6 +1145,10 @@ window.initMainMap = function() {
                   fillColor: isOrange ? "#f97316" : "#22c55e"
                 });
               }
+              // Phase 4-B: 選択解除したrowId → IN_PROGRESSをremove
+              if (typeof window.setPinInProgress === 'function') {
+                 window.setPinInProgress(activeMarker.rowId, "remove");
+              }
             }
 
             // タップされたPINのアイコンのfillColorを#00B7FF（青色）に変更
@@ -1095,6 +1159,11 @@ window.initMainMap = function() {
                 fillColor: "#00B7FF"
               });
             }
+
+            // Phase 4-B: 選択したrowId → IN_PROGRESSをadd
+            if (activeMarker !== marker && typeof window.setPinInProgress === 'function') {
+               window.setPinInProgress(row.rowId, "add");
+            }
             activeMarker = marker;
 
             const showOverlay = () => {
@@ -1103,8 +1172,8 @@ window.initMainMap = function() {
                 activeOverlay.setMap(null);
                 activeOverlay = null;
               }
-              activeOverlay = new CustomMarkerOverlay(marker.getPosition(), createContent(), map, () => {
-                openPointDetailModal(row.rowId);
+              activeOverlay = new CustomMarkerOverlay(marker.getPosition(), createContent(isCompleted, isRemoteInProgress), map, () => {
+                if (!isLocked) openPointDetailModal(row.rowId);
               });
               activeOverlay.rowId = row.rowId;
               activeOverlay.cityName = row.city_name;

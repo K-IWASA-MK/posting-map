@@ -35,6 +35,8 @@ window.cityAreaCache = {};
 window.activeCityDetailsPromise = null;
 window.currentCityDetailsName = null;
 window.activeRankingPromise = null;
+window.globalPinStatus = { inProgress: [], completed: [] };
+window.lastPinStatusSync = 0;
 
 // ─── グローバル・ローディング二重制御ヘルパー ─────────────────────
 let _loadingCount = 0;
@@ -257,7 +259,6 @@ async function callApiPost(action, payload = {}) {
         throw new Error("JSON形式ではない応答を受け取りました: " + parseErr.message);
       }
 
-      // GAS v2 形式のレスポンス（data.data ペイロードが存在する）の場合はアンラップ
       if (data && typeof data === 'object' && 'data' in data && data.data !== null) {
         const innerSuccess = data.data.success !== undefined ? data.data.success : data.success;
         if (innerSuccess === false) throw new Error(data.data.message || data.message || "API Error");
@@ -277,6 +278,39 @@ async function callApiPost(action, payload = {}) {
     }
   }
 }
+
+// =====================================
+// Phase 4-B: Global Pin Status Sync
+// =====================================
+window.fetchGlobalPinStatus = async function() {
+  const now = Date.now();
+  if (now - window.lastPinStatusSync < 10000) {
+    // スロットリング：10秒以内の連続フェッチをスキップ
+    return;
+  }
+  window.lastPinStatusSync = now;
+  try {
+    const res = await callApiPost('getGlobalPinStatus');
+    if (res && res.success) {
+      window.globalPinStatus.inProgress = res.inProgress || [];
+      window.globalPinStatus.completed = res.completed || [];
+      // 必要に応じて画面再描画
+      if (typeof window.refreshMainMapPins === 'function') {
+        window.refreshMainMapPins();
+      }
+    }
+  } catch (err) {
+    logDebug(`[fetchGlobalPinStatus] Error: ${err.message}`);
+  }
+};
+
+window.setPinInProgress = async function(rowId, action) {
+  try {
+    await callApiPost('setPinInProgress', { rowId: rowId, action: action });
+  } catch (err) {
+    logDebug(`[setPinInProgress] Error: ${err.message}`);
+  }
+};
 
 async function startApp(profile = null, registrationPromise = null) {
   try {
@@ -964,6 +998,15 @@ async function submitMissionComplete(areaName, rowId) {
         const status = await window.getRowStatus(rowId);
         if (status === null) {
           // キューから消滅 ＝ GAS保存成功（データ送信成功＝ロック）
+          if (typeof window.setPinInProgress === 'function') {
+            window.setPinInProgress(rowId, "remove");
+          }
+          if (window.globalPinStatus) {
+             if (!window.globalPinStatus.completed.includes(rowId)) {
+                window.globalPinStatus.completed.push(rowId);
+             }
+             window.globalPinStatus.inProgress = window.globalPinStatus.inProgress.filter(id => id !== rowId);
+          }
           if (typeof window.lockActivePinAndBubble === 'function') {
             window.lockActivePinAndBubble(rowId);
           }
