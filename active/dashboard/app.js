@@ -580,22 +580,41 @@ function closeNumpad() {
 // GPS現在地取得ヘルパー (15秒タイムアウト)
 function getGPSLocation() {
   return new Promise((resolve) => {
+    let settled = false;
+
     if (!navigator.geolocation) {
-      resolve({ latitude: '', longitude: '', accuracy: null, errorCode: null });
+      if (!settled) { settled = true; resolve({ latitude: '', longitude: '', accuracy: null, errorCode: null }); }
       return;
     }
+
+    const timeoutId = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        console.warn("GPS JS Timeout after 15000ms.");
+        resolve({ latitude: '', longitude: '', accuracy: null, errorCode: 3 }); // 3 = TIMEOUT
+      }
+    }, 15000);
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        resolve({
-          latitude:  pos.coords.latitude,
-          longitude: pos.coords.longitude,
-          accuracy:  pos.coords.accuracy,
-          errorCode: null
-        });
+        if (!settled) {
+          settled = true;
+          clearTimeout(timeoutId);
+          resolve({
+            latitude:  pos.coords.latitude,
+            longitude: pos.coords.longitude,
+            accuracy:  pos.coords.accuracy,
+            errorCode: null
+          });
+        }
       },
       (err) => {
-        console.warn("GPS Error:", err);
-        resolve({ latitude: '', longitude: '', accuracy: null, errorCode: err.code });
+        if (!settled) {
+          settled = true;
+          clearTimeout(timeoutId);
+          console.warn("GPS Error:", err);
+          resolve({ latitude: '', longitude: '', accuracy: null, errorCode: err.code });
+        }
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
     );
