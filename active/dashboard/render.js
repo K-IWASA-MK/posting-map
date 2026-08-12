@@ -219,7 +219,7 @@ function renderDetailModalContent(p) {
   const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
   const myId = userInfo.id || '';
   const myName = `${userInfo.last || ''} ${userInfo.first || ''}`.trim();
-  
+
   // 他人の完了実績か判定
   const isOtherStaff = p.isDone && (
     (p.staffId && p.staffId !== myId) ||
@@ -232,7 +232,17 @@ function renderDetailModalContent(p) {
   // GPS接続バッジ
   let gpsBadgeHtml = '';
   if (p.isDone) {
-    if (p.gps) {
+    if (p.gpsStatus === 'pending') {
+      gpsBadgeHtml = `
+        <!-- 【GPS取得中】横幅いっぱいのカード型 -->
+        <div style="background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.2);" class="w-full rounded-2xl py-4 px-5 flex flex-col items-center justify-center">
+          <div class="flex items-center justify-center gap-2 w-full">
+            <span class="text-sm animate-pulse">📍</span>
+            <span class="text-[10px] font-black text-[#f59e0b] uppercase tracking-[0.2em] animate-pulse">GPS 取得中...</span>
+          </div>
+        </div>
+      `;
+    } else if (p.gpsStatus === 'OK' || p.gps) {
       gpsBadgeHtml = `
         <!-- 【GPSあり】横幅いっぱいの青色カード型 (PHOTO VERIFIED と完全同一スタイル) -->
         <div style="background: rgba(37, 99, 235, 0.05); border: 1.5px solid rgba(37, 99, 235, 0.4); box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.15), 0 0 30px rgba(37, 99, 235, 0.05);" class="w-full rounded-2xl py-4 px-5 flex flex-col items-center justify-center">
@@ -242,13 +252,23 @@ function renderDetailModalContent(p) {
           </div>
         </div>
       `;
+    } else if (p.gpsStatus === 'DEVICE_OFF') {
+      gpsBadgeHtml = `
+        <!-- 【GPS OFF】横幅いっぱいのカード型 -->
+        <div style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2);" class="w-full rounded-2xl py-4 px-5 flex flex-col items-center justify-center">
+          <div class="flex items-center justify-center gap-2 w-full">
+            <span class="text-sm opacity-50">📍</span>
+            <span class="text-[10px] font-black text-[#ef4444] uppercase tracking-[0.2em]">GPS OFF</span>
+          </div>
+        </div>
+      `;
     } else {
       gpsBadgeHtml = `
-        <!-- 【GPSなし】横幅いっぱいのカード型 -->
-        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);" class="w-full rounded-2xl py-4 px-5 flex flex-col items-center justify-center">
+        <!-- 【GPSエラー】横幅いっぱいのカード型 -->
+        <div style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2);" class="w-full rounded-2xl py-4 px-5 flex flex-col items-center justify-center">
           <div class="flex items-center justify-center gap-2 w-full">
-            <span class="text-sm opacity-30">📍</span>
-            <span class="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">NO GPS DATA</span>
+            <span class="text-sm opacity-50">📍</span>
+            <span class="text-[10px] font-black text-[#ef4444] uppercase tracking-[0.2em]">GPS 取得できませんでした</span>
           </div>
         </div>
       `;
@@ -309,7 +329,7 @@ function renderDetailModalContent(p) {
   const cardClasses = isOtherStaff
     ? "rounded-3xl p-5 flex items-center gap-5 bg-white/[0.01] border border-white/[0.03]"
     : "rounded-3xl p-5 flex items-center gap-5 bg-white/5 border border-white/10";
-  
+
   const labelStyle = !isOtherStaff && p.isDone
     ? 'background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.2);'
     : '';
@@ -334,13 +354,13 @@ function renderDetailModalContent(p) {
       </div>
       ${p.memo ? `<div class="text-xs text-white/50 bg-white/5 rounded-xl p-3 border border-white/5 select-text w-full text-center mt-1">${escapeHtml(p.memo)}</div>` : ''}
     </div>
-    
+
     <div class="flex flex-col gap-4">
       ${!p.isDone ? `
         <!-- 【未完了】全体がタップ可能な極上シンメトリーカード -->
         <label ontouchstart="" class="cursor-pointer rounded-3xl py-6 px-5 bg-white/5 border border-white/10 flex flex-col items-center justify-center gap-4 w-full">
           <input type="checkbox" class="hidden" onchange="toggleDone('${escapeHtml(areaName)}', ${p.rowId}, this)">
-          
+
           <!-- 1. テキスト（中央揃え） -->
           <div class="flex flex-col items-center select-none text-center">
             <span class="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">READY TO DEPLOY</span>
@@ -360,7 +380,7 @@ function renderDetailModalContent(p) {
       ` : `
         <!-- 【完了済み】編集ロックがかかった上品なグリーンステータス表示 -->
         <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.1), 0 0 30px rgba(16, 185, 129, 0.05);" class="w-full rounded-3xl py-6 px-5 flex flex-col items-center justify-center gap-4">
-          
+
           <!-- 1. テキスト（中央揃え） -->
           <div class="flex flex-col items-center select-none text-center">
             <div class="flex items-center justify-center gap-1.5">
@@ -369,14 +389,14 @@ function renderDetailModalContent(p) {
             </div>
             <span class="text-xs font-bold text-white/80 mt-1">${p.completedAt ? `${formatCompletedAt(p.completedAt)}${p.staffName ? ` · ${escapeHtml(p.staffName)}` : ''}` : ''}</span>
           </div>
-          
+
           ${syncLabelHtml ? `<div class="w-full flex justify-center mt-1">${syncLabelHtml.replace('ml-auto', '')}</div>` : ''}
         </div>
       `}
 
       ${p.isDone ? `
         ${gpsBadgeHtml}
-        
+
         ${photoBlockHtml}
 
         <!-- 【配布数】上2つの証拠カードと枠サイズ・デザイン・青色テーマを完全統一 -->
@@ -390,9 +410,15 @@ function renderDetailModalContent(p) {
         </div>
 
         <!-- 4行目: この内容で提出する（閉じる）ボタン -->
-        <button ontouchstart="" onclick="submitMissionComplete('${escapeHtml(areaName)}', ${p.rowId})" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); color: #10b981; box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), inset 0 0 6px rgba(16,185,129,0.1), 0 0 12px rgba(16,185,129,0.05); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);" class="w-full h-12 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest rounded-2xl active:scale-95 active:translate-y-[2px] transition-all duration-75 mt-2">
-          ✅ この内容で提出する（閉じる）
+        ${p.gpsStatus === 'pending' ? `
+        <button disabled style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.5);" class="w-full h-12 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest rounded-2xl mt-2 cursor-not-allowed">
+          🔒 GPS取得中...
         </button>
+        ` : `
+        <button ontouchstart="" onclick="submitMissionComplete('${escapeHtml(areaName)}', ${p.rowId})" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); color: #10b981; box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), inset 0 0 6px rgba(16,185,129,0.1), 0 0 12px rgba(16,185,129,0.05); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);" class="w-full h-12 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest rounded-2xl active:scale-95 active:translate-y-[2px] transition-all duration-75 mt-2">
+          ✅ この内容で提出する
+        </button>
+        `}
       ` : ''}
     </div>
   `;
@@ -414,9 +440,9 @@ function renderDetailList(areaName) {
   const bottomNavHtml = `
     <div class="flex items-center justify-between mt-8 pb-10 w-full gap-4">
       <button onclick="navigateToSiblingArea(-1)" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold ${hasPrev ? '' : 'opacity-20 pointer-events-none'}" ${hasPrev ? '' : 'disabled'}>‹</button>
-      
+
       <button onclick="switchPage('areas')" class="flex-1 h-12 premium-glass-btn flex items-center justify-center text-xs font-bold uppercase tracking-wider text-white/80">一覧に戻る</button>
-      
+
       <button onclick="navigateToSiblingArea(1)" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold ${hasNext ? '' : 'opacity-20 pointer-events-none'}" ${hasNext ? '' : 'disabled'}>›</button>
     </div>
   `;
@@ -431,7 +457,7 @@ function navigateToSiblingArea(direction) {
   const cityAreas = (typeof tier2CacheMap !== 'undefined' && tier2CacheMap[activeCity]) ? tier2CacheMap[activeCity] : [];
   const currentIndex = cityAreas.findIndex(s => s.name === window.currentCityDetailAreaName);
   if (currentIndex === -1) return;
-  
+
   const targetIndex = currentIndex + direction;
   if (targetIndex >= 0 && targetIndex < cityAreas.length) {
     const targetAreaName = cityAreas[targetIndex].name;
@@ -481,9 +507,9 @@ async function openDetail(name) {
   // 3. フォールバック: キャッシュ未取得の場合
   $('loading').classList.remove('hidden');
   $('loading').classList.remove('opacity-0');
-  
+
   await new Promise(r => setTimeout(r, 50));
-  
+
   try {
     // 実行中の先読みPromiseがあればそれを待つ
     if (window.activeCityDetailsPromise) {
@@ -493,11 +519,11 @@ async function openDetail(name) {
         window.currentCityDetailAreaName = name;
         allPoints = data.details[name];
         renderDetailList(name);
-        
+
         if (typeof scrollPositions !== 'undefined') scrollPositions['detail'] = 0;
         const contentEl = $('content');
         if (contentEl) contentEl.scrollTop = 0;
-        
+
         switchPage('detail');
         $('loading').classList.add('opacity-0');
         setTimeout(() => $('loading').classList.add('hidden'), 700);
@@ -510,10 +536,10 @@ async function openDetail(name) {
     if (data && data.points) {
       window.currentCityDetailAreaName = name;
       allPoints = data.points;
-      
+
       if (!window.cityAreaCache) window.cityAreaCache = {};
       window.cityAreaCache[name] = data.points;
-      
+
       renderDetailList(name);
       if (typeof scrollPositions !== 'undefined') scrollPositions['detail'] = 0;
       const contentEl = $('content');
@@ -533,7 +559,7 @@ async function openDetail(name) {
     }
     switchPage('detail');
   }
-  
+
   $('loading').classList.add('opacity-0');
   setTimeout(() => $('loading').classList.add('hidden'), 700);
 }
@@ -541,7 +567,7 @@ async function openDetail(name) {
 function toggleDone(areaName, rowId, checkbox) {
   const p = allPoints.find(point => point.rowId === rowId);
   if (!p) return;
-  
+
   if (checkbox.checked) {
     // Open numpad modal
     openNumpad(areaName, rowId, p.count || 0, true, checkbox);
@@ -551,7 +577,7 @@ function toggleDone(areaName, rowId, checkbox) {
       checkbox.checked = true; // キャンセルされたらチェック状態を元に戻す
       return;
     }
-    
+
     // Directly clear completion and count
     p.isDone = false;
     p.count = 0;
@@ -559,16 +585,16 @@ function toggleDone(areaName, rowId, checkbox) {
     p.staffName = '';
     delete p.syncStatus;
     delete p.tempPhotoUrl;
-    
+
     // Update local card list
     renderDetailList(areaName);
-    
+
     // Update active modal content
     const modalContent = $('detail-modal-content');
     if (modalContent) {
       modalContent.innerHTML = renderDetailModalContent(p);
     }
-    
+
     // Send update to server
     updateRecord(areaName, rowId, false, 0);
   }
@@ -582,7 +608,7 @@ function renderSettings() {
 
   const userInfo = JSON.parse(localStorage.getItem('user_info'));
   const container = $('settings-content');
-  
+
   if (!userInfo) {
     // サーチ画面から1.5秒で確実にID画面へ移行する仕様のため、中途半端なスピナーや登録画面等の中間表示は一切行わない
     container.innerHTML = '';
@@ -594,7 +620,7 @@ function renderSettings() {
   // Normal view mode: Show ID card + assigned area shortcut + edit name button
   const rawBranch = localStorage.getItem('branch_name') || '';
   const displayBranch = rawBranch ? (rawBranch.includes('支部') ? rawBranch : `${rawBranch} 支部`) : 'MIE-03 支部';
-  
+
   // Format sync time
   const lastSyncTime = localStorage.getItem('__last_sync_time__') || '--:--';
   const regDate = userInfo.registrationDate || '2025/07/01';
@@ -688,7 +714,7 @@ function renderStorageList(stocks) {
 
   const groupsHtml = sortedLocations.map(loc => {
     const list = groups[loc];
-    
+
     // 日時の降順（新しい順）にソート
     list.sort((a, b) => {
       const dateA = a.updatedAt || '';
@@ -697,7 +723,7 @@ function renderStorageList(stocks) {
     });
 
     const staffCount = list.length;
-    
+
     const rowsHtml = list.map(s => {
       return `
         <div class="stock-row flex flex-col pt-1 pb-4 border-b border-white/5 last:border-b-0 rounded-xl px-2 -mx-2 gap-2"
@@ -705,12 +731,12 @@ function renderStorageList(stocks) {
           data-id="${(s.staffId||'').replace(/"/g,'&quot;')}"
           data-loc="${(s.location||'').replace(/"/g,'&quot;')}"
           data-count="${s.count||0}">
-          
+
           <!-- 1行目：左詰め（名前） -->
           <div class="w-full text-left">
             <div class="text-sm font-black text-white truncate">${(s.staffName||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
           </div>
-          
+
           <!-- 2行目：中央揃え（枚数とLINEボタン） -->
           <div class="flex items-center justify-center w-full py-1" style="gap: 32px;">
             <span class="text-base font-black text-[#22c55e] font-mono">${(s.count || 0).toLocaleString()}枚</span>
@@ -725,7 +751,7 @@ function renderStorageList(stocks) {
               <span class="text-[10px] font-black tracking-wider pointer-events-none">受渡要請</span>
             </button>
           </div>
-          
+
           <!-- 3行目：右詰め（更新日時） -->
           <div class="w-full text-right">
             <div class="text-[9px] text-white/40 font-mono truncate">UPDATE: ${(s.updatedAt||'---').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>
@@ -966,7 +992,7 @@ window.initMainMap = function() {
             anchor: new google.maps.Point(12, 22)
           }
         });
-        
+
         marker.addListener('click', () => {
           const cleanTown = row.town_name.replace(/^大字/, '');
           const mapQuery = encodeURIComponent(`${row.city_name} ${cleanTown}`);
@@ -1063,7 +1089,7 @@ window.initMainMap = function() {
             }
 
             const threshold = 0.00002; // スクロール判定のしきい値
-            const isAlreadyCentered = Math.abs(center.lat() - targetPos.lat()) < threshold && 
+            const isAlreadyCentered = Math.abs(center.lat() - targetPos.lat()) < threshold &&
                                       Math.abs(center.lng() - targetPos.lng()) < threshold;
 
             if (isAlreadyCentered) {

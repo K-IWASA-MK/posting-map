@@ -577,11 +577,11 @@ function closeNumpad() {
   numpadContext = null;
 }
 
-// GPS現在地取得ヘルパー (3秒タイムアウト)
+// GPS現在地取得ヘルパー (15秒タイムアウト)
 function getGPSLocation() {
   return new Promise((resolve) => {
     if (!navigator.geolocation) {
-      resolve({ latitude: '', longitude: '' });
+      resolve({ latitude: '', longitude: '', accuracy: null, errorCode: null });
       return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -589,14 +589,15 @@ function getGPSLocation() {
         resolve({
           latitude:  pos.coords.latitude,
           longitude: pos.coords.longitude,
-          accuracy:  pos.coords.accuracy   // GPS精度(m) — 要件2
+          accuracy:  pos.coords.accuracy,
+          errorCode: null
         });
       },
       (err) => {
         console.warn("GPS Error:", err);
-        resolve({ latitude: '', longitude: '', accuracy: null });
+        resolve({ latitude: '', longitude: '', accuracy: null, errorCode: err.code });
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 10000 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
     );
   });
 }
@@ -804,14 +805,6 @@ function pressNum(key) {
         console.error("Camera activation failed:", err);
       }
 
-      // カメラから戻った後、先行開始しておいたGPSの結果を待つ
-      let gps = await gpsPromise;
-      // GPS未取得の場合はカメラ復帰後にリトライ
-      if (!gps.latitude || !gps.longitude) {
-        console.log("GPS empty after camera, retrying...");
-        gps = await getGPSLocation();
-      }
-
       // カメラがキャンセルされた場合は処理を中断
       if (!imageBlob || typeof window.blobToBase64 !== 'function') {
         console.warn("Photo capture cancelled or failed. Mission completion aborted.");
@@ -830,23 +823,7 @@ function pressNum(key) {
         return;
       }
 
-      // GPSが正しく取得できなかった場合は処理を中断
-      const latNum = Number(gps?.latitude);
-      const lngNum = Number(gps?.longitude);
-      const hasValidGps = 
-        Number.isFinite(latNum) && 
-        Number.isFinite(lngNum) && 
-        latNum !== 0 && 
-        lngNum !== 0 &&
-        latNum >= -90 && latNum <= 90 &&
-        lngNum >= -180 && lngNum <= 180;
-
-      if (!hasValidGps) {
-        console.warn("GPS acquisition failed or out of range. Mission completion aborted.");
-        return;
-      }
-
-      // 3. 写真・GPS確定後に初めて状態を更新し、MISSION COMPLETED画面を生成
+      // 3. 写真確定後に状態を更新し、即座にMISSION COMPLETED画面を生成（GPSは待たない）
       if (p) {
         p.isDone = true;
         p.count = valNum;
@@ -854,21 +831,51 @@ function pressNum(key) {
         p.staffId = staffId; // Payload用に保持
         p.completedAt = timeStr;
         p.syncStatus = 'pending';
+        p.gpsStatus = 'pending';
+        p.photoStatus = 'OK';
 
-        if (gps.latitude && gps.longitude) {
+        p.tempPhotoUrl = URL.createObjectURL(imageBlob);
+        p.photoBase64 = photoBase64;
+
+        // リストとモーダルを再描画（ここでMISSION COMPLETEDが表示される）
+        renderDetailList(areaName);
+        const modalContent = $('detail-modal-content');
+        if (modalContent) {
+          modalContent.innerHTML = renderDetailModalContent(p);
+        }
+      }
+
+      // 4. バックグラウンドでGPS結果を待機
+      let gps = await gpsPromise;
+      if (!gps.latitude || !gps.longitude) {
+        console.log("GPS empty after camera, retrying...");
+        gps = await getGPSLocation();
+      }
+
+      // GPS判定
+      const latNum = Number(gps?.latitude);
+      const lngNum = Number(gps?.longitude);
+      const hasValidGps =
+        Number.isFinite(latNum) &&
+        Number.isFinite(lngNum) &&
+        latNum !== 0 &&
+        lngNum !== 0 &&
+        latNum >= -90 && latNum <= 90 &&
+        lngNum >= -180 && lngNum <= 180;
+
+      if (p) {
+        if (!hasValidGps) {
+          console.warn("GPS acquisition failed or out of range.");
+          p.gpsStatus = 'NO';
+        } else {
+          p.gpsStatus = 'OK';
           p.gps = `${gps.latitude},${gps.longitude}`;
           p.latitude = gps.latitude;
           p.longitude = gps.longitude;
           p.accuracy = gps.accuracy || null;
         }
 
-        if (imageBlob) {
-          p.tempPhotoUrl = URL.createObjectURL(imageBlob);
-          p.photoBase64 = photoBase64;
-        }
-
-        // リストとモーダルを再描画（ここで初めてMISSION COMPLETEDが表示される）
-        renderDetailList(areaName);
+        // GPS状態が確定したのでモーダルのみ再描画（裏のリストは更新不要）
         const modalContent = $('detail-modal-content');
         if (modalContent) {
           modalContent.innerHTML = renderDetailModalContent(p);
@@ -897,6 +904,16 @@ async function submitMissionComplete(areaName, rowId) {
   const p = allPoints.find(point => point.rowId === rowId);
   if (!p) return;
 
+  // 提出前の厳格なバリデーション
+  if (p.gpsStatus === 'pending') return;
+  if (p.photoStatus !== 'OK') return;
+  if (!p.photoBase64) return;
+
+  if (p.gpsStatus === 'OK') {
+    if (!Number.isFinite(Number(p.latitude))) return;
+    if (!Number.isFinite(Number(p.longitude))) return;
+  }
+
   // 二重送信の防止
   if (p.syncStatus === 'submitting') return;
   p.syncStatus = 'submitting';
@@ -908,9 +925,11 @@ async function submitMissionComplete(areaName, rowId) {
         rowId,
         isDone:     true,
         count:      p.count || 0,
-        latitude:   p.latitude || '',
-        longitude:  p.longitude || '',
-        accuracy:   p.accuracy || null,
+        latitude:   p.gpsStatus === 'OK' ? (p.latitude || '') : '',
+        longitude:  p.gpsStatus === 'OK' ? (p.longitude || '') : '',
+        accuracy:   p.gpsStatus === 'OK' ? (p.accuracy || null) : null,
+        gpsTimestamp: p.gpsStatus === 'OK' ? (p.gpsTimestamp || '') : '',
+        gpsStatusReason: p.gpsStatus || 'ERROR',
         branchCode: localStorage.getItem('branch_name') || '',
         areaId:     String(rowId),
         photoBase64: p.photoBase64 || '',
