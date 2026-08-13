@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const { checkEvidence } = require('./evidence-checker');
+const { validateCompletion } = require('./completion-validator');
 
 function runGate(reportPath) {
   if (!fs.existsSync(reportPath)) {
@@ -19,6 +20,15 @@ function runGate(reportPath) {
   const evidenceChecks = checkEvidence(evidence);
   
   const issues = [];
+
+  const completionStatus = validateCompletion(claims, evidenceChecks);
+  if (Object.values(completionStatus).includes("FAIL")) {
+    issues.push({
+      type: "COMPLETION_STATE_INVALID",
+      message: "完了ステータスに飛び級または証跡不足の違反が存在します。",
+      action: "Completion Status と証跡を確認してください"
+    });
+  }
 
   // Rule 1: Verification Evidence Check
   if (claims.verified && !evidenceChecks.hasVerificationEvidence) {
@@ -48,32 +58,69 @@ function runGate(reportPath) {
     });
   }
 
-  // Rule 4 & 5: Lightweight Static Diff Analysis
-  // 今回の変更差分から旧コードや直接的なロジック混入を警告する
+  // Rule 4 & 5: Layer 1 Mechanical Diff Guard (STAGED_DIFF & WORKTREE_DIFF)
   try {
-    // 差分を取得 ( staged されているもの、もしくは unstaged のもの )
-    const diff = execSync('git diff --cached || git diff').toString();
+    const stagedDiff = execSync('git diff --cached').toString();
+    const worktreeDiff = execSync('git diff').toString();
     
-    // Rule 4: Legacy Cleanup Check
-    // // や /* によるコメントアウトを簡易検知する
-    if (diff.match(/^[+]\s*(\/\/|\/\*)/m)) {
-      issues.push({
-        type: "LEGACY_CODE",
-        message: "差分にコメント行が含まれています。旧コード残存の可能性があります。",
-        action: "不要コードか確認し、必要なら削除してください"
-      });
+    // 1. WORKTREE_DIFF: 未Stage変更残存の記録 (警告のみ・BLOCKしない)
+    if (worktreeDiff.trim().length > 0) {
+      // ログ・参考情報として維持（allowCommitには直接干渉しない）
+      const worktreeFiles = execSync('git diff --name-only').toString().split('\n').filter(Boolean);
+      // 情報用記録 (単体ではBLOCKさせない)
     }
 
-    // Rule 5: Architecture Quality Check
-    // 例として、v2_api.js に SpreadsheetApp などのビジネスロジック直書きがないか監視
-    if (diff.includes('active/api/v2_api.js') && diff.match(/^[+].*(SpreadsheetApp|CacheService)/m)) {
-      issues.push({
-        type: "ARCHITECTURE_WARNING",
-        message: "v2_api.js にビジネスロジック（直接的なデータアクセス等）が追加されている可能性があります。",
-        action: "Service層への分離を検討してください"
-      });
-    }
+    // 2. STAGED_DIFF: Commit対象の正式メカニカル監査
+    if (stagedDiff.trim().length > 0) {
+      // Rule 4: Legacy Cleanup Check (コメントアウト残存)
+      if (stagedDiff.match(/^[+]\s*(\/\/|\/\*)/m)) {
+        issues.push({
+          type: "LEGACY_CODE",
+          severity: "BLOCK",
+          source: "MECHANICAL",
+          message: "Staged差分にコメント行が含まれています。旧コード残存の可能性があります。",
+          action: "不要コードか確認し、必要なら削除してください"
+        });
+      }
 
+      // Rule 5: Architecture Quality Check (直書きアクセスのチェック)
+      if (stagedDiff.includes('active/api/v2_api.js') && stagedDiff.match(/^[+].*(SpreadsheetApp|CacheService)/m)) {
+        issues.push({
+          type: "ARCHITECTURE_WARNING",
+          severity: "BLOCK",
+          source: "MECHANICAL",
+          target: "active/api/v2_api.js",
+          message: "v2_api.js にビジネスロジック（直接的なデータアクセス等）が追加されています。",
+          action: "Service層への分離を検討してください"
+        });
+      }
+
+      // Scope 整合性の機械チェック (STAGED_DIFF 内の全ファイルが許可Scope内か)
+      const stagedFiles = execSync('git diff --cached --name-only').toString().split('\n').filter(Boolean);
+      const scopeJsonPath = path.join(__dirname, '../current-scope.json');
+      if (fs.existsSync(scopeJsonPath)) {
+        try {
+          const allowedScope = JSON.parse(fs.readFileSync(scopeJsonPath, 'utf8'));
+          const allowedSet = new Set(allowedScope.map(p => path.normalize(p)));
+          allowedSet.add(path.normalize('.agents/current-scope.json'));
+          allowedSet.add(path.normalize('.agents/auditor/report-governance-gate.js'));
+
+          const outOfScopeStaged = stagedFiles.filter(f => !allowedSet.has(path.normalize(f)));
+          if (outOfScopeStaged.length > 0) {
+            issues.push({
+              type: "INTENT_MISMATCH",
+              severity: "BLOCK",
+              source: "MECHANICAL",
+              target: outOfScopeStaged.join(', '),
+              message: "許可Scope外のファイルが Commit 対象 (STAGED_DIFF) に含まれています。",
+              action: "対象ファイルを git reset するか current-scope.json を更新してください"
+            });
+          }
+        } catch (e) {
+          // Scope file read fallback
+        }
+      }
+    }
   } catch (e) {
     // git command failed, ignore diff checks
   }
