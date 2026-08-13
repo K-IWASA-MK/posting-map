@@ -63,9 +63,6 @@ if (typeof DistributionService === 'undefined') {
           // ① 旧エリアシート（互換）へのシャドー書き込み
           self.repository.updateLegacyAreaSheet(data, event, isComplete);
 
-          // ② EventLog（正）への追記
-          self.repository.logEvent(event);
-
           return { success: true, status: "ok", id: event.id };
         } catch (e) {
           return { success: false, message: e.toString() };

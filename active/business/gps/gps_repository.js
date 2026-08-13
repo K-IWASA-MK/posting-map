@@ -3,7 +3,7 @@
  *
  * Domain: GPS / Photo Domain
  * Layer: Business Layer
- * Responsibility: Google Drive への写真保存、指定エリアシートへの GPS・写真情報書き込み、EventLog 記録
+ * Responsibility: Google Drive への写真保存、指定エリアシートへの GPS・写真情報書き込み
  */
 
 if (typeof GPSRepository === 'undefined') {

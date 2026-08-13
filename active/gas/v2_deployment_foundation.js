@@ -72,53 +72,11 @@ class DriveRule extends VerificationRule {
 }
 
 /**
- * Rule to verify EventLog sheet existence and schema integrity
- */
-class EventLogRule extends VerificationRule {
-  constructor() {
-    super("EventLog Schema");
-  }
-  execute() {
-    try {
-      const ss = getSS();
-      const sheetName = CONFIG.get("SHEETS.EVENTLOG") || "EventLog";
-      let sheet = ss.getSheetByName(sheetName);
-      
-      if (!sheet) {
-        sheet = ss.insertSheet(sheetName);
-        sheet.appendRow([
-          "id", "timestamp", "tenantId", "branchId", "prefectureId", 
-          "blockId", "userId", "actionType", "count", "lat", "lng", "meta"
-        ]);
-        sheet.getRange("A1:L1").setFontWeight("bold").setBackground("#f3f4f6");
-        sheet.setFrozenRows(1);
-        return new VerificationResult(this.name, "PASS", `EventLog sheet was missing but created successfully.`);
-      }
-      
-      const headers = sheet.getRange(1, 1, 1, 12).getValues()[0];
-      const expected = ["id", "timestamp", "tenantId", "branchId", "prefectureId", "blockId", "userId", "actionType", "count", "lat", "lng", "meta"];
-      const mismatch = expected.filter((h, idx) => headers[idx] !== h);
-      
-      if (mismatch.length > 0) {
-        return new VerificationResult(this.name, "WARNING", `Schema header mismatch: expected ${expected.join(',')}, got ${headers.join(',')}`);
-      }
-      
-      return new VerificationResult(this.name, "PASS", `EventLog sheet verified with correct schema.`);
-    } catch (e) {
-      return new VerificationResult(this.name, "FAILED", `EventLog check failed: ${e.toString()}`);
-    }
-  }
-}
-
-/**
- * Core Deployment Foundation Engine
- */
 class DistrictDeploymentFoundation {
   static runDiagnostics() {
     const rules = [
       new SpreadsheetRule(),
-      new DriveRule(),
-      new EventLogRule()
+      new DriveRule()
     ];
     
     const results = [];

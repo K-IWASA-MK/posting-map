@@ -12,9 +12,6 @@ const DEFAULT_STORE = {
   "DEFAULT": {
     VERSION: "2.2.0 (Mobile & Pro Integrated)",
     MODE: "production",
-    SHEETS: {
-      EVENTLOG: "EventLog"
-    },
     PATH: {
       CSV: "/reference/",
       CORE: "v2_core.gs",

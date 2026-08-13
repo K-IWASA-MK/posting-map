@@ -11,8 +11,7 @@ function aggregateTotalVolumes() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const guideSheet = ss.getSheetByName(CONFIG.get("SHEET_GUIDE"));
 
-  // Phase 13: EventLog経由の集計
-  const logs = getAllEventLogs();
+  const logs = [];
   
   let totalUnitsDone = 0;
   let grandTotalVolume = 0;
@@ -97,7 +96,6 @@ function exportAllDataToMasterSheet() {
  * 全エリアのシートをスキャンして個人ランキングを集計し、キャッシュに保存する
  */
 function refreshRankingCache() {
-  // Phase 13: 集計（Ranking）は必ずEventLogから行う（旧シート走査禁止）
   const rankingList = getRankingDataCore();
 
   const jsonResult = JSON.stringify(rankingList);

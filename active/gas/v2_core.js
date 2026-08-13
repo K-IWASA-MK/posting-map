@@ -1,22 +1,8 @@
 /**
  * GAS v2 - Core Aggregation Engine (Single Source of Truth)
  * 
- * すべての実績データは EventLog から取得・集計される。
  * UI層での計算を排除し、すべてここで完結させる。
- * (Phase 13 Step 1)
  */
-
-function getEventLogSheet() {
-  return null;
-}
-
-/**
- * EventLogの全データを取得し、キャッシュする
- */
-function getAllEventLogs() {
-  return [];
-}
-
 
 // ==========================================
 // 集計エンジン (Aggregation Engine)
@@ -29,7 +15,7 @@ function getAllEventLogs() {
  * 個人別配布枚数ランキング
  */
 function getRankingDataCore() {
-  const logs = getAllEventLogs();
+  const logs = [];
   const staffRanking = {};
   
   logs.forEach(log => {
@@ -54,7 +40,7 @@ function getRankingDataCore() {
  * 配送証跡統計
  */
 function getDeliveryStatsCore() {
-  const logs = getAllEventLogs();
+  const logs = [];
   
   let totalCompleted = 0;
   let withGPS = 0;

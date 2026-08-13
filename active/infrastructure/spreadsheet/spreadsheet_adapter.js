@@ -113,21 +113,6 @@ class SpreadsheetRepository {
     }
     return records;
   }
-  saveEventLogs(logs) {
-    if (logs.length === 0) return;
-    const rawRows = this.reader.readAll('EventLogs');
-    const headers = rawRows.length > 0 ? rawRows[0] : ['Event ID', 'Timestamp', 'Type', 'Payload'];
-    const formattedRows = logs.map(log => {
-      return headers.map(h => {
-        if (h === 'Event ID') return log.eventId || ("EV-" + Date.now() + "-" + Math.random().toString(36).substr(2, 4));
-        if (h === 'Timestamp') return log.timestamp || Date.now();
-        if (h === 'Type') return log.type || 'unknown';
-        if (h === 'Payload') return JSON.stringify(log.payload || {});
-        return '';
-      });
-    });
-    this.writer.appendRows('EventLogs', formattedRows);
-  }
   getStaffs() {
     const rawRows = this.reader.readAll('Staffs');
     if (rawRows.length <= 1) return [];

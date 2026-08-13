@@ -84,8 +84,7 @@ function refreshAreaSummaryCache() {
     excludeSheets.push(
       CONFIG.get("SHEET_GUIDE"), CONFIG.get("SHEET_ROSTER"), CONFIG.get("SHEET_TEMPLATE"),
       CONFIG.get("SHEET_POSTAL"), CONFIG.get("SHEET_DISTRICT"), CONFIG.get("SHEET_MASTER_EXPORT"),
-      CONFIG.get("SHEET_REPORT"), CONFIG.get("SHEET_MANUAL"), CONFIG.get("SHEET_SYSTEM_CACHE"),
-      CONFIG.get("SHEET_STORAGE"), "__TEMP_ADDRESSES__", "TraceLog", "原本", "EventLog"
+      CONFIG.get("SHEET_STORAGE"), "__TEMP_ADDRESSES__", "TraceLog", "原本"
     );
   }
 
@@ -239,7 +238,7 @@ function createSystemCacheSheet() {
 
     return [
       name,
-      0, // 完了数はEventLogから集計するためダミー(0)とする
+      0,
       `=COUNTA('${escapedName}'!A2:A)`, // マスター件数数式
       repAddress,
       "",

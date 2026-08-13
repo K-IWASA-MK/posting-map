@@ -3,7 +3,7 @@
  * 
  * Target Domain: Distribution Management
  * Owner Layer: Business Layer
- * Responsibility: 配布実績のシャドー書き込み、EventLog記録および統計・ランキングデータアクセス
+ * Responsibility: 配布実績のシャドー書き込みおよび統計・ランキングデータアクセス
  */
 
 if (typeof DistributionRepository === 'undefined') {
@@ -60,10 +60,6 @@ if (typeof DistributionRepository === 'undefined') {
       return false;
     }
 
-    logEvent(event) {
-      return true;
-    }
-
     fetchDeliveryStats() {
       const ss = this.getSS();
       if (!ss) return { totalDistributed: 0, areasCount: 0 };
@@ -75,7 +71,7 @@ if (typeof DistributionRepository === 'undefined') {
       for (let i = 0; i < sheets.length; i++) {
         const sheet = sheets[i];
         const name = sheet.getName();
-        if (name === "名簿" || name === "EventLog" || name === "TraceLog" || name === "__SYSTEM_CACHE__" || name === "保有チラシ枚数" || name === "原本") {
+        if (name === "名簿" || name === "TraceLog" || name === "__SYSTEM_CACHE__" || name === "保有チラシ枚数" || name === "原本") {
           continue;
         }
 
@@ -98,41 +94,10 @@ if (typeof DistributionRepository === 'undefined') {
     }
 
     fetchRankingData() {
-      if (typeof v2_core !== 'undefined' && typeof v2_core.getRankingData === 'function') {
-        return v2_core.getRankingData();
+      if (typeof getRankingDataCore === 'function') {
+        return getRankingDataCore();
       }
-      const ss = this.getSS();
-      if (!ss) return [];
-
-      const eventLogSheet = ss.getSheetByName("EventLog");
-      if (!eventLogSheet) return [];
-
-      const lastRow = eventLogSheet.getLastRow();
-      if (lastRow < 2) return [];
-
-      const values = eventLogSheet.getRange(2, 1, lastRow - 1, 12).getValues();
-      const rankingMap = {};
-
-      for (let i = 0; i < values.length; i++) {
-        const userId = values[i][5];
-        const count = parseFloat(values[i][7]) || 0;
-        const actionType = values[i][6];
-
-        if (!userId) continue;
-        if (!rankingMap[userId]) {
-          rankingMap[userId] = { userId: userId, totalCount: 0 };
-        }
-
-        if (actionType === "distribute") {
-          rankingMap[userId].totalCount += count;
-        } else if (actionType === "revert_distribute") {
-          rankingMap[userId].totalCount += count; // count is already negative for revert
-        }
-      }
-
-      const rankingList = Object.keys(rankingMap).map(k => rankingMap[k]);
-      rankingList.sort((a, b) => b.totalCount - a.totalCount);
-      return rankingList;
+      return [];
     }
   };
   DistributionRepository.instance = null;
