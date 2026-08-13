@@ -942,25 +942,75 @@ window.initMainMap = function() {
     }
   }
 
-  let activeOverlay = null;
-  let activeMarker = null;
+  let mapLockLayer = null;
+
+  function lockMapControls() {
+    if (!mapLockLayer && mapEl) {
+      mapLockLayer = document.createElement('div');
+      mapLockLayer.id = 'map-lock-layer';
+      mapLockLayer.style.position = 'absolute';
+      mapLockLayer.style.top = '0';
+      mapLockLayer.style.left = '0';
+      mapLockLayer.style.width = '100%';
+      mapLockLayer.style.height = '100%';
+      mapLockLayer.style.zIndex = '5';
+      mapLockLayer.style.background = 'transparent';
+      mapLockLayer.style.touchAction = 'none';
+
+      const blockEvent = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      };
+
+      mapLockLayer.addEventListener('click', blockEvent, true);
+      mapLockLayer.addEventListener('touchstart', blockEvent, { passive: false, capture: true });
+      mapLockLayer.addEventListener('touchmove', blockEvent, { passive: false, capture: true });
+      mapLockLayer.addEventListener('touchend', blockEvent, { passive: false, capture: true });
+      mapLockLayer.addEventListener('mousedown', blockEvent, true);
+      mapLockLayer.addEventListener('mousemove', blockEvent, true);
+      mapLockLayer.addEventListener('mouseup', blockEvent, true);
+      mapLockLayer.addEventListener('wheel', blockEvent, { passive: false, capture: true });
+
+      if (getComputedStyle(mapEl).position === 'static') {
+        mapEl.style.position = 'relative';
+      }
+      mapEl.appendChild(mapLockLayer);
+    } else if (mapLockLayer) {
+      mapLockLayer.style.display = 'block';
+    }
+  }
+
+  function unlockMapControls() {
+    if (mapLockLayer) {
+      mapLockLayer.style.display = 'none';
+    }
+  }
 
   const revertActiveMarkerColor = () => {
     if (activeMarker) {
+      const isCompleted = window.globalPinStatus?.completed?.includes(activeMarker.rowId);
+      const isRemoteView = !!activeMarker.isRemoteView;
       const prevIcon = activeMarker.getIcon();
+
       if (prevIcon) {
-        const isOrange = prevIcon.fillColor === "#f97316";
+        let restoredColor = "#22c55e";
+        if (isCompleted) {
+          restoredColor = "#EA5F08";
+        } else if (isRemoteView) {
+          restoredColor = "#00B7FF";
+        }
         activeMarker.setIcon({
           ...prevIcon,
-          fillColor: isOrange ? "#f97316" : "#22c55e"
+          fillColor: restoredColor
         });
       }
 
-      // Phase 4-B: 選択解除したrowId → IN_PROGRESSをremove
-      if (typeof window.setPinInProgress === 'function') {
+      // Phase 4-B: 自端末で追加していた場合のみ IN_PROGRESS を remove
+      if (!isCompleted && !isRemoteView && typeof window.setPinInProgress === 'function') {
         window.setPinInProgress(activeMarker.rowId, "remove");
       }
 
+      unlockMapControls();
       activeMarker = null;
     }
   };
@@ -976,7 +1026,7 @@ window.initMainMap = function() {
       if (currentIcon) {
         let targetColor = "#22c55e";
         if (isCompleted) {
-          targetColor = "#f97316";
+          targetColor = "#EA5F08";
         } else if (isInProgress || isMine) {
           targetColor = "#00B7FF";
         }
@@ -1009,7 +1059,7 @@ window.initMainMap = function() {
     if (activeMarker && activeMarker.rowId === rowId) {
       const currentIcon = activeMarker.getIcon();
       if (currentIcon) {
-        activeMarker.setIcon({ ...currentIcon, fillColor: "#f97316" });
+        activeMarker.setIcon({ ...currentIcon, fillColor: "#EA5F08" });
       }
     }
     if (activeOverlay && activeOverlay.rowId === rowId) {
@@ -1027,7 +1077,7 @@ window.initMainMap = function() {
           <div style="font-size: 20px; font-weight: 900; line-height: 1.2; text-align: center; margin-bottom: 12px;">
             ${activeOverlay.townName || ''}
           </div>
-          <div style="background: rgba(249, 115, 22, 0.2); border: 1px solid rgba(249, 115, 22, 0.5); border-radius: 4px; padding: 4px 8px; text-align: center; color: #f97316; font-weight: bold; font-size: 13px;">
+          <div style="background: rgba(234, 95, 8, 0.2); border: 1px solid rgba(234, 95, 8, 0.5); border-radius: 4px; padding: 4px 8px; text-align: center; color: #EA5F08; font-weight: bold; font-size: 13px;">
             配布済み 🔒
           </div>
         </div>
@@ -1073,7 +1123,7 @@ window.initMainMap = function() {
 
             if (isCompleted) {
               bottomUI = `
-                <div style="font-size: 14px; font-weight: 700; text-align: center; color: #f97316; margin-top: 10px; background: rgba(249,115,22,0.1); padding: 8px; border-radius: 6px;">
+                <div style="font-size: 14px; font-weight: 700; text-align: center; color: #EA5F08; margin-top: 10px; background: rgba(234,95,8,0.1); padding: 8px; border-radius: 6px;">
                   配布済み 🔒
                 </div>
               `;
@@ -1125,46 +1175,40 @@ window.initMainMap = function() {
           };
 
           const executeOpen = () => {
+            // 先頭ガード：既にPopupが開いていれば他ピンの新規タップを完全に無視
+            if (activeOverlay || activeMarker) {
+              return;
+            }
+
             const isCompleted = window.globalPinStatus?.completed?.includes(row.rowId);
-            const isRemoteInProgress = window.globalPinStatus?.inProgress?.includes(row.rowId) && (!activeMarker || activeMarker.rowId !== row.rowId);
+            const isRemoteInProgress = window.globalPinStatus?.inProgress?.includes(row.rowId);
             const isLocked = isCompleted || isRemoteInProgress;
 
-            // 既にアクティブなオーバーレイがあれば即座に閉じる
-            if (activeOverlay) {
-              activeOverlay.setMap(null);
-              activeOverlay = null;
-            }
-
-            // 既に別のPINが選択されている場合は、元の色に戻す (オレンジならそのまま、青なら緑)
-            if (activeMarker && activeMarker !== marker) {
-              const prevIcon = activeMarker.getIcon();
-              if (prevIcon) {
-                const isOrange = prevIcon.fillColor === "#f97316";
-                activeMarker.setIcon({
-                  ...prevIcon,
-                  fillColor: isOrange ? "#f97316" : "#22c55e"
-                });
-              }
-              // Phase 4-B: 選択解除したrowId → IN_PROGRESSをremove
-              if (typeof window.setPinInProgress === 'function') {
-                 window.setPinInProgress(activeMarker.rowId, "remove");
-              }
-            }
-
-            // タップされたPINのアイコンのfillColorを#00B7FF（青色）に変更
+            // タップされたPINのアイコン色変更
             const currentIcon = marker.getIcon();
             if (currentIcon) {
+              let targetColor = "#00B7FF";
+              if (isCompleted) {
+                targetColor = "#EA5F08";
+              } else if (isRemoteInProgress) {
+                targetColor = "#00B7FF";
+              }
               marker.setIcon({
                 ...currentIcon,
-                fillColor: "#00B7FF"
+                fillColor: targetColor
               });
             }
 
-            // Phase 4-B: 選択したrowId → IN_PROGRESSをadd
-            if (activeMarker !== marker && typeof window.setPinInProgress === 'function') {
+            marker.isRemoteView = isRemoteInProgress;
+
+            // Phase 4-B: 未完了かつ他端末作業中でない自端末の新規選択時のみ IN_PROGRESS を add
+            if (!isCompleted && !isRemoteInProgress && typeof window.setPinInProgress === 'function') {
                window.setPinInProgress(row.rowId, "add");
             }
             activeMarker = marker;
+
+            // MAP操作可逆ロック
+            lockMapControls();
 
             const showOverlay = () => {
               // 重複表示防止のガード：表示前に再度クリアする
