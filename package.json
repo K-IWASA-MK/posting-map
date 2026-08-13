@@ -8,7 +8,10 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "check:ssot": "node scripts/validate-gas-endpoint-ssot.mjs",
+    "verify:gas": "node scripts/verify-gas-deployment.mjs",
+    "deploy:gas": "node scripts/safe-deploy.mjs"
   },
   "keywords": [],
   "author": "",
