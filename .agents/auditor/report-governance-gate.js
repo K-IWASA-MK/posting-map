@@ -63,11 +63,16 @@ function runGate(reportPath) {
     const stagedDiff = execSync('git diff --cached').toString();
     const worktreeDiff = execSync('git diff').toString();
     
-    // 1. WORKTREE_DIFF: 未Stage変更残存の記録 (警告のみ・BLOCKしない)
     if (worktreeDiff.trim().length > 0) {
-      // ログ・参考情報として維持（allowCommitには直接干渉しない）
       const worktreeFiles = execSync('git diff --name-only').toString().split('\n').filter(Boolean);
-      // 情報用記録 (単体ではBLOCKさせない)
+      issues.push({
+        type: "WORKTREE_DIRTY",
+        severity: "BLOCK",
+        source: "MECHANICAL",
+        target: worktreeFiles.join(', '),
+        message: "Working Tree に未 Stage の変更保留が存在します。完了報告は許可されません。",
+        action: "対象変更を commit するか git reset / restore でクリーンにしてください"
+      });
     }
 
     // 2. STAGED_DIFF: Commit対象の正式メカニカル監査
