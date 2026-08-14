@@ -343,7 +343,15 @@ input::placeholder { text-align: center; }
   padding-bottom: 160px;
 }
 #page-settings {
-  padding-bottom: 160px;
+  min-height: 100%;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding-bottom: 0 !important;
+}
+#page-settings.hidden {
+  display: none !important;
 }
 
 /* iOSにおけるinput・selectのデフォルト白背景・崩れ防止リセット */
