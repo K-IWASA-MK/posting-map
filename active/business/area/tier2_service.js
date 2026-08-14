@@ -34,29 +34,52 @@
         if (typeof getSS === 'function') {
           const ss = getSS();
           if (ss) {
-            const cacheSheet = ss.getSheetByName("__SYSTEM_CACHE__");
-            if (cacheSheet) {
-              const lastRow = cacheSheet.getLastRow();
-              if (lastRow >= 2) {
-                // 1列目: エリア名, 2列目: 完了数, 3列目: 合計数, 4列目: 代表住所
-                const rows = cacheSheet.getRange(2, 1, lastRow - 1, 4).getValues();
-                rows.forEach(r => {
-                  const areaName = String(r[0] || "").trim();
-                  const doneCount = Number(r[1]) || 0;
-                  const totalCount = Number(r[2]) || 0;
-                  const repAddr = String(r[3] || "").trim();
-                  if (!areaName) return;
-
-                  const targetCity = typeof getCityName === 'function' ? getCityName(areaName) : null;
-                  if (targetCity === cityName) {
-                    areas.push({
-                      name: this.getTownName(areaName, cityName) || areaName,
-                      fullName: areaName,
-                      done: doneCount,
-                      total: totalCount,
-                      repAddress: repAddr
+            const masterSheet = ss.getSheetByName("MIE03_ADDRESS_MASTER");
+            const distSheet = ss.getSheetByName("配布実績");
+            if (masterSheet) {
+              const masterLr = masterSheet.getLastRow();
+              if (masterLr > 1) {
+                const masterData = masterSheet.getRange(2, 1, masterLr - 1, 3).getValues();
+                const completedRowIds = new Set();
+                if (distSheet) {
+                  const distLr = distSheet.getLastRow();
+                  if (distLr > 0) {
+                    const distValues = distSheet.getRange(1, 1, distLr, 4).getValues();
+                    distValues.forEach(r => {
+                      if (r[0] && r[3] !== "" && r[3] !== null) {
+                        const id = parseInt(r[0], 10);
+                        if (!isNaN(id)) completedRowIds.add(id);
+                      }
                     });
                   }
+                }
+
+                const townMap = {};
+                const townOrder = [];
+                masterData.forEach(r => {
+                  const rId = parseInt(r[0], 10);
+                  const tName = String(r[1] || "").trim();
+                  const cName = String(r[2] || "").trim();
+                  if (cName === cityName && tName) {
+                    if (!townMap[tName]) {
+                      townMap[tName] = {
+                        name: this.getTownName(tName, cityName) || tName,
+                        fullName: tName,
+                        done: 0,
+                        total: 0,
+                        repAddress: tName
+                      };
+                      townOrder.push(tName);
+                    }
+                    townMap[tName].total += 1;
+                    if (completedRowIds.has(rId)) {
+                      townMap[tName].done += 1;
+                    }
+                  }
+                });
+
+                townOrder.forEach(tName => {
+                  areas.push(townMap[tName]);
                 });
               }
             }

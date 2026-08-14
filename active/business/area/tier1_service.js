@@ -28,25 +28,39 @@
           "三重郡川越町": 94
         };
 
-        // __SYSTEM_CACHE__ から自治体別 done を高速集計 (getSystemSummary と同じ方式 / 全シート巡回絶対禁止)
+        // 配布実績シート SSOT から自治体別 done を算出
         const cityDoneMap = {};
         try {
           if (typeof getSS === 'function') {
             const ss = getSS();
             if (ss) {
-              const cacheSheet = ss.getSheetByName("__SYSTEM_CACHE__");
-              if (cacheSheet) {
-                const lastRow = cacheSheet.getLastRow();
-                if (lastRow >= 2) {
-                  // 1列目: エリア名, 2列目: 完了数
-                  const rows = cacheSheet.getRange(2, 1, lastRow - 1, 2).getValues();
-                  rows.forEach(r => {
-                    const areaName = String(r[0] || "").trim();
-                    const doneCount = Number(r[1]) || 0;
-                    if (!areaName) return;
-                    const cityName = typeof getCityName === 'function' ? getCityName(areaName) : null;
+              const distSheet = ss.getSheetByName("配布実績");
+              const masterSheet = ss.getSheetByName("MIE03_ADDRESS_MASTER");
+              if (distSheet && masterSheet) {
+                const distLr = distSheet.getLastRow();
+                const masterLr = masterSheet.getLastRow();
+                if (distLr > 0 && masterLr > 1) {
+                  const masterData = masterSheet.getRange(2, 1, masterLr - 1, 3).getValues();
+                  const rowCityMap = {};
+                  masterData.forEach(r => {
+                    const rId = parseInt(r[0], 10);
+                    if (!isNaN(rId)) {
+                      rowCityMap[rId] = String(r[2] || "").trim();
+                    }
+                  });
+
+                  const distValues = distSheet.getRange(1, 1, distLr, 4).getValues();
+                  const completedRowIds = new Set(
+                    distValues
+                      .filter(r => r[0] && r[3] !== "" && r[3] !== null)
+                      .map(r => parseInt(r[0], 10))
+                      .filter(id => !isNaN(id))
+                  );
+
+                  completedRowIds.forEach(rowId => {
+                    const cityName = rowCityMap[rowId];
                     if (cityName) {
-                      cityDoneMap[cityName] = (cityDoneMap[cityName] || 0) + doneCount;
+                      cityDoneMap[cityName] = (cityDoneMap[cityName] || 0) + 1;
                     }
                   });
                 }
@@ -54,7 +68,7 @@
             }
           }
         } catch (e) {
-          // キャッシュアクセス失敗時は安全フォールバック
+          // 安全フォールバック
         }
 
         const orderedCities = getMunicipalityOrder();

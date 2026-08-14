@@ -1604,9 +1604,9 @@ function updateStats(summaryData = null) {
     return;
   }
 
-  const total = summaryData.total || 858;
-  const done = summaryData.done || 0;
-  const percent = typeof summaryData.percent === 'number' ? summaryData.percent : (total > 0 ? Math.round((done / total) * 100) : 0);
+  const total = typeof summaryData.total === 'number' ? summaryData.total : 858;
+  const done = typeof summaryData.done === 'number' ? summaryData.done : 0;
+  const percent = typeof summaryData.percent === 'number' ? summaryData.percent : 0;
 
   if (countEl) countEl.textContent = `${done}/ ${total}`;
   if (pctEl) pctEl.textContent = `${percent}%`;
