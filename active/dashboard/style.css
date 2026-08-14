@@ -344,11 +344,13 @@ input::placeholder { text-align: center; }
 }
 #page-settings {
   min-height: 100%;
+  box-sizing: border-box;
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
   align-items: center !important;
-  padding-bottom: 0 !important;
+  padding-bottom: 98px !important;
+  overflow-y: auto;
 }
 #page-settings.hidden {
   display: none !important;
