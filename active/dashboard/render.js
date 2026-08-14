@@ -1192,6 +1192,11 @@ window.initMainMap = function() {
             }
 
             marker.isRemoteView = isRemoteInProgress;
+
+            // Phase 4-B: 未完了かつ他端末作業中でない自端末の新規選択時のみ IN_PROGRESS を add
+            if (!isCompleted && !isRemoteInProgress && typeof window.setPinInProgress === 'function') {
+               window.setPinInProgress(row.rowId, "add");
+            }
             activeMarker = marker;
 
             // MAP操作可逆ロック
