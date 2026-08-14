@@ -26,19 +26,23 @@
           totalPoints = 858;
         }
 
-        // SSOT: __SYSTEM_CACHE__ または高速データソースから完了件数を取得（全シート巡回は絶対禁止）
+        // SSOT: 配布実績シートからユニーク完了件数を取得
         try {
           if (typeof getSS === 'function') {
             const ss = getSS();
             if (ss) {
-              const cacheSheet = ss.getSheetByName("__SYSTEM_CACHE__");
-              if (cacheSheet) {
-                const lastRow = cacheSheet.getLastRow();
-                if (lastRow >= 2) {
-                  const doneValues = cacheSheet.getRange(2, 2, lastRow - 1, 1).getValues();
-                  doneValues.forEach(r => {
-                    totalDone += Number(r[0]) || 0;
-                  });
+              const distSheet = ss.getSheetByName("配布実績");
+              if (distSheet) {
+                const lastRow = distSheet.getLastRow();
+                if (lastRow > 0) {
+                  const values = distSheet.getRange(1, 1, lastRow, 4).getValues();
+                  const uniqueCompleted = new Set(
+                    values
+                      .filter(r => r[0] && r[3] !== "" && r[3] !== null)
+                      .map(r => parseInt(r[0], 10))
+                      .filter(id => !isNaN(id))
+                  );
+                  totalDone = uniqueCompleted.size;
                 }
               }
             }
