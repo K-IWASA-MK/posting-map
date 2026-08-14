@@ -1141,7 +1141,7 @@ window.initMainMap = function() {
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                       <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                     </svg>
-                    <span>入力操作</span>
+                    <span>配布開始</span>
                   </button>
                 </div>
               `;
@@ -1176,10 +1176,10 @@ window.initMainMap = function() {
             const isRemoteInProgress = window.globalPinStatus?.inProgress?.includes(row.rowId);
             const isLocked = isCompleted || isRemoteInProgress;
 
-            // タップされたPINのアイコン色変更
+            // タップされたPINのアイコン色変更 (未配布ピンはグリーンのまま維持)
             const currentIcon = marker.getIcon();
             if (currentIcon) {
-              let targetColor = "#00B7FF";
+              let targetColor = "#22c55e";
               if (isCompleted) {
                 targetColor = "#EA5F08";
               } else if (isRemoteInProgress) {
@@ -1192,11 +1192,6 @@ window.initMainMap = function() {
             }
 
             marker.isRemoteView = isRemoteInProgress;
-
-            // Phase 4-B: 未完了かつ他端末作業中でない自端末の新規選択時のみ IN_PROGRESS を add
-            if (!isCompleted && !isRemoteInProgress && typeof window.setPinInProgress === 'function') {
-               window.setPinInProgress(row.rowId, "add");
-            }
             activeMarker = marker;
 
             // MAP操作可逆ロック
