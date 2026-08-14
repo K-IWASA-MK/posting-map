@@ -446,23 +446,41 @@ select:-webkit-autofill:focus {
   height: 14px;
 }
 
-/* 詳細地図ボタン (青グラス) */
+/* プレミアム・グラスバッジ（閲覧専用） */
+.premium-glass-badge {
+  height: 44px;
+  min-width: 110px;
+  max-width: 130px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: default;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-sizing: border-box;
+  margin: 10px auto 0 auto;
+  user-select: none;
+}
+
+/* 詳細地図ボタン (シアンブルーグラス) */
 .premium-glass-btn.btn-maps {
-  background: rgba(0, 183, 255, 0.08);
-  border: 1px solid rgba(0, 183, 255, 0.25);
+  background: rgba(0, 183, 255, 0.12);
+  border: 1px solid rgba(0, 183, 255, 0.30);
   color: #00B7FF;
   box-shadow: 0 0 10px rgba(0, 183, 255, 0.05);
 }
 .premium-glass-btn.btn-maps:hover {
-  background: rgba(0, 183, 255, 0.15);
-  border-color: rgba(0, 183, 255, 0.40);
+  background: rgba(0, 183, 255, 0.20);
+  border-color: rgba(0, 183, 255, 0.45);
   box-shadow: 0 0 15px rgba(0, 183, 255, 0.15);
 }
 
-/* 入力操作ボタン (緑グラス) */
+/* 入力操作ボタン (エメラルドグリーングラス) */
 .premium-glass-btn.btn-input {
   background: rgba(34, 197, 94, 0.12);
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  border: 1px solid rgba(34, 197, 94, 0.30);
   color: #22C55E;
   box-shadow: 0 0 10px rgba(34, 197, 94, 0.05);
 }
@@ -470,5 +488,19 @@ select:-webkit-autofill:focus {
   background: rgba(34, 197, 94, 0.20);
   border-color: rgba(34, 197, 94, 0.45);
   box-shadow: 0 0 15px rgba(34, 197, 94, 0.15);
+}
+
+/* 配布中バッジ (シアンブルーグラス・閲覧専用) */
+.premium-glass-badge.badge-in-progress {
+  background: rgba(0, 183, 255, 0.12);
+  border: 1px solid rgba(0, 183, 255, 0.30);
+  color: #00B7FF;
+}
+
+/* 配布済みバッジ (ブランドオレンジグラス・閲覧専用) */
+.premium-glass-badge.badge-completed {
+  background: rgba(234, 95, 8, 0.12);
+  border: 1px solid rgba(234, 95, 8, 0.30);
+  color: #EA5F08;
 }
 

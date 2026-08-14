@@ -1114,13 +1114,13 @@ window.initMainMap = function() {
 
             if (isCompleted) {
               bottomUI = `
-                <div style="font-size: 14px; font-weight: 700; text-align: center; color: #EA5F08; margin-top: 10px; background: rgba(234,95,8,0.1); padding: 8px; border-radius: 6px;">
+                <div class="premium-glass-badge badge-completed">
                   配布済み 🔒
                 </div>
               `;
             } else if (isRemoteInProgress) {
               bottomUI = `
-                <div style="font-size: 14px; font-weight: 700; text-align: center; color: #00B7FF; margin-top: 10px; background: rgba(0,183,255,0.1); padding: 8px; border-radius: 6px;">
+                <div class="premium-glass-badge badge-in-progress">
                   配布中 🔵
                 </div>
               `;
