@@ -913,7 +913,7 @@ window.initMainMap = function() {
       const inputButton = div.querySelector('.input-operation-btn');
       if (inputButton && this.onInputClick) {
         inputButton.addEventListener('click', () => {
-          this.onInputClick();
+          this.onInputClick(inputButton);
         });
       }
 
@@ -1208,8 +1208,22 @@ window.initMainMap = function() {
                 activeOverlay.setMap(null);
                 activeOverlay = null;
               }
-              activeOverlay = new CustomMarkerOverlay(marker.getPosition(), createContent(isCompleted, isRemoteInProgress), map, () => {
-                if (!isLocked) openPointDetailModal(row.rowId);
+              let isStarted = false;
+              activeOverlay = new CustomMarkerOverlay(marker.getPosition(), createContent(isCompleted, isRemoteInProgress), map, (buttonEl) => {
+                if (isLocked) return;
+
+                if (!isStarted) {
+                  isStarted = true;
+                  const span = buttonEl ? buttonEl.querySelector('span') : null;
+                  if (span) {
+                    span.textContent = '入力操作';
+                  } else if (buttonEl) {
+                    buttonEl.textContent = '入力操作';
+                  }
+                  return;
+                }
+
+                openPointDetailModal(row.rowId);
               });
               activeOverlay.rowId = row.rowId;
               activeOverlay.cityName = row.city_name;
