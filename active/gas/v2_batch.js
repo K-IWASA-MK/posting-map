@@ -568,3 +568,57 @@ function setupPhotoCleanupTrigger() {
     .create();
   console.log("cleanupOldPhotosBatch trigger set: daily at 3:00 AM JST");
 }
+
+/**
+ * PinStatus 日次クリーンアップ
+ * 毎日0:00頃の時間主導型トリガーから実行。
+ * PinStatus シートに残存した IN_PROGRESS データを全件クリアする。
+ * 配布実績シートを含む他シートには一切アクセス・変更しない。
+ */
+function cleanupPinStatusDaily() {
+  try {
+    const ss = getSS();
+    const pinSheet = ss.getSheetByName("PinStatus");
+    if (!pinSheet) {
+      console.log("cleanupPinStatusDaily: PinStatus sheet does not exist. Nothing to clear.");
+      return;
+    }
+
+    const lr = pinSheet.getLastRow();
+    if (lr === 0) {
+      console.log("cleanupPinStatusDaily: PinStatus sheet is empty. Nothing to clear.");
+      return;
+    }
+
+    const lock = LockService.getScriptLock();
+    if (lock.tryLock(10000)) {
+      try {
+        pinSheet.clearContents();
+        SpreadsheetApp.flush();
+        console.log(`cleanupPinStatusDaily: PinStatus cleared successfully (${lr} rows cleared).`);
+      } finally {
+        lock.releaseLock();
+      }
+    } else {
+      console.warn("cleanupPinStatusDaily: Could not obtain lock.");
+    }
+  } catch (e) {
+    console.error("cleanupPinStatusDaily error: " + e.toString());
+  }
+}
+
+/**
+ * PinStatus 日次クリーンアップの時間主導型トリガーを設定する
+ * 既存の同名トリガーを削除してから新規登録（多重登録防止）
+ * 毎日 0:00 (午前0時〜1時) に1回実行
+ */
+function setupPinStatusCleanupTrigger() {
+  deleteTriggers("cleanupPinStatusDaily");
+  ScriptApp.newTrigger("cleanupPinStatusDaily")
+    .timeBased()
+    .everyDays(1)
+    .atHour(0) // 0:00 AM JST
+    .create();
+  console.log("cleanupPinStatusDaily trigger set: daily at 0:00 AM JST");
+}
+
