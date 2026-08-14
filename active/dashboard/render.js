@@ -942,47 +942,38 @@ window.initMainMap = function() {
     }
   }
 
-  let mapLockLayer = null;
+  let activeOverlay = null;
+  let activeMarker = null;
+  let savedMapOptions = null;
 
   function lockMapControls() {
-    if (!mapLockLayer && mapEl) {
-      mapLockLayer = document.createElement('div');
-      mapLockLayer.id = 'map-lock-layer';
-      mapLockLayer.style.position = 'absolute';
-      mapLockLayer.style.top = '0';
-      mapLockLayer.style.left = '0';
-      mapLockLayer.style.width = '100%';
-      mapLockLayer.style.height = '100%';
-      mapLockLayer.style.zIndex = '5';
-      mapLockLayer.style.background = 'transparent';
-      mapLockLayer.style.touchAction = 'none';
-
-      const blockEvent = (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-      };
-
-      mapLockLayer.addEventListener('click', blockEvent, true);
-      mapLockLayer.addEventListener('touchstart', blockEvent, { passive: false, capture: true });
-      mapLockLayer.addEventListener('touchmove', blockEvent, { passive: false, capture: true });
-      mapLockLayer.addEventListener('touchend', blockEvent, { passive: false, capture: true });
-      mapLockLayer.addEventListener('mousedown', blockEvent, true);
-      mapLockLayer.addEventListener('mousemove', blockEvent, true);
-      mapLockLayer.addEventListener('mouseup', blockEvent, true);
-      mapLockLayer.addEventListener('wheel', blockEvent, { passive: false, capture: true });
-
-      if (getComputedStyle(mapEl).position === 'static') {
-        mapEl.style.position = 'relative';
+    if (map) {
+      if (!savedMapOptions) {
+        savedMapOptions = {
+          gestureHandling: map.get('gestureHandling') || 'greedy',
+          zoomControl: map.get('zoomControl') !== false,
+          scrollwheel: map.get('scrollwheel') !== false,
+          disableDoubleClickZoom: map.get('disableDoubleClickZoom') === true
+        };
       }
-      mapEl.appendChild(mapLockLayer);
-    } else if (mapLockLayer) {
-      mapLockLayer.style.display = 'block';
+      map.setOptions({
+        gestureHandling: 'none',
+        zoomControl: false,
+        scrollwheel: false,
+        disableDoubleClickZoom: true
+      });
     }
   }
 
   function unlockMapControls() {
-    if (mapLockLayer) {
-      mapLockLayer.style.display = 'none';
+    if (map && savedMapOptions) {
+      map.setOptions({
+        gestureHandling: savedMapOptions.gestureHandling,
+        zoomControl: savedMapOptions.zoomControl,
+        scrollwheel: savedMapOptions.scrollwheel,
+        disableDoubleClickZoom: savedMapOptions.disableDoubleClickZoom
+      });
+      savedMapOptions = null;
     }
   }
 
