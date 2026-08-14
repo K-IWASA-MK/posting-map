@@ -873,6 +873,7 @@ window.initMainMap = function() {
     zoom: window.currentMapState?.zoom || 11,
     disableDefaultUI: true,
     zoomControl: true,
+    clickableIcons: false,
     styles: appleStyle
   });
   window.mainMapInstance = map;
