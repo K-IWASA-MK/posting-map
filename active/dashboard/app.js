@@ -524,8 +524,8 @@ async function loadData(skipSync = false) {
     logDebug("[loadData] getSystemSummary fetched successfully.");
 
     if (data && data.success) {
-      logDebug("[loadData] System Summary received: total=" + data.total + ", done=" + data.done);
-      updateStats({ done: data.done, total: data.total });
+      logDebug("[loadData] System Summary received: total=" + data.total + ", done=" + data.done + ", percent=" + data.percent);
+      updateStats(data);
       prefetchRanking();
 
       // 動的にGoogle Maps APIをロード（独立したAPIで取得し、既存レスポンスに影響を与えない）
