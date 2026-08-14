@@ -1176,10 +1176,10 @@ window.initMainMap = function() {
             const isRemoteInProgress = window.globalPinStatus?.inProgress?.includes(row.rowId);
             const isLocked = isCompleted || isRemoteInProgress;
 
-            // タップされたPINのアイコン色変更 (未配布ピンはグリーンのまま維持)
+            // タップされたPINのアイコン色変更 (自端末選択表示のため青へ変更 / PinStatus追加なし)
             const currentIcon = marker.getIcon();
             if (currentIcon) {
-              let targetColor = "#22c55e";
+              let targetColor = "#00B7FF";
               if (isCompleted) {
                 targetColor = "#EA5F08";
               } else if (isRemoteInProgress) {
