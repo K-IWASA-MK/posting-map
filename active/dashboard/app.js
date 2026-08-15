@@ -1450,7 +1450,7 @@ window.updateStorageLocationDropdown = function updateStorageLocationDropdown(ov
 
   // 設定画面（登録・IDカード）では無駄なスクロールを避けるが、画面サイズが小さい場合はスクロール可能にする
   const contentEl = $('content');
-  if (id === 'settings' || id === 'storage-register') {
+  if (id === 'storage-register') {
     contentEl.scrollTop = 0;
     contentEl.style.overflowY = 'hidden';
   } else {
