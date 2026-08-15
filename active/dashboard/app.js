@@ -351,7 +351,7 @@ function setSyncStatus(state) {
   statusEl.className = 'w-2 h-2 rounded-full transition-all duration-300';
 
   if (textEl) {
-    textEl.className = 'text-[8px] font-black uppercase tracking-[0.2em] transition-all duration-300';
+    textEl.className = 'text-sm font-black uppercase tracking-[0.1em] transition-all duration-300';
   }
 
   if (state === 'online') {
