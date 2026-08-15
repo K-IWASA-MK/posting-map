@@ -351,7 +351,7 @@ function setSyncStatus(state) {
   statusEl.className = 'w-2 h-2 rounded-full transition-all duration-300';
 
   if (textEl) {
-    textEl.className = 'text-sm font-black uppercase tracking-[0.1em] transition-all duration-300';
+    textEl.className = 'text-[8px] font-black uppercase tracking-[0.2em] transition-all duration-300';
   }
 
   if (state === 'online') {
@@ -1130,6 +1130,16 @@ async function switchPage(id, force = false) {
   // すでにアクティブなら多重遷移を防ぐためスキップ
   if (!force && !target.classList.contains('hidden') && target.style.opacity === '1') return;
 
+  // ページ切り替え時に第1層MAP以外の画面であれば is-map-view を除去
+  const mapContentEl = $('content');
+  if (mapContentEl) {
+    if (id === 'areas' && (typeof currentCity === 'undefined' || currentCity === null)) {
+      mapContentEl.classList.add('is-map-view');
+    } else {
+      mapContentEl.classList.remove('is-map-view');
+    }
+  }
+
   // エリア関連のページ切り替えであれば直前のページタイプを記憶
   if (id === 'areas' || id === 'detail') {
     lastAreaSubPage = id;
@@ -1151,16 +1161,6 @@ async function switchPage(id, force = false) {
       p.classList.add('hidden');
       p.style.opacity = '0';
     });
-  }
-
-  // 2. 旧ページが完全に hidden になった後に is-map-view を切り替える
-  const mapContentEl = $('content');
-  if (mapContentEl) {
-    if (id === 'areas' && (typeof currentCity === 'undefined' || currentCity === null)) {
-      mapContentEl.classList.add('is-map-view');
-    } else {
-      mapContentEl.classList.remove('is-map-view');
-    }
   }
 
   // 2. ページに応じた処理・レンダリングを行う
@@ -1450,7 +1450,7 @@ window.updateStorageLocationDropdown = function updateStorageLocationDropdown(ov
 
   // 設定画面（登録・IDカード）では無駄なスクロールを避けるが、画面サイズが小さい場合はスクロール可能にする
   const contentEl = $('content');
-  if (id === 'storage-register') {
+  if (id === 'settings' || id === 'storage-register') {
     contentEl.scrollTop = 0;
     contentEl.style.overflowY = 'hidden';
   } else {
@@ -1593,7 +1593,7 @@ function updateStats(summaryData = null) {
   const pctEl = $('header-pct');
 
   if (!summaryData) {
-    if (countEl) countEl.textContent = '0 / 858';
+    if (countEl) countEl.textContent = '0/ 858';
     if (pctEl) pctEl.textContent = '0%';
     return;
   }
@@ -1602,7 +1602,7 @@ function updateStats(summaryData = null) {
   const done = typeof summaryData.done === 'number' ? summaryData.done : 0;
   const percent = typeof summaryData.percent === 'number' ? summaryData.percent : 0;
 
-  if (countEl) countEl.textContent = `${done} / ${total}`;
+  if (countEl) countEl.textContent = `${done}/ ${total}`;
   if (pctEl) pctEl.textContent = `${percent}%`;
 }
 

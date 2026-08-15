@@ -20,8 +20,8 @@ window.renderStaffCard = function(userInfo, options = {}) {
   return `
     <div class="pt-2 pb-0 px-4 flex flex-col items-center">
       <div class="mb-6 flex items-center justify-center gap-3">
-        <span class="text-sm font-bold text-white/50 tracking-wider">公式配布員</span>
-        ${formattedId ? `<span style="letter-spacing: 0.15em; text-indent: 0.15em; background: linear-gradient(180deg, rgba(234,95,8,0.16), rgba(234,95,8,0.06)); border: 1px solid #EA5F08; box-shadow: 0 0 6px rgba(234,95,8,.35), 0 0 12px rgba(234,95,8,.18); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);" class="inline-flex items-center justify-center h-6 px-3 text-sm font-black text-white font-mono rounded-full">${formattedId}</span>` : ''}
+        <span class="text-xs font-bold text-white/50 tracking-wider">公式配布員</span>
+        ${formattedId ? `<span style="letter-spacing: 0.15em; text-indent: 0.15em; background: linear-gradient(180deg, rgba(234,95,8,0.16), rgba(234,95,8,0.06)); border: 1px solid #EA5F08; box-shadow: 0 0 6px rgba(234,95,8,.35), 0 0 12px rgba(234,95,8,.18); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);" class="inline-flex items-center justify-center h-6 px-3 text-[10px] font-black text-white font-mono rounded-full">${formattedId}</span>` : ''}
       </div>
       
       <div id="id-gyro-card" style="height: 300px; --glow-x: 0px; --glow-y: 0px; --glow-opacity: 0.08; --edge-opacity: 0.08; --edge-angle: 180deg;" class="w-full max-w-sm gyro-card flex flex-col items-center p-6 relative overflow-hidden">
@@ -54,18 +54,6 @@ window.renderStaffCard = function(userInfo, options = {}) {
             <span class="cursor-pointer hover:text-white transition-colors" onclick="openIdInfoModal('license', event)">License</span>
           </p>
         </div>
-      </div>
-
-      <!-- 第2カード: 試作メッセージカード -->
-      <div class="w-full max-w-sm gyro-card flex flex-col items-center justify-center py-10 px-6 mt-4 relative overflow-hidden text-center select-none" style="min-height: 240px; --glow-x: 0px; --glow-y: 0px; --glow-opacity: 0.08; --edge-opacity: 0.08; --edge-angle: 180deg;">
-        <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-white/0 pointer-events-none rounded-[28px]"></div>
-        <p class="text-sm font-medium text-white/80 leading-loose z-10">
-          ポスティングを、自由に楽しもう。<br>
-          好きなときに、好きな場所から。<br>
-          マップを見ながら街を歩いて、<br>
-          活動した場所を記録できます。<br>
-          自分のペースで、気軽に参加できます。
-        </p>
       </div>
     </div>
   `;
