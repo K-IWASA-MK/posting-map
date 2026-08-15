@@ -55,6 +55,18 @@ window.renderStaffCard = function(userInfo, options = {}) {
           </p>
         </div>
       </div>
+
+      <!-- 第2カード: 試作メッセージカード -->
+      <div class="w-full max-w-sm gyro-card flex flex-col items-center justify-center py-10 px-6 mt-4 relative overflow-hidden text-center select-none" style="min-height: 240px; --glow-x: 0px; --glow-y: 0px; --glow-opacity: 0.08; --edge-opacity: 0.08; --edge-angle: 180deg;">
+        <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-white/0 pointer-events-none rounded-[28px]"></div>
+        <p class="text-sm font-medium text-white/80 leading-loose z-10">
+          ポスティングを、自由に楽しもう。<br>
+          好きなときに、好きな場所から。<br>
+          マップを見ながら街を歩いて、<br>
+          活動した場所を記録できます。<br>
+          自分のペースで、気軽に参加できます。
+        </p>
+      </div>
     </div>
   `;
 };
