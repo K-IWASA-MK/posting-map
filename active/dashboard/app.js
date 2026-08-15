@@ -1593,7 +1593,7 @@ function updateStats(summaryData = null) {
   const pctEl = $('header-pct');
 
   if (!summaryData) {
-    if (countEl) countEl.textContent = '0/ 858';
+    if (countEl) countEl.textContent = '0 / 858';
     if (pctEl) pctEl.textContent = '0%';
     return;
   }
@@ -1602,7 +1602,7 @@ function updateStats(summaryData = null) {
   const done = typeof summaryData.done === 'number' ? summaryData.done : 0;
   const percent = typeof summaryData.percent === 'number' ? summaryData.percent : 0;
 
-  if (countEl) countEl.textContent = `${done}/ ${total}`;
+  if (countEl) countEl.textContent = `${done} / ${total}`;
   if (pctEl) pctEl.textContent = `${percent}%`;
 }
 
