@@ -1130,16 +1130,6 @@ async function switchPage(id, force = false) {
   // すでにアクティブなら多重遷移を防ぐためスキップ
   if (!force && !target.classList.contains('hidden') && target.style.opacity === '1') return;
 
-  // ページ切り替え時に第1層MAP以外の画面であれば is-map-view を除去
-  const mapContentEl = $('content');
-  if (mapContentEl) {
-    if (id === 'areas' && (typeof currentCity === 'undefined' || currentCity === null)) {
-      mapContentEl.classList.add('is-map-view');
-    } else {
-      mapContentEl.classList.remove('is-map-view');
-    }
-  }
-
   // エリア関連のページ切り替えであれば直前のページタイプを記憶
   if (id === 'areas' || id === 'detail') {
     lastAreaSubPage = id;
@@ -1161,6 +1151,16 @@ async function switchPage(id, force = false) {
       p.classList.add('hidden');
       p.style.opacity = '0';
     });
+  }
+
+  // 2. 旧ページが完全に hidden になった後に is-map-view を切り替える
+  const mapContentEl = $('content');
+  if (mapContentEl) {
+    if (id === 'areas' && (typeof currentCity === 'undefined' || currentCity === null)) {
+      mapContentEl.classList.add('is-map-view');
+    } else {
+      mapContentEl.classList.remove('is-map-view');
+    }
   }
 
   // 2. ページに応じた処理・レンダリングを行う
