@@ -2125,7 +2125,7 @@ function openIdInfoModal(type, event) {
       bodyText = bodyText.replace('__BRANCH_NAME__', escapeHtml(displayBranch));
     }
 
-    bodyEl.textContent = bodyText;
+    bodyEl.innerHTML = bodyText;
   }
 
   modal.classList.remove('pointer-events-none', 'opacity-0');
