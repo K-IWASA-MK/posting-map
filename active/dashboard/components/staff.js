@@ -59,6 +59,7 @@ window.renderStaffCard = function(userInfo, options = {}) {
       <!-- 第2カード: メッセージカード -->
       <div class="w-full max-w-sm gyro-card flex flex-col items-center justify-center py-10 px-6 relative overflow-hidden text-center select-none" style="margin-top: 18px; min-height: 240px; --glow-x: 0px; --glow-y: 0px; --glow-opacity: 0.08; --edge-opacity: 0.08; --edge-angle: 180deg;">
         <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-white/0 pointer-events-none rounded-[28px]"></div>
+        <div class="id-ambient-sheen pointer-events-none"></div>
         <p class="id-message-card-text font-medium text-white/80 z-10 text-left w-full">
           <br>
           ポスティングを、自由に楽しもう。<br>
