@@ -504,3 +504,16 @@ select:-webkit-autofill:focus {
   color: #EA5F08;
 }
 
+/* ID画面 第2カード：メッセージテキスト（標準表示は14px固定） */
+.id-message-card-text {
+  font-size: 14px;
+  line-height: 2;
+}
+
+/* 拡大表示（Display Zoom: 幅375px以下 / 320px等）時のみ文字サイズ・行間を縮小 */
+@media (max-width: 375px) {
+  .id-message-card-text {
+    font-size: 12px;
+    line-height: 1.8;
+  }
+}
