@@ -13,7 +13,7 @@ window.renderStaffCard = function(userInfo, options = {}) {
   `;
 
   const formattedId = userInfo.id ? userInfo.id.replace(/^[A-Za-z]+/, 'STAFF ID ') : '';
-  const displayBranch = options.branchName || 'MIE-03 支部';
+  const displayBranch = options.branchName || (window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.districtId ? `${window.PMS_CLIENT_CONFIG.districtId} 支部` : '');
   const lastSyncTime = options.lastSyncTime || '--:--';
   const registrationDate = userInfo.registrationDate || '2025/07/01';
 

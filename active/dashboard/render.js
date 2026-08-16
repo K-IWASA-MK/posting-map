@@ -622,8 +622,8 @@ function renderSettings() {
 
 
   // Normal view mode: Show ID card + assigned area shortcut + edit name button
-  const rawBranch = localStorage.getItem('branch_name') || '';
-  const displayBranch = rawBranch ? (rawBranch.includes('支部') ? rawBranch : `${rawBranch} 支部`) : 'MIE-03 支部';
+  const rawBranch = (window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.districtId) || localStorage.getItem('branch_name') || '';
+  const displayBranch = rawBranch ? (rawBranch.includes('支部') ? rawBranch : `${rawBranch} 支部`) : '';
 
   // Format sync time
   const lastSyncTime = localStorage.getItem('__last_sync_time__') || '--:--';
