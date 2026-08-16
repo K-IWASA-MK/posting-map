@@ -568,3 +568,54 @@ select:-webkit-autofill:focus {
     animation: none;
   }
 }
+
+/* 在庫登録画面 第2カード：Soft Network Pulse（地域連携をイメージした極薄の水平微動流光） */
+.soft-network-pulse {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-card, 24px);
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.soft-network-pulse::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    transparent 40%,
+    rgba(255, 255, 255, 0.032) 50%,
+    transparent 60%,
+    transparent 100%
+  );
+  transform: translateX(-85%);
+  animation: softNetworkPulse 11s cubic-bezier(0.35, 0, 0.25, 1) infinite;
+  will-change: transform;
+}
+
+@keyframes softNetworkPulse {
+  0% {
+    transform: translateX(-85%);
+  }
+  28% {
+    transform: translateX(85%);
+  }
+  100% {
+    transform: translateX(85%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .soft-network-pulse::before {
+    animation: none;
+  }
+}
