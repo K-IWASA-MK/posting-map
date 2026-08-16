@@ -62,9 +62,9 @@ window.renderStaffCard = function(userInfo, options = {}) {
         <p class="id-message-card-text font-medium text-white/80 z-10">
           ポスティングを、自由に楽しもう。<br>
           好きなときに、好きな場所から。<br>
-          マップを見ながら街を歩いて、<br>
+          マップを見ながら街を歩いて<br>
           活動した場所を記録できます。<br>
-          自分のペースで、気軽に参加できます。
+          自分のペースで気軽に参加できます。
         </p>
       </div>
     </div>
