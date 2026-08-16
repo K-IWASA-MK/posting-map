@@ -1537,7 +1537,7 @@ window.submitFlyerStock = async function() {
   }
 
   btn.disabled = true;
-  btn.textContent = "登録中...";
+  btn.textContent = "更新中...";
 
   try {
     const res = await callApiPost('updateFlyerStock', {
@@ -1548,10 +1548,10 @@ window.submitFlyerStock = async function() {
     });
 
     if (res && res.success) {
-      alert("✓ 在庫を登録しました");
+      alert("✓ チラシ枚数を更新しました");
       _stockFetched = false; // キャッシュを無効化し、次回遷移時に最新の在庫を取得させる
     } else {
-      alert("登録に失敗しました: " + (res.message || "エラー"));
+      alert("更新に失敗しました: " + (res.message || "エラー"));
     }
   } catch (e) {
     alert("エラーが発生しました: " + e.message);
