@@ -1448,12 +1448,9 @@ window.updateStorageLocationDropdown = function updateStorageLocationDropdown(ov
   const hasUser = !!localStorage.getItem('user_info');
   if (nav) nav.style.display = hasUser ? '' : 'none';
 
-  // 設定画面（登録・IDカード）では無駄なスクロールを避けるが、画面サイズが小さい場合はスクロール可能にする
   const contentEl = $('content');
-  if (id === 'storage-register') {
+  if (contentEl) {
     contentEl.scrollTop = 0;
-    contentEl.style.overflowY = 'hidden';
-  } else {
     contentEl.style.overflowY = 'auto';
   }
 

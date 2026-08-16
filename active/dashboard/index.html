@@ -152,9 +152,9 @@
       </section>
 
       <!-- STORAGE REGISTER PAGE -->
-      <section id="page-storage-register" class="page hidden flex flex-col justify-center min-h-[calc(100dvh-200px)] py-2">
+      <section id="page-storage-register" class="page hidden space-y-4" style="padding-bottom: 160px; padding-top: 8px;">
         <!-- Form Card -->
-        <div class="premium-glass p-6 space-y-6" style="transform: translateY(-8px); padding-top: 20px; padding-bottom: 20px;">
+        <div class="premium-glass p-6 space-y-6" style="padding-top: 20px; padding-bottom: 20px;">
           <div class="flex justify-center">
             <span style="letter-spacing: 0.12em; background: linear-gradient(180deg, rgba(234,95,8,0.16), rgba(234,95,8,0.06)); border: 1px solid #EA5F08; box-shadow: 0 0 6px rgba(234,95,8,.35), 0 0 12px rgba(234,95,8,.18); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);" class="inline-flex items-center justify-center py-1.5 px-4 text-xs font-black text-white rounded-full">保有チラシ枚数</span>
           </div>
@@ -188,6 +188,10 @@
 
           <!-- Submit Button -->
           <button id="btn-storage-register-submit" onclick="submitFlyerStock()" class="btn-neu w-full bg-[#2563eb] text-white rounded-2xl py-4 text-base font-black shadow-xl uppercase tracking-wider">チラシ枚数を入力する</button>
+        </div>
+
+        <!-- Info Card (第2カード: 空カード) -->
+        <div id="storage-register-info-card" class="premium-glass flex flex-col items-center justify-center py-10 px-6 relative overflow-hidden text-center select-none" style="min-height: 240px;">
         </div>
       </section>
 
