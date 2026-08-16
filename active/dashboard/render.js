@@ -683,12 +683,22 @@ function renderStorageList(stocks) {
   const container = $('storage-list-container');
   if (!container) return;
 
-  // テスト用データを除外
+  const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+  const myStaffId = userInfo.id ? String(userInfo.id).trim() : '';
+
+  // テスト用データおよび「自分のデータ」を除外（他人の在庫のみ共有表示）
   if (stocks && stocks.length > 0) {
     stocks = stocks.filter(s => {
       const name = s.staffName || '';
-      const id = s.staffId || '';
-      return !name.includes('テスト') && !id.toUpperCase().includes('TEST');
+      const id = s.staffId ? String(s.staffId).trim() : '';
+
+      // テストデータの除外
+      if (name.includes('テスト') || id.toUpperCase().includes('TEST')) return false;
+
+      // 自分のレコードは在庫一覧（共有一覧）から除外
+      if (myStaffId && id === myStaffId) return false;
+
+      return true;
     });
   }
 
@@ -696,7 +706,7 @@ function renderStorageList(stocks) {
     container.innerHTML = `
       <div style="border: 1px solid rgba(255,255,255,0.04);" class="premium-glass p-8 flex flex-col items-center justify-center text-center gap-3">
         <span class="text-2xl">📦</span>
-        <p class="text-sm font-black text-white/60">現在、保管されているチラシはありません</p>
+        <p class="text-sm font-black text-white/60">現在、他の方が保管しているチラシはありません</p>
       </div>`;
     return;
   }
@@ -709,11 +719,27 @@ function renderStorageList(stocks) {
     groups[loc].push(s);
   });
 
+  // ADDRESS_MASTER_858.CSV (tier1Cache / ADDRESS_MASTER_DATA) の出現順を SSOT として取得
+  let masterCities = [];
+  if (typeof tier1Cache !== 'undefined' && Array.isArray(tier1Cache) && tier1Cache.length > 0) {
+    masterCities = tier1Cache.map(c => typeof c === 'string' ? c : (c.name || ''));
+  } else if (typeof window !== 'undefined' && window.ADDRESS_MASTER_DATA && Array.isArray(window.ADDRESS_MASTER_DATA)) {
+    const seen = new Set();
+    window.ADDRESS_MASTER_DATA.forEach(row => {
+      if (row.city_name && !seen.has(row.city_name)) {
+        seen.add(row.city_name);
+        masterCities.push(row.city_name);
+      }
+    });
+  }
+
   const sortedLocations = Object.keys(groups).sort((a, b) => {
-    const orderA = CITY_ORDER[a] || 99;
-    const orderB = CITY_ORDER[b] || 99;
+    const idxA = masterCities.indexOf(a);
+    const idxB = masterCities.indexOf(b);
+    const orderA = idxA !== -1 ? idxA : 999;
+    const orderB = idxB !== -1 ? idxB : 999;
     if (orderA !== orderB) return orderA - orderB;
-    return a.localeCompare(b);
+    return a.localeCompare(b); // SSOTに存在しない未知の保管場所のみ五十音順で末尾に配置
   });
 
   const groupsHtml = sortedLocations.map(loc => {
