@@ -61,10 +61,16 @@ window.renderStaffCard = function(userInfo, options = {}) {
         <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-white/0 pointer-events-none rounded-[28px]"></div>
         <p class="id-message-card-text font-medium text-white/80 z-10">
           ポスティングを、自由に楽しもう。<br>
-          好きなときに、好きな場所から。<br>
+          空いてる時間に、近い場所から。<br><br>
+
           マップを見ながら街を歩いて<br>
-          活動した場所を記録できます。<br>
-          自分のペースで気軽に参加できます。
+          自分のペースで、気軽に参加できます。<br><br>
+
+          ポスティングが終わったら<br>
+          配った枚数を入力してね！<br><br>
+
+          ランキングもあります。<br>
+          ぜひチェックしてね！
         </p>
       </div>
     </div>
