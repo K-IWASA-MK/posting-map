@@ -2118,10 +2118,10 @@ function openIdInfoModal(type, event) {
   if (bodyEl) {
     let bodyText = data.body;
 
-    // ライセンス表示時のみ、支部名を動的に差し替える
+    // ライセンス表示時のみ、支部名を動的に差し替える（Google Sheetsシート名・支部識別子SSOTから動的解決）
     if (type === 'license') {
-      const rawBranch = localStorage.getItem('branch_name') || '';
-      const displayBranch = rawBranch ? (rawBranch.includes('支部') ? rawBranch : `${rawBranch} 支部`) : 'MIE-02 支部';
+      const rawBranch = (window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.districtId) || localStorage.getItem('branch_name') || '';
+      const displayBranch = rawBranch ? (rawBranch.includes('支部') ? rawBranch : `${rawBranch} 支部`) : '';
       bodyText = bodyText.replace('__BRANCH_NAME__', escapeHtml(displayBranch));
     }
 
