@@ -432,12 +432,19 @@ function handleRequestFlyerTransfer(data) {
       }
     }
 
-    // 2. 「受渡要請履歴」シートへ保存（履歴保存専用）
+    // 2. 「受渡要請履歴」シートへ保存（履歴保存専用：A〜G列の7項目）
     let sheetName = "受渡要請履歴";
     let s = ss.getSheetByName(sheetName);
+    const expectedHeaders = [["日時", "要請者", "要請者ID", "保管者", "保管者ID", "連絡方法", "連絡先"]];
     if (!s) {
       s = ss.insertSheet(sheetName);
-      s.getRange(1, 1, 1, 8).setValues([["日時", "要請者", "要請者ID", "保管者", "保管者ID", "連絡方法", "連絡先", "状態"]]);
+      s.getRange(1, 1, 1, 7).setValues(expectedHeaders);
+    } else {
+      // 既存シートのヘッダーA1:G1を正規化し、H列（状態）以降の不要ヘッダー/旧データを撤去（A〜G列の既存データは完全保持）
+      s.getRange(1, 1, 1, 7).setValues(expectedHeaders);
+      if (s.getLastColumn() >= 8) {
+        s.getRange(1, 8, s.getLastRow(), s.getLastColumn() - 7).clearContent();
+      }
     }
 
     const now = new Date();
@@ -450,8 +457,7 @@ function handleRequestFlyerTransfer(data) {
       holderName,
       holderUserId,
       contactMethod,
-      contactValue,
-      "申請中"
+      contactValue
     ]);
 
     // 3. 保管者本人だけに LINE プッシュ通知を送信
@@ -503,7 +509,7 @@ function sendLinePushMessage(toUserId, messageText) {
 
 
 
-// 受渡要請履歴の取得 API
+// 受渡要請履歴の取得 API（A〜G列の7項目）
 function getTransferRequests() {
   const ss = getSS();
   const sheetName = "受渡要請履歴";
@@ -511,17 +517,16 @@ function getTransferRequests() {
   if (!s) return [];
   const lastRow = s.getLastRow();
   if (lastRow < 2) return [];
-  const values = s.getRange(2, 1, lastRow - 1, 8).getValues();
+  const values = s.getRange(2, 1, lastRow - 1, 7).getValues();
   return values.map((r, i) => ({
-    rowNumber: i + 2, // 行番号（更新用）
+    rowNumber: i + 2, // 行番号（参照用）
     requestTime: (r[0] && typeof r[0].getMonth === 'function') ? Utilities.formatDate(r[0], "JST", "yyyy/MM/dd HH:mm:ss") : String(r[0] || ''),
     requesterName: r[1],
     requesterId: r[2],
     holderName: r[3],
     holderId: r[4],
     contactMethod: r[5],
-    contactValue: r[6],
-    status: r[7] || "申請中"
+    contactValue: r[6]
   }));
 }
 
