@@ -2182,7 +2182,7 @@ window.openTransferRequestDialog = function(name, id, loc, count) {
 
       <div style="margin-bottom:24px;">
         <label style="display:block;color:rgba(255,255,255,0.45);font-size:11px;font-weight:900;letter-spacing:0.05em;margin-bottom:8px;">【連絡先】</label>
-        <input type="text" id="transfer-contact-value" placeholder="LINE ID / 電話番号 / メールアドレス"
+        <input type="text" id="transfer-contact-value" placeholder="LINE ID"
           style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:12px 14px;color:white;font-size:14px;font-weight:700;outline:none;" />
       </div>
 
@@ -2194,6 +2194,21 @@ window.openTransferRequestDialog = function(name, id, loc, count) {
   `;
 
   document.body.appendChild(overlay);
+
+  const contactValueInput = document.getElementById('transfer-contact-value');
+  const methodPlaceholders = {
+    'LINE': 'LINE ID',
+    '電話': '電話番号',
+    'メール': 'メールアドレス'
+  };
+
+  document.querySelectorAll('input[name="contact-method"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      if (contactValueInput) {
+        contactValueInput.placeholder = methodPlaceholders[e.target.value] || '連絡先を入力';
+      }
+    });
+  });
 
   document.getElementById('dyn-cancel').addEventListener('click', () => overlay.remove());
 
