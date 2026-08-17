@@ -2159,10 +2159,10 @@ window.openTransferRequestDialog = function(name, id, loc, count) {
     <div style="background:#1C1C1E;border-radius:24px;border:1px solid rgba(255,255,255,0.12);padding:28px 20px;width:100%;max-width:340px;box-sizing:border-box;">
       <div style="text-align:center;margin-bottom:20px;">
         <div style="font-size:24px;margin-bottom:8px;">📦</div>
-        <div style="color:white;font-size:16px;font-weight:900;letter-spacing:0.05em;text-align:center;">受渡要請</div>
-        <div style="color:rgba(255,255,255,0.7);font-size:13px;font-weight:700;margin-top:8px;line-height:1.5;text-align:center;">
-          ${escapeHtml(id)}さんとの<br>連絡方法を入力してください。
-        </div>
+        <div style="color:white;font-size:16px;font-weight:900;letter-spacing:0.05em;">受渡要請</div>
+      </div>
+      <div style="color:rgba(255,255,255,0.7);font-size:13px;font-weight:700;margin-bottom:20px;line-height:1.5;text-align:left;">
+        ${escapeHtml(id)}さんとの<br>連絡方法を入力してください。
       </div>
 
       <div style="margin-bottom:16px;">
