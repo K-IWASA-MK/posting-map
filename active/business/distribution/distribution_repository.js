@@ -163,12 +163,22 @@ if (typeof DistributionRepository === 'undefined') {
         return a.staffId.localeCompare(b.staffId);
       });
 
-      return list.map((item, index) => ({
-        rank: index + 1,
-        staffId: item.staffId,
-        name: item.name,
-        count: item.count
-      }));
+      let currentRank = 0;
+      let previousCount = null;
+
+      return list.map((item, index) => {
+        if (previousCount === null || item.count !== previousCount) {
+          currentRank = index + 1;
+        }
+        previousCount = item.count;
+
+        return {
+          rank: currentRank,
+          staffId: item.staffId,
+          name: item.name,
+          count: item.count
+        };
+      });
     }
   };
   DistributionRepository.instance = null;
