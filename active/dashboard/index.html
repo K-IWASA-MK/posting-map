@@ -233,16 +233,36 @@
       </section>
 
       <!-- STORAGE LIST PAGE -->
-      <section id="page-storage-list" class="page hidden space-y-8" style="padding-bottom: 160px;">
-        <!-- Section Header Card -->
-        <div style="border: 1px solid rgba(37, 99, 235, 0.35); box-shadow: inset 0 0 15px rgba(37,99,235,0.08), 0 0 25px rgba(37,99,235,0.12);" class="premium-glass py-5 px-6 flex flex-col items-center justify-center text-center gap-2">
-          <div class="w-8 h-8 rounded-xl bg-[#2563eb]/10 border border-[#2563eb]/20 flex items-center justify-center shadow-lg shadow-[#2563eb]/10 mb-0.5">
-            <span class="text-sm">📊</span>
+      <section id="page-storage-list" class="page hidden space-y-6" style="padding-bottom: 160px; padding-top: 8px;">
+        <!-- 第1カード: 「チラシを探している人へ」説明カード -->
+        <div id="storage-list-guide-card" class="premium-glass flex flex-col items-center justify-center py-10 px-6 relative overflow-hidden text-center select-none" style="min-height: 240px;">
+          <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-white/0 pointer-events-none rounded-[28px]"></div>
+          <div class="soft-network-pulse pointer-events-none"></div>
+
+          <div class="text-center mb-4 z-10">
+            <div style="font-size: 24px; margin-bottom: 6px;">📦</div>
+            <h3 class="text-base font-black tracking-wider text-white">チラシを探している人へ</h3>
           </div>
-          <div>
-            <h3 class="text-sm font-black tracking-wider text-white">保管状況一覧</h3>
-            <p class="text-[10px] font-bold text-[#2563eb] mt-0.5 uppercase tracking-widest font-mono">FLYER STOCK INVENTORY</p>
-          </div>
+
+          <p class="id-message-card-text font-medium text-white/80 z-10 text-left w-full">
+            <br>
+            必要なチラシを保有している人を<br>
+            市区町村から探してください。<br><br>
+
+            希望する人が見つかったら<br>
+            「受渡要請」を送れます。<br><br>
+
+            受渡要請では、<br>
+            あなたの連絡方法と連絡先を入力してください。<br><br>
+
+            「受渡要請を送る」ボタンを押すと<br>
+            保有者にLINEで通知されます。<br><br>
+
+            保有者は、<br>
+            あなたが提示した連絡手段に合わせて<br>
+            直接連絡します。<br>
+            <br>
+          </p>
         </div>
 
         <!-- Grouped List Container -->
