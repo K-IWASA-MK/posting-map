@@ -94,10 +94,81 @@ if (typeof DistributionRepository === 'undefined') {
     }
 
     fetchRankingData() {
-      if (typeof getRankingDataCore === 'function') {
-        return getRankingDataCore();
+      const ss = this.getSS();
+      if (!ss) return [];
+
+      const sheet = ss.getSheetByName("配布実績");
+      if (!sheet) return [];
+
+      const lastRow = sheet.getLastRow();
+      if (lastRow < 2) return [];
+
+      // A: rowId, B: cityName, C: townName, D: completedAt, E: count, F: staffId, G: staffName
+      const values = sheet.getRange(2, 1, lastRow - 1, 7).getValues();
+      const staffMap = {};
+
+      for (let i = 0; i < values.length; i++) {
+        const row = values[i];
+        const rawCompletedAt = row[3];
+        const count = parseFloat(row[4]) || 0;
+        const staffId = row[5] ? String(row[5]).trim() : "";
+        const staffName = row[6] ? String(row[6]).trim() : "";
+
+        // 必須条件: completedAt が存在、staffId が存在、count > 0
+        if (!rawCompletedAt || !staffId || count <= 0) continue;
+
+        // 日時正規化処理（Date型または文字列からミリ秒タイムスタンプへ安全にパース）
+        let timeVal = 0;
+        if (rawCompletedAt instanceof Date && !isNaN(rawCompletedAt.getTime())) {
+          timeVal = rawCompletedAt.getTime();
+        } else if (typeof rawCompletedAt === 'string') {
+          const trimmedDate = rawCompletedAt.trim();
+          if (trimmedDate !== "") {
+            const parsed = Date.parse(trimmedDate.replace(/-/g, '/'));
+            if (!isNaN(parsed)) {
+              timeVal = parsed;
+            }
+          }
+        } else if (typeof rawCompletedAt === 'number' && rawCompletedAt > 0) {
+          timeVal = rawCompletedAt;
+        }
+
+        if (!staffMap[staffId]) {
+          staffMap[staffId] = {
+            staffId: staffId,
+            name: staffName || staffId,
+            count: 0,
+            latestTimestamp: timeVal
+          };
+        }
+
+        staffMap[staffId].count += count;
+
+        // staffName は completedAt が最新のレコードを採用
+        if (timeVal > staffMap[staffId].latestTimestamp) {
+          staffMap[staffId].latestTimestamp = timeVal;
+          if (staffName) {
+            staffMap[staffId].name = staffName;
+          }
+        }
       }
-      return [];
+
+      const list = Object.values(staffMap);
+
+      // ソート: ① count 降順, ② 同数時は staffId 昇順
+      list.sort((a, b) => {
+        if (b.count !== a.count) {
+          return b.count - a.count;
+        }
+        return a.staffId.localeCompare(b.staffId);
+      });
+
+      return list.map((item, index) => ({
+        rank: index + 1,
+        staffId: item.staffId,
+        name: item.name,
+        count: item.count
+      }));
     }
   };
   DistributionRepository.instance = null;

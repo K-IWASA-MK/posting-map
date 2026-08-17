@@ -15,25 +15,10 @@
  * 個人別配布枚数ランキング
  */
 function getRankingDataCore() {
-  const logs = [];
-  const staffRanking = {};
-  
-  logs.forEach(log => {
-    if (log.actionType !== "distribute") return;
-    const staffName = log.meta && log.meta.staffName ? log.meta.staffName : log.userId;
-    if (!staffName || staffName === "UNKNOWN") return;
-    
-    if (!staffRanking[staffName]) {
-      staffRanking[staffName] = 0;
-    }
-    staffRanking[staffName] += log.count;
-  });
-  
-  const rankingList = Object.entries(staffRanking)
-    .map(([name, count]) => ({ name: name, count: count }))
-    .sort((a, b) => b.count - a.count);
-    
-  return rankingList;
+  if (typeof DistributionRepository !== 'undefined' && DistributionRepository.getInstance) {
+    return DistributionRepository.getInstance().fetchRankingData();
+  }
+  return [];
 }
 
 /**
