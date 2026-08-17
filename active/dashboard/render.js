@@ -898,7 +898,7 @@ window.initMainMap = function() {
     center: window.currentMapState?.center || { lat: 35.05, lng: 136.65 },
     zoom: window.currentMapState?.zoom || 11,
     disableDefaultUI: true,
-    zoomControl: true,
+    zoomControl: false,
     clickableIcons: false,
     styles: appleStyle
   });
