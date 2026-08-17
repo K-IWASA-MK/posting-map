@@ -381,78 +381,78 @@ function renderDetailModalContent(p) {
           </div>
         </div>
       ` : `
-        <!-- 【完了確認】MISSION COMPLETED 大見出しカード -->
-        <div style="background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.25); box-shadow: 0 0 24px rgba(16, 185, 129, 0.08);" class="w-full rounded-3xl p-5 flex flex-col items-center justify-center text-center gap-2">
-          <div class="w-10 h-10 rounded-full bg-[#10b981]/20 border border-[#10b981]/40 flex items-center justify-center text-[#10b981] font-black text-lg">
+        <!-- 【完了確認】MISSION COMPLETED 大見出しカード (コンパクト化) -->
+        <div style="background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.25); box-shadow: 0 0 20px rgba(16, 185, 129, 0.08); border-radius: 20px; padding: 14px 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; box-sizing: border-box; width: 100%;">
+          <div style="width: 28px; height: 28px; border-radius: 9999px; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); display: flex; align-items: center; justify-content: center; color: #10b981; font-weight: 900; font-size: 14px;">
             ✓
           </div>
-          <div class="text-base font-black uppercase tracking-wider text-[#10b981]">
+          <div style="font-size: 13px; font-weight: 900; letter-spacing: 0.08em; color: #10b981; text-transform: uppercase;">
             MISSION COMPLETED!
           </div>
-          <div class="text-xs font-bold text-white/70">
+          <div style="font-size: 11px; font-weight: 700; color: rgba(255, 255, 255, 0.7);">
             配布が完了しました
           </div>
-          <div class="text-[11px] font-bold text-white/40 mt-1">
+          <div style="font-size: 10px; font-weight: 700; color: rgba(255, 255, 255, 0.4); margin-top: 2px;">
             🕒 ${p.completedAt || ''}${p.staffName ? ` · ${escapeHtml(p.staffName)}` : ''}
           </div>
         </div>
 
         <!-- 【中央2カラムエリア】左: 提出写真 / 右: GPS・枚数・配布員 -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%;">
+        <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; width: 100%; box-sizing: border-box;">
           <!-- 左カラム: 提出写真 -->
-          <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);" class="rounded-2xl p-3 flex flex-col items-center justify-between gap-2.5">
-            <div class="text-[11px] font-black text-white/50 w-full flex items-center gap-1.5">
+          <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 6px; box-sizing: border-box; overflow: hidden;">
+            <div style="font-size: 10px; font-weight: 900; color: rgba(255, 255, 255, 0.5); width: 100%; display: flex; align-items: center; gap: 4px;">
               <span>📷</span><span>提出写真</span>
             </div>
-            <div class="w-full aspect-square rounded-xl overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center">
+            <div style="width: 100%; aspect-ratio: 1 / 1; border-radius: 10px; overflow: hidden; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center;">
               ${(p.tempPhotoUrl || p.photoUrl) ? `
-                <img src="${p.tempPhotoUrl || p.photoUrl}" alt="Evidence" class="w-full h-full object-cover" />
+                <img src="${p.tempPhotoUrl || p.photoUrl}" alt="Evidence" style="width: 100%; height: 100%; object-fit: cover;" />
               ` : `
-                <span class="text-xs text-white/30">写真なし</span>
+                <span style="font-size: 10px; color: rgba(255, 255, 255, 0.3);">写真なし</span>
               `}
             </div>
-            <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); color: #10b981;" class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full flex items-center gap-1 tracking-wider">
+            <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); color: #10b981; font-size: 8.5px; font-weight: 900; padding: 2px 6px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; letter-spacing: 0.04em;">
               <span>🛡️</span><span>PHOTO VERIFIED</span>
             </div>
-            <div class="text-[9px] font-bold text-white/40 text-center">
+            <div style="font-size: 9px; font-weight: 700; color: rgba(255, 255, 255, 0.4); text-align: center; white-space: nowrap;">
               写真を確認しました
             </div>
           </div>
 
           <!-- 右カラム: GPS・配布数・配布員（3段） -->
-          <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+          <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; box-sizing: border-box; justify-content: space-between;">
             <!-- 1. GPS位置情報 -->
-            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);" class="rounded-2xl p-2.5 flex flex-col gap-1">
-              <div class="flex items-center justify-between">
-                <span class="text-[10px] font-black text-white/50 flex items-center gap-1">📍 GPS位置情報</span>
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 8px 9px; display: flex; flex-direction: column; gap: 2px; box-sizing: border-box; overflow: hidden;">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 2px; width: 100%;">
+                <span style="font-size: 9.5px; font-weight: 900; color: rgba(255, 255, 255, 0.5); display: flex; align-items: center; gap: 2px; white-space: nowrap;">📍 GPS</span>
                 ${(p.gpsStatus === 'OK' || p.gps || p.latitude) ? `
-                  <span style="background: rgba(16, 185, 129, 0.12); color: #10b981;" class="text-[8px] font-black px-1.5 py-0.5 rounded">取得済み</span>
+                  <span style="background: rgba(16, 185, 129, 0.12); color: #10b981; font-size: 7.5px; font-weight: 900; padding: 1px 4px; border-radius: 4px; white-space: nowrap;">取得済み</span>
                 ` : p.gpsStatus === 'pending' ? `
-                  <span style="background: rgba(37, 99, 235, 0.12); color: #60a5fa;" class="text-[8px] font-black px-1.5 py-0.5 rounded animate-pulse">取得中...</span>
+                  <span style="background: rgba(37, 99, 235, 0.12); color: #60a5fa; font-size: 7.5px; font-weight: 900; padding: 1px 4px; border-radius: 4px; white-space: nowrap;">取得中...</span>
                 ` : `
-                  <span style="background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.5);" class="text-[8px] font-black px-1.5 py-0.5 rounded">未取得</span>
+                  <span style="background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.5); font-size: 7.5px; font-weight: 900; padding: 1px 4px; border-radius: 4px; white-space: nowrap;">未取得</span>
                 `}
               </div>
-              <div class="text-[10px] font-mono font-bold ${(p.gps || p.latitude) ? 'text-white/80' : 'text-white/40'} truncate">
+              <div style="font-size: 9px; font-family: monospace; font-weight: 700; color: ${(p.gps || p.latitude) ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.4)'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;">
                 ${p.gps || (p.latitude && p.longitude ? `${String(p.latitude).slice(0,9)}, ${String(p.longitude).slice(0,10)}` : (p.gpsStatus === 'pending' ? '測位中...' : '位置情報なし (GPSオフ)'))}
               </div>
-              <div class="text-[8px] font-bold text-white/30">
-                ${(p.gps || p.latitude) ? `精度: ±${p.accuracy ? Math.round(p.accuracy) : 5}m · 取得: ${(p.completedAt || '').split(' ')[1] || ''}` : '※GPS未取得でも提出できます'}
+              <div style="font-size: 7.5px; font-weight: 700; color: rgba(255, 255, 255, 0.3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                ${(p.gps || p.latitude) ? `精度: ±${p.accuracy ? Math.round(p.accuracy) : 5}m · ${(p.completedAt || '').split(' ')[1] || ''}` : '※未取得でも提出できます'}
               </div>
             </div>
 
-            <!-- 2. 配布枚数（右詰め） -->
-            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);" class="rounded-2xl p-2.5 flex flex-col justify-center gap-0.5 flex-1">
-              <div class="text-[10px] font-black text-white/50 flex items-center gap-1">📄 配布枚数</div>
-              <div class="text-2xl font-black text-[#10b981] font-mono tracking-tight leading-none my-1 text-right w-full">
+            <!-- 2. 配布枚数（右詰め・コンパクト化） -->
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 8px 9px; display: flex; flex-direction: column; justify-content: center; gap: 1px; box-sizing: border-box; overflow: hidden;">
+              <div style="font-size: 9.5px; font-weight: 900; color: rgba(255, 255, 255, 0.5); display: flex; align-items: center; gap: 2px;">📄 配布枚数</div>
+              <div style="font-size: 18px; font-weight: 900; color: #10b981; font-family: monospace; text-align: right; width: 100%; line-height: 1.1; margin-top: 2px; letter-spacing: -0.02em;">
                 ${p.count || 0}枚
               </div>
             </div>
 
-            <!-- 3. 配布員（右詰め） -->
-            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);" class="rounded-2xl p-2.5 flex flex-col gap-0.5">
-              <div class="text-[10px] font-black text-white/50 flex items-center gap-1">👤 配布員</div>
-              <div class="text-xs font-black text-white/90 truncate text-right w-full">
+            <!-- 3. 配布員（右詰め・コンパクト化） -->
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 8px 9px; display: flex; flex-direction: column; justify-content: center; gap: 1px; box-sizing: border-box; overflow: hidden;">
+              <div style="font-size: 9.5px; font-weight: 900; color: rgba(255, 255, 255, 0.5); display: flex; align-items: center; gap: 2px;">👤 配布員</div>
+              <div style="font-size: 11px; font-weight: 900; color: rgba(255, 255, 255, 0.9); text-align: right; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                 ${escapeHtml(p.staffName || '担当者')}
               </div>
             </div>
@@ -460,30 +460,30 @@ function renderDetailModalContent(p) {
         </div>
 
         <!-- 【注意文バー】 -->
-        <div style="background: rgba(245, 158, 11, 0.06); border: 1px solid rgba(245, 158, 11, 0.2); color: rgba(245, 158, 11, 0.9);" class="w-full rounded-2xl py-2.5 px-3 flex items-center justify-center gap-1.5 text-[11px] font-bold">
+        <div style="background: rgba(245, 158, 11, 0.06); border: 1px solid rgba(245, 158, 11, 0.2); color: rgba(245, 158, 11, 0.9); border-radius: 14px; padding: 8px 10px; display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 10.5px; font-weight: 700; width: 100%; box-sizing: border-box;">
           <span>⚠️</span><span>提出すると配布実績として記録されます</span>
         </div>
 
         <!-- 【アクションボタン】上: 提出(ブルー) / 下: キャンセル(ダークグレー) -->
-        <div class="w-full flex flex-col gap-2.5">
+        <div style="width: 100%; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box;">
           <!-- 提出ボタン (ブルー) -->
-          <button type="button" ontouchstart="" onclick="submitMissionComplete('${escapeHtml(areaName)}', ${p.rowId})" class="btn-neu w-full"
-            style="background: #2563eb; border: none; color: white; border-radius: 14px; padding: 14px 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: transform 0.12s ease, opacity 0.12s ease; display: flex; flex-direction: column; items-center; justify-content: center; gap: 2px;"
+          <button type="button" ontouchstart="" onclick="submitMissionComplete('${escapeHtml(areaName)}', ${p.rowId})" class="btn-neu"
+            style="width: 100%; background: #2563eb; border: none; color: white; border-radius: 14px; padding: 12px 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: transform 0.12s ease, opacity 0.12s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; box-sizing: border-box;"
             onpointerdown="this.style.transform='scale(0.97)'; this.style.opacity='0.85';"
             onpointerup="this.style.transform='scale(1)'; this.style.opacity='1';"
             onpointerleave="this.style.transform='scale(1)'; this.style.opacity='1';">
-            <span class="flex items-center justify-center gap-1.5 text-sm">🚀 この内容で提出する</span>
-            <span class="text-[10px] font-normal text-white/70">配布実績として記録されます</span>
+            <span style="display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: 900;">🚀 この内容で提出する</span>
+            <span style="font-size: 9.5px; font-weight: 400; color: rgba(255, 255, 255, 0.7);">配布実績として記録されます</span>
           </button>
 
           <!-- キャンセルボタン (ダークグレー) -->
-          <button type="button" ontouchstart="" onclick="closeDetailModal()" class="w-full"
-            style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6); border-radius: 14px; padding: 12px 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: transform 0.12s ease, opacity 0.12s ease; display: flex; flex-direction: column; items-center; justify-content: center; gap: 2px;"
+          <button type="button" ontouchstart="" onclick="closeDetailModal()"
+            style="width: 100%; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6); border-radius: 14px; padding: 10px 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: transform 0.12s ease, opacity 0.12s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; box-sizing: border-box;"
             onpointerdown="this.style.transform='scale(0.97)'; this.style.opacity='0.7';"
             onpointerup="this.style.transform='scale(1)'; this.style.opacity='1';"
             onpointerleave="this.style.transform='scale(1)'; this.style.opacity='1';">
-            <span class="flex items-center justify-center gap-1.5">✕ キャンセル</span>
-            <span class="text-[10px] font-normal text-white/40">入力を中止して戻る</span>
+            <span style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 12px; font-weight: 900;">✕ キャンセル</span>
+            <span style="font-size: 9px; font-weight: 400; color: rgba(255, 255, 255, 0.4);">入力を中止して戻る</span>
           </button>
         </div>
       `}
