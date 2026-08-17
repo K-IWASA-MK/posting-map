@@ -2161,7 +2161,7 @@ window.openTransferRequestDialog = function(name, id, loc, count) {
         <div style="font-size:24px;margin-bottom:8px;">📦</div>
         <div style="color:white;font-size:16px;font-weight:900;letter-spacing:0.05em;">受渡要請</div>
         <div style="color:rgba(255,255,255,0.7);font-size:13px;font-weight:700;margin-top:8px;line-height:1.5;">
-          ${escapeHtml(id)}さんとの<br>連絡方法を入力してください。
+          ${escapeHtml(id)}さんとの連絡方法を入力してください。
         </div>
       </div>
 
@@ -2187,8 +2187,16 @@ window.openTransferRequestDialog = function(name, id, loc, count) {
       </div>
 
       <div style="display:flex;gap:10px;">
-        <button id="dyn-cancel" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);border-radius:14px;padding:14px 8px;font-size:13px;font-weight:900;cursor:pointer;">キャンセル</button>
-        <button id="dyn-submit" style="flex:2;background:#2563eb;border:none;color:white;border-radius:14px;padding:14px 8px;font-size:13px;font-weight:900;cursor:pointer;">受渡要請を送る</button>
+        <button id="dyn-cancel"
+          style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);border-radius:14px;padding:14px 8px;font-size:13px;font-weight:900;cursor:pointer;transition:transform 0.12s ease, opacity 0.12s ease;"
+          onpointerdown="this.style.transform='scale(0.94)'; this.style.opacity='0.7';"
+          onpointerup="this.style.transform='scale(1)'; this.style.opacity='1';"
+          onpointerleave="this.style.transform='scale(1)'; this.style.opacity='1';">キャンセル</button>
+        <button id="dyn-submit" class="btn-neu"
+          style="flex:2;background:#2563eb;border:none;color:white;border-radius:14px;padding:14px 8px;font-size:13px;font-weight:900;cursor:pointer;transition:transform 0.12s ease, opacity 0.12s ease;"
+          onpointerdown="this.style.transform='scale(0.96)'; this.style.opacity='0.85';"
+          onpointerup="this.style.transform='scale(1)'; this.style.opacity='1';"
+          onpointerleave="this.style.transform='scale(1)'; this.style.opacity='1';">受渡要請を送る</button>
       </div>
     </div>
   `;
