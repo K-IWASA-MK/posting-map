@@ -80,23 +80,15 @@ if (typeof FlyerRepository === 'undefined') {
         }
 
         let targetRow = 0;
-        let existingCount = 0;
-        let existingLocation = "";
-
         for (let i = 0; i < values.length; i++) {
           if (values[i][1] === staffId) {
             targetRow = i + 2;
-            existingCount = parseFloat(values[i][4]) || 0;
-            existingLocation = values[i][3];
             break;
           }
         }
 
         if (targetRow > 0) {
-          if (existingLocation !== location) {
-            return { success: false, message: "このIDはすでに " + existingLocation + " で登録されています。他の市には登録できません。" };
-          }
-          // updateStock() は現在保有しているチラシ枚数を絶対値で保存する。加算・減算・差分計算は一切行わない。
+          // updateStock() は現在保有しているチラシ枚数および保管場所を最新の入力値で保存する。加算・減算・差分計算は一切行わない。
           const finalCount = count;
           s.getRange(targetRow, 3, 1, 4).setValues([[staffName, location, finalCount, updatedAt]]);
         } else {
