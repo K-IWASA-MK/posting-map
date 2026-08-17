@@ -305,6 +305,16 @@ window.fetchGlobalPinStatus = async function() {
 };
 
 window.setPinInProgress = async function(rowId, action) {
+  const numericRowId = parseInt(rowId, 10);
+  if (!isNaN(numericRowId) && window.globalPinStatus && Array.isArray(window.globalPinStatus.inProgress)) {
+    if (action === "remove") {
+      window.globalPinStatus.inProgress = window.globalPinStatus.inProgress.filter(id => id !== numericRowId);
+    } else if (action === "add") {
+      if (!window.globalPinStatus.inProgress.includes(numericRowId)) {
+        window.globalPinStatus.inProgress.push(numericRowId);
+      }
+    }
+  }
   try {
     await callApiPost('setPinInProgress', { rowId: rowId, pinAction: action });
   } catch (err) {
