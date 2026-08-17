@@ -381,48 +381,112 @@ function renderDetailModalContent(p) {
           </div>
         </div>
       ` : `
-        <!-- 【完了済み】編集ロックがかかった上品なグリーンステータス表示 -->
-        <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.1), 0 0 30px rgba(16, 185, 129, 0.05);" class="w-full rounded-3xl py-6 px-5 flex flex-col items-center justify-center gap-4">
+        <!-- 【完了確認】MISSION COMPLETED 大見出しカード -->
+        <div style="background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.25); box-shadow: 0 0 24px rgba(16, 185, 129, 0.08);" class="w-full rounded-3xl p-5 flex flex-col items-center justify-center text-center gap-2">
+          <div class="w-10 h-10 rounded-full bg-[#10b981]/20 border border-[#10b981]/40 flex items-center justify-center text-[#10b981] font-black text-lg">
+            ✓
+          </div>
+          <div class="text-base font-black uppercase tracking-wider text-[#10b981]">
+            MISSION COMPLETED!
+          </div>
+          <div class="text-xs font-bold text-white/70">
+            配布が完了しました
+          </div>
+          <div class="text-[11px] font-bold text-white/40 mt-1">
+            🕒 ${p.completedAt || ''}${p.staffName ? ` · ${escapeHtml(p.staffName)}` : ''}
+          </div>
+        </div>
 
-          <!-- 1. テキスト（中央揃え） -->
-          <div class="flex flex-col items-center select-none text-center">
-            <div class="flex items-center justify-center gap-1.5">
-              <span class="text-xs">🔒</span>
-              <span class="text-[10px] font-black uppercase tracking-widest text-[#10b981]">MISSION COMPLETED</span>
+        <!-- 【中央2カラムエリア】左: 提出写真 / 右: GPS・枚数・配布員 -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%;">
+          <!-- 左カラム: 提出写真 -->
+          <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);" class="rounded-2xl p-3 flex flex-col items-center justify-between gap-2.5">
+            <div class="text-[11px] font-black text-white/50 w-full flex items-center gap-1.5">
+              <span>📷</span><span>提出写真</span>
             </div>
-            <span class="text-xs font-bold text-white/80 mt-1">${p.completedAt ? `${formatCompletedAt(p.completedAt)}${p.staffName ? ` · ${escapeHtml(p.staffName)}` : ''}` : ''}</span>
+            <div class="w-full aspect-square rounded-xl overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center">
+              ${(p.tempPhotoUrl || p.photoUrl) ? `
+                <img src="${p.tempPhotoUrl || p.photoUrl}" alt="Evidence" class="w-full h-full object-cover" />
+              ` : `
+                <span class="text-xs text-white/30">写真なし</span>
+              `}
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); color: #10b981;" class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full flex items-center gap-1 tracking-wider">
+              <span>🛡️</span><span>PHOTO VERIFIED</span>
+            </div>
+            <div class="text-[9px] font-bold text-white/40 text-center">
+              写真を確認しました
+            </div>
           </div>
 
-          ${syncLabelHtml ? `<div class="w-full flex justify-center mt-1">${syncLabelHtml.replace('ml-auto', '')}</div>` : ''}
+          <!-- 右カラム: GPS・配布数・配布員（3段） -->
+          <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+            <!-- 1. GPS位置情報 -->
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);" class="rounded-2xl p-2.5 flex flex-col gap-1">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-black text-white/50 flex items-center gap-1">📍 GPS位置情報</span>
+                ${(p.gpsStatus === 'OK' || p.gps || p.latitude) ? `
+                  <span style="background: rgba(16, 185, 129, 0.12); color: #10b981;" class="text-[8px] font-black px-1.5 py-0.5 rounded">取得済み</span>
+                ` : p.gpsStatus === 'pending' ? `
+                  <span style="background: rgba(37, 99, 235, 0.12); color: #60a5fa;" class="text-[8px] font-black px-1.5 py-0.5 rounded animate-pulse">取得中...</span>
+                ` : `
+                  <span style="background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.5);" class="text-[8px] font-black px-1.5 py-0.5 rounded">未取得</span>
+                `}
+              </div>
+              <div class="text-[10px] font-mono font-bold ${(p.gps || p.latitude) ? 'text-white/80' : 'text-white/40'} truncate">
+                ${p.gps || (p.latitude && p.longitude ? `${String(p.latitude).slice(0,9)}, ${String(p.longitude).slice(0,10)}` : (p.gpsStatus === 'pending' ? '測位中...' : '位置情報なし (GPSオフ)'))}
+              </div>
+              <div class="text-[8px] font-bold text-white/30">
+                ${(p.gps || p.latitude) ? `精度: ±${p.accuracy ? Math.round(p.accuracy) : 5}m · 取得: ${(p.completedAt || '').split(' ')[1] || ''}` : '※GPS未取得でも提出できます'}
+              </div>
+            </div>
+
+            <!-- 2. 配布枚数（右詰め） -->
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);" class="rounded-2xl p-2.5 flex flex-col justify-center gap-0.5 flex-1">
+              <div class="text-[10px] font-black text-white/50 flex items-center gap-1">📄 配布枚数</div>
+              <div class="text-2xl font-black text-[#10b981] font-mono tracking-tight leading-none my-1 text-right w-full">
+                ${p.count || 0}枚
+              </div>
+            </div>
+
+            <!-- 3. 配布員（右詰め） -->
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);" class="rounded-2xl p-2.5 flex flex-col gap-0.5">
+              <div class="text-[10px] font-black text-white/50 flex items-center gap-1">👤 配布員</div>
+              <div class="text-xs font-black text-white/90 truncate text-right w-full">
+                ${escapeHtml(p.staffName || '担当者')}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 【注意文バー】 -->
+        <div style="background: rgba(245, 158, 11, 0.06); border: 1px solid rgba(245, 158, 11, 0.2); color: rgba(245, 158, 11, 0.9);" class="w-full rounded-2xl py-2.5 px-3 flex items-center justify-center gap-1.5 text-[11px] font-bold">
+          <span>⚠️</span><span>提出すると配布実績として記録されます</span>
+        </div>
+
+        <!-- 【アクションボタン】上: 提出(ブルー) / 下: キャンセル(ダークグレー) -->
+        <div class="w-full flex flex-col gap-2.5">
+          <!-- 提出ボタン (ブルー) -->
+          <button type="button" ontouchstart="" onclick="submitMissionComplete('${escapeHtml(areaName)}', ${p.rowId})" class="btn-neu w-full"
+            style="background: #2563eb; border: none; color: white; border-radius: 14px; padding: 14px 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: transform 0.12s ease, opacity 0.12s ease; display: flex; flex-direction: column; items-center; justify-content: center; gap: 2px;"
+            onpointerdown="this.style.transform='scale(0.97)'; this.style.opacity='0.85';"
+            onpointerup="this.style.transform='scale(1)'; this.style.opacity='1';"
+            onpointerleave="this.style.transform='scale(1)'; this.style.opacity='1';">
+            <span class="flex items-center justify-center gap-1.5 text-sm">🚀 この内容で提出する</span>
+            <span class="text-[10px] font-normal text-white/70">配布実績として記録されます</span>
+          </button>
+
+          <!-- キャンセルボタン (ダークグレー) -->
+          <button type="button" ontouchstart="" onclick="closeDetailModal()" class="w-full"
+            style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6); border-radius: 14px; padding: 12px 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: transform 0.12s ease, opacity 0.12s ease; display: flex; flex-direction: column; items-center; justify-content: center; gap: 2px;"
+            onpointerdown="this.style.transform='scale(0.97)'; this.style.opacity='0.7';"
+            onpointerup="this.style.transform='scale(1)'; this.style.opacity='1';"
+            onpointerleave="this.style.transform='scale(1)'; this.style.opacity='1';">
+            <span class="flex items-center justify-center gap-1.5">✕ キャンセル</span>
+            <span class="text-[10px] font-normal text-white/40">入力を中止して戻る</span>
+          </button>
         </div>
       `}
-
-      ${p.isDone ? `
-        ${gpsBadgeHtml}
-
-        ${photoBlockHtml}
-
-        <!-- 【配布数】上2つの証拠カードと枠サイズ・デザイン・青色テーマを完全統一 -->
-        <div style="background: rgba(37, 99, 235, 0.05); border: 1.5px solid rgba(37, 99, 235, 0.4); box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.15), 0 0 30px rgba(37, 99, 235, 0.05);" class="w-full rounded-2xl py-4 px-5 flex flex-col items-center justify-center">
-          <div class="text-3xl font-black text-[#2563eb] text-center tracking-tight">
-            配布数 ${p.count || 0}枚
-          </div>
-          ${!isLocked ? `
-            <button onclick="openNumpad('${escapeHtml(areaName)}', ${p.rowId}, ${p.count || 0})" class="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white/80 active:scale-95 transition-all mt-2">枚数変更</button>
-          ` : ''}
-        </div>
-
-        <!-- 4行目: この内容で提出する（閉じる）ボタン -->
-        ${p.gpsStatus === 'pending' ? `
-        <button disabled style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.5);" class="w-full h-12 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest rounded-2xl mt-2 cursor-not-allowed">
-          🔒 GPS取得中...
-        </button>
-        ` : `
-        <button ontouchstart="" onclick="submitMissionComplete('${escapeHtml(areaName)}', ${p.rowId})" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); color: #10b981; box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), inset 0 0 6px rgba(16,185,129,0.1), 0 0 12px rgba(16,185,129,0.05); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);" class="w-full h-12 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest rounded-2xl active:scale-95 active:translate-y-[2px] transition-all duration-75 mt-2">
-          ✅ この内容で提出する
-        </button>
-        `}
-      ` : ''}
     </div>
   `;
 }
