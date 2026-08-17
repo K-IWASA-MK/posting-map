@@ -33,7 +33,7 @@ window.renderRankingCard = function(rankingData, myStaffId) {
       <div ${meBg} class="flex items-center justify-between p-4 rounded-2xl border border-white/5 bg-[#1C1C1E]/50">
         <div class="flex items-center gap-3">
           ${rankBadgeHtml}
-          <span class="text-sm font-black truncate max-w-[140px] ${nameColor}">${(item.name || item.staffId || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
+          <span class="text-sm font-black font-mono truncate max-w-[140px] ${nameColor}">${(item.staffId || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
         </div>
         <span class="text-sm font-black text-white/90 font-mono">${(item.count || 0).toLocaleString()}枚</span>
       </div>
