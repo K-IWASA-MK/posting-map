@@ -462,11 +462,18 @@ function handleRequestFlyerTransfer(data) {
 
     // 3. 保管者本人だけに LINE プッシュ通知を送信
     if (holderLineUserId) {
-      const messageText = "📦 チラシの受渡要請が届きました\n\n" +
+      const postingMapUrl = getProductionLiffUrl();
+
+      const messageText =
+        "📦 チラシの受渡要請が届きました\n\n\n" +
         requestUserName + "（" + requestUserId + "）さんがあなたの保有している\n" +
-        "チラシを希望しています。\n\n" +
+        "チラシを希望しています。\n\n\n" +
         "【連絡先】\n" +
-        contactMethod + "：" + contactValue;
+        contactMethod + "：" + contactValue + "\n\n\n" +
+        "この連絡先へ直接ご連絡ください。\n\n\n" +
+        "↓\n" +
+        "POSTING MAPを開く\n" +
+        postingMapUrl;
 
       sendLinePushMessage(holderLineUserId, messageText);
     }
