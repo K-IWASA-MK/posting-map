@@ -62,17 +62,17 @@ window.renderStaffCard = function(userInfo, options = {}) {
         <div class="id-ambient-sheen pointer-events-none"></div>
         <p class="id-message-card-text font-medium text-white/80 z-10 text-left w-full">
           <br>
-          ポスティングを、自由に楽しもう。<br>
-          空いてる時間に、近い場所から。<br><br>
+          ポスティングを自由に楽しもう<br>
+          空いてる時間に近い場所から<br><br>
 
           マップを見ながら街を歩いて<br>
-          自分のペースで、自分らしく。<br>
-          気軽に参加しましょう。<br><br>
+          自分のペースで自分らしく<br>
+          気軽に参加しましょう<br><br>
 
           ポスティングが終わったら<br>
           配った枚数を入力してね！<br><br>
 
-          ランキングもあります。<br>
+          ランキングもあります<br>
           ぜひチェックしてみてね！<br>
           <br>
         </p>
