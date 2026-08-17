@@ -2144,8 +2144,9 @@ function closeIdInfoModal() {
 // =============================
 let currentTransferRequest = null;
 
-window.openTransferRequestDialog = function(name, id, loc, count) {
-  currentTransferRequest = { holderName: name, holderUserId: id, requestArea: loc, stockCount: count };
+window.openTransferRequestDialog = function(name, id, loc, count, storageId) {
+  const displayStorageId = String(storageId || '').trim();
+  currentTransferRequest = { holderName: name, holderUserId: id, requestArea: loc, stockCount: count, storageId: displayStorageId };
 
   // 既存を削除して再生成（CSS競合を完全排除）
   const prev = document.getElementById('dynamic-transfer-dialog');
@@ -2162,7 +2163,7 @@ window.openTransferRequestDialog = function(name, id, loc, count) {
         <div style="color:white;font-size:16px;font-weight:900;letter-spacing:0.05em;">受渡要請</div>
       </div>
       <div style="color:rgba(255,255,255,0.7);font-size:13px;font-weight:700;margin-bottom:20px;line-height:1.5;text-align:left;">
-        ${escapeHtml(id)}さんとの<br>連絡方法を入力してください。
+        ${escapeHtml(displayStorageId)}さんとの<br>連絡方法を入力してください。
       </div>
 
       <div style="margin-bottom:16px;">

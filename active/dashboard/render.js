@@ -746,6 +746,7 @@ function renderStorageList(stocks) {
     const rowsHtml = list.map(s => {
       return `
         <div class="stock-row flex flex-col pt-1 pb-4 border-b border-white/5 last:border-b-0 rounded-xl px-2 -mx-2 gap-2"
+          data-storage-id="${(s.id||'').replace(/"/g,'&quot;')}"
           data-name="${(s.staffName||'').replace(/"/g,'&quot;')}"
           data-id="${(s.staffId||'').replace(/"/g,'&quot;')}"
           data-loc="${(s.location||'').replace(/"/g,'&quot;')}"
@@ -761,9 +762,9 @@ function renderStorageList(stocks) {
             <span class="text-base font-black text-[#22c55e] font-mono">${(s.count || 0).toLocaleString()}枚</span>
             <button type="button"
               ontouchstart="this.style.transform='scale(0.92)'; this.style.opacity='0.7';"
-              ontouchend="this.style.transform='scale(1)'; this.style.opacity='1'; event.preventDefault(); var r=this.closest('.stock-row'); if(window.openTransferRequestDialog){window.openTransferRequestDialog(r.dataset.name,r.dataset.id,r.dataset.loc,parseFloat(r.dataset.count)||0);}else{alert('[DEBUG]関数未定義');}"
+              ontouchend="this.style.transform='scale(1)'; this.style.opacity='1'; event.preventDefault(); var r=this.closest('.stock-row'); if(window.openTransferRequestDialog){window.openTransferRequestDialog(r.dataset.name,r.dataset.id,r.dataset.loc,parseFloat(r.dataset.count)||0,r.dataset.storageId||'');}else{alert('[DEBUG]関数未定義');}"
               ontouchcancel="this.style.transform='scale(1)'; this.style.opacity='1';"
-              onclick="var r=this.closest('.stock-row'); if(window.openTransferRequestDialog){window.openTransferRequestDialog(r.dataset.name,r.dataset.id,r.dataset.loc,parseFloat(r.dataset.count)||0);}"
+              onclick="var r=this.closest('.stock-row'); if(window.openTransferRequestDialog){window.openTransferRequestDialog(r.dataset.name,r.dataset.id,r.dataset.loc,parseFloat(r.dataset.count)||0,r.dataset.storageId||'');}"
               style="background: rgba(6,199,85,0.1); border-color: rgba(6,199,85,0.3); color: #06C755; gap: 6px; transition: transform 0.15s ease, opacity 0.15s ease; touch-action: manipulation;"
               class="flex items-center justify-center px-5 py-2 rounded-full border">
               <span class="text-sm pointer-events-none">🤝</span>
