@@ -373,7 +373,7 @@ function renderDetailModalContent(p) {
               onpointerdown="this.style.transform='scale(0.94)'; this.style.opacity='0.7';"
               onpointerup="this.style.transform='scale(1)'; this.style.opacity='1';"
               onpointerleave="this.style.transform='scale(1)'; this.style.opacity='1';">キャンセル</button>
-            <button type="button" onclick="closeDetailModal(); openNumpad('${escapeHtml(areaName)}', ${p.rowId}, ${p.count || 0}, true);" class="btn-neu"
+            <button type="button" onclick="openNumpad('${escapeHtml(areaName)}', ${p.rowId}, ${p.count || 0}, true);" class="btn-neu"
               style="flex: 1; background: #2563eb; border: none; color: white; border-radius: 14px; padding: 14px 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: transform 0.12s ease, opacity 0.12s ease;"
               onpointerdown="this.style.transform='scale(0.96)'; this.style.opacity='0.85';"
               onpointerup="this.style.transform='scale(1)'; this.style.opacity='1';"
