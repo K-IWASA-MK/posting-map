@@ -16,10 +16,11 @@ function getDeploymentId() {
   const deploymentJsonPath = resolve(process.cwd(), 'deployment.json');
   try {
     const data = JSON.parse(readFileSync(deploymentJsonPath, 'utf8'));
-    if (!data.deploymentId) {
+    const depId = data.deploymentId || (data.resources && data.resources.deploymentId);
+    if (!depId) {
       throw new Error('deploymentId is missing in deployment.json');
     }
-    return data.deploymentId;
+    return depId;
   } catch (err) {
     console.error(`\n🛑 [Hard Stop] Failed to read deployment.json: ${err.message}`);
     process.exit(1);
