@@ -41,15 +41,15 @@ window.renderRankingCard = function(rankingData, myStaffId) {
   }).join('');
 
   const myRankSummaryHtml = myRank !== -1 ? `
-    <div class="premium-glass py-5 px-6 flex justify-around items-center border border-[#00B7FF]/20 shadow-[0_0_20px_rgba(0,183,255,0.05)]">
+    <div style="border: 1px solid #EA5F08; box-shadow: 0 0 6px rgba(234,95,8,.35), 0 0 12px rgba(234,95,8,.18); background: linear-gradient(180deg, rgba(234,95,8,0.12), rgba(234,95,8,0.04));" class="premium-glass py-5 px-6 flex justify-around items-center rounded-2xl">
       <div class="text-center">
-        <span class="text-[9px] font-bold text-white/30 tracking-wider block">現在の順位</span>
-        <span class="text-2xl font-black text-[#00B7FF] font-mono">${myRank}位</span>
+        <span class="text-[9px] font-bold text-white/40 tracking-wider block">現在の順位</span>
+        <span class="text-2xl font-black text-white font-mono">${myRank}位</span>
       </div>
       <div class="w-[1px] h-8 bg-white/10"></div>
       <div class="text-center">
-        <span class="text-[9px] font-bold text-white/30 tracking-wider block">配布実績枚数</span>
-        <span class="text-2xl font-black text-[#00B7FF] font-mono">${myCount.toLocaleString()}枚</span>
+        <span class="text-[9px] font-bold text-white/40 tracking-wider block">配布実績枚数</span>
+        <span class="text-2xl font-black text-white font-mono">${myCount.toLocaleString()}枚</span>
       </div>
     </div>
   ` : '';
