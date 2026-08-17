@@ -363,7 +363,7 @@ function renderDetailModalContent(p) {
       ${!p.isDone ? `
         <!-- 【未完了】配布枚数入力案内カード -->
         <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);" class="w-full rounded-3xl py-6 px-5 flex flex-col items-center justify-center gap-6">
-          <div style="color: rgba(255, 255, 255, 0.7); font-size: 13px; font-weight: 700; line-height: 1.6; text-align: center;">
+          <div style="color: rgba(255, 255, 255, 0.7); font-size: 13px; font-weight: 700; line-height: 1.6; text-align: center; margin-bottom: 12px;">
             配布枚数を入力してください<br>入力後 写真を撮影します
           </div>
 
