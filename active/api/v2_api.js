@@ -383,6 +383,15 @@ function updateFlyerStock(location, count, staffName, staffId) {
 // =============================
 
 function handleRequestFlyerTransfer(data) {
+  const requestUserId = data && data.requestUserId ? String(data.requestUserId).trim() : '';
+  const holderUserId = data && data.holderUserId ? String(data.holderUserId).trim() : '';
+  const contactMethod = data && data.contactMethod ? String(data.contactMethod).trim() : 'LINE';
+  const contactValue = data && data.contactValue ? String(data.contactValue).trim() : '';
+
+  if (!requestUserId || !holderUserId || !contactValue) {
+    return { success: false, message: "必須パラメータが不足しています。" };
+  }
+
   const lock = LockService.getScriptLock();
   try {
     lock.waitLock(10000);
@@ -392,11 +401,43 @@ function handleRequestFlyerTransfer(data) {
 
   try {
     const ss = getSS();
+
+    // 1. 「名簿」シート (SSOT) から要請者名および保管者情報を解決
+    const rosterSheetName = (typeof CONFIG !== 'undefined' && typeof CONFIG.get === 'function')
+      ? (CONFIG.get("SHEET_ROSTER") || '名簿')
+      : '名簿';
+    const rosterSheet = ss.getSheetByName(rosterSheetName);
+
+    let requestUserName = requestUserId;
+    let holderName = holderUserId;
+    let holderLineUserId = "";
+
+    if (rosterSheet) {
+      const lastRosterRow = rosterSheet.getLastRow();
+      if (lastRosterRow >= 2) {
+        const rosterValues = rosterSheet.getRange(2, 1, lastRosterRow - 1, 4).getValues();
+        for (let i = 0; i < rosterValues.length; i++) {
+          const rowId = String(rosterValues[i][0] || '').trim();
+          const rowName = String(rosterValues[i][1] || '').trim();
+          const rowLineId = String(rosterValues[i][3] || '').trim();
+
+          if (rowId === requestUserId) {
+            requestUserName = rowName || requestUserId;
+          }
+          if (rowId === holderUserId) {
+            holderName = rowName || holderUserId;
+            holderLineUserId = rowLineId;
+          }
+        }
+      }
+    }
+
+    // 2. 「受渡要請履歴」シートへ保存（履歴保存専用）
     let sheetName = "受渡要請履歴";
     let s = ss.getSheetByName(sheetName);
     if (!s) {
       s = ss.insertSheet(sheetName);
-      s.getRange(1, 1, 1, 8).setValues([["日時", "要請者", "要請者ID", "保管者", "保管者ID", "地区", "在庫枚数", "状態"]]);
+      s.getRange(1, 1, 1, 8).setValues([["日時", "要請者", "要請者ID", "保管者", "保管者ID", "連絡方法", "連絡先", "状態"]]);
     }
 
     const now = new Date();
@@ -404,14 +445,25 @@ function handleRequestFlyerTransfer(data) {
 
     s.appendRow([
       requestTime,
-      data.requestUserName,
-      data.requestUserId,
-      data.holderName,
-      data.holderUserId,
-      data.requestArea,
-      data.stockCount,
+      requestUserName,
+      requestUserId,
+      holderName,
+      holderUserId,
+      contactMethod,
+      contactValue,
       "申請中"
     ]);
+
+    // 3. 保管者本人だけに LINE プッシュ通知を送信
+    if (holderLineUserId) {
+      const messageText = "📦 チラシの受渡要請が届きました\n\n" +
+        requestUserName + "（" + requestUserId + "）さんがあなたの保有している\n" +
+        "チラシを希望しています。\n\n" +
+        "【連絡先】\n" +
+        contactMethod + "：" + contactValue;
+
+      sendLinePushMessage(holderLineUserId, messageText);
+    }
 
     return { success: true };
   } catch(e) {
@@ -467,8 +519,8 @@ function getTransferRequests() {
     requesterId: r[2],
     holderName: r[3],
     holderId: r[4],
-    areaName: r[5],
-    count: parseFloat(r[6]) || 0,
+    contactMethod: r[5],
+    contactValue: r[6],
     status: r[7] || "申請中"
   }));
 }
