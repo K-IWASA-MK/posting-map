@@ -5,37 +5,123 @@ import { resolve } from 'path';
 function runStep(description, command) {
   console.log(`\n🚀 [Safe Deploy Step] ${description}...`);
   try {
-    execSync(command, { stdio: 'inherit' });
+    const output = execSync(command, { encoding: 'utf8' });
+    console.log(output);
+    return output;
   } catch (error) {
     console.error(`\n🛑 [Hard Stop] ${description} failed.`);
+    if (error.stdout) console.error(error.stdout.toString());
+    if (error.stderr) console.error(error.stderr.toString());
     process.exit(1);
   }
 }
 
-function getDeploymentId() {
+function getSSOTDeploymentInfo() {
   const deploymentJsonPath = resolve(process.cwd(), 'deployment.json');
   try {
     const data = JSON.parse(readFileSync(deploymentJsonPath, 'utf8'));
-    const depId = data.deploymentId || (data.resources && data.resources.deploymentId);
-    if (!depId) {
+    const deploymentId = data.deploymentId || (data.resources && data.resources.deploymentId);
+    const webAppUrl = data.webAppUrl || (data.resources && data.resources.webAppUrl);
+    if (!deploymentId) {
       throw new Error('deploymentId is missing in deployment.json');
     }
-    return depId;
+    return { deploymentId, webAppUrl };
   } catch (err) {
     console.error(`\n🛑 [Hard Stop] Failed to read deployment.json: ${err.message}`);
     process.exit(1);
   }
 }
 
-// 1. Preflight SSOT Check
-runStep('Preflight SSOT Check', 'npm run check:ssot');
+async function main() {
+  console.log('====================================================');
+  console.log('🚀 GAS PRODUCTION DEPLOYMENT & VERIFICATION GATE');
+  console.log('====================================================');
 
-// 2. Resolve Deployment ID & Execute clasp deploy
-const deploymentId = getDeploymentId();
-console.log(`\n📌 Target Deployment ID: ${deploymentId}`);
-runStep('Executing clasp deploy with fixed Deployment ID', `npx clasp deploy -i ${deploymentId}`);
+  // Step 1: Preflight SSOT Check
+  runStep('Step 1: Preflight SSOT Check', 'npm run check:ssot');
 
-// 3. Post-deploy Verification
-runStep('Post-deploy Verification', 'npm run verify:gas');
+  // Step 2: Push Local Code to GAS HEAD
+  console.log('\n🚀 [Safe Deploy Step] Step 2: Source Code Sync (clasp push)...');
+  const pushOutput = runStep('Syncing local files to GAS HEAD', 'npx clasp push');
+  const pushSuccess = pushOutput.includes('Pushed') || pushOutput.includes('already up to date');
+  if (!pushSuccess) {
+    console.error('🛑 [Hard Stop] clasp push did not report successful file push.');
+    process.exit(1);
+  }
 
-console.log('\n✅ [Safe Deploy Complete] Production GAS deployment and verification succeeded.');
+  // Step 3: Execute clasp deploy with fixed Deployment ID
+  const { deploymentId, webAppUrl } = getSSOTDeploymentInfo();
+  console.log(`\n📌 Target SSOT Deployment ID: ${deploymentId}`);
+  
+  let gitCommitSha = '';
+  try {
+    gitCommitSha = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+  } catch (e) {
+    gitCommitSha = 'manual';
+  }
+  const deployDesc = `Production Release (${gitCommitSha} - ${new Date().toISOString().substring(0, 19).replace('T', ' ')})`;
+
+  console.log(`\n🚀 [Safe Deploy Step] Step 3: Executing clasp deploy (Creating new version)...`);
+  const deployOutput = runStep(
+    'Creating production version and updating deployment',
+    `npx clasp deploy -i ${deploymentId} -d "${deployDesc}"`
+  );
+
+  // Extract created version number from deploy stdout (e.g. "Deployed AKfycby... @158")
+  const createdVersionMatch = deployOutput.match(/@(\d+)/);
+  if (!createdVersionMatch) {
+    console.error(`\n🛑 [Hard Stop] Could not determine created version from clasp deploy output: ${deployOutput}`);
+    process.exit(1);
+  }
+  const createdVersion = createdVersionMatch[1];
+  console.log(`\n✨ Created New Deployment Version: @${createdVersion}`);
+
+  // Step 4: Deployment Version Gate (Audit active deployments)
+  console.log(`\n🚀 [Safe Deploy Step] Step 4: Deployment Version Gate (Audit active deployments)...`);
+  const deploymentsOutput = execSync('npx clasp deployments', { encoding: 'utf8' });
+  console.log(deploymentsOutput);
+
+  // Parse lines to find target deploymentId
+  const deploymentLines = deploymentsOutput.split('\n');
+  let activeVersion = null;
+  for (const line of deploymentLines) {
+    if (line.includes(deploymentId)) {
+      const match = line.match(/@(\d+)/);
+      if (match) {
+        activeVersion = match[1];
+        break;
+      }
+    }
+  }
+
+  console.log(`\n🔍 [Version Gate Audit]`);
+  console.log(`  - Target Deployment ID:      ${deploymentId}`);
+  console.log(`  - Created Version (Step 3):  @${createdVersion}`);
+  console.log(`  - Active Version (clasp):    @${activeVersion}`);
+
+  if (!activeVersion) {
+    console.error(`\n🛑 [Hard Stop] Target deployment ID (${deploymentId}) was not found in 'clasp deployments' output.`);
+    process.exit(1);
+  }
+
+  if (activeVersion !== createdVersion) {
+    console.error(`\n🛑 [Hard Stop] DEPLOYMENT VERSION MISMATCH!`);
+    console.error(`   Created Version: @${createdVersion} !== Active Version: @${activeVersion}`);
+    console.error(`   Production Web App is NOT serving the latest code.`);
+    process.exit(1);
+  }
+  console.log(`✅ [Version Gate PASSED] Active Deployment Version matches created version: @${activeVersion}`);
+
+  // Step 5: Post-deploy Endpoint Verification
+  console.log(`\n🚀 [Safe Deploy Step] Step 5: Production Endpoint Verification...`);
+  runStep('Production Endpoint Verification Suite', 'npm run verify:gas');
+
+  console.log('\n====================================================');
+  console.log(`🎉 [PRODUCTION DEPLOYMENT SUCCESS]`);
+  console.log(`   Deployment ID:   ${deploymentId}`);
+  console.log(`   Active Version:  @${activeVersion}`);
+  console.log(`   Endpoint:        ${webAppUrl || `https://script.google.com/macros/s/${deploymentId}/exec`}`);
+  console.log('====================================================\n');
+}
+
+main();
