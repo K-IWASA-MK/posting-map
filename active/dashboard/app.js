@@ -304,7 +304,9 @@ window.fetchGlobalPinStatus = async function() {
   }
 };
 
-window.setPinInProgress = async function(rowId, action) {
+let pinActionPromiseChain = Promise.resolve();
+
+window.setPinInProgress = function(rowId, action) {
   const numericRowId = parseInt(rowId, 10);
   if (!isNaN(numericRowId) && window.globalPinStatus && Array.isArray(window.globalPinStatus.inProgress)) {
     if (action === "remove") {
@@ -315,11 +317,17 @@ window.setPinInProgress = async function(rowId, action) {
       }
     }
   }
-  try {
-    await callApiPost('setPinInProgress', { rowId: rowId, pinAction: action });
-  } catch (err) {
-    logDebug(`[setPinInProgress] Error: ${err.message}`);
-  }
+
+  // Promise Chain によるFIFO直列通信制御
+  pinActionPromiseChain = pinActionPromiseChain.then(async () => {
+    try {
+      await callApiPost('setPinInProgress', { rowId: rowId, pinAction: action });
+    } catch (err) {
+      logDebug(`[setPinInProgress] Error: ${err.message}`);
+    }
+  });
+
+  return pinActionPromiseChain;
 };
 
 async function startApp(profile = null, registrationPromise = null) {
