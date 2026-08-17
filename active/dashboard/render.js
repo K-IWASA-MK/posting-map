@@ -361,26 +361,25 @@ function renderDetailModalContent(p) {
 
     <div class="flex flex-col gap-4">
       ${!p.isDone ? `
-        <!-- 【未完了】全体がタップ可能な極上シンメトリーカード -->
-        <label ontouchstart="" class="cursor-pointer rounded-3xl py-6 px-5 bg-white/5 border border-white/10 flex flex-col items-center justify-center gap-4 w-full">
-          <input type="checkbox" class="hidden" onchange="toggleDone('${escapeHtml(areaName)}', ${p.rowId}, this)">
-
-          <!-- 1. テキスト（中央揃え） -->
-          <div class="flex flex-col items-center select-none text-center">
-            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">READY TO DEPLOY</span>
-            <span class="text-xs font-bold text-white/40 mt-1 tracking-wider">タップで配布完了</span>
+        <!-- 【未完了】配布枚数入力案内カード -->
+        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);" class="w-full rounded-3xl py-6 px-5 flex flex-col items-center justify-center gap-6">
+          <div style="color: rgba(255, 255, 255, 0.7); font-size: 13px; font-weight: 700; line-height: 1.6; text-align: center;">
+            配布枚数を入力してください<br>入力後 写真を撮影します
           </div>
 
-          <!-- 2. チェックボックス（押した瞬間だけ沈み込む） -->
-          <div ontouchstart="" style="border-color: #10b981; background-color: #10b981; box-shadow: 0 0 10px rgba(16,185,129,0.4); transition: transform 75ms ease-out, box-shadow 75ms ease-out, filter 75ms ease-out;" class="w-12 h-12 rounded-2xl border flex items-center justify-center select-none"
-            onpointerdown="this.style.transform='scale(0.82)'; this.style.boxShadow='0 0 4px rgba(16,185,129,0.2)'; this.style.filter='brightness(0.85)'"
-            onpointerup="this.style.transform=''; this.style.boxShadow='0 0 10px rgba(16,185,129,0.4)'; this.style.filter=''"
-            onpointerleave="this.style.transform=''; this.style.boxShadow='0 0 10px rgba(16,185,129,0.4)'; this.style.filter=''">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="4" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-            </svg>
+          <div style="display: flex; gap: 10px; width: 100%;">
+            <button type="button" onclick="closeDetailModal()"
+              style="flex: 1; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6); border-radius: 14px; padding: 14px 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: transform 0.12s ease, opacity 0.12s ease;"
+              onpointerdown="this.style.transform='scale(0.94)'; this.style.opacity='0.7';"
+              onpointerup="this.style.transform='scale(1)'; this.style.opacity='1';"
+              onpointerleave="this.style.transform='scale(1)'; this.style.opacity='1';">キャンセル</button>
+            <button type="button" onclick="closeDetailModal(); openNumpad('${escapeHtml(areaName)}', ${p.rowId}, ${p.count || 0}, true);" class="btn-neu"
+              style="flex: 1; background: #2563eb; border: none; color: white; border-radius: 14px; padding: 14px 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: transform 0.12s ease, opacity 0.12s ease;"
+              onpointerdown="this.style.transform='scale(0.96)'; this.style.opacity='0.85';"
+              onpointerup="this.style.transform='scale(1)'; this.style.opacity='1';"
+              onpointerleave="this.style.transform='scale(1)'; this.style.opacity='1';">OK</button>
           </div>
-        </label>
+        </div>
       ` : `
         <!-- 【完了済み】編集ロックがかかった上品なグリーンステータス表示 -->
         <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.1), 0 0 30px rgba(16, 185, 129, 0.05);" class="w-full rounded-3xl py-6 px-5 flex flex-col items-center justify-center gap-4">
