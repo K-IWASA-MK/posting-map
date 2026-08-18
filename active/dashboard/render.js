@@ -468,22 +468,20 @@ function renderDetailModalContent(p) {
         <div style="width: 100%; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box;">
           <!-- 提出ボタン (ブルー) -->
           <button type="button" ontouchstart="" onclick="submitMissionComplete('${escapeHtml(areaName)}', ${p.rowId})" class="btn-neu"
-            style="width: 100%; background: #2563eb; border: none; color: white; border-radius: 14px; padding: 12px 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: transform 0.12s ease, opacity 0.12s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; box-sizing: border-box;"
+            style="width: 100%; background: #2563eb; border: none; color: white; border-radius: 14px; padding: 14px 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: transform 0.12s ease, opacity 0.12s ease; display: flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box;"
             onpointerdown="this.style.transform='scale(0.97)'; this.style.opacity='0.85';"
             onpointerup="this.style.transform='scale(1)'; this.style.opacity='1';"
             onpointerleave="this.style.transform='scale(1)'; this.style.opacity='1';">
-            <span style="display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: 900;">🚀 この内容で提出する</span>
-            <span style="font-size: 9.5px; font-weight: 400; color: rgba(255, 255, 255, 0.7);">配布実績として記録されます</span>
+            🚀 この内容で提出する
           </button>
 
           <!-- キャンセルボタン (ダークグレー) -->
           <button type="button" ontouchstart="" onclick="closeDetailModal()"
-            style="width: 100%; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6); border-radius: 14px; padding: 10px 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: transform 0.12s ease, opacity 0.12s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; box-sizing: border-box;"
+            style="width: 100%; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6); border-radius: 14px; padding: 12px 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: transform 0.12s ease, opacity 0.12s ease; display: flex; align-items: center; justify-content: center; gap: 4px; box-sizing: border-box;"
             onpointerdown="this.style.transform='scale(0.97)'; this.style.opacity='0.7';"
             onpointerup="this.style.transform='scale(1)'; this.style.opacity='1';"
             onpointerleave="this.style.transform='scale(1)'; this.style.opacity='1';">
-            <span style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 12px; font-weight: 900;">✕ キャンセル</span>
-            <span style="font-size: 9px; font-weight: 400; color: rgba(255, 255, 255, 0.4);">入力を中止して戻る</span>
+            ✕ キャンセル
           </button>
         </div>
       `}
