@@ -130,14 +130,16 @@ async function updateQueueStatus(id, status) {
 }
 
 /**
- * 特定 rowId の送信ステータスを取得（render.js / app.js から参照）
+ * 特定 rowId の送信ステータスを取得（数値/文字列の型を正規化）
  * @returns {string|null} 'PENDING' | 'SYNCING' | 'RETRY' | null
  */
 async function getRowStatus(rowId) {
+  const targetId = Number(rowId);
   const queue = await getQueue();
-  const found = queue.find(q => q.rowId === rowId);
-  return found ? (found.syncStatus || found.status || null) : null;
+  const found = queue.find(q => Number(q.rowId) === targetId);
+  return found ? (found.syncStatus || found.status || 'PENDING') : null;
 }
+window.getRowStatus = getRowStatus;
 
 /**
  * 管理画面用: キュー統計を返す

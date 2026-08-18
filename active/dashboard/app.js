@@ -946,9 +946,9 @@ function pressNum(key) {
           p.accuracy = gps.accuracy || null;
         }
 
-        // GPS状態が確定したのでモーダルのみ再描画（裏のリストは更新不要）
+        // GPS状態が確定したのでモーダルのみ再描画（提出処理中はUIを上書きしない）
         const modalContent = $('detail-modal-content');
-        if (modalContent) {
+        if (modalContent && p.syncStatus !== 'submitting') {
           modalContent.innerHTML = renderDetailModalContent(p);
         }
       }
@@ -1005,11 +1005,14 @@ async function submitMissionComplete(areaName, rowId) {
     cancelBtn.style.cursor = 'not-allowed';
   }
 
+  // Safariに確実に「⏳ 提出処理中...」を描画(Paint)させてから送信処理へ進む
+  await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
+
   try {
     if (typeof enqueueSync === 'function') {
       await enqueueSync({
         areaName,
-        rowId,
+        rowId: Number(rowId),
         isDone:     true,
         count:      p.count || 0,
         latitude:   p.gpsStatus === 'OK' ? (p.latitude || '') : '',
@@ -1029,7 +1032,7 @@ async function submitMissionComplete(areaName, rowId) {
         if (typeof window.getRowStatus !== 'function') {
           throw new Error("Sync check mechanism is missing.");
         }
-        const status = await window.getRowStatus(rowId);
+        const status = await window.getRowStatus(Number(rowId));
         if (status === null) {
           // キューから消滅 ＝ GAS保存成功（データ送信成功＝ロック）
           if (typeof window.setPinInProgress === 'function') {
