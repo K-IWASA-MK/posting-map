@@ -993,21 +993,6 @@ async function submitMissionComplete(areaName, rowId) {
   if (p.syncStatus === 'submitting') return;
   p.syncStatus = 'submitting';
 
-  // 「更新中...」基準: 同期的にボタン要素を即座に無効化＆テキスト変更
-  const submitBtn = $('submit-mission-btn');
-  const cancelBtn = $('cancel-mission-btn');
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.style.opacity = '0.75';
-    submitBtn.style.cursor = 'not-allowed';
-    submitBtn.textContent = '⏳ 提出処理中...';
-  }
-  if (cancelBtn) {
-    cancelBtn.disabled = true;
-    cancelBtn.style.opacity = '0.35';
-    cancelBtn.style.cursor = 'not-allowed';
-  }
-
   // 状態駆動UI用のモーダル全体再描画（バックグラウンド更新時のSSOT担保）
   const modalContent = $('detail-modal-content');
   if (modalContent && typeof renderDetailModalContent === 'function') {
