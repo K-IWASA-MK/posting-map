@@ -69,19 +69,6 @@ function processGetActionLegacy(action, e) {
       case 'getTier1':
         response = typeof Tier1Service !== 'undefined' ? Tier1Service.getInstance().getTier1() : { success: false };
         break;
-      case 'getTier2':
-        {
-          const targetCity = (e && e.parameter && (e.parameter.cityName || e.parameter.city)) ? (e.parameter.cityName || e.parameter.city) : (typeof postData !== 'undefined' && postData ? postData.cityName : null);
-          response = typeof Tier2Service !== 'undefined' ? Tier2Service.getInstance().getTier2(targetCity) : { success: false };
-        }
-        break;
-      case 'getTier3':
-        {
-          const targetCity = (e && e.parameter && (e.parameter.cityName || e.parameter.city)) ? (e.parameter.cityName || e.parameter.city) : (typeof postData !== 'undefined' && postData ? postData.cityName : null);
-          const targetTown = (e && e.parameter && (e.parameter.townName || e.parameter.town)) ? (e.parameter.townName || e.parameter.town) : (typeof postData !== 'undefined' && postData ? postData.townName : null);
-          response = typeof Tier3Service !== 'undefined' ? Tier3Service.getInstance().getTier3(targetCity, targetTown) : { success: false };
-        }
-        break;
       case 'getRanking':
         response = { success: true, ranking: getRankingData() };
         break;
@@ -90,9 +77,6 @@ function processGetActionLegacy(action, e) {
         break;
       case 'getAreaDetails':
         response = getAreaDetails(e.name);
-        break;
-      case 'getCityAreaDetails':
-        response = getCityAreaDetails(e.cityName);
         break;
       case 'submitDistribution':
         response = { success: false, message: 'Write operations require POST. Please update the client.' };
@@ -181,10 +165,6 @@ function processPostAction(action, postData, e) {
       return { success: true, mapsApiKey: PropertiesService.getScriptProperties().getProperty('GOOGLE_MAPS_API_KEY') || "" };
     case 'getTier1':
       return typeof Tier1Service !== 'undefined' ? Tier1Service.getInstance().getTier1() : { success: false };
-    case 'getTier2':
-      return typeof Tier2Service !== 'undefined' ? Tier2Service.getInstance().getTier2(postData ? postData.cityName : null) : { success: false };
-    case 'getTier3':
-      return typeof Tier3Service !== 'undefined' ? Tier3Service.getInstance().getTier3(postData ? postData.cityName : null, postData ? postData.townName : null) : { success: false };
 
     case 'getEvidence':
       try {
@@ -206,8 +186,6 @@ function processPostAction(action, postData, e) {
       return { success: true, roster: getRoster() };
     case 'getAreaDetails':
       return getAreaDetails(postData.name || e.parameter.name);
-    case 'getCityAreaDetails':
-      return getCityAreaDetails(postData.cityName || e.parameter.cityName);
     case 'submitDistribution':
       return submitDistribution(postData);
     case 'updateRecordWithGPSPhoto':
@@ -263,9 +241,6 @@ function getCityName(areaName) {
   return AreaService.getInstance().getCityName(areaName);
 }
 
-function getCityAreaDetails(cityName) {
-  return AreaService.getInstance().getCityAreaDetails(cityName);
-}
 
 
 
