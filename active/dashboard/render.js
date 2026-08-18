@@ -459,8 +459,8 @@ function renderDetailModalContent(p) {
           </div>
         </div>
 
-        <!-- 【注意文バー】 -->
-        <div style="background: rgba(245, 158, 11, 0.06); border: 1px solid rgba(245, 158, 11, 0.2); color: rgba(245, 158, 11, 0.9); border-radius: 14px; padding: 8px 10px; display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 10.5px; font-weight: 700; width: 100%; box-sizing: border-box;">
+        <!-- 【注意文】枠線・背景なしのシンプルなテキスト -->
+        <div style="color: rgba(245, 158, 11, 0.9); display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 11px; font-weight: 700; width: 100%; box-sizing: border-box; padding: 2px 0;">
           <span>⚠️</span><span>提出すると配布実績として記録されます</span>
         </div>
 
