@@ -1,5 +1,3 @@
 [
-  "active/dashboard/db.js",
-  "active/dashboard/render.js",
-  "active/dashboard/app.html"
+  "active/dashboard/app.js"
 ]
