@@ -1411,40 +1411,6 @@ async function fetchTier1() {
   return null;
 }
 
-/**
- * Sprint G2-3: Tier 2 Lazy Loading Foundation (Generation 2)
- * fetchTier2(cityName) - 市町村指定オンデマンド町名取得
- */
-let tier2CacheMap = {};
-
-async function fetchTier2(cityName) {
-  if (!cityName) return null;
-
-  // Tier 2 再取得・呼び出し時は該当市町村配下の Tier 3 キャッシュをパージ
-  Object.keys(tier3CacheMap).forEach(key => {
-    if (key.startsWith(`${cityName}::`)) {
-      delete tier3CacheMap[key];
-    }
-  });
-
-  if (tier2CacheMap[cityName]) {
-    return tier2CacheMap[cityName];
-  }
-
-  showLoading('CONNECTING...');
-  try {
-    const res = await callApiPost('getTier2', { cityName: cityName });
-    if (res && res.success && Array.isArray(res.areas)) {
-      tier2CacheMap[cityName] = res.areas;
-      return res.areas;
-    }
-  } catch (err) {
-    console.warn(`fetchTier2 failed for ${cityName}:`, err);
-  } finally {
-    hideLoading();
-  }
-  return null;
-}
 
 /**
  * Sprint G2-4: Tier 3 Lazy Loading Foundation (Generation 2 完成)

@@ -83,36 +83,6 @@ function renderAreas() {
   }
 }
 
-async function selectCity(cityName) {
-  currentCity = cityName;
-  renderAreas();
-  const contentEl = $('content');
-  if (contentEl) contentEl.scrollTop = 0;
-
-  // Gen 2 Tier 2 オンデマンド取得
-  if (typeof fetchTier2 === 'function') {
-    await fetchTier2(cityName);
-    renderAreas();
-  }
-
-  // 市区町村全体の詳細データをバックグラウンドで先読み開始
-  if (window.currentCityDetailsName !== cityName) {
-    window.cityAreaCache = {}; // キャッシュリセット
-    window.currentCityDetailsName = cityName;
-    window.activeCityDetailsPromise = callApiPost('getCityAreaDetails', { cityName: cityName })
-      .then(data => {
-        if (data && data.success) {
-          window.cityAreaCache = data.details || {};
-        }
-        return data;
-      })
-      .catch(err => {
-        console.error("Background prefetch failed:", err);
-        return null;
-      });
-  }
-}
-
 // Open point detail modal
 function openPointDetailModal(rowId) {
   if (!allPoints) {
