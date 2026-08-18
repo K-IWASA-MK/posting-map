@@ -1,42 +1,15 @@
 import { execSync } from 'child_process';
-import { readFileSync, existsSync } from 'fs';
-import { resolve, isAbsolute, normalize } from 'path';
+import { existsSync } from 'fs';
+import { resolve, normalize } from 'path';
 
 const rootDir = process.cwd();
-const scopeJsonPath = resolve(rootDir, '.agents/current-scope.json');
 
 function exitFail(message) {
   console.error(`\n🛑 [Hard Stop] Scope Guard Failed: ${message}`);
   process.exit(1);
 }
 
-// 1. Validate Scope JSON
-if (!existsSync(scopeJsonPath)) {
-  exitFail('.agents/current-scope.json does not exist.');
-}
-
-let allowedScope = [];
-try {
-  allowedScope = JSON.parse(readFileSync(scopeJsonPath, 'utf8'));
-  if (!Array.isArray(allowedScope)) {
-    exitFail('.agents/current-scope.json must be a JSON array.');
-  }
-} catch (e) {
-  exitFail(`Invalid JSON format in .agents/current-scope.json: ${e.message}`);
-}
-
-for (const p of allowedScope) {
-  if (typeof p !== 'string' || isAbsolute(p) || normalize(p).startsWith('..')) {
-    exitFail(`Invalid or unsafe path in scope list: "${p}"`);
-  }
-}
-
-// Normalize allowed scope paths
-const normalizedAllowed = new Set(allowedScope.map(p => normalize(p)));
-// Bootstrap exception: allow current-scope.json itself on initial creation
-normalizedAllowed.add(normalize('.agents/current-scope.json'));
-
-// 2. Fetch Git Changed Files via `git status --porcelain=v1 -z`
+// 1. Fetch Git Changed Files via `git status --porcelain=v1 -z`
 let gitStatusOutput;
 try {
   gitStatusOutput = execSync('git status --porcelain=v1 -z', { cwd: rootDir });
@@ -61,61 +34,86 @@ for (let i = 0; i < tokens.length; i++) {
   }
 }
 
-console.log(`[Scope Guard] Checking ${changedFiles.length} changed file(s) against allowed scope...`);
+console.log(`[Scope Guard] Checking ${changedFiles.length} changed file(s)...`);
 
-// 3. Self-Modification Check for committed current-scope.json
-let isTrackedScopeJson = false;
+const isScopeOnlyMode = process.argv.includes('--scope-only');
+const scopeFilePath = normalize('.agents/current-scope.json');
+const hasScopeJsonChanged = changedFiles.includes(scopeFilePath);
+
+// ─────────────────────────────────────────────────────────────
+// 【モード 1: Scope 更新専用検証モード (--scope-only)】
+// ─────────────────────────────────────────────────────────────
+if (isScopeOnlyMode) {
+  const nonScopeFiles = changedFiles.filter(f => f !== scopeFilePath);
+  if (nonScopeFiles.length > 0) {
+    exitFail(`Scope Transaction Violation: Code changes detected during scope-only update: ${nonScopeFiles.join(', ')}`);
+  }
+  if (!hasScopeJsonChanged) {
+    exitFail('Scope Transaction Warning: No changes detected in .agents/current-scope.json.');
+  }
+  console.log('🟢 [Scope-Only Mode] PASSED: Scope definition update isolated with zero code changes.');
+  process.exit(0);
+}
+
+// ─────────────────────────────────────────────────────────────
+// 【モード 2: 実装コミット検証モード (デフォルト)】
+// ─────────────────────────────────────────────────────────────
+
+// [防衛 1] コード変更と同時に Scope 定義を変更することは禁止 (自己承認の遮断)
+if (hasScopeJsonChanged) {
+  exitFail('Unauthorized Scope Tampering: .agents/current-scope.json cannot be modified alongside code changes. Use 2-phase scope commit.');
+}
+
+// [防衛 2] Git HEAD 上の current-scope.json を読み込み、実装変更がすべてその範囲内か検証
+let allowedScope = [];
 try {
-  const trackedCheck = execSync('git ls-files .agents/current-scope.json', { cwd: rootDir }).toString().trim();
-  if (trackedCheck.length > 0) {
-    isTrackedScopeJson = true;
+  const headScopeJson = execSync('git show HEAD:.agents/current-scope.json', { cwd: rootDir }).toString('utf8');
+  allowedScope = JSON.parse(headScopeJson);
+  if (!Array.isArray(allowedScope)) {
+    exitFail('Git HEAD current-scope.json must be an array.');
   }
 } catch (e) {
-  // Not tracked
+  exitFail(`Failed to load approved Scope from Git HEAD: ${e.message}`);
 }
 
-if (isTrackedScopeJson && changedFiles.includes(normalize('.agents/current-scope.json'))) {
-  exitFail('Unauthorized modification detected: .agents/current-scope.json cannot be modified once committed.');
-}
+const normalizedAllowed = new Set(allowedScope.map(p => normalize(p)));
+const violations = changedFiles.filter(f => !normalizedAllowed.has(f));
 
-// 4. Verify Changed Files Against Scope
-const scopeViolations = [];
-for (const file of changedFiles) {
-  if (!normalizedAllowed.has(file)) {
-    scopeViolations.push(file);
-  }
-}
-
-if (scopeViolations.length > 0) {
+if (violations.length > 0) {
   console.error('❌ Scope Violations Detected:');
-  scopeViolations.forEach(f => console.error(`  - ${f}`));
-  exitFail(`${scopeViolations.length} file(s) outside allowed scope.`);
+  violations.forEach(f => console.error(`  - ${f}`));
+  exitFail(`${violations.length} file(s) outside allowed Git-HEAD scope.`);
 }
 
-console.log('🟢 Scope Validation PASSED: All changed files are within allowed scope.');
+console.log('🟢 Scope Validation PASSED: All code changes are within the approved Git-HEAD scope.');
 
 // 5. Connect Existing Governance Auditor (report-governance-gate.js)
 const auditorScript = resolve(rootDir, '.agents/auditor/report-governance-gate.js');
 const jsonReportPath = resolve(rootDir, '.agents/audit-log/report-audit.json');
-const targetReport = existsSync(jsonReportPath) ? jsonReportPath : resolve(rootDir, 'latest-report-audit.json');
+const targetReport = resolve(rootDir, '.agents/audit-log/latest-report-audit.json');
 
 if (existsSync(auditorScript)) {
   console.log('\n[Governance Gate] Invoking .agents/auditor/report-governance-gate.js...');
   try {
-    const output = execSync(`node "${auditorScript}" "${targetReport}"`, { cwd: rootDir }).toString();
-    console.log(output);
+    const reportToAudit = existsSync(jsonReportPath) ? jsonReportPath : targetReport;
+    if (existsSync(reportToAudit)) {
+      const output = execSync(`node "${auditorScript}" "${reportToAudit}"`, { cwd: rootDir }).toString();
+      console.log(output);
 
-    let parsed;
-    try {
-      parsed = JSON.parse(output);
-    } catch (e) {
-      exitFail('Failed to parse report-governance-gate.js JSON output.');
-    }
+      let parsed;
+      try {
+        parsed = JSON.parse(output);
+      } catch (e) {
+        exitFail('Failed to parse report-governance-gate.js JSON output.');
+      }
 
-    if (parsed.allowCommit !== true) {
-      exitFail(`Governance Auditor rejected (allowCommit: ${parsed.allowCommit}).`);
+      if (parsed.allowCommit !== true) {
+        exitFail(`Governance Auditor rejected (allowCommit: ${parsed.allowCommit}).`);
+      }
+      console.log('🟢 Governance Gate PASSED: Auditor allowCommit === true.');
+    } else {
+      console.log('⚪ [Governance Gate] No report file found to audit. Scope check complete.');
     }
-    console.log('🟢 Governance Gate PASSED: Auditor allowCommit === true.');
   } catch (e) {
     exitFail(`Governance Auditor execution failed: ${e.message}`);
   }
