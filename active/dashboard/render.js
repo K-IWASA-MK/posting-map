@@ -1,18 +1,3 @@
-function formatCompletedAt(dateStr) {
-  if (!dateStr) return '';
-  if (/^\d{2}\/\d{2} \d{2}:\d{2}$/.test(dateStr)) {
-    return dateStr;
-  }
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) {
-    return dateStr;
-  }
-  const MM = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  const HH = String(d.getHours()).padStart(2, '0');
-  const mm = String(d.getMinutes()).padStart(2, '0');
-  return `${MM}/${dd} ${HH}:${mm}`;
-}
 
 function getCityName(areaName) {
   if (!areaName) return 'その他';
@@ -285,104 +270,6 @@ function renderDetailModalContent(p) {
   // 配布完了時は編集ロック
   const isLocked = p.isDone;
 
-  // GPS接続バッジ
-  let gpsBadgeHtml = '';
-  if (p.isDone) {
-    if (p.gpsStatus === 'pending') {
-      gpsBadgeHtml = `
-        <!-- 【GPS取得中】横幅いっぱいのカード型 -->
-        <div style="background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.2);" class="w-full rounded-2xl py-4 px-5 flex flex-col items-center justify-center">
-          <div class="flex items-center justify-center gap-2 w-full">
-            <span class="text-sm animate-pulse">📍</span>
-            <span class="text-[10px] font-black text-[#f59e0b] uppercase tracking-[0.2em] animate-pulse">GPS 取得中...</span>
-          </div>
-        </div>
-      `;
-    } else if (p.gpsStatus === 'OK' || p.gps) {
-      gpsBadgeHtml = `
-        <!-- 【GPSあり】横幅いっぱいの青色カード型 (PHOTO VERIFIED と完全同一スタイル) -->
-        <div style="background: rgba(37, 99, 235, 0.05); border: 1.5px solid rgba(37, 99, 235, 0.4); box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.15), 0 0 30px rgba(37, 99, 235, 0.05);" class="w-full rounded-2xl py-4 px-5 flex flex-col items-center justify-center">
-          <div class="flex items-center justify-center gap-2 w-full">
-            <span class="text-sm">📍</span>
-            <span class="text-[10px] font-black text-[#2563eb] uppercase tracking-[0.2em]">GPS VERIFIED</span>
-          </div>
-        </div>
-      `;
-    } else if (p.gpsStatus === 'DEVICE_OFF') {
-      gpsBadgeHtml = `
-        <!-- 【GPS OFF】横幅いっぱいのカード型 -->
-        <div style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2);" class="w-full rounded-2xl py-4 px-5 flex flex-col items-center justify-center">
-          <div class="flex items-center justify-center gap-2 w-full">
-            <span class="text-sm opacity-50">📍</span>
-            <span class="text-[10px] font-black text-[#ef4444] uppercase tracking-[0.2em]">GPS OFF</span>
-          </div>
-        </div>
-      `;
-    } else {
-      gpsBadgeHtml = `
-        <!-- 【GPSエラー】横幅いっぱいのカード型 -->
-        <div style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2);" class="w-full rounded-2xl py-4 px-5 flex flex-col items-center justify-center">
-          <div class="flex items-center justify-center gap-2 w-full">
-            <span class="text-sm opacity-50">📍</span>
-            <span class="text-[10px] font-black text-[#ef4444] uppercase tracking-[0.2em]">GPS 取得できませんでした</span>
-          </div>
-        </div>
-      `;
-    }
-  }
-
-  // 非同期送信ステータスバッジ (要件8: PENDING / SYNCING / COMPLETE / RETRYING...)
-  let syncLabelHtml = '';
-  if (p.isDone) {
-    const s = p.syncStatus;
-    if (s === 'SYNCING' || s === 'sending') {
-      syncLabelHtml = `<span class="text-[8px] font-black text-[#2563eb] animate-pulse tracking-widest bg-[#2563eb]/10 px-2 py-0.5 rounded-full ml-auto">FIELD DATA SYNCING...</span>`;
-    } else if (s === 'RETRY' || s === 'failed') {
-      syncLabelHtml = `<span class="text-[8px] font-black text-red-500 animate-pulse tracking-widest bg-red-500/10 px-2 py-0.5 rounded-full ml-auto">UPLOAD RETRYING...</span>`;
-    } else if (s === 'PENDING' || s === 'pending') {
-      syncLabelHtml = `<span class="text-[8px] font-black text-white/40 animate-pulse tracking-widest bg-white/5 px-2 py-0.5 rounded-full ml-auto">SYNC PENDING...</span>`;
-    }
-  }
-
-  // 🔒アイコン
-  const lockIconHtml = isLocked ? `<span class="text-xs mr-1">🔒</span>` : '';
-
-  // 写真表示・追加・変更ブロック
-  const photoId = p.photoUrl || '';
-  const tempUrl = p.tempPhotoUrl || '';
-  let photoBlockHtml = '';
-  if (p.isDone) {
-    if (tempUrl || photoId) {
-      photoBlockHtml = `
-        <!-- 【写真あり】青色（#2563eb）テーマの写真確認カード (コンパクト化・ボタン廃止・外枠青色化) -->
-        <div style="background: rgba(37, 99, 235, 0.05); border: 1.5px solid rgba(37, 99, 235, 0.4); box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.15), 0 0 30px rgba(37, 99, 235, 0.05);" class="w-full rounded-2xl py-4 px-5 flex flex-col items-center justify-center">
-          <div class="flex items-center justify-center gap-2 w-full">
-            <span class="text-sm">📸</span>
-            <span class="text-[10px] font-black text-[#2563eb] uppercase tracking-[0.2em]">PHOTO VERIFIED</span>
-          </div>
-        </div>
-      `;
-    } else {
-      photoBlockHtml = `
-        <!-- 【写真なし】「写真を追加」ボタンを排除し、証跡なし状態のみをシンプルに表示 -->
-        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);" class="w-full rounded-2xl py-4 px-5 flex flex-col items-center justify-center">
-          <div class="flex items-center justify-center gap-2 w-full">
-            <span class="text-sm opacity-30">📸</span>
-            <span class="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">NO EVIDENCE PHOTO</span>
-          </div>
-        </div>
-      `;
-    }
-  }
-
-  // ロック状態によるスタイル分岐
-  const cardClasses = isOtherStaff
-    ? "rounded-3xl p-5 flex items-center gap-5 bg-white/[0.01] border border-white/[0.03]"
-    : "rounded-3xl p-5 flex items-center gap-5 bg-white/5 border border-white/10";
-
-  const labelStyle = !isOtherStaff && p.isDone
-    ? 'background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.2);'
-    : '';
 
   const areaName = window.currentCityDetailAreaName || '';
 
@@ -683,42 +570,6 @@ async function openDetail(name) {
 
   $('loading').classList.add('opacity-0');
   setTimeout(() => $('loading').classList.add('hidden'), 700);
-}
-
-function toggleDone(areaName, rowId, checkbox) {
-  const p = allPoints.find(point => point.rowId === rowId);
-  if (!p) return;
-
-  if (checkbox.checked) {
-    // Open numpad modal
-    openNumpad(areaName, rowId, p.count || 0, true, checkbox);
-  } else {
-    // 誤操作防止の削除確認ダイアログ
-    if (!confirm("完了実績をキャンセルしますか？\n入力された配布枚数もクリアされます。")) {
-      checkbox.checked = true; // キャンセルされたらチェック状態を元に戻す
-      return;
-    }
-
-    // Directly clear completion and count
-    p.isDone = false;
-    p.count = 0;
-    p.completedAt = '';
-    p.staffName = '';
-    delete p.syncStatus;
-    delete p.tempPhotoUrl;
-
-    // Update local card list
-    renderDetailList(areaName);
-
-    // Update active modal content
-    const modalContent = $('detail-modal-content');
-    if (modalContent) {
-      modalContent.innerHTML = renderDetailModalContent(p);
-    }
-
-    // Send update to server
-    updateRecord(areaName, rowId, false, 0);
-  }
 }
 
 function renderSettings() {

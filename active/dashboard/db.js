@@ -134,22 +134,6 @@ async function getRowStatus(rowId) {
 }
 window.getRowStatus = getRowStatus;
 
-/**
- * 管理画面用: キュー統計を返す
- */
-async function getQueueStats() {
-  const queue = await getQueue();
-  const oldest = queue.length > 0
-    ? new Date(Math.min(...queue.map(i => i.timestamp))).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
-    : null;
-  return {
-    pending:  queue.filter(i => i.syncStatus === 'PENDING'  || i.status === 'pending').length,
-    syncing:  queue.filter(i => i.syncStatus === 'SYNCING'  || i.status === 'sending').length,
-    retrying: queue.filter(i => i.syncStatus === 'RETRY'    || i.status === 'failed').length,
-    total:    queue.length,
-    oldest
-  };
-}
 
 // ── 指数バックオフリトライスケジューリング ─────────────────────
 
