@@ -120,96 +120,6 @@ function getLiffAuthToken() {
   return liff.getAccessToken();
 }
 
-async function callApi(action, params = {}) {
-  const MAX_RETRIES = 3;
-  let delay = 1000;
-
-  logDebug(`[callApi] Checking LIFF status for action=${action}`);
-  const token = getLiffAuthToken();
-  if (token) {
-    logDebug(`[callApi] Token NOT injected into GET for security. (Token available)`);
-  } else {
-    logDebug(`[callApi] No token available.`);
-  }
-
-  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-    const queryParams = new URLSearchParams({
-      action: action,
-      _t: Date.now().toString(), // キャッシュバスター：iOS WebKitの302キャッシュ回避
-      ...params
-    });
-
-    const url = `${API_URL}?${queryParams.toString()}`;
-    const options = {
-      method: 'GET',
-      mode: 'cors',
-      credentials: 'omit',
-      cache: 'no-store', // キャッシュを利用しない
-      redirect: 'follow'
-    };
-
-    try {
-      logDebug(`[callApi] START (Attempt ${attempt}/${MAX_RETRIES}): action=${action}`);
-      logDebug(`[callApi] URL: ${url.substring(0, 80)}...`);
-
-      // 20秒タイムアウト（GASコールドスタート対策）
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 20000);
-      const response = await fetch(url, { ...options, signal: controller.signal });
-      clearTimeout(timeoutId);
-
-      logDebug(`[callApi] FETCH OK. status=${response.status}, type=${response.type}`);
-
-      if (!response.ok) {
-        logDebug(`[callApi] HTTP ERROR: status=${response.status}`);
-        throw new Error(`HTTP Error: ${response.status}`);
-      }
-
-      logDebug(`[callApi] Calling response.text()...`);
-      const text = await response.text();
-      logDebug(`[callApi] TEXT RECEIVED (length=${text.length})`);
-      logDebug(`[callApi] TEXT PREVIEW: ${text.substring(0, 150)}`);
-
-      logDebug(`[callApi] Parsing JSON...`);
-      let data;
-      try {
-        data = JSON.parse(text);
-        logDebug(`[callApi] JSON PARSE SUCCESS. success=${data.success}`);
-      } catch (parseErr) {
-        logDebug(`[callApi] JSON parse failed. Error=${parseErr.message}`);
-        logDebug(`[callApi] Failed Text snippet: ${text.substring(0, 200)}`);
-        throw new Error("JSON形式ではない応答を受け取りました: " + parseErr.message);
-      }
-
-      // GAS v2 形式のレスポンス（data.data ペイロードが存在する）の場合はアンラップ
-      if (data && typeof data === 'object' && 'data' in data && data.data !== null) {
-        const innerSuccess = data.data.success !== undefined ? data.data.success : data.success;
-        if (innerSuccess === false) {
-          logDebug(`[callApi] API returned inner success=false. msg=${data.data.message || data.message}`);
-          throw new Error(data.data.message || data.message || "API Error");
-        }
-        return data.data;
-      }
-
-      if (data.success === false) {
-        logDebug(`[callApi] API returned success=false. msg=${data.message}`);
-        throw new Error(data.message || "API Error");
-      }
-      return data;
-    } catch (err) {
-      logDebug(`[callApi] Attempt ${attempt} failed: ${err.message}`);
-      if (attempt === MAX_RETRIES) {
-        logDebug(`[callApi] ALL ATTEMPTS FAILED.`);
-        console.error("API Connection Error:", err);
-        alert("通信エラーが発生しました。\n内容: " + err.message);
-        throw err;
-      }
-      logDebug(`[callApi] Waiting ${delay}ms before retry...`);
-      await new Promise(r => setTimeout(r, delay));
-      delay *= 2;
-    }
-  }
-}
 
 /**
  * 写真アップロードなど大容量データ用 POST API呼び出し
@@ -477,48 +387,6 @@ window.retryRegistration = () => {
   }
 };
 
-let isSyncing = false;
-async function syncOfflineQueue() {
-  if (isSyncing) return;
-  if (!navigator.onLine) {
-    setSyncStatus('offline');
-    return;
-  }
-  const queue = JSON.parse(localStorage.getItem('offline_queue') || '[]');
-  if (queue.length === 0) {
-    setSyncStatus('online');
-    return;
-  }
-
-  isSyncing = true;
-  setSyncStatus('syncing');
-  console.log(`Offline sync: processing ${queue.length} report(s)...`);
-
-  const failedItems = [];
-  for (const item of queue) {
-    try {
-      const result = await callApiPost('submitDistribution', item);
-      if (!result || !result.success) {
-        failedItems.push(item);
-      }
-    } catch (e) {
-      console.error('Failed to sync offline item:', e);
-      failedItems.push(item);
-    }
-  }
-
-  localStorage.setItem('offline_queue', JSON.stringify(failedItems));
-  isSyncing = false;
-
-  if (failedItems.length === 0) {
-    console.log('Offline sync completed successfully.');
-    setSyncStatus('online');
-  } else {
-    console.warn(`${failedItems.length} items failed to sync. Will retry.`);
-    setSyncStatus('offline');
-  }
-}
-
 async function loadData(skipSync = false) {
   logDebug("[loadData] START (Background)");
 
@@ -527,12 +395,8 @@ async function loadData(skipSync = false) {
   await tier1Promise;
 
   try {
-    if (!skipSync && navigator.onLine) {
-      logDebug("[loadData] Syncing offline queue in background...");
-      await syncOfflineQueue();
-    } else if (!navigator.onLine) {
-      logDebug("[loadData] Offline. Setting status...");
-      setSyncStatus('offline');
+    if (!skipSync) {
+      setSyncStatus(navigator.onLine ? 'online' : 'offline');
     }
 
     logDebug("[loadData] Fetching getSystemSummary in background...");
@@ -791,58 +655,6 @@ window.triggerUISyncRefresh = async function() {
   }
 };
 
-// 後から写真を追加・変更する処理
-async function addPhotoToDetail(rowId) {
-  const p = allPoints.find(point => point.rowId === rowId); // let変数は window に付かないため直接参照
-  if (!p) return;
-  const areaName = window.currentCityDetailAreaName || '';
-
-  const imageBlob = await capturePhoto();
-  if (!imageBlob) return;
-
-  // ローカルBlobプレビューを即座に適用
-  p.tempPhotoUrl = URL.createObjectURL(imageBlob);
-  renderDetailList(areaName);
-  const modalContent = $('detail-modal-content');
-  if (modalContent) {
-    modalContent.innerHTML = renderDetailModalContent(p);
-  }
-
-  // 非同期でIndexedDB送信キューに登録
-  const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
-  const staffName = `${userInfo.last || ''} ${userInfo.first || ''}`.trim();
-  const staffId = userInfo.id || '';
-
-  if (typeof enqueueSync === 'function') {
-    p.syncStatus = 'pending';
-    if (modalContent) {
-      modalContent.innerHTML = renderDetailModalContent(p);
-    }
-
-    const gps = p.gps ? { latitude: p.gps.split(',')[0], longitude: p.gps.split(',')[1] } : { latitude: '', longitude: '' };
-
-    // BlobはSafari/LINE WebViewのIndexedDBで失われるため送信前にbase64変換
-    let photoBase64 = '';
-    if (imageBlob && typeof blobToBase64 === 'function') {
-      photoBase64 = await blobToBase64(imageBlob);
-    }
-
-    await enqueueSync({
-      areaName,
-      rowId,
-      isDone:     true,
-      count:      p.count || 0,
-      latitude:   gps.latitude,
-      longitude:  gps.longitude,
-      accuracy:   gps.accuracy   || null,                    // 要件2
-      branchCode: localStorage.getItem('branch_name') || '', // 要件2
-      areaId:     String(rowId),                             // 要件2
-      photoBase64, // BlobではなくBase64文字列で保存
-      staffName,
-      staffId
-    });
-  }
-}
 
 function pressNum(key) {
   if (!numpadContext) return;
@@ -1062,86 +874,8 @@ async function submitMissionComplete(areaName, rowId) {
   }
 }
 
-async function updateRecord(areaName, rowId, isDone, count) {
-  const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
-  const staffName = `${userInfo.last || ''} ${userInfo.first || ''}`.trim();
-  const staffId = userInfo.id || '';
-
-  // IndexedDB キュー経由で送信（db.js のフローと統一 → オフライン対応・リトライあり）
-  if (typeof enqueueSync === 'function') {
-    await enqueueSync({
-      areaName,
-      rowId,
-      isDone,
-      count,
-      latitude:    '',
-      longitude:   '',
-      accuracy:    null,
-      branchCode:  localStorage.getItem('branch_name') || '',
-      areaId:      String(rowId),
-      photoBase64: '',
-      staffName,
-      staffId
-    });
-    return;
-  }
-
-  // フォールバック: db.js が未ロードの場合のみ旧フローを使用
-  const payload = { areaName, rowId, staffName, staffId, isDone, count };
-  if (!navigator.onLine) {
-    saveToOfflineQueue(payload);
-    applyOptimisticCheck(areaName, rowId, isDone, count);
-    return;
-  }
-  try {
-    const result = await callApiPost('submitDistribution', payload);
-    if (result.success) loadData(true);
-  } catch (e) {
-    console.warn("API write failed. Storing report to offline queue.");
-    saveToOfflineQueue(payload);
-    applyOptimisticCheck(areaName, rowId, isDone, count);
-  }
-}
-
-function saveToOfflineQueue(payload) {
-  const queue = JSON.parse(localStorage.getItem('offline_queue') || '[]');
-  const filtered = queue.filter(item => !(item.areaName === payload.areaName && item.rowId === payload.rowId));
-  filtered.push(payload);
-  localStorage.setItem('offline_queue', JSON.stringify(filtered));
-  setSyncStatus('offline');
-}
-
-function applyOptimisticCheck(areaName, rowId, isDone, count) {
-  const p = allPoints.find(point => point.rowId === rowId);
-  if (p) {
-    p.isDone = isDone;
-    p.count = count;
-    if (isDone) {
-      const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
-      p.staffName = `${userInfo.last || ''} ${userInfo.first || ''}`.trim();
-      const now = new Date();
-      p.completedAt = `${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    } else {
-      p.completedAt = '';
-      p.staffName = '';
-    }
-
-    const card = $(`point-card-${rowId}`);
-    if (card) {
-      card.innerHTML = renderPointCard(p);
-      if (!navigator.onLine) {
-        const statusText = card.querySelector('label span');
-        if (statusText) {
-          statusText.textContent = isDone ? 'MISSION COMPLETED (OFFLINE)' : 'READY TO DEPLOY (OFFLINE)';
-        }
-      }
-    }
-  }
-}
-
 window.addEventListener('online', () => {
-  console.log("Device is online. Initializing background sync.");
-  syncOfflineQueue();
+  setSyncStatus('online');
 });
 
 window.addEventListener('offline', () => {
@@ -1782,88 +1516,6 @@ async function selectTown(cityName, townName) {
   }
 }
 
-function cleanNameInput(str) {
-  if (!str) return "";
-  // 1. スペース（半角・全角）をすべて除去
-  let s = str.replace(/[\s\u3000]/g, "");
-
-  // 2. 半角カタカナを全角カタカナに変換
-  const kanaMap = {
-    'ｱ': 'ア', 'ｲ': 'イ', 'ｳ': 'ウ', 'ｴ': 'エ', 'ｵ': 'オ',
-    'ｶ': 'カ', 'ｷ': 'キ', 'ｸ': 'ク', 'ｹ': 'ケ', 'ｺ': 'コ',
-    'ｻ': 'サ', 'ｼ': 'シ', 'ｽ': 'ス', 'ｾ': 'セ', 'ｿ': 'ソ',
-    'ﾀ': 'タ', 'ﾁ': 'チ', 'ﾂ': 'ツ', 'ﾃ': 'テ', 'ﾄ': 'ト',
-    'ﾅ': 'ナ', 'ﾆ': 'ニ', 'ﾇ': 'ヌ', 'ﾈ': 'ネ', 'ﾉ': 'ノ',
-    'ﾊ': 'ハ', 'ﾋ': 'ヒ', 'ﾌ': 'フ', 'ﾍ': 'ヘ', 'ﾎ': 'ホ',
-    'ﾏ': 'マ', 'ﾐ': 'ミ', 'ﾑ': 'ム', 'ﾒ': 'メ', 'ﾓ': 'モ',
-    'ﾔ': 'ヤ', 'ﾕ': 'ユ', 'ﾖ': 'ヨ',
-    'ﾗ': 'ラ', 'ﾘ': 'リ', 'ﾙ': 'ル', 'ﾚ': 'レ', 'ﾛ': 'ロ',
-    'ﾜ': 'ワ', 'ｦ': 'ヲ', 'ﾝ': 'ン',
-    'ｧ': 'ァ', 'ｨ': 'ィ', 'ｩ': 'ゥ', 'ｪ': 'ェ', 'ｫ': 'ォ',
-    'ｬ': 'ャ', 'ｭ': 'ュ', 'ｮ': 'ョ', 'ｯ': 'ッ',
-    'ｰ': 'ー', 'ﾞ': '゛', 'ﾟ': '゜'
-  };
-  let reg = new RegExp('[' + Object.keys(kanaMap).join('') + ']', 'g');
-  s = s.replace(reg, m => kanaMap[m]);
-
-  // 濁点・半濁点の結合処理
-  s = s.replace(/カ゛/g, 'ガ').replace(/キ゛/g, 'ギ').replace(/ク゛/g, 'グ').replace(/ケ゛/g, 'ゲ').replace(/コ゛/g, 'ゴ')
-       .replace(/サ゛/g, 'ザ').replace(/シ゛/g, 'ジ').replace(/ス゛/g, 'ズ').replace(/セ゛/g, 'ゼ').replace(/ソ゛/g, 'ゾ')
-       .replace(/タ゛/g, 'ダ').replace(/チ゛/g, 'ヂ').replace(/ツ゛/g, 'ヅ').replace(/テ゛/g, 'デ').replace(/ト゛/g, 'ド')
-       .replace(/ハ゛/g, 'バ').replace(/ヒ゛/g, 'ビ').replace(/フ゛/g, 'ブ').replace(/ヘ゛/g, 'ベ').replace(/ホ゛/g, 'ボ')
-       .replace(/ハ゜/g, 'パ').replace(/ヒ゜/g, 'ピ').replace(/フ゜/g, 'プ').replace(/ヘ゜/g, 'ペ').replace(/ホ゜/g, 'ポ');
-
-  return s;
-}
-
-// [CANDIDATE FOR REMOVAL]
-// Legacy manual registration.
-// Not executed in normal LINE authentication flow.
-async function saveProfile() {
-  logDebug("saveProfile: click triggered");
-  const rawLast = $('user-last').value, rawFirst = $('user-first').value;
-  logDebug(`saveProfile: inputs: last='${rawLast}', first='${rawFirst}'`);
-  const last = cleanNameInput(rawLast);
-  const first = cleanNameInput(rawFirst);
-  logDebug(`saveProfile: cleaned: last='${last}', first='${first}'`);
-
-  if (!last || !first) {
-    logDebug("saveProfile: validation failed (empty last/first name)");
-    alert('姓名を入力してください');
-    return;
-  }
-
-  logDebug("saveProfile: showing loading indicator");
-  $('loading').classList.remove('hidden');
-  $('loading').classList.remove('opacity-0');
-
-  await new Promise(r => setTimeout(r, 50));
-
-  try {
-    logDebug("saveProfile: invoking callApiPost('registerStaff')");
-    const res = await callApiPost('registerStaff', { lastName: last, firstName: first });
-    logDebug(`saveProfile: API result: ${JSON.stringify(res)}`);
-    if (res && res.success) {
-      logDebug("saveProfile: success! storing user_info to localStorage");
-      const existing = JSON.parse(localStorage.getItem('user_info')) || {};
-      const updated = Object.assign({}, existing, { last, first });
-      if (res.id) updated.id = res.id;
-      localStorage.setItem('user_info', JSON.stringify(updated));
-      window.isEditingProfile = false;
-      logDebug("saveProfile: switching to settings page");
-      switchPage('settings', true);
-      $('loading').classList.add('opacity-0');
-      setTimeout(() => $('loading').classList.add('hidden'), 700);
-    } else {
-      throw new Error('Failed');
-    }
-  } catch (err) {
-    logDebug(`saveProfile: caught exception: ${err.message}`);
-    alert('通信エラーが発生しました。');
-    $('loading').classList.add('opacity-0');
-    setTimeout(() => $('loading').classList.add('hidden'), 700);
-  }
-}
 
 async function safeInitApp() {
   // LIFF SDK が内部でトークン交換用に生成する非表示 iframe 内での二重実行（アクセストークン失効）を完全に防止するガード
