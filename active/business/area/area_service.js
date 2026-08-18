@@ -34,15 +34,6 @@ if (typeof AreaService === 'undefined') {
     getAreaDetails(areaName) {
       return this.repository.findAreaPoints(areaName);
     }
-
-    getCityAreaDetails(cityName) {
-      const result = this.repository.findCityAreaDetails(cityName, this.getCityName.bind(this));
-      if (!result.success) return result;
-      return {
-        success: true,
-        details: result.details
-      };
-    }
   };
   AreaService.instance = null;
 }
