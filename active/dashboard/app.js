@@ -633,12 +633,6 @@ window.triggerUISyncRefresh = async function() {
       }
     });
 
-    // リスト全体の再描画
-    const areaName = window.currentCityDetailAreaName || '';
-    if (areaName) {
-      renderDetailList(areaName);
-    }
-
     // 開いている詳細モーダルの再描画
     if (window.currentPointDetailRowId) {
       const p = allPoints.find(point => point.rowId === window.currentPointDetailRowId);
