@@ -2,39 +2,6 @@
 
 
 
-window.renderCityListItem = function(c) {
-  const isCompleted = c.done === c.total && c.total > 0;
-  const leftDummy = isCompleted ? '<span style="visibility: hidden; margin-right: 12px;" class="select-none text-[9px] font-sans">🔒 VERIFIED</span>' : '';
-  const rightLabel = isCompleted ? '<span style="margin-left: 12px;" class="font-sans text-[9px] opacity-90">🔒 VERIFIED</span>' : '';
-
-  let fontSizeClass = 'text-lg';
-  if (c.name.length > 12) {
-    fontSizeClass = 'text-xs';
-  } else if (c.name.length > 8) {
-    fontSizeClass = 'text-sm';
-  } else if (c.name.length > 5) {
-    fontSizeClass = 'text-base';
-  }
-
-  return `
-    <div class="clickable-card premium-glass py-5 px-6 flex flex-col items-center text-center gap-1.5" onclick="selectCity('${c.name}')">
-      <div class="w-full flex justify-center mb-1">
-        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);" class="inline-flex items-center justify-center h-7 px-3 ${fontSizeClass} font-black text-white rounded-full tracking-tight">
-          <span class="text-xs mr-1 select-none">🏢</span>
-          <span>${escapeHtml(c.name)}</span>
-        </div>
-      </div>
-      <div class="text-sm text-[#00B7FF]">${c.progress}%</div>
-      <div class="flex items-center justify-center w-full">
-        ${leftDummy}
-        <div style="background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.25); height: 22px; font-size: 10px; color: #22c55e;" class="inline-flex items-center justify-center px-2.5 font-bold rounded-full tracking-wider font-mono">
-          ${c.done || 0}/ ${c.total || 0}
-        </div>
-        ${rightLabel}
-      </div>
-    </div>
-  `;
-};
 
 window.renderAreaListItem = function(s) {
   const isCompleted = s.done === s.total && s.total > 0;
