@@ -465,7 +465,7 @@ function renderDetailModalContent(p) {
         </div>
 
         <!-- 【アクションボタン】上: 提出(ブルー) / 下: キャンセル(ダークグレー) -->
-        <div style="width: 100%; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box;">
+        <div style="width: 100%; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box;">
           <!-- 提出ボタン (ブルー) -->
           <button type="button" ontouchstart="" onclick="submitMissionComplete('${escapeHtml(areaName)}', ${p.rowId})" class="btn-neu"
             style="width: 100%; background: #2563eb; border: none; color: white; border-radius: 14px; padding: 14px 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: transform 0.12s ease, opacity 0.12s ease; display: flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box;"
