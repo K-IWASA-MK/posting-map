@@ -122,18 +122,6 @@ async function updateQueueItem(id, fields) {
   });
 }
 
-/**
- * 特定 rowId の送信ステータスを取得（数値/文字列の型を正規化）
- * @returns {string|null} 'PENDING' | 'SYNCING' | 'RETRY' | null
- */
-async function getRowStatus(rowId) {
-  const targetId = Number(rowId);
-  const queue = await getQueue();
-  const found = queue.find(q => Number(q.rowId) === targetId);
-  return found ? (found.syncStatus || found.status || 'PENDING') : null;
-}
-window.getRowStatus = getRowStatus;
-
 
 // ── 指数バックオフリトライスケジューリング ─────────────────────
 
