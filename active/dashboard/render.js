@@ -351,15 +351,15 @@ function renderDetailModalContent(p) {
   }
 
   return `
-    <!-- 1行目: 住所バッジ（中央寄せ） -->
-    <div class="w-full flex flex-col items-center gap-3">
-      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); height: 26px; font-size: 12px; color: rgba(255, 255, 255, 0.9);" class="inline-flex items-center px-3 font-bold rounded-full tracking-wide truncate max-w-full select-text">
-        🏠 ${escapeHtml(cleanAddr)}
+    <div style="display: flex; flex-direction: column; gap: 12px; width: 100%; box-sizing: border-box;">
+      <!-- 1行目: 住所バッジ（中央寄せ） -->
+      <div class="w-full flex flex-col items-center">
+        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); height: 26px; font-size: 12px; color: rgba(255, 255, 255, 0.9);" class="inline-flex items-center px-3 font-bold rounded-full tracking-wide truncate max-w-full select-text">
+          🏠 ${escapeHtml(cleanAddr)}
+        </div>
+        ${p.memo ? `<div class="text-xs text-white/50 bg-white/5 rounded-xl p-3 border border-white/5 select-text w-full text-center mt-1">${escapeHtml(p.memo)}</div>` : ''}
       </div>
-      ${p.memo ? `<div class="text-xs text-white/50 bg-white/5 rounded-xl p-3 border border-white/5 select-text w-full text-center mt-1">${escapeHtml(p.memo)}</div>` : ''}
-    </div>
 
-    <div class="flex flex-col gap-4">
       ${!p.isDone ? `
         <!-- 【未完了】配布枚数入力案内カード -->
         <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);" class="w-full rounded-3xl py-6 px-5 flex flex-col items-center justify-center gap-6">
