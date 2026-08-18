@@ -214,6 +214,62 @@ function closeDetailModal() {
   window.currentPointDetailRowId = null;
 }
 
+// キャンセル時の完全破棄＆PinStatus解除 (二重remove防止設計)
+window.cancelMissionComplete = function(rowId) {
+  const numericRowId = parseInt(rowId, 10);
+
+  // 1. 対象ポイントの一時下書きデータを完全破棄
+  const resetPointData = (p) => {
+    p.isDone = false;
+    p.count = 0;
+    p.staffName = '';
+    p.staffId = '';
+    p.completedAt = '';
+    p.syncStatus = '';
+    p.photoStatus = 'NONE';
+    p.gpsStatus = 'NO';
+    p.gps = '';
+    p.latitude = '';
+    p.longitude = '';
+    p.accuracy = null;
+    delete p.tempPhotoUrl;
+    delete p.photoBase64;
+  };
+
+  if (typeof allPoints !== 'undefined' && Array.isArray(allPoints)) {
+    const p = allPoints.find(point => point.rowId === numericRowId || point.rowId === rowId);
+    if (p) resetPointData(p);
+  }
+  if (typeof window.allPoints !== 'undefined' && Array.isArray(window.allPoints)) {
+    const p = window.allPoints.find(point => point.rowId === numericRowId || point.rowId === rowId);
+    if (p) resetPointData(p);
+  }
+
+  // 2. モーダルを閉じる
+  closeDetailModal();
+
+  // 3. activeMarker の有無を確認し、removeの二重送信を防止
+  let markerHandled = false;
+  if (typeof window.closeCustomInfoWindow === 'function') {
+    markerHandled = window.closeCustomInfoWindow();
+  }
+
+  // activeMarker が無かった場合のみ直接 remove を呼ぶ (重複送信の防止)
+  if (!markerHandled && typeof window.setPinInProgress === 'function') {
+    window.setPinInProgress(numericRowId || rowId, "remove");
+  }
+
+  // 4. マップピンの同期
+  if (typeof window.refreshMainMapPins === 'function') {
+    window.refreshMainMapPins();
+  }
+
+  // 5. エリア詳細リストの再描画
+  if (typeof renderDetailList === 'function' && window.currentCityDetailAreaName) {
+    renderDetailList(window.currentCityDetailAreaName);
+  }
+};
+
 // Render single point detail modal contents
 function renderDetailModalContent(p) {
   const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
@@ -368,7 +424,7 @@ function renderDetailModalContent(p) {
           </div>
 
           <div style="display: flex; gap: 10px; width: 100%;">
-            <button type="button" onclick="closeDetailModal()"
+            <button type="button" onclick="cancelMissionComplete(${p.rowId})"
               style="flex: 1; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6); border-radius: 14px; padding: 14px 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: transform 0.12s ease, opacity 0.12s ease;"
               onpointerdown="this.style.transform='scale(0.94)'; this.style.opacity='0.7';"
               onpointerup="this.style.transform='scale(1)'; this.style.opacity='1';"
@@ -476,7 +532,7 @@ function renderDetailModalContent(p) {
           </button>
 
           <!-- キャンセルボタン (ダークグレー) -->
-          <button type="button" ontouchstart="" onclick="closeDetailModal()"
+          <button type="button" ontouchstart="" onclick="cancelMissionComplete(${p.rowId})"
             style="width: 100%; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6); border-radius: 14px; padding: 12px 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: transform 0.12s ease, opacity 0.12s ease; display: flex; align-items: center; justify-content: center; gap: 4px; box-sizing: border-box;"
             onpointerdown="this.style.transform='scale(0.97)'; this.style.opacity='0.7';"
             onpointerup="this.style.transform='scale(1)'; this.style.opacity='1';"
@@ -1116,7 +1172,9 @@ window.initMainMap = function() {
       activeOverlay.setMap(null);
       activeOverlay = null;
     }
+    const hadMarker = (typeof activeMarker !== 'undefined' && activeMarker !== null);
     revertActiveMarkerColor();
+    return hadMarker;
   };
 
   // E2Eテスト用および下位互換性スタブ
