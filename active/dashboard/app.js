@@ -1319,13 +1319,6 @@ function navigateToAreaTab() {
   switchPage(lastAreaSubPage);
 }
 
-// 2層目（エリア一覧）から1層目（市区町村一覧）へ戻る
-function backToCityList() {
-  currentCity = null;
-  renderAreas();
-  const contentEl = $('content');
-  if (contentEl) contentEl.scrollTop = 0;
-}
 
 /**
  * Sprint G2-1: System Summary Foundation
