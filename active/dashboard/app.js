@@ -761,6 +761,9 @@ window.triggerUISyncRefresh = async function() {
   try {
     const queue = await getQueue();
     allPoints.forEach(p => {
+      // submitting（提出処理中）の場合はキュー状態での上書きを防止
+      if (p.syncStatus === 'submitting') return;
+
       const found = queue.find(q => q.rowId === p.rowId && q.areaName === currentAreaName);
       if (found) {
         p.syncStatus = found.syncStatus || found.status; // 'pending' | 'sending' | 'failed'
@@ -990,14 +993,14 @@ async function submitMissionComplete(areaName, rowId) {
   if (p.syncStatus === 'submitting') return;
   p.syncStatus = 'submitting';
 
-  // 即座にボタンを disabled 化し、「提出処理中」へ切り替え
+  // 「更新中...」基準: 同期的にボタン要素を即座に無効化＆テキスト変更
   const submitBtn = $('submit-mission-btn');
   const cancelBtn = $('cancel-mission-btn');
   if (submitBtn) {
     submitBtn.disabled = true;
     submitBtn.style.opacity = '0.75';
     submitBtn.style.cursor = 'not-allowed';
-    submitBtn.innerHTML = '⏳ 提出処理中...';
+    submitBtn.textContent = '⏳ 提出処理中...';
   }
   if (cancelBtn) {
     cancelBtn.disabled = true;
@@ -1005,8 +1008,11 @@ async function submitMissionComplete(areaName, rowId) {
     cancelBtn.style.cursor = 'not-allowed';
   }
 
-  // Safariに確実に「⏳ 提出処理中...」を描画(Paint)させてから送信処理へ進む
-  await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
+  // 状態駆動UI用のモーダル全体再描画（バックグラウンド更新時のSSOT担保）
+  const modalContent = $('detail-modal-content');
+  if (modalContent && typeof renderDetailModalContent === 'function') {
+    modalContent.innerHTML = renderDetailModalContent(p);
+  }
 
   try {
     if (typeof enqueueSync === 'function') {
@@ -1065,16 +1071,8 @@ async function submitMissionComplete(areaName, rowId) {
     p.syncStatus = 'pending';
 
     // エラー時のみ元の表示と操作可能状態に復帰
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.style.opacity = '1';
-      submitBtn.style.cursor = 'pointer';
-      submitBtn.innerHTML = '🚀 この内容で提出する';
-    }
-    if (cancelBtn) {
-      cancelBtn.disabled = false;
-      cancelBtn.style.opacity = '1';
-      cancelBtn.style.cursor = 'pointer';
+    if (modalContent && typeof renderDetailModalContent === 'function') {
+      modalContent.innerHTML = renderDetailModalContent(p);
     }
   }
 }
