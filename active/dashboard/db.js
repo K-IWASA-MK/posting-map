@@ -226,12 +226,8 @@ async function processQueue() {
             }
           }
 
-          // 2. 現在開いている画面(L3)のallPointsを同期
+          // 2. 現在開いているモーダル(L3)のallPointsを同期
           if (typeof allPoints !== 'undefined' && allPoints && window.currentCityDetailAreaName === item.areaName) {
-            // allPointsはキャッシュ配列への参照であるため、上記1の処理で自動的に値が更新されています
-            if (typeof renderDetailList === 'function') {
-              renderDetailList(item.areaName);
-            }
             if (window.currentPointDetailRowId === item.rowId) {
               const mc = document.getElementById('detail-modal-content');
               if (mc && typeof renderDetailModalContent === 'function') {
@@ -257,13 +253,6 @@ async function processQueue() {
           const p = cachedPoints.find(pt => pt.rowId === item.rowId);
           if (p) {
             p.syncStatus = 'RETRY';
-          }
-        }
-
-        // 2. 現在表示中の画面(L3)のステータス更新
-        if (typeof allPoints !== 'undefined' && allPoints && window.currentCityDetailAreaName === item.areaName) {
-          if (typeof renderDetailList === 'function') {
-            renderDetailList(item.areaName);
           }
         }
       }

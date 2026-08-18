@@ -1,9 +1,3 @@
-
-function getCityName(areaName) {
-  if (!areaName) return 'その他';
-  return areaName.replace(/\(\d+\)$/, '').trim();
-}
-
 function renderAreas() {
   const contentEl = $('content');
 
@@ -47,39 +41,6 @@ function renderAreas() {
     if (!window.mainMapInstance && typeof window.initMainMap === 'function') {
       setTimeout(window.initMainMap, 100);
     }
-  } else {
-    if (contentEl) contentEl.classList.remove('is-map-view');
-    // 【第2層：選択された市のエリアシート一覧画面】
-    const backButtonHtml = `
-      <div class="flex items-center mb-6 h-12">
-        <button onclick="backToCityList()" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold">‹</button>
-      </div>
-    `;
-
-    let filteredAreas = [];
-    if (typeof tier2CacheMap !== 'undefined' && Array.isArray(tier2CacheMap[currentCity])) {
-      filteredAreas = tier2CacheMap[currentCity].map(t => {
-        const done = t.done || 0;
-        const total = t.total || 0;
-        const progress = total > 0 ? Math.round((done / total) * 100) : 0;
-        return { name: t.name, done: done, total: total, progress: progress, repAddress: t.repAddress || '' };
-      });
-    }
-
-    const areaCardsHtml = filteredAreas.map(s => renderAreaListItem(s)).join('');
-    const bottomNavHtml = filteredAreas.length > 3 ? `
-      <div class="flex items-center justify-between mt-8 pb-10 w-full gap-4">
-        <button onclick="backToCityList()" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold">‹</button>
-        <button onclick="$('content').scrollTo({top: 0, behavior: 'smooth'})" class="flex-1 h-12 premium-glass-btn flex items-center justify-center text-xs font-bold uppercase tracking-wider text-white/80">↑ トップに戻る</button>
-        <div class="w-12 h-12"></div>
-      </div>
-    ` : `
-      <div class="flex items-center justify-start mt-8 pb-10">
-        <button onclick="backToCityList()" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold">‹</button>
-      </div>
-    `;
-    const mainContentHtml = `<div class="space-y-6">${areaCardsHtml}</div>` + bottomNavHtml;
-    $('area-list').innerHTML = backButtonHtml + mainContentHtml;
   }
 }
 
@@ -217,11 +178,6 @@ window.cancelMissionComplete = function(rowId) {
   // 4. マップピンの同期
   if (typeof window.refreshMainMapPins === 'function') {
     window.refreshMainMapPins();
-  }
-
-  // 5. エリア詳細リストの再描画
-  if (typeof renderDetailList === 'function' && window.currentCityDetailAreaName) {
-    renderDetailList(window.currentCityDetailAreaName);
   }
 };
 
@@ -400,146 +356,6 @@ function renderDetailModalContent(p) {
       `}
     </div>
   `;
-}
-
-// Render the entire details list using global allPoints (1-line simple card)
-function renderDetailList(areaName) {
-  const cardsHtml = allPoints.map((p, i) => {
-    return renderPointCard(p);
-  }).join('');
-
-  // 同一市区町村内の隣接エリアへの切り替えナビゲーションを追加
-  const activeCity = currentCity || getCityName(areaName);
-  const cityAreas = (typeof tier2CacheMap !== 'undefined' && tier2CacheMap[activeCity]) ? tier2CacheMap[activeCity] : [];
-  const currentIndex = cityAreas.findIndex(s => s.name === areaName);
-  const hasPrev = currentIndex > 0;
-  const hasNext = currentIndex !== -1 && currentIndex < cityAreas.length - 1;
-
-  const bottomNavHtml = `
-    <div class="flex items-center justify-between mt-8 pb-10 w-full gap-4">
-      <button onclick="navigateToSiblingArea(-1)" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold ${hasPrev ? '' : 'opacity-20 pointer-events-none'}" ${hasPrev ? '' : 'disabled'}>‹</button>
-
-      <button onclick="switchPage('areas')" class="flex-1 h-12 premium-glass-btn flex items-center justify-center text-xs font-bold uppercase tracking-wider text-white/80">一覧に戻る</button>
-
-      <button onclick="navigateToSiblingArea(1)" class="w-12 h-12 premium-glass-btn flex items-center justify-center text-xl font-bold ${hasNext ? '' : 'opacity-20 pointer-events-none'}" ${hasNext ? '' : 'disabled'}>›</button>
-    </div>
-  `;
-
-  $('detail-list').innerHTML = `<div class="space-y-4">${cardsHtml}</div>` + bottomNavHtml;
-}
-
-// 隣のエリアへの切り替えを実行する関数
-function navigateToSiblingArea(direction) {
-  if (!window.currentCityDetailAreaName) return;
-  const activeCity = currentCity || getCityName(window.currentCityDetailAreaName);
-  const cityAreas = (typeof tier2CacheMap !== 'undefined' && tier2CacheMap[activeCity]) ? tier2CacheMap[activeCity] : [];
-  const currentIndex = cityAreas.findIndex(s => s.name === window.currentCityDetailAreaName);
-  if (currentIndex === -1) return;
-
-  const targetIndex = currentIndex + direction;
-  if (targetIndex >= 0 && targetIndex < cityAreas.length) {
-    const targetAreaName = cityAreas[targetIndex].name;
-    openDetail(targetAreaName);
-  }
-}
-
-async function openDetail(name) {
-  // Gen 2 Tier3 キャッシュチェック
-  const activeCity = (typeof currentCity !== 'undefined' && currentCity) ? currentCity : getCityName(name);
-  const cacheKey = `${activeCity}::${name}`;
-  if (typeof tier3CacheMap !== 'undefined' && tier3CacheMap[cacheKey]) {
-    allPoints = tier3CacheMap[cacheKey];
-    window.currentCityDetailAreaName = name;
-    if (typeof scrollPositions !== 'undefined') scrollPositions['detail'] = 0;
-    const contentEl = $('content');
-    if (contentEl) contentEl.scrollTop = 0;
-    renderDetailList(name);
-    switchPage('detail');
-    return;
-  }
-
-  // 1. 同一エリアへの再タップ: メモリキャッシュを使って即時描画
-  if (window.currentCityDetailAreaName === name && allPoints && allPoints.length > 0) {
-    if (typeof scrollPositions !== 'undefined') scrollPositions['detail'] = 0;
-    const contentEl = $('content');
-    if (contentEl) contentEl.scrollTop = 0;
-    renderDetailList(name);
-    switchPage('detail');
-    return;
-  }
-
-  // 2. メモリキャッシュの確認（改善④）
-  if (window.cityAreaCache && window.cityAreaCache[name]) {
-    window.currentCityDetailAreaName = name;
-    allPoints = window.cityAreaCache[name];
-    if (typeof scrollPositions !== 'undefined') {
-      scrollPositions['detail'] = 0;
-    }
-    const contentEl = $('content');
-    if (contentEl) contentEl.scrollTop = 0;
-    renderDetailList(name);
-    switchPage('detail');
-    return;
-  }
-
-  // 3. フォールバック: キャッシュ未取得の場合
-  $('loading').classList.remove('hidden');
-  $('loading').classList.remove('opacity-0');
-
-  await new Promise(r => setTimeout(r, 50));
-
-  try {
-    // 実行中の先読みPromiseがあればそれを待つ
-    if (window.activeCityDetailsPromise) {
-      const data = await window.activeCityDetailsPromise;
-      if (data && data.success && data.details && data.details[name]) {
-        window.cityAreaCache = data.details;
-        window.currentCityDetailAreaName = name;
-        allPoints = data.details[name];
-        renderDetailList(name);
-
-        if (typeof scrollPositions !== 'undefined') scrollPositions['detail'] = 0;
-        const contentEl = $('content');
-        if (contentEl) contentEl.scrollTop = 0;
-
-        switchPage('detail');
-        $('loading').classList.add('opacity-0');
-        setTimeout(() => $('loading').classList.add('hidden'), 700);
-        return;
-      }
-    }
-
-    // 先読みPromiseがない、または取得に失敗した場合は個別取得を実行
-    const data = await callApiPost('getAreaDetails', { name: name });
-    if (data && data.points) {
-      window.currentCityDetailAreaName = name;
-      allPoints = data.points;
-
-      if (!window.cityAreaCache) window.cityAreaCache = {};
-      window.cityAreaCache[name] = data.points;
-
-      renderDetailList(name);
-      if (typeof scrollPositions !== 'undefined') scrollPositions['detail'] = 0;
-      const contentEl = $('content');
-      if (contentEl) contentEl.scrollTop = 0;
-      switchPage('detail');
-    }
-  } catch (e) {
-    // alert()はLINE WebViewで不安定なためDOM表示に切り替え
-    const detailList = $('detail-list');
-    if (detailList) {
-      detailList.innerHTML = `
-        <div style="border: 1px solid rgba(255,255,255,0.04);" class="premium-glass p-8 flex flex-col items-center justify-center text-center gap-3 mt-8">
-          <span class="text-2xl">⚠️</span>
-          <p class="text-sm font-black text-white/60">データの取得に失敗しました</p>
-          <p class="text-[10px] font-bold text-white/30 uppercase tracking-wider">時間をおいて再度お試しください</p>
-        </div>`;
-    }
-    switchPage('detail');
-  }
-
-  $('loading').classList.add('opacity-0');
-  setTimeout(() => $('loading').classList.add('hidden'), 700);
 }
 
 function renderSettings() {

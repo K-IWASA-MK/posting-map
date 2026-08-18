@@ -714,8 +714,7 @@ function pressNum(key) {
         p.tempPhotoUrl = URL.createObjectURL(imageBlob);
         p.photoBase64 = photoBase64;
 
-        // リストとモーダルを再描画（ここでMISSION COMPLETEDが表示される）
-        renderDetailList(areaName);
+        // モーダルを再描画（ここでMISSION COMPLETEDが表示される）
         const modalContent = $('detail-modal-content');
         if (modalContent) {
           modalContent.innerHTML = renderDetailModalContent(p);
@@ -1396,62 +1395,6 @@ async function fetchTier1() {
   }
 
   return null;
-}
-
-
-/**
- * Sprint G2-4: Tier 3 Lazy Loading Foundation (Generation 2 完成)
- * fetchTier3(cityName, townName) - 町名指定オンデマンド住所一覧取得
- */
-let tier3CacheMap = {};
-
-async function fetchTier3(cityName, townName) {
-  if (!townName) return null;
-  const cacheKey = `${cityName || ''}::${townName}`;
-  if (tier3CacheMap[cacheKey]) {
-    return tier3CacheMap[cacheKey];
-  }
-
-  showLoading('CONNECTING...');
-  try {
-    const res = await callApiPost('getTier3', { cityName: cityName, townName: townName });
-    if (res && res.success && Array.isArray(res.points)) {
-      tier3CacheMap[cacheKey] = res.points;
-      return res.points;
-    }
-  } catch (err) {
-    console.warn(`fetchTier3 failed for ${cityName} ${townName}:`, err);
-  } finally {
-    hideLoading();
-  }
-  return null;
-}
-
-/**
- * Sprint G2-4: selectTown(cityName, townName)
- */
-async function selectTown(cityName, townName) {
-  logDebug(`[selectTown] Selected: ${cityName} -> ${townName}`);
-  const fullName = (townName && townName.includes(cityName)) ? townName : `${cityName}_${townName}`;
-
-  // Gen 2 Tier 3 オンデマンド取得
-  const points = await fetchTier3(cityName, townName);
-  if (points && points.length > 0 && typeof allPoints !== 'undefined') {
-    allPoints = points;
-    window.currentCityDetailAreaName = fullName;
-    if (typeof renderDetailList === 'function') {
-      renderDetailList(fullName);
-    }
-    if (typeof switchPage === 'function') {
-      switchPage('detail');
-    }
-    return;
-  }
-
-  // フォールバック (Gen 1 互換維持)
-  if (typeof openDetail === 'function') {
-    openDetail(fullName);
-  }
 }
 
 
