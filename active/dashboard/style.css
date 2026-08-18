@@ -339,9 +339,6 @@ input::placeholder { text-align: center; }
 #page-areas {
   padding-bottom: 160px;
 }
-#page-detail {
-  padding-bottom: 160px;
-}
 #page-settings.hidden {
   display: none !important;
 }

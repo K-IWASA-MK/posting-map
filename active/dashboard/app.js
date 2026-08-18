@@ -29,8 +29,8 @@ let _rankingFetched = false;  // ランキング遅延取得済みフラグ
 let _stockFetched = false;    // 在庫一覧取得済みフラグ
 let _stockData = [];          // 在庫一覧キャッシュデータ
 let currentCity = null;
-let lastAreaSubPage = 'areas'; // 直前のエリアサブページ ('areas' または 'detail') を記憶
-let scrollPositions = { areas: 0, detail: 0, settings: 0, ranking: 0 };
+let lastAreaSubPage = 'areas';
+let scrollPositions = { areas: 0, settings: 0, ranking: 0 };
 window.activeRankingPromise = null;
 window.globalPinStatus = { inProgress: [], completed: [] };
 window.lastPinStatusSync = 0;
@@ -76,7 +76,6 @@ function setLoadingProgress(pct, label) {
 
 const pageIdMap = {
   'page-areas': 'areas',
-  'page-detail': 'detail',
   'page-settings': 'settings',
   'page-ranking': 'ranking',
   'page-storage-register': 'storage-register',
@@ -863,8 +862,7 @@ window.addEventListener('offline', () => {
 
 async function switchPage(id, force = false) {
   const pages = document.querySelectorAll('.page');
-  const targetId = id === 'detail' ? 'page-detail' :
-                   id === 'settings' ? 'page-settings' :
+  const targetId = id === 'settings' ? 'page-settings' :
                    id === 'ranking' ? 'page-ranking' :
                    id === 'storage-register' ? 'page-storage-register' :
                    id === 'storage-list' ? 'page-storage-list' :
@@ -886,7 +884,7 @@ async function switchPage(id, force = false) {
   }
 
   // エリア関連のページ切り替えであれば直前のページタイプを記憶
-  if (id === 'areas' || id === 'detail') {
+  if (id === 'areas') {
     lastAreaSubPage = id;
   }
 
