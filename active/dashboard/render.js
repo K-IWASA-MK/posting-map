@@ -444,7 +444,7 @@ function renderDetailModalContent(p) {
             <!-- 2. 配布枚数（右詰め・コンパクト化） -->
             <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 8px 9px; display: flex; flex-direction: column; justify-content: center; gap: 1px; box-sizing: border-box; overflow: hidden;">
               <div style="font-size: 9.5px; font-weight: 900; color: rgba(255, 255, 255, 0.5); display: flex; align-items: center; gap: 2px;">📄 配布枚数</div>
-              <div style="font-size: 18px; font-weight: 900; color: #10b981; font-family: monospace; text-align: right; width: 100%; line-height: 1.1; margin-top: 2px; letter-spacing: -0.02em;">
+              <div style="font-size: 18px; font-weight: 900; color: #ffffff; font-family: monospace; text-align: right; width: 100%; line-height: 1.1; margin-top: 2px; letter-spacing: -0.02em;">
                 ${p.count || 0}枚
               </div>
             </div>
