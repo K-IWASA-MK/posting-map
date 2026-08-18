@@ -1,4 +1,4 @@
 [
-  "package.json",
-  "scripts/check-scope.mjs"
+  "active/dashboard/db.js",
+  "active/dashboard/render.js"
 ]
