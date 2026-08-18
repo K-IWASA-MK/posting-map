@@ -362,16 +362,6 @@ function renderDetailModalContent(p) {
           </div>
         </div>
       `;
-    } else if (false) { // keep existing else block structure intact but bypassed
-      photoBlockHtml = `
-        <!-- 【写真あり】青色（#2563eb）テーマの写真確認カード (コンパクト化・ボタン廃止・外枠青色化) -->
-        <div style="background: rgba(37, 99, 235, 0.05); border: 1.5px solid rgba(37, 99, 235, 0.4); box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.15), 0 0 30px rgba(37, 99, 235, 0.05);" class="w-full rounded-2xl py-4 px-5 flex flex-col items-center justify-center">
-          <div class="flex items-center justify-center gap-2 w-full">
-            <span class="text-sm">📸</span>
-            <span class="text-[10px] font-black text-[#2563eb] uppercase tracking-[0.2em]">PHOTO VERIFIED</span>
-          </div>
-        </div>
-      `;
     } else {
       photoBlockHtml = `
         <!-- 【写真なし】「写真を追加」ボタンを排除し、証跡なし状態のみをシンプルに表示 -->

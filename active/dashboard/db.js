@@ -122,13 +122,6 @@ async function updateQueueItem(id, fields) {
   });
 }
 
-// 後方互換: 旧 updateQueueStatus は updateQueueItem でラップ
-async function updateQueueStatus(id, status) {
-  // 旧ステータス → 新ステータスへ正規化
-  const statusMap = { pending: 'PENDING', sending: 'SYNCING', failed: 'RETRY' };
-  await updateQueueItem(id, { syncStatus: statusMap[status] || status });
-}
-
 /**
  * 特定 rowId の送信ステータスを取得（数値/文字列の型を正規化）
  * @returns {string|null} 'PENDING' | 'SYNCING' | 'RETRY' | null
