@@ -28,8 +28,6 @@ function onOpen() {
     .addItem("🔓 スプシの保護・ロックをすべて解除", "removeAllProtections")
     .addItem("🔍 保護・ロックの状況を診断する", "diagnoseProtections")
     .addSeparator()
-    .addItem("🗺 司令室マップを開く (司令室用)", "openMapDashboard")
-    .addSeparator()
     .addItem("📊 全体数を集計する（ランキング更新）", "aggregateTotalVolumes")
     .addItem("📥 完了データのマスター抽出", "exportAllDataToMasterSheet")
     .addItem("📖 スタッフ用マニュアルを作成", "createManualSheet")
@@ -668,16 +666,6 @@ function setupMonthlyResetTrigger() {
   SpreadsheetApp.getUi().alert("⏰ 毎月末（翌月1日深夜）の自動データ更新トリガーを設定しました。\n毎日深夜に自動判定を行い、1日のタイミングでデータのリセットと再展開を行います。");
 }
 
-/**
- * 戦況マップダッシュボードを開く
- */
-function openMapDashboard() {
-  const apiKey = PropertiesService.getScriptProperties().getProperty('GOOGLE_MAPS_API_KEY');
-  if (!apiKey) { SpreadsheetApp.getUi().alert("APIキー未設定です。"); return; }
-  const html = HtmlService.createTemplateFromFile('map_dashboard');
-  html.apiKey = apiKey;
-  SpreadsheetApp.getUi().showModalDialog(html.evaluate().setWidth(1000).setHeight(700), '戦況マップ');
-}
 
 /**
  * スプレッドシート内のすべてのシート・セル範囲の保護（ロック）を完全に解除する
