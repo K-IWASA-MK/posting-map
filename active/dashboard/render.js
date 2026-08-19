@@ -376,16 +376,14 @@ function renderSettings() {
 
 
   // Normal view mode: Show ID card + assigned area shortcut + edit name button
-  const rawBranch = (window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.districtId) || localStorage.getItem('branch_name') || '';
-  const displayBranch = rawBranch ? (rawBranch.includes('支部') ? rawBranch : `${rawBranch} 支部`) : '';
+  const displayBranch = window.__districtName || localStorage.getItem('branch_name') || '';
 
   // Format sync time
   const lastSyncTime = localStorage.getItem('__last_sync_time__') || '--:--';
   const regDate = userInfo.registrationDate || '2025/07/01';
 
-
   const staffCardHtml = renderStaffCard(userInfo, {
-    branchName: displayBranch,
+    districtName: displayBranch,
     lastSyncTime: lastSyncTime,
     registrationDate: regDate
   });

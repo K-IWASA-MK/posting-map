@@ -31,12 +31,6 @@ if (document.readyState === 'loading') {
 }
 
 function initMissionControl() {
-  // Set district title
-  if (typeof window !== 'undefined' && window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.districtName) {
-    const titleEl = document.getElementById('sidebar-district-name');
-    if (titleEl) titleEl.textContent = window.PMS_CLIENT_CONFIG.districtName;
-  }
-
   // 1. Immediate Initial Sync
   syncMissionData();
 
@@ -54,58 +48,65 @@ function initMissionControl() {
 }
 
 /**
- * Backend API 通信ヘルパー (GET)
+ * Backend API 通信ヘルパー (GET with redirect follow)
  */
 async function callApi(action) {
   const url = `${getApiUrl()}?action=${encodeURIComponent(action)}&_t=${Date.now()}`;
-  const response = await fetch(url);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 20000);
+
+  const response = await fetch(url, {
+    method: 'GET',
+    mode: 'cors',
+    credentials: 'omit',
+    cache: 'no-store',
+    redirect: 'follow',
+    signal: controller.signal
+  });
+  clearTimeout(timeoutId);
+
   if (!response.ok) {
     throw new Error(`HTTP Error: ${response.status}`);
   }
   return await response.json();
 }
 
-/**
- * 実データの一括同期 (4 API すべての整合性を検証)
- */
 async function syncMissionData() {
   try {
-    const [summaryRes, tier1Res, stockRes, rankRes] = await Promise.allSettled([
-      callApi('getSystemSummary'),
-      callApi('getTier1'),
-      callApi('getFlyerStock'),
-      callApi('getRanking')
-    ]);
+    const summaryRes = await callApi('getSystemSummary').catch(e => ({ success: false, error: e.message }));
+    const tier1Res = await callApi('getTier1').catch(e => ({ success: false, error: e.message }));
+    const stockRes = await callApi('getFlyerStock').catch(e => ({ success: false, error: e.message }));
+    const rankRes = await callApi('getRanking').catch(e => ({ success: false, error: e.message }));
 
-    const isSummaryOk = summaryRes.status === 'fulfilled' && summaryRes.value && summaryRes.value.success;
-    const isTier1Ok = tier1Res.status === 'fulfilled' && tier1Res.value && tier1Res.value.success;
-    const isStockOk = stockRes.status === 'fulfilled' && stockRes.value && stockRes.value.success;
-    const isRankOk = rankRes.status === 'fulfilled' && rankRes.value && rankRes.value.success;
+    const isSummaryOk = summaryRes && summaryRes.success;
+    const isTier1Ok = tier1Res && tier1Res.success;
+    const isStockOk = stockRes && stockRes.success;
+    const isRankOk = rankRes && rankRes.success;
 
     // 1. Summary
     if (isSummaryOk) {
-      renderSummary(summaryRes.value);
+      renderSummary(summaryRes);
     } else {
       renderSummaryError();
     }
 
     // 2. Tier 1 Cities
     if (isTier1Ok) {
-      renderCities(tier1Res.value.cities || []);
+      renderCities(tier1Res.cities || []);
     } else {
       renderCitiesError();
     }
 
     // 3. Flyer Stocks
     if (isStockOk) {
-      renderStocks(stockRes.value.stocks || []);
+      renderStocks(stockRes.stocks || []);
     } else {
       renderStocksError();
     }
 
     // 4. Ranking / Activities
     if (isRankOk) {
-      renderActivities(rankRes.value.ranking || [], isStockOk ? stockRes.value.stocks || [] : []);
+      renderActivities(rankRes.ranking || [], isStockOk ? stockRes.stocks || [] : []);
     } else {
       renderActivitiesError();
     }
@@ -140,7 +141,9 @@ function renderSummary(data) {
   const doneEl = document.getElementById('kpi-done-pins');
   const totalEl = document.getElementById('kpi-total-pins');
   const badgeEl = document.getElementById('badge-progress');
+  const titleEl = document.getElementById('sidebar-district-name');
 
+  if (titleEl && data.districtName) titleEl.textContent = data.districtName;
   if (percentEl) percentEl.textContent = `${percent}%`;
   if (doneEl) doneEl.textContent = done.toLocaleString();
   if (totalEl) totalEl.textContent = total.toLocaleString();

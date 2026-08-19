@@ -5,8 +5,6 @@
  * 地区固有のSSOT設定ファイル
  */
 window.PMS_CLIENT_CONFIG = {
-  districtId: "MIE-03",
-  districtName: "三重県第3区",
   status: "ACTIVE_DEVELOPMENT",
   
   spreadsheetId: "1xQUvlCaUO103rjSGmdcFQQFkukodG4Dg9mS_teWT7uA",

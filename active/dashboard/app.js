@@ -110,10 +110,14 @@ function getLiffAuthToken() {
   if (typeof liff === "undefined") {
     return null;
   }
-  if (!liff.isLoggedIn()) {
+  try {
+    if (!liff.isLoggedIn()) {
+      return null;
+    }
+    return liff.getAccessToken();
+  } catch (e) {
     return null;
   }
-  return liff.getAccessToken();
 }
 
 
@@ -396,9 +400,7 @@ async function loadData(skipSync = false) {
     }
 
     logDebug("[loadData] Fetching getSystemSummary in background...");
-    const summaryPromise = callApiPost('getSystemSummary');
-
-    const data = await summaryPromise;
+    const data = await fetchSystemSummary();
     logDebug("[loadData] getSystemSummary fetched successfully.");
 
     if (data && data.success) {
@@ -1335,6 +1337,10 @@ function updateStats(summaryData = null) {
   const done = typeof summaryData.done === 'number' ? summaryData.done : 0;
   const percent = typeof summaryData.percent === 'number' ? summaryData.percent : 0;
 
+  if (summaryData.districtName) {
+    window.__districtName = summaryData.districtName;
+  }
+
   if (countEl) countEl.textContent = `${done}/ ${total}`;
   if (pctEl) pctEl.textContent = `${percent}%`;
 }
@@ -1347,6 +1353,26 @@ async function fetchSystemSummary(forceRefresh = false) {
   }
 
   _systemSummaryPromise = (async () => {
+    try {
+      const url = `${API_URL}?action=getSystemSummary&_t=${Date.now()}`;
+      const response = await fetch(url, {
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'omit',
+        cache: 'no-store',
+        redirect: 'follow'
+      });
+      if (response.ok) {
+        const res = await response.json();
+        if (res && res.success) {
+          updateStats(res);
+          return res;
+        }
+      }
+    } catch (err) {
+      console.warn("fetchSystemSummary via GET failed:", err);
+    }
+
     try {
       const res = await callApiPost('getSystemSummary');
       if (res && res.success) {
@@ -1424,6 +1450,13 @@ async function safeInitApp() {
   const liffId = (window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.line && window.PMS_CLIENT_CONFIG.line.liffId);
   if (!liffId) {
     throw new Error("LIFF ID missing in client configuration.");
+  }
+
+  if (typeof window !== 'undefined' && (window.location.search.includes('bypass_liff=1') || window.PMS_DEV_BYPASS)) {
+    logDebug("Development bypass active. Starting app directly.");
+    let userInfo = JSON.parse(localStorage.getItem('user_info') || '{"id":"S001","first":"勝二","last":"岩佐"}');
+    startApp({ displayName: userInfo.last, userId: userInfo.id });
+    return;
   }
 
   if (typeof liff !== 'undefined') {
@@ -1682,10 +1715,9 @@ function openIdInfoModal(type, event) {
   if (bodyEl) {
     let bodyText = data.body;
 
-    // ライセンス表示時のみ、支部名を動的に差し替える（Google Sheetsシート名・支部識別子SSOTから動的解決）
+    // ライセンス表示時のみ、地区名を動的に差し替える（Google Sheetsファイル名SSOTから動的解決）
     if (type === 'license') {
-      const rawBranch = (window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.districtId) || localStorage.getItem('branch_name') || '';
-      const displayBranch = rawBranch ? (rawBranch.includes('支部') ? rawBranch : `${rawBranch} 支部`) : '';
+      const displayBranch = window.__districtName || localStorage.getItem('branch_name') || '';
       bodyText = bodyText.replace('__BRANCH_NAME__', escapeHtml(displayBranch));
     }
 

@@ -18,6 +18,7 @@
       try {
         let totalDone = 0;
         let totalPoints = 0;
+        let districtName = "";
 
         // SSOT: CONFIG から総件数を動的に取得（フォールバック: 858）
         if (typeof CONFIG !== 'undefined' && CONFIG.get) {
@@ -26,11 +27,12 @@
           totalPoints = 858;
         }
 
-        // SSOT: 配布実績シートからユニーク完了件数を取得
+        // SSOT: Spreadsheetファイル名および配布実績シートからデータを取得
         try {
           if (typeof getSS === 'function') {
             const ss = getSS();
             if (ss) {
+              districtName = ss.getName();
               const distSheet = ss.getSheetByName("配布実績");
               if (distSheet) {
                 const lastRow = distSheet.getLastRow();
@@ -55,6 +57,7 @@
 
         return {
           success: true,
+          districtName: districtName,
           total: totalPoints,
           done: totalDone,
           percent: percent,
