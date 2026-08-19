@@ -3,308 +3,366 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>POSTING MAP - Mission Control Dashboard</title>
+  <title>POSTING MAP Dashboard</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
   <script src="/active/dashboard/config.js"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            brand: '#f97316',
+            brand: '#EA5F08',
+            brandLight: '#fb923c',
             brandDark: '#c2410c',
-            bgDark: '#07090e',
-            panelDark: '#0d111a',
-            borderDark: 'rgba(255, 255, 255, 0.07)',
-            neonGreen: '#22c55e',
-            neonBlue: '#38bdf8'
+            brandBlue: '#00B7FF',
+            brandGreen: '#22C55E',
+            appBg: '#0F141E',
+            containerBg: '#151D2B',
+            cardBg: '#1B2434',
+            cardSubBg: '#222C3E',
+            borderNormal: '#2A3547',
+            borderHighlight: '#36425A',
+            textMain: '#E6ECF3',
+            textSub: '#A8B3C7',
+            statusGreen: '#22C55E',
+            statusYellow: '#F59E0B',
+            statusRed: '#EF4444'
           },
           fontFamily: {
-            sans: ['Outfit', 'Noto Sans JP', 'sans-serif']
+            sans: ['Outfit', 'Noto Sans JP', 'sans-serif'],
+            mono: ['Outfit', 'monospace']
           }
         }
       }
     }
   </script>
+  
   <style>
     * {
       box-sizing: border-box;
       user-select: none;
     }
-    body {
-      background-color: #06080d;
-      color: #ffffff;
-      font-family: 'Outfit', 'Noto Sans JP', sans-serif;
+    html, body {
+      height: 100vh;
       height: 100dvh;
       width: 100vw;
-      overflow: hidden;
       margin: 0;
       padding: 0;
+      overflow: hidden;
+      background-color: #0F141E;
+      color: #E6ECF3;
+      font-family: 'Outfit', 'Noto Sans JP', sans-serif;
     }
 
-    .mission-card {
-      background: #0d111a;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 18px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      position: relative;
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2A3547;
+      border-radius: 2px;
     }
 
-    .glow-orange-text {
-      text-shadow: 0 0 25px rgba(249, 115, 22, 0.5);
+    /* Posting Map Custom Card */
+    .pm-card {
+      background: #1B2434;
+      border: 1px solid #2A3547;
+      border-radius: 14px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .pm-card:hover {
+      border-color: #36425A;
+    }
+    .pm-card-interactive {
+      cursor: pointer;
+    }
+    .pm-card-interactive:hover {
+      border-color: rgba(234, 95, 8, 0.4);
+      transform: translateY(-1px);
     }
 
-    .glow-green {
-      box-shadow: 0 0 10px #22c55e;
+    /* Leaflet Dark Theme Adjustments */
+    .leaflet-container {
+      background-color: #0F141E !important;
+      font-family: inherit;
     }
-
-    .glow-orange {
-      box-shadow: 0 0 10px #f97316;
+    .leaflet-popup-content-wrapper {
+      background: rgba(21, 29, 43, 0.95) !important;
+      color: #E6ECF3 !important;
+      border: 1px solid #2A3547 !important;
+      border-radius: 10px !important;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
     }
-
-    .glow-blue {
-      box-shadow: 0 0 10px #38bdf8;
-    }
-
-    .glow-red {
-      box-shadow: 0 0 10px #ef4444;
-    }
-
-    /* Waveform Animation */
-    .flow-wave {
-      filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.6));
+    .leaflet-popup-tip {
+      background: rgba(21, 29, 43, 0.95) !important;
     }
   </style>
 </head>
-<body class="flex h-screen w-screen overflow-hidden antialiased">
+<body class="bg-appBg text-textMain h-screen h-[100dvh] w-screen overflow-hidden flex flex-col antialiased">
 
-  <!-- ========================================== -->
-  <!-- LEFT SIDEBAR: MISSION CONTROL NAVIGATION   -->
-  <!-- ========================================== -->
-  <aside class="w-60 bg-[#080b11] border-r border-borderDark flex flex-col justify-between p-5 flex-shrink-0 z-20">
-    <div class="space-y-6">
-      <!-- Brand & Mission Control Header -->
-      <div class="space-y-3">
-        <div class="text-brand font-black text-lg tracking-wider">
-          POSTING MAP
-        </div>
-        <div class="border-l-2 border-brand pl-3 py-0.5">
-          <div class="text-[9px] font-mono font-bold text-white/40 uppercase tracking-widest">MISSION CONTROL</div>
-          <div id="sidebar-district-name" class="text-sm font-black text-white tracking-tight">--</div>
-        </div>
+  <!-- ==================== HEADER (最上部バー) ==================== -->
+  <header class="h-12 bg-containerBg border-b border-borderNormal px-4 flex items-center justify-between flex-shrink-0 z-30">
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-brand"></span>
+        <span class="font-black text-sm tracking-wider text-white">POSTING MAP</span>
+        <span class="text-[10px] font-semibold tracking-widest text-textSub/60 uppercase ml-1">Dashboard</span>
       </div>
+      
+      <!-- Live Sync Status -->
+      <div class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#222C3E] border border-borderNormal text-[11px] text-textSub">
+        <span id="live-dot" class="w-2 h-2 rounded-full bg-statusGreen"></span>
+        <span id="live-status-text" class="font-medium text-[10px]">現場データ同期</span>
+        <span id="sync-clock" class="font-mono text-[10px] text-textSub/70 ml-1">--:--:--</span>
+      </div>
+    </div>
 
-      <!-- Nav Menu Items -->
-      <nav class="space-y-5 text-xs">
-        <!-- Main Console -->
-        <div class="space-y-1.5">
-          <div class="text-[9px] font-mono font-bold text-white/30 uppercase tracking-widest px-2">MAIN CONSOLE</div>
-          <div class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white/5 border border-brand/30 text-white font-bold">
-            <span class="text-brand text-sm">📊</span>
-            <span>ダッシュボード</span>
-          </div>
-        </div>
+    <!-- 自治体セレクター (Control UI) -->
+    <div class="flex items-center gap-2">
+      <label for="city-selector" class="text-[11px] text-textSub font-medium hidden sm:inline">自治体:</label>
+      <select id="city-selector" onchange="onCitySelected(this.value)" class="bg-[#222C3E] text-textMain border border-borderNormal hover:border-borderHighlight rounded-lg px-2.5 py-1 text-xs font-medium focus:outline-none focus:border-brand cursor-pointer transition-colors">
+        <option value="ALL">全域 (三重第3区)</option>
+        <option value="四日市市">四日市市</option>
+        <option value="桑名市">桑名市</option>
+        <option value="いなべ市">いなべ市</option>
+        <option value="三重郡菰野町">菰野町</option>
+        <option value="三重郡朝日町">朝日町</option>
+        <option value="三重郡川越町">川越町</option>
+        <option value="員弁郡東員町">東員町</option>
+        <option value="桑名郡木曽岬町">木曽岬町</option>
+      </select>
+    </div>
+  </header>
 
-        <!-- Database -->
-        <div class="space-y-1">
-          <div class="text-[9px] font-mono font-bold text-white/30 uppercase tracking-widest px-2">DATABASE</div>
-          <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-white/60 hover:text-white transition-colors">
-            <span class="text-sm">📦</span>
-            <span>保管者一覧</span>
-          </div>
-          <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-white/60 hover:text-white transition-colors">
-            <span class="text-sm">🗺️</span>
-            <span>配布エリア</span>
-          </div>
-          <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-white/60 hover:text-white transition-colors">
-            <span class="text-sm">📝</span>
-            <span>活動ログ</span>
-          </div>
-        </div>
+  <!-- ==================== MAIN COCKPIT BODY (1-Viewport 100dvh 固定) ==================== -->
+  <div class="flex-1 flex overflow-hidden">
 
-        <!-- Analytics -->
-        <div class="space-y-1">
-          <div class="text-[9px] font-mono font-bold text-white/30 uppercase tracking-widest px-2">ANALYTICS</div>
-          <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-white/60 hover:text-white transition-colors">
-            <span class="text-sm">📈</span>
-            <span>配布活動分析</span>
-          </div>
-          <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-white/60 hover:text-white transition-colors">
-            <span class="text-sm">🗺️</span>
-            <span>エリア別進捗</span>
-          </div>
-          <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-white/60 hover:text-white transition-colors">
-            <span class="text-sm">⚙️</span>
-            <span>システム設定</span>
-          </div>
-        </div>
+    <!-- ========== LEFT NAV (5事実項目) ========== -->
+    <aside class="w-48 bg-containerBg border-r border-borderNormal p-3 flex flex-col justify-between flex-shrink-0">
+      <nav class="space-y-1.5">
+        <button id="nav-roster" onclick="switchView('roster')" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-textSub hover:text-white hover:bg-white/5 transition-all text-left">
+          <span class="text-sm">📋</span>
+          <span class="text-xs font-bold">名簿</span>
+        </button>
+        <button id="nav-stocks" onclick="switchView('stocks')" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-textSub hover:text-white hover:bg-white/5 transition-all text-left">
+          <span class="text-sm">📦</span>
+          <span class="text-xs font-bold">保有チラシ</span>
+        </button>
+        <button id="nav-requests" onclick="switchView('requests')" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-textSub hover:text-white hover:bg-white/5 transition-all text-left">
+          <span class="text-sm">🤝</span>
+          <span class="text-xs font-bold">受渡要請</span>
+        </button>
+        <button id="nav-records" onclick="switchView('records')" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-textSub hover:text-white hover:bg-white/5 transition-all text-left">
+          <span class="text-sm">📝</span>
+          <span class="text-xs font-bold">配布実績</span>
+        </button>
+        <button id="nav-areas" onclick="switchView('areas')" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-brand/10 text-brand border border-brand/30 font-bold transition-all text-left">
+          <span class="text-sm">🗺️</span>
+          <span class="text-xs font-bold">配布エリア</span>
+        </button>
       </nav>
-    </div>
 
-    <!-- Sidebar Footer -->
-    <div class="text-[9px] font-mono text-white/20 tracking-widest uppercase">
-      READ-ONLY CONSOLE
-    </div>
-  </aside>
-
-  <!-- ========================================== -->
-  <!-- MAIN DISPLAY AREA (1-VIEWPORT GRID)       -->
-  <!-- ========================================== -->
-  <main class="flex-1 flex flex-col p-5 overflow-hidden gap-4">
-
-    <!-- 1. TOP STATUS HEADER -->
-    <header class="flex justify-between items-center px-1 flex-shrink-0">
-      <div class="flex items-center gap-2.5">
-        <span id="live-dot" class="w-2.5 h-2.5 rounded-full bg-sky-400 glow-blue animate-pulse"></span>
-        <span id="live-status-text" class="text-xs font-bold text-white/80">同期準備中...</span>
-        <span id="sync-clock" class="text-xs font-mono text-white/40 ml-1">--:--:--</span>
+      <!-- 左ナビ下部：全体復帰ボタン -->
+      <div class="pt-2 border-t border-borderNormal">
+        <button onclick="resetFocus()" class="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-[#222C3E] border border-borderNormal hover:border-borderHighlight text-[11px] text-textSub hover:text-white transition-all">
+          <span>⤺</span>
+          <span>全体を見る</span>
+        </button>
       </div>
+    </aside>
 
-      <div class="flex items-center gap-3 text-white/40 text-xs">
-        <span class="cursor-default">🌙</span>
-        <span class="cursor-default">❓</span>
-      </div>
-    </header>
+    <!-- ========== CENTER & RIGHT COCKPIT CANVAS ========== -->
+    <main class="flex-1 flex flex-col p-3 overflow-hidden gap-2.5 bg-appBg">
 
-    <!-- 2. TOP KPI CARDS (3 COLUMNS) -->
-    <div class="grid grid-cols-3 gap-4 flex-shrink-0">
-      <!-- Card 1: 活動人数 -->
-      <div class="mission-card p-4 flex flex-col justify-between border-brand/20">
-        <div class="flex justify-between items-center">
-          <span class="text-xs font-bold text-white/80">活動人数</span>
-          <span id="badge-active-members" class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-white/5 text-white/40 border border-white/10">● SYNC</span>
-        </div>
-        <div class="text-[9px] font-mono text-white/40 uppercase tracking-wider">ACTIVE MEMBERS</div>
-        <div class="mt-2 flex items-baseline justify-end gap-1">
-          <span id="kpi-active-members" class="text-3xl font-black text-white font-mono">--</span>
-          <span class="text-xs text-white/60 font-bold">人</span>
-        </div>
-      </div>
-
-      <!-- Card 2: 全体進捗・完了ピン -->
-      <div class="mission-card p-4 flex flex-col justify-between">
-        <div class="flex justify-between items-center">
-          <span class="text-xs font-bold text-white/80">全体進捗</span>
-          <span id="badge-progress" class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-white/5 text-white/40 border border-white/10">● SYNC</span>
-        </div>
-        <div class="text-[9px] font-mono text-white/40 uppercase tracking-wider">OVERALL PROGRESS</div>
-        <div class="mt-2 flex items-baseline justify-end gap-2">
-          <span id="kpi-percent" class="text-3xl font-black text-brand font-mono glow-orange-text">--%</span>
-          <span class="text-xs text-white/40 font-mono">(<span id="kpi-done-pins" class="text-white/80 font-bold">--</span> / <span id="kpi-total-pins">858</span>)</span>
-        </div>
-      </div>
-
-      <!-- Card 3: 保有枚数 -->
-      <div class="mission-card p-4 flex flex-col justify-between">
-        <div class="flex justify-between items-center">
-          <span class="text-xs font-bold text-white/80">保有枚数</span>
-          <span id="badge-stock" class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-white/5 text-white/40 border border-white/10">● SYNC</span>
-        </div>
-        <div class="text-[9px] font-mono text-white/40 uppercase tracking-wider">SHEETS IN CUSTODY</div>
-        <div class="mt-2 flex items-baseline justify-end gap-1">
-          <span id="kpi-total-stock" class="text-3xl font-black text-white font-mono">--</span>
-          <span class="text-xs text-white/60 font-bold">枚</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 3. LOWER CONTENT AREA (GRID 60% : 40%) -->
-    <div class="grid grid-cols-12 gap-4 flex-1 overflow-hidden min-h-0">
-
-      <!-- LEFT SIDE (7 COLS): 活動推移 ＆ 保管状況 -->
-      <div class="col-span-7 flex flex-col gap-4 overflow-hidden h-full">
-
-        <!-- Activity Flow Trend (波形) -->
-        <div class="mission-card p-4 flex-1 flex flex-col justify-between overflow-hidden">
-          <div class="flex justify-between items-center flex-shrink-0">
-            <div>
-              <div class="text-xs font-bold text-white/90">活動推移</div>
-              <div class="text-[9px] font-mono text-white/40 uppercase tracking-wider">ACTIVITY FLOW TREND</div>
+      <!-- ===== ROW 1: TOP FACT CARDS (3事実数字) ===== -->
+      <div class="grid grid-cols-3 gap-2.5 flex-shrink-0 h-16">
+        <!-- 事実 1: 配布エリア (完了 / 総数) -->
+        <div onclick="focusCard('areas')" class="pm-card pm-card-interactive px-3.5 py-2 flex items-center justify-between">
+          <div>
+            <div class="text-[10px] font-semibold text-textSub tracking-wider">配布エリア</div>
+            <div class="flex items-baseline gap-1 mt-0.5">
+              <span id="fact-done-areas" class="text-2xl font-black font-mono text-white tracking-tight leading-none">--</span>
+              <span class="text-[11px] text-textSub font-mono">/ <span id="fact-total-areas">858</span></span>
             </div>
-            <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-brand/10 text-brand border border-brand/20">● FLOW</span>
+          </div>
+          <div class="text-xl opacity-60">🗺️</div>
+        </div>
+
+        <!-- 事実 2: 保有チラシ (総枚数) -->
+        <div onclick="focusCard('stocks')" class="pm-card pm-card-interactive px-3.5 py-2 flex items-center justify-between">
+          <div>
+            <div class="text-[10px] font-semibold text-textSub tracking-wider">保有チラシ</div>
+            <div class="flex items-baseline gap-1 mt-0.5">
+              <span id="fact-total-stocks" class="text-2xl font-black font-mono text-white tracking-tight leading-none">--</span>
+              <span class="text-[11px] text-textSub">枚</span>
+            </div>
+          </div>
+          <div class="text-xl opacity-60">📦</div>
+        </div>
+
+        <!-- 事実 3: 配布した人 (人数) -->
+        <div onclick="focusCard('records')" class="pm-card pm-card-interactive px-3.5 py-2 flex items-center justify-between">
+          <div>
+            <div class="text-[10px] font-semibold text-textSub tracking-wider">配布した人</div>
+            <div class="flex items-baseline gap-1 mt-0.5">
+              <span id="fact-active-members" class="text-2xl font-black font-mono text-white tracking-tight leading-none">--</span>
+              <span class="text-[11px] text-textSub">人</span>
+            </div>
+          </div>
+          <div class="text-xl opacity-60">👥</div>
+        </div>
+      </div>
+
+      <!-- ===== ROW 2 & ROW 3 (フォーカス切り替え対応メインビュー) ===== -->
+      <div id="default-view-grid" class="flex-1 grid grid-cols-12 gap-2.5 min-h-0 overflow-hidden">
+        
+        <!-- ===== LEFT: MAP CONTAINER (8カラム: 画面の主役) ===== -->
+        <div class="col-span-8 pm-card flex flex-col p-2 overflow-hidden relative">
+          <!-- マップ上部バー -->
+          <div class="flex items-center justify-between px-2 py-1 flex-shrink-0 z-10">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-xs text-white">配布エリア MAP</span>
+              <span id="map-district-label" class="text-[10px] font-mono text-brand font-semibold">三重第3区 (858エリア)</span>
+            </div>
+            <button onclick="focusCard('areas')" class="text-[10px] text-brand hover:text-brandLight font-bold transition-colors">
+              全画面 ➔
+            </button>
           </div>
 
-          <!-- Smooth Waveform Graphic (SVG) -->
-          <div class="flex-1 flex items-center justify-center my-2 relative w-full overflow-hidden">
-            <svg class="w-full h-full max-h-36 flow-wave" viewBox="0 0 500 120" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="waveGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#f97316" stop-opacity="0.35"/>
-                  <stop offset="100%" stop-color="#f97316" stop-opacity="0.0"/>
-                </linearGradient>
-              </defs>
-              <path d="M 0 100 Q 120 100 200 80 T 380 40 T 480 60 L 500 30 L 500 120 L 0 120 Z" fill="url(#waveGrad)"/>
-              <path d="M 0 100 Q 120 100 200 80 T 380 40 T 480 60 L 500 30" fill="none" stroke="#f97316" stroke-width="2.5" stroke-linecap="round"/>
-            </svg>
+          <!-- Leaflet Map Canvas -->
+          <div class="flex-1 w-full rounded-xl overflow-hidden relative border border-borderNormal mt-1">
+            <div id="map" class="w-full h-full"></div>
+            
+            <!-- マップ上ピンタップ時の詳細情報オーバーレイ -->
+            <div id="map-area-detail" class="absolute bottom-2 left-2 right-2 p-2.5 rounded-xl bg-containerBg/95 border border-borderHighlight backdrop-blur-md z-[1000] hidden transition-all shadow-2xl">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div id="selected-area-name" class="font-bold text-xs text-white">--</div>
+                  <div class="text-[10px] text-textSub mt-0.5">
+                    状態: <span id="selected-area-count" class="font-mono font-bold text-brand">--</span> ｜ 
+                    スタッフ: <span id="selected-area-staff">--</span> ｜ 
+                    日時: <span id="selected-area-time">--</span>
+                  </div>
+                </div>
+                <button onclick="closeAreaDetail()" class="text-textSub hover:text-white px-2 py-1 text-xs">✕</button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Inventory Stock Level (保管状況バーグラフ) -->
-        <div class="mission-card p-4 flex-1 flex flex-col justify-between overflow-hidden">
-          <div class="flex justify-between items-center flex-shrink-0">
-            <div>
-              <div class="text-xs font-bold text-white/90">保管状況</div>
-              <div class="text-[9px] font-mono text-white/40 uppercase tracking-wider">INVENTORY STOCK LEVEL</div>
+        <!-- ===== RIGHT: 2 FACTS CARDS (4カラム: 最新の活動 ＆ 保有チラシ) ===== -->
+        <div class="col-span-4 flex flex-col gap-2.5 min-h-0 overflow-hidden">
+          
+          <!-- 上段: 最新の活動 (写真付き) -->
+          <div class="flex-1 pm-card p-3 flex flex-col justify-between overflow-hidden">
+            <div class="flex items-center justify-between flex-shrink-0">
+              <span class="font-bold text-xs text-white">最新の活動</span>
+              <button onclick="focusCard('records')" class="text-[10px] text-brand hover:text-brandLight font-bold transition-colors">
+                詳細 ➔
+              </button>
             </div>
-            <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20">● STOCK</span>
+
+            <!-- 活動ハイライト表示 -->
+            <div class="my-auto flex items-center gap-3">
+              <!-- 現場写真枠 -->
+              <div class="w-16 h-16 rounded-xl bg-cardSubBg border border-borderNormal flex-shrink-0 overflow-hidden flex items-center justify-center relative">
+                <img id="latest-activity-img" src="" alt="現場写真" class="w-full h-full object-cover hidden">
+                <span id="latest-activity-placeholder" class="text-xl opacity-40">📷</span>
+              </div>
+              
+              <!-- 活動データ -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5">
+                  <span id="latest-activity-time" class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-brand/10 text-brand font-bold">--:--</span>
+                  <span id="latest-activity-staff" class="font-mono font-bold text-white text-xs">--</span>
+                </div>
+                <div id="latest-activity-location" class="font-medium text-xs text-white/90 truncate mt-1">本日の活動データなし</div>
+                <div class="text-[11px] text-textSub mt-0.5">
+                  <span id="latest-activity-count" class="font-mono font-black text-white text-sm">--</span> 枚 配布
+                </div>
+              </div>
+            </div>
+
+            <div class="text-[10px] text-textSub/50 text-right flex-shrink-0">
+              リアルタイム現場同期
+            </div>
           </div>
 
-          <!-- Bar Chart Area -->
-          <div id="inventory-bars-container" class="flex-1 flex items-end justify-around gap-3 pt-4 pb-1">
-            <!-- Dynamically populated stock bars -->
-            <div class="text-xs text-white/30 font-mono self-center">同期待機中...</div>
+          <!-- 下段: 保有チラシ (拠点別内訳) -->
+          <div class="flex-1 pm-card p-3 flex flex-col justify-between overflow-hidden">
+            <div class="flex items-center justify-between flex-shrink-0">
+              <span class="font-bold text-xs text-white">保有チラシ</span>
+              <button onclick="focusCard('stocks')" class="text-[10px] text-brand hover:text-brandLight font-bold transition-colors">
+                一覧 ➔
+              </button>
+            </div>
+
+            <!-- 拠点別リスト -->
+            <div id="stock-location-list" class="space-y-1.5 overflow-y-auto max-h-[110px] pr-1">
+              <div class="text-[11px] text-textSub/50 text-center py-2">保管データ読み込み中...</div>
+            </div>
+
+            <div class="text-[10px] text-textSub/50 text-right flex-shrink-0">
+              拠点在庫データ
+            </div>
           </div>
+
         </div>
 
       </div>
 
-      <!-- RIGHT SIDE (5 COLS): 今日の活動 ＆ 配布エリア進捗 -->
-      <div class="col-span-5 flex flex-col gap-4 overflow-hidden h-full">
-
-        <!-- Today's Activity (今日の活動) -->
-        <div class="mission-card p-4 flex-1 flex flex-col justify-between overflow-hidden">
-          <div class="flex justify-between items-center flex-shrink-0 border-b border-white/5 pb-2">
-            <div>
-              <div class="text-xs font-bold text-white/90">今日の活動</div>
-              <div class="text-[9px] font-mono text-white/40 uppercase tracking-wider">TODAY'S ACTIVITY</div>
-            </div>
-            <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">● LIVE</span>
-          </div>
-
-          <!-- Activity List -->
-          <div id="today-activity-list" class="space-y-2.5 my-auto overflow-hidden">
-            <!-- Dynamically populated activity rows -->
-            <div class="text-xs text-white/30 font-mono py-2 text-center">同期待機中...</div>
-          </div>
-
-          <div class="text-right pt-1 flex-shrink-0">
-            <span class="text-[10px] text-brand font-bold cursor-default">すべて見る ＞</span>
-          </div>
+      <!-- ===== ROW 3: BOTTOM DISTRIBUTION RECORDS FEED (横並び最新配布フィード) ===== -->
+      <div class="h-10 pm-card px-3 flex items-center justify-between flex-shrink-0 overflow-hidden">
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <span class="text-xs">📝</span>
+          <span class="font-bold text-xs text-white">配布実績</span>
         </div>
 
-        <!-- Area Progress (配布エリア進捗) -->
-        <div class="mission-card p-4 flex-1 flex flex-col justify-between overflow-hidden">
-          <div class="flex justify-between items-center flex-shrink-0 border-b border-white/5 pb-2">
-            <div>
-              <div class="text-xs font-bold text-white/90">配布エリア進捗</div>
-              <div class="text-[9px] font-mono text-white/40 uppercase tracking-wider">AREA PROGRESS</div>
-            </div>
-            <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">● PROGRESS</span>
-          </div>
-
-          <!-- City Progress Bars -->
-          <div id="area-progress-container" class="space-y-1.5 my-auto overflow-hidden">
-            <!-- Dynamically populated area progress rows -->
-            <div class="text-xs text-white/30 font-mono py-2 text-center">同期待機中...</div>
-          </div>
+        <!-- 横スクロール実績フィード -->
+        <div id="distribution-records-list" class="flex-1 flex items-center gap-2.5 overflow-x-auto hide-scrollbar px-3 min-w-0">
+          <div class="text-[11px] text-textSub/50">データ読み込み中...</div>
         </div>
 
+        <button onclick="focusCard('records')" class="text-[10px] text-brand hover:text-brandLight font-bold flex-shrink-0 ml-2">
+          詳細 ➔
+        </button>
       </div>
 
-    </div>
+      <!-- ===== FOCUS VIEW CONTAINER (特定事実が主役になるオーバーレイ) ===== -->
+      <div id="focus-view-container" class="flex-1 pm-card p-4 flex-col overflow-hidden hidden">
+        <div id="focus-header" class="flex items-center justify-between pb-3 border-b border-borderNormal flex-shrink-0">
+          <div class="flex items-center gap-2">
+            <span id="focus-icon" class="text-lg">🗺️</span>
+            <h2 id="focus-title" class="font-bold text-sm text-white">詳細ビュー</h2>
+          </div>
+          <button onclick="resetFocus()" class="px-3 py-1 rounded-lg bg-cardSubBg border border-borderNormal hover:border-borderHighlight text-xs font-medium text-textSub hover:text-white transition-all">
+            ⤺ 全体画面に戻る
+          </button>
+        </div>
+        <div id="focus-content" class="flex-1 overflow-y-auto pt-3">
+          <!-- Dynamically populated by focusCard(type) -->
+        </div>
+      </div>
 
-  </main>
+    </main>
+
+  </div>
 
   <script src="manager.js"></script>
 </body>
