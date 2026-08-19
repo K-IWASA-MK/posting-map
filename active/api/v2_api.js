@@ -39,14 +39,34 @@ function doGet(e) {
     })).setMimeType(ContentService.MimeType.JSON);
   }
 
-  // Authentication Gate
-  const auth = authenticateRequest(params);
-  if (!auth.success) {
-    return ContentService.createTextOutput(JSON.stringify(auth))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-  e.user = auth.user;
   const action = params.action || "";
+
+  // Read-only actions that do not require liffToken
+  const isReadOnlyAction = [
+    'getSystemSummary',
+    'getDashboardData',
+    'getTier1',
+    'getFlyerStock',
+    'getRanking',
+    'getMapsApiKey',
+    'getDeliveryStats',
+    'getEvidence',
+    'getAreaDetails',
+    'getGlobalPinStatus',
+    'getRoster'
+  ].includes(action);
+
+  // Authentication Gate
+  if (!isReadOnlyAction) {
+    const auth = authenticateRequest(params);
+    if (!auth.success) {
+      return ContentService.createTextOutput(JSON.stringify(auth))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    e.user = auth.user;
+  } else {
+    e.user = null;
+  }
   const res = processGetActionLegacy(action, e);
   if (res && typeof res.setMimeType === 'function') {
     return res;
@@ -120,22 +140,39 @@ function doPost(e) {
     } catch (errJson) {}
   }
 
-  const action = params.action || (postData && postData.action) || "";
+  // Read-only actions that do not require liffToken
+  const isReadOnlyAction = [
+    'getSystemSummary',
+    'getDashboardData',
+    'getTier1',
+    'getFlyerStock',
+    'getRanking',
+    'getMapsApiKey',
+    'getDeliveryStats',
+    'getEvidence',
+    'getAreaDetails',
+    'getGlobalPinStatus',
+    'getRoster'
+  ].includes(action);
 
   // Authentication Gate
-  const auth = authenticateRequest(postData || {});
-  if (!auth.success) {
-    // getMapsApiKey のみ未ログインでも通過を許可する (バイパス)
-    if (action !== 'getMapsApiKey') {
+  if (!isReadOnlyAction) {
+    const auth = authenticateRequest(postData || {});
+    if (!auth.success) {
       return ContentService.createTextOutput(JSON.stringify(auth))
         .setMimeType(ContentService.MimeType.JSON);
     }
-  }
-
-  if (postData) {
-    postData.user = auth.user;
+    if (postData) {
+      postData.user = auth.user;
+    } else {
+      postData = { user: auth.user };
+    }
   } else {
-    postData = { user: auth.user };
+    if (postData) {
+      postData.user = null;
+    } else {
+      postData = { user: null };
+    }
   }
   const res = processPostAction(action, postData, e);
   if (res && typeof res.setMimeType === 'function') {
