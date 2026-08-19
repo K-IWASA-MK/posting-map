@@ -25,6 +25,7 @@ const DashboardState = {
   stocks: [],
   ranking: [], // 現場アプリと完全同一の計算済みランキング (getRanking)
   roster: [],
+  requests: [], // 受渡要請 (getTransferRequests)
   globalPinStatus: { inProgress: [], completed: [] },
   masterPins858: [], // SSOT 858件マスターピン
   selectedCity: 'ALL',
@@ -205,13 +206,14 @@ function initMap() {
  */
 async function syncDashboardData() {
   try {
-    const [summaryRes, tier1Res, stockRes, rankRes, pinStatusRes, rosterRes] = await Promise.all([
+    const [summaryRes, tier1Res, stockRes, rankRes, pinStatusRes, rosterRes, reqRes] = await Promise.all([
       callApiPost('getSystemSummary').catch(e => ({ success: false, error: e.message })),
       callApiPost('getTier1').catch(e => ({ success: false, error: e.message })),
       callApiPost('getFlyerStock').catch(e => ({ success: false, error: e.message })),
       callApiPost('getRanking').catch(e => ({ success: false, error: e.message })),
       callApiPost('getGlobalPinStatus').catch(e => ({ success: false, error: e.message })),
-      callApiPost('getRoster').catch(e => ({ success: false, error: e.message }))
+      callApiPost('getRoster').catch(e => ({ success: false, error: e.message })),
+      callApiPost('getTransferRequests').catch(e => ({ success: false, error: e.message }))
     ]);
 
     const isSummaryOk = summaryRes && summaryRes.success;
@@ -220,6 +222,7 @@ async function syncDashboardData() {
     const isRankOk = rankRes && rankRes.success;
     const isPinStatusOk = pinStatusRes && pinStatusRes.success;
     const isRosterOk = rosterRes && rosterRes.success;
+    const isReqOk = reqRes && reqRes.success;
 
     // 1. 配布エリア事実データ
     if (isSummaryOk) {
@@ -241,23 +244,30 @@ async function syncDashboardData() {
       DashboardState.roster = rosterRes.roster || [];
     }
 
-    // 5. 現場ピンステータス（現場アプリと完全同一データ）
+    // 5. 受渡要請データ
+    if (isReqOk) {
+      DashboardState.requests = reqRes.requests || [];
+    } else {
+      DashboardState.requests = [];
+    }
+
+    // 6. 現場ピンステータス（現場アプリと完全同一データ）
     if (isPinStatusOk) {
       DashboardState.globalPinStatus.inProgress = (pinStatusRes.inProgress || []).map(id => parseInt(id, 10)).filter(id => !isNaN(id));
       DashboardState.globalPinStatus.completed = (pinStatusRes.completed || []).map(id => parseInt(id, 10)).filter(id => !isNaN(id));
     }
 
-    // 6. 配布実績ランキング（現場アプリと完全同一データ）
+    // 7. 配布実績ランキング（現場アプリと完全同一データ）
     if (isRankOk) {
       DashboardState.ranking = rankRes.ranking || [];
     } else {
       DashboardState.ranking = [];
     }
 
-    // 7. 現在選択中の自治体に合わせて画面全体を再描画
+    // 8. 現在選択中の自治体に合わせて画面全体を再描画
     renderCurrentView();
 
-    // 8. 通常マップと全画面マップのピンを再描画
+    // 9. 通常マップと全画面マップのピンを再描画
     if (DashboardState.map && DashboardState.markersLayer) {
       renderPinsOnMap(DashboardState.map, DashboardState.markersLayer, DashboardState.masterPins858);
     }
@@ -663,9 +673,11 @@ function focusCard(type) {
     } else {
       DashboardState.roster.forEach(r => {
         html += `
-          <div class="p-3.5 rounded-xl bg-[#222C3E] border border-[#2A3547]">
-            <div class="font-bold text-xs text-[#E6ECF3]">${r.id || r.staffId || ''} ｜ ${r.name || '配布員'}</div>
-            <div class="text-[#A8B3C7] text-[11px] mt-0.5">管轄: ${r.area || r.district || '未設定'} ｜ 登録: ${r.registeredAt || '未設定'}</div>
+          <div class="p-3.5 rounded-xl bg-[#222C3E] border border-[#2A3547] flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="font-mono font-bold text-xs text-brand">${r.id || ''}</span>
+              <span class="font-bold text-xs text-[#E6ECF3]">${r.name || ''}</span>
+            </div>
           </div>
         `;
       });
@@ -676,11 +688,31 @@ function focusCard(type) {
   } else if (type === 'requests') {
     if (focusTitle) focusTitle.textContent = '受渡要請';
     if (focusIcon) focusIcon.textContent = '🤝';
-    focusContent.innerHTML = `
-      <div class="text-xs text-[#A8B3C7]/60 text-center py-6">
-        現在、アクティブな受渡要請はありません
-      </div>
-    `;
+
+    let html = '<div class="space-y-2.5">';
+    if (DashboardState.requests.length === 0) {
+      html += `<div class="text-xs text-[#A8B3C7]/60 text-center py-6">現在、受渡要請はありません</div>`;
+    } else {
+      DashboardState.requests.forEach(req => {
+        html += `
+          <div class="p-3.5 rounded-xl bg-[#222C3E] border border-[#2A3547]">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-xs text-[#E6ECF3]">${req.requesterName || req.requesterId}</span>
+                <span class="text-[10px] text-[#A8B3C7]">➔</span>
+                <span class="font-bold text-xs text-[#E6ECF3]">${req.holderName || req.holderId}</span>
+              </div>
+              <span class="font-mono text-[10px] text-[#A8B3C7]">${req.requestTime || ''}</span>
+            </div>
+            <div class="text-[11px] text-[#A8B3C7] mt-1">
+              連絡先: ${req.contactMethod ? `[${req.contactMethod}] ` : ''}${req.contactValue || ''}
+            </div>
+          </div>
+        `;
+      });
+    }
+    html += '</div>';
+    focusContent.innerHTML = html;
   }
 }
 
