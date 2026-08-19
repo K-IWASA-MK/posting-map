@@ -3,16 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>POSTING MAP - Operations Dashboard</title>
+  <title>POSTING MAP - Branch Live Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="/active/dashboard/config.js"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
+            brand: '#EA5F08',
             primary: '#2563eb',
-            black: '#000000'
+            surface: '#080c14',
+            card: 'rgba(255, 255, 255, 0.03)'
           },
           fontFamily: {
             sans: ['Outfit', 'Noto Sans JP', 'sans-serif']
@@ -23,139 +26,157 @@
   </script>
   <style>
     body {
-      background-color: #000000;
+      background-color: #030508;
       color: #ffffff;
       font-family: 'Outfit', 'Noto Sans JP', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
+
     .glass-card {
-      border-radius: 28px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.008));
-      box-shadow: inset 0 0 0 1px rgba(120,140,255,0.08), 0 0 30px rgba(37,99,235,0.05);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: rgba(255, 255, 255, 0.025);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      transition: border-color 0.4s ease, box-shadow 0.4s ease;
     }
-    .text-secondary {
-      color: rgba(255, 255, 255, 0.72);
+
+    .glass-card.updated-flash {
+      border-color: rgba(34, 197, 94, 0.6);
+      box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
     }
-    .border-default {
-      border-color: rgba(255, 255, 255, 0.08);
+
+    .glow-orange {
+      text-shadow: 0 0 25px rgba(234, 95, 8, 0.6);
+    }
+
+    .glow-green {
+      box-shadow: 0 0 12px #22c55e;
+    }
+
+    .glow-red {
+      box-shadow: 0 0 12px #ef4444;
+    }
+
+    /* Smooth Progress Bar Transition */
+    .progress-bar-fill {
+      transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Ambient Background Grid */
+    .ambient-grid {
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between overflow-x-hidden antialiased">
-  <!-- Loading overlay -->
-  <div id="loading-overlay" class="fixed inset-0 bg-[#000000]/90 backdrop-blur-md flex flex-col items-center justify-center z-[10000] transition-opacity duration-300">
-    <div class="w-10 h-10 border-2 border-white/20 border-t-primary rounded-full animate-spin"></div>
-  </div>
+<body class="p-4 sm:p-6 lg:p-8 flex flex-col justify-between relative antialiased">
+  <div class="ambient-grid"></div>
 
-  <!-- Gateway Screen (Auth Mock UI Only) -->
-  <div id="auth-screen" class="hidden fixed inset-0 bg-[#000000] flex flex-col items-center justify-center p-6 text-center z-[1000]">
-    <div class="glass-card max-w-sm w-full p-8 transition-transform duration-300 scale-95 hover:scale-100">
-      <div class="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-6 text-2xl">
-        ⚙️
-      </div>
-      <h2 class="text-2xl font-extrabold tracking-tight mb-2">POSTING MAP</h2>
-      <p class="text-sm text-secondary mb-8">Operations Console</p>
-      <button onclick="handleOperationsLogin()" class="w-full bg-primary hover:bg-primary/95 text-white rounded-full py-4 text-sm font-bold shadow-lg shadow-primary/20 active:scale-[0.98] transition-all">
-        運営コンソールに接続
-      </button>
-    </div>
-  </div>
+  <div class="max-w-3xl mx-auto w-full space-y-6 relative z-10">
 
-  <!-- Operations Dashboard App Shell -->
-  <div id="operations-app" class="hidden min-h-screen flex flex-col p-6 max-w-4xl mx-auto w-full space-y-8">
-    <header class="flex justify-between items-center py-4 border-b border-default">
-      <div>
-        <h1 class="text-2xl font-extrabold tracking-tighter">POSTING MAP Operations</h1>
-        <p class="text-[9px] font-bold text-primary uppercase tracking-widest mt-1">Subscription Overview</p>
+    <!-- 1. HEADER (Branch Name, LIVE Pulse, Last Sync) -->
+    <header class="glass-card p-5 sm:p-6 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#EA5F08] to-[#ff8c42] flex items-center justify-center font-black text-white text-lg shadow-[0_0_20px_rgba(234,95,8,0.4)]">
+          P
+        </div>
+        <div>
+          <h1 id="branch-title" class="text-xl sm:text-2xl font-black tracking-tight text-white">三重県第3区</h1>
+          <p class="text-[9px] font-mono font-bold text-white/40 uppercase tracking-widest mt-0.5">POSTING MAP Field Dashboard</p>
+        </div>
       </div>
-      <button onclick="logout()" class="text-xs font-bold text-secondary hover:text-white border border-default rounded-full px-4 py-2 hover:bg-white/5 transition-all">
-        切断
-      </button>
+
+      <div class="flex items-center gap-3 text-right">
+        <div>
+          <div id="live-indicator-wrapper" class="flex items-center justify-end gap-2">
+            <span id="live-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 glow-green animate-pulse"></span>
+            <span id="live-text" class="text-xs font-black tracking-widest text-emerald-400">LIVE</span>
+          </div>
+          <div id="sync-time" class="text-[11px] font-mono text-white/50 tracking-wider mt-0.5">同期中...</div>
+        </div>
+      </div>
     </header>
 
-    <!-- KPI Section -->
-    <main class="space-y-6 flex-1">
-      <div class="grid grid-cols-3 gap-4">
-        <div class="glass-card p-5 flex flex-col justify-center">
-          <span class="text-[9px] font-bold text-secondary uppercase tracking-widest mb-1">契約中</span>
-          <span class="text-2xl font-extrabold text-emerald-400" id="kpi-active-count">0支部</span>
+    <!-- 2. KPI MAIN CARD (Large Percentage & Pin Count) -->
+    <section id="kpi-card" class="glass-card p-8 text-center relative overflow-hidden">
+      <div class="text-[11px] font-mono uppercase tracking-[0.25em] text-white/40 mb-2 font-bold">
+        Overall Completion Rate
+      </div>
+      <div id="kpi-percent" class="text-6xl sm:text-7xl font-black tracking-tighter text-white glow-orange my-2">
+        0<span class="text-3xl sm:text-4xl text-white/60 font-bold ml-1">%</span>
+      </div>
+      <div class="flex items-center justify-center gap-2 text-sm sm:text-base text-white/70 font-mono mt-3">
+        <span id="kpi-done-pins" class="font-black text-emerald-400 text-lg sm:text-xl">0</span>
+        <span class="text-white/30">/</span>
+        <span id="kpi-total-pins" class="font-bold text-white/70">858</span>
+        <span class="text-xs text-white/40 ml-1">PINS COMPLETED</span>
+      </div>
+    </section>
+
+    <!-- 3. MUNICIPALITY PROGRESS (City Breakdown Bars) -->
+    <section class="glass-card p-6 sm:p-7 space-y-5">
+      <div class="flex justify-between items-center border-b border-white/10 pb-3">
+        <h2 class="text-xs font-black uppercase tracking-[0.2em] text-white/70">自治体別進捗</h2>
+        <span id="municipality-summary-count" class="text-[10px] font-mono text-white/40">8 自治体</span>
+      </div>
+
+      <div id="municipality-list" class="space-y-4">
+        <!-- Dynamically rendered city progress bars -->
+        <div class="animate-pulse space-y-3">
+          <div class="h-4 bg-white/5 rounded-full w-full"></div>
+          <div class="h-4 bg-white/5 rounded-full w-4/5"></div>
+          <div class="h-4 bg-white/5 rounded-full w-3/4"></div>
         </div>
-        <div class="glass-card p-5 flex flex-col justify-center">
-          <span class="text-[9px] font-bold text-secondary uppercase tracking-widest mb-1">利用停止中</span>
-          <span class="text-2xl font-extrabold text-red-400" id="kpi-suspended-count">0支部</span>
+      </div>
+    </section>
+
+    <!-- 4. JUST UPDATED (Live Diff Indicator) -->
+    <section id="just-updated-card" class="glass-card p-5 sm:p-6 border-white/10 relative overflow-hidden transition-all duration-500">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-xl bg-emerald-400/10 border border-emerald-400/30 flex items-center justify-center text-sm">
+            ⚡
+          </div>
+          <div>
+            <div class="text-[10px] font-mono font-black uppercase tracking-widest text-emerald-400">JUST UPDATED</div>
+            <div id="updated-area-text" class="text-sm font-bold text-white mt-0.5">現場データと完全に同期しています</div>
+          </div>
         </div>
-        <div class="glass-card p-5 flex flex-col justify-center">
-          <span class="text-[9px] font-bold text-secondary uppercase tracking-widest mb-1">期限間近 (7日以内)</span>
-          <span class="text-2xl font-extrabold text-amber-400" id="kpi-warning-count">0支部</span>
+        <div id="updated-time-text" class="text-[11px] font-mono text-white/40">
+          --:--
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. FLYER STOCK (Current Inventory by Location) -->
+    <section class="glass-card p-6 sm:p-7 space-y-5">
+      <div class="flex justify-between items-center border-b border-white/10 pb-3">
+        <h2 class="text-xs font-black uppercase tracking-[0.2em] text-white/70">チラシ在庫</h2>
+        <div class="text-xs font-mono font-bold text-brand">
+          合計: <span id="total-flyer-stock">0</span> 枚
         </div>
       </div>
 
-      <!-- Workspace Onboarding Card -->
-      <section class="glass-card p-6 space-y-4">
-        <h3 class="text-sm font-bold tracking-tight">新規ワークスペース導入 (Onboarding)</h3>
-        <form id="onboarding-form" onsubmit="handleOnboarding(event)" class="space-y-4">
-          <div class="flex flex-col space-y-2">
-            <label for="onboard-name-input" class="text-xs text-secondary font-bold uppercase tracking-wider">支部名 (新規作成)</label>
-            <div class="flex gap-3">
-              <input type="text" id="onboard-name-input" placeholder="例: 三重県 第4支部" required class="bg-white/5 border border-default rounded-full px-4 py-2 text-sm text-white focus:outline-none focus:border-primary flex-1">
-              <button type="submit" class="bg-primary hover:bg-primary/95 text-white text-xs font-bold rounded-full px-6 py-2 transition-all">作成</button>
-            </div>
-          </div>
-        </form>
-
-        <!-- Result Box -->
-        <div id="onboarding-result" class="hidden border border-emerald-400/20 bg-emerald-400/5 rounded-2xl p-4 space-y-3">
-          <p class="text-xs font-bold text-emerald-400">✓ Workspace Created</p>
-          <div class="grid grid-cols-1 gap-2 text-xs font-mono text-white">
-            <div class="flex justify-between items-center py-1 border-b border-default">
-              <span class="text-secondary uppercase tracking-widest text-[9px]">Workspace ID</span>
-              <span id="result-id" class="font-bold text-emerald-400">-</span>
-            </div>
-            <div class="flex flex-col py-1 border-b border-default">
-              <span class="text-secondary uppercase tracking-widest text-[9px] mb-1">LINE URL</span>
-              <a id="result-line" href="#" target="_blank" class="text-primary hover:underline break-all">-</a>
-            </div>
-            <div class="flex flex-col py-1">
-              <span class="text-secondary uppercase tracking-widest text-[9px] mb-1">Dashboard URL</span>
-              <a id="result-dashboard" href="#" target="_blank" class="text-primary hover:underline break-all">-</a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Search Box -->
-      <div class="glass-card p-4 flex gap-4 items-center">
-        <span class="text-lg">🔍</span>
-        <input type="text" id="search-input" oninput="handleSearch()" placeholder="Workspace ID または 支部名で検索..." class="bg-transparent text-sm w-full outline-none text-white placeholder-white/30">
+      <div id="stock-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <!-- Dynamically rendered stock items -->
+        <div class="text-xs text-white/30 font-mono py-2">在庫情報を取得中...</div>
       </div>
+    </section>
 
-      <!-- Workspaces Table / List -->
-      <section class="glass-card p-6 space-y-4">
-        <h3 class="text-sm font-bold tracking-tight">支部契約一覧</h3>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm text-secondary">
-            <thead>
-              <tr class="border-b border-default text-[9px] uppercase tracking-widest text-white">
-                <th class="py-3 px-2">Workspace ID</th>
-                <th class="py-3 px-2">支部名</th>
-                <th class="py-3 px-2">契約ステータス</th>
-                <th class="py-3 px-2">有効期限</th>
-                <th class="py-3 px-2 text-right">残り日数</th>
-              </tr>
-            </thead>
-            <tbody id="workspaces-table-body" class="divide-y divide-default">
-              <!-- Dynamically populated -->
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="py-6 text-center text-[9px] font-bold text-secondary uppercase tracking-widest border-t border-default">
-      Operational Environment (Operations Only)
+    <!-- FOOTER (Read-Only Status) -->
+    <footer class="text-center py-6 text-[10px] font-mono text-white/30 tracking-widest uppercase">
+      POSTING MAP · FIELD OPERATIONS PLATFORM (READ-ONLY)
     </footer>
+
   </div>
 
   <script src="manager.js"></script>
