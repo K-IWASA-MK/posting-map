@@ -400,7 +400,9 @@ async function loadData(skipSync = false) {
     }
 
     logDebug("[loadData] Fetching getSystemSummary in background...");
-    const data = await fetchSystemSummary();
+    const summaryPromise = callApiPost('getSystemSummary');
+
+    const data = await summaryPromise;
     logDebug("[loadData] getSystemSummary fetched successfully.");
 
     if (data && data.success) {
@@ -1354,26 +1356,6 @@ async function fetchSystemSummary(forceRefresh = false) {
 
   _systemSummaryPromise = (async () => {
     try {
-      const url = `${API_URL}?action=getSystemSummary&_t=${Date.now()}`;
-      const response = await fetch(url, {
-        method: 'GET',
-        mode: 'cors',
-        credentials: 'omit',
-        cache: 'no-store',
-        redirect: 'follow'
-      });
-      if (response.ok) {
-        const res = await response.json();
-        if (res && res.success) {
-          updateStats(res);
-          return res;
-        }
-      }
-    } catch (err) {
-      console.warn("fetchSystemSummary via GET failed:", err);
-    }
-
-    try {
       const res = await callApiPost('getSystemSummary');
       if (res && res.success) {
         updateStats(res);
@@ -1450,13 +1432,6 @@ async function safeInitApp() {
   const liffId = (window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.line && window.PMS_CLIENT_CONFIG.line.liffId);
   if (!liffId) {
     throw new Error("LIFF ID missing in client configuration.");
-  }
-
-  if (typeof window !== 'undefined' && (window.location.search.includes('bypass_liff=1') || window.PMS_DEV_BYPASS)) {
-    logDebug("Development bypass active. Starting app directly.");
-    let userInfo = JSON.parse(localStorage.getItem('user_info') || '{"id":"S001","first":"勝二","last":"岩佐"}');
-    startApp({ displayName: userInfo.last, userId: userInfo.id });
-    return;
   }
 
   if (typeof liff !== 'undefined') {
