@@ -139,6 +139,7 @@ function doPost(e) {
       postData = { ...(postData || {}), ...parsedJson };
     } catch (errJson) {}
   }
+  const action = (postData && postData.action) || params.action || (e && e.parameter && e.parameter.action) || "";
 
   // Read-only actions that do not require liffToken
   const isReadOnlyAction = [
