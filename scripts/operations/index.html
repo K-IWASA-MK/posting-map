@@ -131,8 +131,8 @@
             <span>配布活動分析</span>
           </div>
           <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-white/60 hover:text-white transition-colors">
-            <span class="text-sm">🗳️</span>
-            <span>投票率対比</span>
+            <span class="text-sm">🗺️</span>
+            <span>エリア別進捗</span>
           </div>
           <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-white/60 hover:text-white transition-colors">
             <span class="text-sm">⚙️</span>
@@ -283,20 +283,20 @@
           </div>
         </div>
 
-        <!-- Turnout Progress (市別投票率 / 自治体進捗) -->
+        <!-- Area Progress (配布エリア進捗) -->
         <div class="mission-card p-4 flex-1 flex flex-col justify-between overflow-hidden">
           <div class="flex justify-between items-center flex-shrink-0 border-b border-white/5 pb-2">
             <div>
-              <div class="text-xs font-bold text-white/90">市別投票率・進捗</div>
-              <div class="text-[9px] font-mono text-white/40 uppercase tracking-wider">TURNOUT PROGRESS</div>
+              <div class="text-xs font-bold text-white/90">配布エリア進捗</div>
+              <div class="text-[9px] font-mono text-white/40 uppercase tracking-wider">AREA PROGRESS</div>
             </div>
-            <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20">● TARGET</span>
+            <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">● PROGRESS</span>
           </div>
 
           <!-- City Progress Bars -->
-          <div id="city-progress-container" class="space-y-2.5 my-auto overflow-hidden">
-            <!-- Dynamically populated turnout rows -->
-            <div class="text-xs text-white/30 font-mono py-2 text-center">自治体進捗取得中...</div>
+          <div id="area-progress-container" class="space-y-1.5 my-auto overflow-hidden">
+            <!-- Dynamically populated area progress rows -->
+            <div class="text-xs text-white/30 font-mono py-2 text-center">エリア進捗取得中...</div>
           </div>
         </div>
 

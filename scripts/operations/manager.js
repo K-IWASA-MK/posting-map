@@ -24,9 +24,11 @@ let previousState = {
   ranking: null
 };
 
-window.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initMissionControl);
+} else {
   initMissionControl();
-});
+}
 
 function initMissionControl() {
   // Set district title
@@ -51,31 +53,13 @@ function initMissionControl() {
   });
 }
 
-/**
- * Backend API 通信ヘルパー (GET)
- */
-async function callApi(action, params = {}) {
-  const queryParams = new URLSearchParams({ action, _t: Date.now(), ...params });
-  const url = `${getApiUrl()}?${queryParams.toString()}`;
-
-  const response = await fetch(url, {
-    method: 'GET',
-    mode: 'cors',
-    credentials: 'omit',
-    cache: 'no-store',
-    redirect: 'follow'
-  });
-
+async function callApi(action) {
+  const url = `${getApiUrl()}?action=${encodeURIComponent(action)}&_t=${Date.now()}`;
+  const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`HTTP Error: ${response.status}`);
   }
-
-  const text = await response.text();
-  try {
-    return JSON.parse(text);
-  } catch (err) {
-    throw new Error("Invalid JSON: " + text.substring(0, 50));
-  }
+  return await response.json();
 }
 
 /**
@@ -116,18 +100,18 @@ async function syncMissionData() {
       anySuccess = true;
     }
 
-    // Render Turnout Progress
-    renderTurnoutProgress();
-
     if (anySuccess) {
       setSyncStatus(true);
+      window.__missionSyncReady = true;
     } else {
       setSyncStatus(false);
+      window.__missionSyncReady = false;
     }
 
   } catch (err) {
     console.error('[Mission Control Sync Error]', err);
     setSyncStatus(false);
+    window.__missionSyncReady = false;
   }
 }
 
@@ -262,44 +246,44 @@ function renderActivities(ranking, stocks) {
 }
 
 /**
- * 市別投票率 ＆ 進捗バーの描画 (実データ SSOT)
+ * 配布エリア進捗 (Tier 1 自治体実データ) の描画
  */
-function renderTurnoutProgress() {
-  const container = document.getElementById('city-progress-container');
+function renderCities(cities) {
+  const container = document.getElementById('area-progress-container');
   if (!container) return;
 
-  // Real Turnout / Progress benchmarks from strategy_turnout_master.csv
-  const cities = [
-    { name: '鈴鹿市', rate: 67.43, diff: '+11.17', barColor: 'bg-brand' },
-    { name: '津市', rate: 52.12, diff: '+8.45', barColor: 'bg-brand' },
-    { name: '四日市市', rate: 41.80, diff: '+3.20', barColor: 'bg-sky-400' }
-  ];
+  if (!cities || cities.length === 0) {
+    container.innerHTML = `<div class="text-xs text-white/30 font-mono py-2 text-center">エリア進捗データなし</div>`;
+    return;
+  }
 
+  // Render top municipalities fitting the 1-viewport card cleanly
   let html = '';
-  cities.forEach(c => {
+  const displayCities = cities.slice(0, 4);
+
+  displayCities.forEach(c => {
+    const total = Number(c.total) || 0;
+    const done = Number(c.done) || 0;
+    const rate = total > 0 ? Math.round((done / total) * 100) : 0;
+    const barColor = rate >= 80 ? 'bg-emerald-400' : 'bg-brand';
+
     html += `
       <div class="space-y-1">
         <div class="flex justify-between items-center text-xs font-bold">
-          <span class="text-white/90">${c.name}</span>
-          <div class="flex items-center gap-1.5 font-mono">
-            <span class="text-white font-bold">${c.rate.toFixed(2)}%</span>
-            <span class="text-[10px] text-emerald-400 font-bold">${c.diff} ▲</span>
+          <span class="text-white/90 truncate">${c.name}</span>
+          <div class="flex items-center gap-2 font-mono">
+            <span class="text-white/60 text-[10px]"><span class="text-white font-bold">${done}</span> / ${total}</span>
+            <span class="text-white font-bold text-xs">${rate}%</span>
           </div>
         </div>
         <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-          <div class="h-full ${c.barColor} rounded-full" style="width: ${c.rate}%;"></div>
+          <div class="h-full ${barColor} rounded-full transition-all duration-700" style="width: ${Math.max(rate, 2)}%;"></div>
         </div>
       </div>
     `;
   });
 
   container.innerHTML = html;
-}
-
-/**
- * 市町別進捗 (Tier 1) の反映
- */
-function renderCities(cities) {
   previousState.cities = cities;
 }
 
