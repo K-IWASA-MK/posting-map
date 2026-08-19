@@ -23,7 +23,7 @@ const DashboardState = {
   summary: null,
   cities: [],
   stocks: [],
-  activities: [],
+  ranking: [], // 現場アプリと完全同一の計算済みランキング (getRanking)
   roster: [],
   globalPinStatus: { inProgress: [], completed: [] },
   masterPins858: [], // SSOT 858件マスターピン
@@ -247,10 +247,12 @@ async function syncDashboardData() {
       DashboardState.globalPinStatus.completed = (pinStatusRes.completed || []).map(id => parseInt(id, 10)).filter(id => !isNaN(id));
     }
 
-    // 6. 配布実績 ＆ 最新の活動
-    const rawActivities = isRankOk ? (rankRes.ranking || []) : [];
-    const stockActivities = isStockOk ? (stockRes.stocks || []) : [];
-    processActivities(rawActivities, stockActivities);
+    // 6. 配布実績ランキング（現場アプリと完全同一データ）
+    if (isRankOk) {
+      DashboardState.ranking = rankRes.ranking || [];
+    } else {
+      DashboardState.ranking = [];
+    }
 
     // 7. 現在選択中の自治体に合わせて画面全体を再描画
     renderCurrentView();
@@ -404,8 +406,8 @@ function renderCurrentView() {
   // 2. 保有チラシの描画
   renderStockFacts(DashboardState.stocks, selected);
 
-  // 3. 最新の活動 ＆ 配布実績の描画
-  renderActivityFacts(DashboardState.activities, selected);
+  // 3. 配布実績ランキングの描画（現場アプリの計算済み結果を直接利用）
+  renderRankingFacts(DashboardState.ranking);
 }
 
 /**
@@ -453,55 +455,19 @@ function renderStockFacts(stocks, selectedCity) {
 }
 
 /**
- * 配布実績データの集約
+ * 配布実績ランキングの描画（現場アプリの計算済み結果をそのまま表示）
  */
-function processActivities(rankings, stocks) {
-  const activities = [];
+function renderRankingFacts(ranking) {
+  const rankingList = ranking || [];
 
-  rankings.forEach(r => {
-    activities.push({
-      time: r.updatedAt || '本日',
-      staffId: r.staffId || 'スタッフ',
-      staffName: r.name || '',
-      location: r.districtName || r.areaName || '',
-      count: Number(r.count) || 0,
-      photoUrl: r.photoUrl || ''
-    });
-  });
-
-  stocks.forEach(s => {
-    if (s.updatedAt) {
-      activities.push({
-        time: s.updatedAt,
-        staffId: s.staffId || 'スタッフ',
-        staffName: s.staffName || '',
-        location: s.location || '',
-        count: Number(s.count) || 0,
-        photoUrl: s.photoUrl || ''
-      });
-    }
-  });
-
-  DashboardState.activities = activities;
-}
-
-/**
- * 配布実績 ＆ 最新活動の描画 (ダミーフォールバック全廃)
- */
-function renderActivityFacts(activities, selectedCity) {
-  const filtered = (selectedCity === 'ALL')
-    ? activities
-    : activities.filter(a => a.location.includes(selectedCity) || selectedCity.includes(a.location));
-
-  // 1. 配布した人の実人数
+  // 1. 配布した人の実人数（現場アプリのランキング件数と完全一致）
   const activeMembersEl = document.getElementById('fact-active-members');
   if (activeMembersEl) {
-    const uniqueStaff = new Set(filtered.map(a => a.staffId).filter(id => id && id !== 'スタッフ'));
-    activeMembersEl.textContent = uniqueStaff.size;
+    activeMembersEl.textContent = rankingList.length;
   }
 
-  // 2. 最新の活動（実データが存在する場合のみ表示）
-  const latest = filtered.length > 0 ? filtered[0] : (activities.length > 0 ? activities[0] : null);
+  // 2. 配布トップ（実データが存在する場合のみ表示）
+  const topMember = rankingList.length > 0 ? rankingList[0] : null;
 
   const lTimeEl = document.getElementById('latest-activity-time');
   const lStaffEl = document.getElementById('latest-activity-staff');
@@ -510,44 +476,46 @@ function renderActivityFacts(activities, selectedCity) {
   const lImgEl = document.getElementById('latest-activity-img');
   const lPlaceholderEl = document.getElementById('latest-activity-placeholder');
 
-  if (latest) {
-    if (lTimeEl) lTimeEl.textContent = latest.time;
-    if (lStaffEl) lStaffEl.textContent = latest.staffId;
-    if (lLocEl) lLocEl.textContent = latest.location || '三重県内';
-    if (lCountEl) lCountEl.textContent = latest.count ? latest.count.toLocaleString() : '--';
+  if (topMember) {
+    if (lTimeEl) lTimeEl.textContent = `第${topMember.rank || 1}位`;
+    if (lStaffEl) lStaffEl.textContent = topMember.staffId;
+    if (lLocEl) lLocEl.textContent = topMember.name || topMember.staffId;
+    if (lCountEl) lCountEl.textContent = Number(topMember.count || 0).toLocaleString();
 
-    if (latest.photoUrl && lImgEl && lPlaceholderEl) {
-      lImgEl.src = latest.photoUrl;
-      lImgEl.classList.remove('hidden');
-      lPlaceholderEl.classList.add('hidden');
-    }
+    if (lImgEl) lImgEl.classList.add('hidden');
+    if (lPlaceholderEl) lPlaceholderEl.classList.remove('hidden');
   } else {
     // 実データが存在しない場合
-    if (lTimeEl) lTimeEl.textContent = '--:--';
+    if (lTimeEl) lTimeEl.textContent = '--';
     if (lStaffEl) lStaffEl.textContent = '--';
-    if (lLocEl) lLocEl.textContent = '本日の活動データなし';
+    if (lLocEl) lLocEl.textContent = '配布実績データなし';
     if (lCountEl) lCountEl.textContent = '0';
     if (lImgEl) lImgEl.classList.add('hidden');
     if (lPlaceholderEl) lPlaceholderEl.classList.remove('hidden');
   }
 
-  // 3. 横並び配布実績フィード（下段）
+  // 3. 横並び配布実績フィード（下段：ランキング上位）
   const recordsListEl = document.getElementById('distribution-records-list');
   if (recordsListEl) {
-    if (filtered.length === 0) {
-      recordsListEl.innerHTML = `<div class="text-[11px] text-[#A8B3C7]/60 py-1">本日の配布実績データはありません</div>`;
+    if (rankingList.length === 0) {
+      recordsListEl.innerHTML = `<div class="text-[11px] text-[#A8B3C7]/60 py-1">配布実績データはありません</div>`;
       return;
     }
 
     let recordsHtml = '';
-    filtered.slice(0, 6).forEach(act => {
+    rankingList.slice(0, 6).forEach(item => {
+      const rank = item.rank || 1;
+      let badge = `${rank}位`;
+      if (rank === 1) badge = '🥇 1位';
+      else if (rank === 2) badge = '🥈 2位';
+      else if (rank === 3) badge = '🥉 3位';
+
       recordsHtml += `
         <div class="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#222C3E] border border-[#2A3547] text-xs flex-shrink-0">
-          <span class="font-mono text-[#A8B3C7] text-[10px]">${act.time}</span>
-          <span class="font-mono font-bold text-brand text-[11px]">${act.staffId}</span>
-          <span class="font-medium text-[#E6ECF3] text-[11px]">${act.location}</span>
-          <span class="font-mono font-bold text-white text-[11px]">${act.count.toLocaleString()}枚</span>
-          ${act.photoUrl ? '<span class="text-[10px]">📷</span>' : ''}
+          <span class="font-mono font-bold text-brand text-[10px]">${badge}</span>
+          <span class="font-mono font-bold text-white text-[11px]">${item.staffId}</span>
+          ${item.name ? `<span class="font-medium text-[#E6ECF3] text-[11px]">(${item.name})</span>` : ''}
+          <span class="font-mono font-bold text-white text-[11px]">${(Number(item.count) || 0).toLocaleString()}枚</span>
         </div>
       `;
     });
@@ -645,26 +613,38 @@ function focusCard(type) {
     focusContent.innerHTML = html;
 
   } else if (type === 'records') {
-    if (focusTitle) focusTitle.textContent = '配布実績 詳細一覧';
-    if (focusIcon) focusIcon.textContent = '📝';
+    if (focusTitle) focusTitle.textContent = '配布実績 ランキング一覧';
+    if (focusIcon) focusIcon.textContent = '🏆';
 
     let html = '<div class="space-y-2.5">';
-    if (DashboardState.activities.length === 0) {
-      html += `<div class="text-xs text-[#A8B3C7]/60 text-center py-6">本日の配布実績データはありません</div>`;
+    if (DashboardState.ranking.length === 0) {
+      html += `<div class="text-xs text-[#A8B3C7]/60 text-center py-6">配布実績データはありません</div>`;
     } else {
-      DashboardState.activities.forEach(a => {
+      DashboardState.ranking.forEach((item, index) => {
+        const rank = item.rank || (index + 1);
+        let rankBadgeHtml = '';
+        if (rank === 1) {
+          rankBadgeHtml = `<span class="w-6 h-6 flex items-center justify-center text-base select-none">🥇</span>`;
+        } else if (rank === 2) {
+          rankBadgeHtml = `<span class="w-6 h-6 flex items-center justify-center text-base select-none">🥈</span>`;
+        } else if (rank === 3) {
+          rankBadgeHtml = `<span class="w-6 h-6 flex items-center justify-center text-base select-none">🥉</span>`;
+        } else {
+          rankBadgeHtml = `<span class="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black font-mono bg-white/5 text-white/50">${rank}</span>`;
+        }
+
         html += `
           <div class="flex items-center justify-between p-3.5 rounded-xl bg-[#222C3E] border border-[#2A3547]">
             <div class="flex items-center gap-3">
-              <span class="font-mono text-xs text-brand font-bold">${a.time}</span>
+              ${rankBadgeHtml}
               <div>
-                <span class="font-bold text-[#E6ECF3] text-xs">${a.staffId} ${a.staffName ? `(${a.staffName})` : ''}</span>
-                <div class="text-[11px] text-[#A8B3C7]">${a.location}</div>
+                <span class="font-bold text-[#E6ECF3] text-xs font-mono">${item.staffId}</span>
+                ${item.name ? `<span class="text-[11px] text-[#A8B3C7] ml-1.5">${item.name}</span>` : ''}
               </div>
             </div>
-            <div class="flex items-center gap-3">
-              <span class="text-lg font-mono font-black text-white">${a.count.toLocaleString()} 枚</span>
-              ${a.photoUrl ? `<img src="${a.photoUrl}" alt="写真" class="w-10 h-10 rounded object-cover border border-[#2A3547]">` : ''}
+            <div class="text-right">
+              <span class="text-lg font-mono font-black text-white">${(Number(item.count) || 0).toLocaleString()}</span>
+              <span class="text-[11px] text-[#A8B3C7] ml-0.5">枚</span>
             </div>
           </div>
         `;
@@ -684,7 +664,7 @@ function focusCard(type) {
       DashboardState.roster.forEach(r => {
         html += `
           <div class="p-3.5 rounded-xl bg-[#222C3E] border border-[#2A3547]">
-            <div class="font-bold text-xs text-[#E6ECF3]">${r.staffId || ''} ｜ ${r.name || '配布員'}</div>
+            <div class="font-bold text-xs text-[#E6ECF3]">${r.id || r.staffId || ''} ｜ ${r.name || '配布員'}</div>
             <div class="text-[#A8B3C7] text-[11px] mt-0.5">管轄: ${r.area || r.district || '未設定'} ｜ 登録: ${r.registeredAt || '未設定'}</div>
           </div>
         `;
