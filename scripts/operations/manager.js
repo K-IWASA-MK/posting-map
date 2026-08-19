@@ -5,7 +5,7 @@
  * 1. 既存Backend API (getSystemSummary, getTier1, getFlyerStock, getRanking) の実データ取得
  * 2. 1-Viewport (100dvh) MISSION CONTROL 原型UIへの完全バインド
  * 3. 差分検知 (Diff Checking) による変更箇所のみのスムーズ更新
- * 4. 厳格な LIVE / OFFLINE 状態管理 (偽装なし)
+ * 4. 厳格な LIVE / OFFLINE 状態管理 (4 API 全て成功時のみ ● LIVE、1つでも失敗時は ● OFFLINE)
  * 5. 完全な Zero-Touch (操作不要・自動同期)
  */
 
@@ -53,6 +53,9 @@ function initMissionControl() {
   });
 }
 
+/**
+ * Backend API 通信ヘルパー (GET)
+ */
 async function callApi(action) {
   const url = `${getApiUrl()}?action=${encodeURIComponent(action)}&_t=${Date.now()}`;
   const response = await fetch(url);
@@ -63,7 +66,7 @@ async function callApi(action) {
 }
 
 /**
- * 実データの一括同期
+ * 実データの一括同期 (4 API すべての整合性を検証)
  */
 async function syncMissionData() {
   try {
@@ -74,43 +77,53 @@ async function syncMissionData() {
       callApi('getRanking')
     ]);
 
-    let anySuccess = false;
+    const isSummaryOk = summaryRes.status === 'fulfilled' && summaryRes.value && summaryRes.value.success;
+    const isTier1Ok = tier1Res.status === 'fulfilled' && tier1Res.value && tier1Res.value.success;
+    const isStockOk = stockRes.status === 'fulfilled' && stockRes.value && stockRes.value.success;
+    const isRankOk = rankRes.status === 'fulfilled' && rankRes.value && rankRes.value.success;
 
     // 1. Summary
-    if (summaryRes.status === 'fulfilled' && summaryRes.value && summaryRes.value.success) {
+    if (isSummaryOk) {
       renderSummary(summaryRes.value);
-      anySuccess = true;
+    } else {
+      renderSummaryError();
     }
 
     // 2. Tier 1 Cities
-    if (tier1Res.status === 'fulfilled' && tier1Res.value && tier1Res.value.success) {
+    if (isTier1Ok) {
       renderCities(tier1Res.value.cities || []);
-      anySuccess = true;
+    } else {
+      renderCitiesError();
     }
 
     // 3. Flyer Stocks
-    if (stockRes.status === 'fulfilled' && stockRes.value && stockRes.value.success) {
+    if (isStockOk) {
       renderStocks(stockRes.value.stocks || []);
-      anySuccess = true;
+    } else {
+      renderStocksError();
     }
 
     // 4. Ranking / Activities
-    if (rankRes.status === 'fulfilled' && rankRes.value && rankRes.value.success) {
-      renderActivities(rankRes.value.ranking || [], stockRes.status === 'fulfilled' ? stockRes.value.stocks || [] : []);
-      anySuccess = true;
+    if (isRankOk) {
+      renderActivities(rankRes.value.ranking || [], isStockOk ? stockRes.value.stocks || [] : []);
+    } else {
+      renderActivitiesError();
     }
 
-    if (anySuccess) {
+    // 厳格な LIVE 判定: 4 API すべて成功時のみ ● LIVE
+    const allSuccessful = isSummaryOk && isTier1Ok && isStockOk && isRankOk;
+
+    if (allSuccessful) {
       setSyncStatus(true);
       window.__missionSyncReady = true;
     } else {
-      setSyncStatus(false);
+      setSyncStatus(false, !isSummaryOk ? '全体進捗取得失敗' : !isTier1Ok ? 'エリア進捗取得失敗' : !isStockOk ? '在庫取得失敗' : 'ランキング取得失敗');
       window.__missionSyncReady = false;
     }
 
   } catch (err) {
     console.error('[Mission Control Sync Error]', err);
-    setSyncStatus(false);
+    setSyncStatus(false, '通信エラー');
     window.__missionSyncReady = false;
   }
 }
@@ -126,12 +139,30 @@ function renderSummary(data) {
   const percentEl = document.getElementById('kpi-percent');
   const doneEl = document.getElementById('kpi-done-pins');
   const totalEl = document.getElementById('kpi-total-pins');
+  const badgeEl = document.getElementById('badge-progress');
 
   if (percentEl) percentEl.textContent = `${percent}%`;
   if (doneEl) doneEl.textContent = done.toLocaleString();
   if (totalEl) totalEl.textContent = total.toLocaleString();
+  if (badgeEl) {
+    badgeEl.className = 'px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20';
+    badgeEl.textContent = '● SYNC';
+  }
 
   previousState.summary = { total, done, percent };
+}
+
+function renderSummaryError() {
+  const percentEl = document.getElementById('kpi-percent');
+  const doneEl = document.getElementById('kpi-done-pins');
+  const badgeEl = document.getElementById('badge-progress');
+
+  if (percentEl) percentEl.textContent = 'ERR';
+  if (doneEl) doneEl.textContent = 'ERR';
+  if (badgeEl) {
+    badgeEl.className = 'px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-red-500/10 text-red-400 border border-red-500/20';
+    badgeEl.textContent = '● ERR';
+  }
 }
 
 /**
@@ -150,7 +181,13 @@ function renderStocks(stocks) {
 
   // KPI Total
   const kpiStockEl = document.getElementById('kpi-total-stock');
+  const badgeStockEl = document.getElementById('badge-stock');
+
   if (kpiStockEl) kpiStockEl.textContent = totalStock.toLocaleString();
+  if (badgeStockEl) {
+    badgeStockEl.className = 'px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20';
+    badgeStockEl.textContent = '● STOCK';
+  }
 
   // Inventory Bars
   const container = document.getElementById('inventory-bars-container');
@@ -183,6 +220,19 @@ function renderStocks(stocks) {
   previousState.stocks = stocks;
 }
 
+function renderStocksError() {
+  const kpiStockEl = document.getElementById('kpi-total-stock');
+  const badgeStockEl = document.getElementById('badge-stock');
+  const container = document.getElementById('inventory-bars-container');
+
+  if (kpiStockEl) kpiStockEl.textContent = 'ERR';
+  if (badgeStockEl) {
+    badgeStockEl.className = 'px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-red-500/10 text-red-400 border border-red-500/20';
+    badgeStockEl.textContent = '● ERR';
+  }
+  if (container) container.innerHTML = `<div class="text-xs text-red-400 font-mono self-center">在庫データ取得失敗</div>`;
+}
+
 /**
  * KPI & List: 活動人数 ＆ 今日の活動フィードの描画
  */
@@ -190,7 +240,13 @@ function renderActivities(ranking, stocks) {
   // Active Members
   const activeCount = Math.max(ranking.length, stocks.length, 1);
   const activeMembersEl = document.getElementById('kpi-active-members');
+  const badgeMembersEl = document.getElementById('badge-active-members');
+
   if (activeMembersEl) activeMembersEl.textContent = activeCount;
+  if (badgeMembersEl) {
+    badgeMembersEl.className = 'px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+    badgeMembersEl.textContent = '● LIVE';
+  }
 
   // Today's Activity List
   const listEl = document.getElementById('today-activity-list');
@@ -245,6 +301,19 @@ function renderActivities(ranking, stocks) {
   previousState.ranking = ranking;
 }
 
+function renderActivitiesError() {
+  const activeMembersEl = document.getElementById('kpi-active-members');
+  const badgeMembersEl = document.getElementById('badge-active-members');
+  const listEl = document.getElementById('today-activity-list');
+
+  if (activeMembersEl) activeMembersEl.textContent = 'ERR';
+  if (badgeMembersEl) {
+    badgeMembersEl.className = 'px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-red-500/10 text-red-400 border border-red-500/20';
+    badgeMembersEl.textContent = '● ERR';
+  }
+  if (listEl) listEl.innerHTML = `<div class="text-xs text-red-400 font-mono py-2 text-center">活動ログ取得失敗</div>`;
+}
+
 /**
  * 配布エリア進捗 (Tier 1 自治体実データ) の描画
  */
@@ -287,10 +356,15 @@ function renderCities(cities) {
   previousState.cities = cities;
 }
 
+function renderCitiesError() {
+  const container = document.getElementById('area-progress-container');
+  if (container) container.innerHTML = `<div class="text-xs text-red-400 font-mono py-2 text-center">エリア進捗取得失敗</div>`;
+}
+
 /**
- * 厳格な同期ステータス表示
+ * 厳格な同期ステータス表示 (4 API 全て成功時のみ LIVE、1つでも失敗時は OFFLINE)
  */
-function setSyncStatus(isLive) {
+function setSyncStatus(isLive, errorReason = '') {
   const dot = document.getElementById('live-dot');
   const text = document.getElementById('live-status-text');
   const clock = document.getElementById('sync-clock');
@@ -304,6 +378,6 @@ function setSyncStatus(isLive) {
     }
   } else {
     if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-red-500 glow-red';
-    if (text) text.textContent = 'オフライン（再接続中）';
+    if (text) text.textContent = errorReason ? `オフライン (${errorReason})` : 'オフライン（再接続中）';
   }
 }
