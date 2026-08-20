@@ -325,6 +325,22 @@
 
       </div>
 
+      <!-- ===== FOCUS VIEW CONTAINER (特定事実が主役になる詳細ビュー) ===== -->
+      <div id="focus-view-container" class="flex-1 pm-card p-4 flex flex-col min-h-0 overflow-hidden hidden">
+        <div id="focus-header" class="flex items-center justify-between pb-3 border-b border-borderNormal flex-shrink-0">
+          <div class="flex items-center gap-2">
+            <span id="focus-icon" class="text-lg">🗺️</span>
+            <h2 id="focus-title" class="font-bold text-sm text-white">詳細ビュー</h2>
+          </div>
+          <button onclick="resetFocus()" class="px-3 py-1 rounded-lg bg-cardSubBg border border-borderNormal hover:border-borderHighlight text-xs font-medium text-textSub hover:text-white transition-all">
+            ⤺ 全体画面に戻る
+          </button>
+        </div>
+        <div id="focus-content" class="flex-1 overflow-y-auto pt-3 flex flex-col min-h-0">
+          <!-- Dynamically populated by focusCard(type) -->
+        </div>
+      </div>
+
       <!-- ===== ROW 3: BOTTOM DISTRIBUTION RECORDS FEED (横並び最新配布フィード) ===== -->
       <div class="h-10 pm-card px-3 flex items-center justify-between flex-shrink-0 overflow-hidden">
         <div class="flex items-center gap-2 flex-shrink-0">
@@ -340,22 +356,6 @@
         <button onclick="focusCard('records')" class="text-[10px] text-brand hover:text-brandLight font-bold flex-shrink-0 ml-2">
           詳細 ➔
         </button>
-      </div>
-
-      <!-- ===== FOCUS VIEW CONTAINER (特定事実が主役になるオーバーレイ) ===== -->
-      <div id="focus-view-container" class="flex-1 pm-card p-4 flex-col overflow-hidden hidden">
-        <div id="focus-header" class="flex items-center justify-between pb-3 border-b border-borderNormal flex-shrink-0">
-          <div class="flex items-center gap-2">
-            <span id="focus-icon" class="text-lg">🗺️</span>
-            <h2 id="focus-title" class="font-bold text-sm text-white">詳細ビュー</h2>
-          </div>
-          <button onclick="resetFocus()" class="px-3 py-1 rounded-lg bg-cardSubBg border border-borderNormal hover:border-borderHighlight text-xs font-medium text-textSub hover:text-white transition-all">
-            ⤺ 全体画面に戻る
-          </button>
-        </div>
-        <div id="focus-content" class="flex-1 overflow-y-auto pt-3">
-          <!-- Dynamically populated by focusCard(type) -->
-        </div>
       </div>
 
     </main>

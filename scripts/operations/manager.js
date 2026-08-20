@@ -573,14 +573,37 @@ function focusCard(type) {
   if (type === 'areas') {
     if (focusTitle) focusTitle.textContent = '配布エリア MAP (全画面)';
     if (focusIcon) focusIcon.textContent = '🗺️';
+
+    // 既存の全画面Leafletインスタンスを安全に破棄
+    if (DashboardState.fullscreenMap && typeof DashboardState.fullscreenMap.remove === 'function') {
+      try {
+        DashboardState.fullscreenMap.remove();
+      } catch (e) {
+        console.warn('[Leaflet Cleanup Warning]', e);
+      }
+      DashboardState.fullscreenMap = null;
+      DashboardState.fullscreenMarkersLayer = null;
+    }
+
     focusContent.innerHTML = `
-      <div class="h-full w-full rounded-xl overflow-hidden relative border border-[#2A3547] min-h-[400px]" id="fullscreen-map-box">
-        <div id="fullscreen-map" class="w-full h-full"></div>
+      <div class="flex-1 w-full rounded-xl overflow-hidden relative border border-[#2A3547] min-h-0" id="fullscreen-map-box">
+        <div id="fullscreen-map" class="absolute inset-0 w-full h-full"></div>
       </div>
     `;
+
     setTimeout(() => {
-      const fsMap = L.map('fullscreen-map').setView(CITY_GEO[DashboardState.selectedCity]?.center || CITY_GEO['ALL'].center, CITY_GEO[DashboardState.selectedCity]?.zoom || 11);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(fsMap);
+      const mapBox = document.getElementById('fullscreen-map');
+      if (!mapBox) return;
+
+      const fsMap = L.map('fullscreen-map', {
+        zoomControl: true,
+        attributionControl: false
+      }).setView(CITY_GEO[DashboardState.selectedCity]?.center || CITY_GEO['ALL'].center, CITY_GEO[DashboardState.selectedCity]?.zoom || 11);
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        subdomains: 'abcd'
+      }).addTo(fsMap);
       
       DashboardState.fullscreenMarkersLayer = L.layerGroup().addTo(fsMap);
       DashboardState.fullscreenMap = fsMap;
@@ -588,7 +611,7 @@ function focusCard(type) {
       // 現場アプリと同一のピンを描画
       renderPinsOnMap(fsMap, DashboardState.fullscreenMarkersLayer, DashboardState.masterPins858);
       fsMap.invalidateSize();
-    }, 150);
+    }, 100);
 
   } else if (type === 'stocks') {
     if (focusTitle) focusTitle.textContent = '保有チラシ 一覧';
@@ -723,6 +746,17 @@ function resetFocus() {
     defaultGrid.classList.remove('hidden');
     focusContainer.classList.add('hidden');
     if (focusHeader) focusHeader.classList.add('hidden');
+  }
+
+  // 全画面Leafletインスタンスの安全破棄
+  if (DashboardState.fullscreenMap && typeof DashboardState.fullscreenMap.remove === 'function') {
+    try {
+      DashboardState.fullscreenMap.remove();
+    } catch (e) {
+      console.warn('[Leaflet Cleanup Warning]', e);
+    }
+    DashboardState.fullscreenMap = null;
+    DashboardState.fullscreenMarkersLayer = null;
   }
 
   updateNavHighlight('areas');
