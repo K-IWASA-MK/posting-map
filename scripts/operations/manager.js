@@ -467,23 +467,38 @@ function renderCurrentView() {
   const selected = DashboardState.selectedCity;
   const isAll = selected === 'ALL';
   const completedList = DashboardState.globalPinStatus.completed || [];
+  const inProgressList = DashboardState.globalPinStatus.inProgress || [];
 
   // 1. トップの事実数字（SSOT 858件 ＆ 実配布完了データ連動）
   let totalAreas = DashboardState.masterPins858.length || 858;
   let doneAreas = DashboardState.masterPins858.filter(p => completedList.includes(p.rowId)).length;
+  let progAreas = DashboardState.masterPins858.filter(p => inProgressList.includes(p.rowId)).length;
 
   if (!isAll && DashboardState.masterPins858.length > 0) {
     const cityPins = DashboardState.masterPins858.filter(p => p.cityName.includes(selected) || selected.includes(p.cityName));
     totalAreas = cityPins.length;
     doneAreas = cityPins.filter(p => completedList.includes(p.rowId)).length;
+    progAreas = cityPins.filter(p => inProgressList.includes(p.rowId)).length;
   }
+
+  const unallocatedAreas = Math.max(0, totalAreas - doneAreas - progAreas);
+  const progressPercent = totalAreas > 0 ? Math.round((doneAreas / totalAreas) * 100) : 0;
 
   const doneAreasEl = document.getElementById('fact-done-areas');
   const totalAreasEl = document.getElementById('fact-total-areas');
+  const progressBadgeEl = document.getElementById('fact-progress-badge');
+  const unallocatedEl = document.getElementById('fact-unallocated-areas');
+  const inProgressEl = document.getElementById('fact-inprogress-areas');
+  const completedEl = document.getElementById('fact-completed-areas');
   const districtLabelEl = document.getElementById('map-district-label');
 
   if (doneAreasEl) doneAreasEl.textContent = doneAreas.toLocaleString();
   if (totalAreasEl) totalAreasEl.textContent = totalAreas.toLocaleString();
+  if (progressBadgeEl) progressBadgeEl.textContent = `${progressPercent}%`;
+  if (unallocatedEl) unallocatedEl.textContent = unallocatedAreas.toLocaleString();
+  if (inProgressEl) inProgressEl.textContent = progAreas.toLocaleString();
+  if (completedEl) completedEl.textContent = doneAreas.toLocaleString();
+
   if (districtLabelEl) {
     districtLabelEl.textContent = isAll ? (DashboardState.summary?.districtName || '三重第3区 (858エリア)') : `${selected} (${totalAreas}エリア)`;
   }
@@ -514,7 +529,9 @@ function renderStockFacts(stocks, selectedCity) {
   });
 
   const totalStocksEl = document.getElementById('fact-total-stocks');
+  const totalSummaryEl = document.getElementById('stock-total-summary');
   if (totalStocksEl) totalStocksEl.textContent = totalStock.toLocaleString();
+  if (totalSummaryEl) totalSummaryEl.textContent = totalStock.toLocaleString();
 
   // 保有チラシリスト（中段カード）
   const listEl = document.getElementById('stock-location-list');
@@ -522,7 +539,7 @@ function renderStockFacts(stocks, selectedCity) {
 
   const locations = Object.keys(locationMap);
   if (locations.length === 0) {
-    listEl.innerHTML = `<div class="text-[11px] text-[#A8B3C7]/60 text-center py-2">保管データなし</div>`;
+    listEl.innerHTML = `<div class="text-[11px] text-[#94A3B8]/60 text-center py-2">保管データなし</div>`;
     return;
   }
 
@@ -530,9 +547,9 @@ function renderStockFacts(stocks, selectedCity) {
   locations.forEach(loc => {
     const count = locationMap[loc];
     html += `
-      <div class="flex items-center justify-between p-2 px-2.5 rounded-lg bg-[#222C3E] border border-[#2A3547] text-xs">
+      <div class="flex items-center justify-between p-1.5 px-2 rounded-lg bg-[#182130] border border-[#243044] text-xs">
         <span class="font-medium text-[#E6ECF3] truncate text-[11px]">${loc}</span>
-        <span class="font-mono font-bold text-white text-xs">${count.toLocaleString()} <span class="text-[9px] text-[#A8B3C7] font-normal">枚</span></span>
+        <span class="font-mono font-bold text-white text-xs">${count.toLocaleString()} <span class="text-[9px] text-[#94A3B8] font-normal">枚</span></span>
       </div>
     `;
   });
@@ -576,29 +593,32 @@ function renderRankingFacts(ranking) {
     if (topCountEl) topCountEl.textContent = '0';
   }
 
-  // 3. 横並び配布実績フィード（下段：ランキング上位）
+  // 3. Activity Stream（時系列現場ログフィード）
   const recordsListEl = document.getElementById('distribution-records-list');
   if (recordsListEl) {
     if (rankingList.length === 0) {
-      recordsListEl.innerHTML = `<div class="text-[11px] text-[#A8B3C7]/60 py-1">配布実績データはありません</div>`;
+      recordsListEl.innerHTML = `<div class="text-[10px] text-[#94A3B8]/60 py-0.5">配布実績データはありません</div>`;
       return;
     }
 
     let recordsHtml = '';
-    rankingList.slice(0, 6).forEach(item => {
-      const rank = item.rank || 1;
-      let badge = `${rank}位`;
-      if (rank === 1) badge = '🥇 1位';
-      else if (rank === 2) badge = '🥈 2位';
-      else if (rank === 3) badge = '🥉 3位';
+    rankingList.slice(0, 8).forEach((item, idx) => {
+      const rank = item.rank || (idx + 1);
+      let rankIcon = '●';
+      let rankColor = 'text-brand';
+      if (rank === 1) rankIcon = '🥇';
+      else if (rank === 2) rankIcon = '🥈';
+      else if (rank === 3) rankIcon = '🥉';
 
       recordsHtml += `
-        <div class="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#222C3E] border border-[#2A3547] text-xs flex-shrink-0">
-          <span class="font-mono font-bold text-brand text-[10px]">${badge}</span>
-          <span class="font-mono font-bold text-white text-[11px]">${item.staffId}</span>
-          ${item.name ? `<span class="font-medium text-[#E6ECF3] text-[11px]">(${item.name})</span>` : ''}
-          <span class="font-mono font-bold text-white text-[11px]">${(Number(item.count) || 0).toLocaleString()}枚</span>
+        <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[#182130] border border-[#243044] text-[10px] flex-shrink-0 whitespace-nowrap">
+          <span class="${rankColor} font-bold">${rankIcon}</span>
+          <span class="font-mono font-bold text-white">${item.staffId}</span>
+          ${item.name ? `<span class="text-[#94A3B8] font-medium">(${item.name})</span>` : ''}
+          <span class="font-mono font-bold text-brandLight">${(Number(item.count) || 0).toLocaleString()}枚</span>
+          <span class="text-[9px] text-statusGreen font-semibold">✓ 完了</span>
         </div>
+        ${idx < rankingList.slice(0, 8).length - 1 ? '<span class="text-[#243044] text-[10px] flex-shrink-0">➔</span>' : ''}
       `;
     });
     recordsListEl.innerHTML = recordsHtml;
@@ -641,11 +661,13 @@ function focusCard(type) {
   const focusTitle = document.getElementById('focus-title');
   const focusIcon = document.getElementById('focus-icon');
   const focusContent = document.getElementById('focus-content');
+  const streamBar = document.getElementById('activity-stream-bar');
 
   if (!defaultGrid || !focusContainer || !focusContent) return;
 
   DashboardState.currentFocus = type;
   defaultGrid.classList.add('hidden');
+  if (streamBar) streamBar.classList.add('hidden');
   focusContainer.classList.remove('hidden');
   if (focusHeader) focusHeader.classList.remove('hidden');
 
@@ -826,10 +848,12 @@ function resetFocus() {
   const defaultGrid = document.getElementById('default-view-grid');
   const focusContainer = document.getElementById('focus-view-container');
   const focusHeader = document.getElementById('focus-header');
+  const streamBar = document.getElementById('activity-stream-bar');
 
   if (defaultGrid && focusContainer) {
     DashboardState.currentFocus = null;
     defaultGrid.classList.remove('hidden');
+    if (streamBar) streamBar.classList.remove('hidden');
     focusContainer.classList.add('hidden');
     if (focusHeader) focusHeader.classList.add('hidden');
   }
@@ -865,9 +889,9 @@ function updateNavHighlight(activeType) {
     const el = document.getElementById(`nav-${t}`);
     if (el) {
       if (t === activeType) {
-        el.className = 'nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-brand/10 text-brand border border-brand/30 font-bold transition-all text-left';
+        el.className = 'nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-brand/15 text-brand border border-brand/30 font-bold transition-all text-left';
       } else {
-        el.className = 'nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#A8B3C7] hover:text-white hover:bg-white/5 transition-all text-left';
+        el.className = 'nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-textSub hover:text-white hover:bg-white/5 transition-all text-left font-bold';
       }
     }
   });
