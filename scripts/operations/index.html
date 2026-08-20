@@ -255,9 +255,8 @@
                 <div>
                   <div id="selected-area-name" class="font-bold text-xs text-white">--</div>
                   <div class="text-[10px] text-textSub mt-0.5">
-                    状態: <span id="selected-area-count" class="font-mono font-bold text-brand">--</span> ｜ 
-                    スタッフ: <span id="selected-area-staff">--</span> ｜ 
-                    日時: <span id="selected-area-time">--</span>
+                    状態: <span id="selected-area-status" class="font-mono font-bold text-brand">--</span> ｜
+                    <span id="selected-area-meta" class="text-textSub/70">ID: --</span>
                   </div>
                 </div>
                 <button onclick="closeAreaDetail()" class="text-textSub hover:text-white px-2 py-1 text-xs">✕</button>
@@ -266,41 +265,40 @@
           </div>
         </div>
 
-        <!-- ===== RIGHT: 2 FACTS CARDS (4カラム: 最新の活動 ＆ 保有チラシ) ===== -->
+        <!-- ===== RIGHT: 2 FACTS CARDS (4カラム: 配布トップ ＆ 保有チラシ) ===== -->
         <div class="col-span-4 flex flex-col gap-2.5 min-h-0 overflow-hidden">
           
-          <!-- 上段: 最新の活動 (写真付き) -->
+          <!-- 上段: 配布トップ (ランキング1位) -->
           <div class="flex-1 pm-card p-3 flex flex-col justify-between overflow-hidden">
             <div class="flex items-center justify-between flex-shrink-0">
-              <span class="font-bold text-xs text-white">最新の活動</span>
+              <span class="font-bold text-xs text-white">配布トップ</span>
               <button onclick="focusCard('records')" class="text-[10px] text-brand hover:text-brandLight font-bold transition-colors">
                 詳細 ➔
               </button>
             </div>
 
-            <!-- 活動ハイライト表示 -->
+            <!-- トップ配布員ハイライト表示 -->
             <div class="my-auto flex items-center gap-3">
-              <!-- 現場写真枠 -->
-              <div class="w-16 h-16 rounded-xl bg-cardSubBg border border-borderNormal flex-shrink-0 overflow-hidden flex items-center justify-center relative">
-                <img id="latest-activity-img" src="" alt="現場写真" class="w-full h-full object-cover hidden">
-                <span id="latest-activity-placeholder" class="text-xl opacity-40">📷</span>
+              <!-- 順位バッジ枠 -->
+              <div class="w-12 h-12 rounded-xl bg-cardSubBg border border-borderNormal flex-shrink-0 flex items-center justify-center">
+                <span id="top-ranking-badge" class="text-2xl select-none">🥇</span>
               </div>
               
-              <!-- 活動データ -->
+              <!-- 配布員データ -->
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-1.5">
-                  <span id="latest-activity-time" class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-brand/10 text-brand font-bold">--:--</span>
-                  <span id="latest-activity-staff" class="font-mono font-bold text-white text-xs">--</span>
+                  <span id="top-ranking-rank" class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-brand/10 text-brand font-bold">第1位</span>
+                  <span id="top-ranking-staff-id" class="font-mono font-bold text-white text-xs">--</span>
                 </div>
-                <div id="latest-activity-location" class="font-medium text-xs text-white/90 truncate mt-1">本日の活動データなし</div>
+                <div id="top-ranking-staff-name" class="font-medium text-xs text-white/90 truncate mt-1">配布実績データなし</div>
                 <div class="text-[11px] text-textSub mt-0.5">
-                  <span id="latest-activity-count" class="font-mono font-black text-white text-sm">--</span> 枚 配布
+                  <span id="top-ranking-count" class="font-mono font-black text-white text-sm">--</span> 枚 配布
                 </div>
               </div>
             </div>
 
             <div class="text-[10px] text-textSub/50 text-right flex-shrink-0">
-              リアルタイム現場同期
+              配布実績 1位
             </div>
           </div>
 

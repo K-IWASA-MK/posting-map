@@ -337,13 +337,12 @@ function renderPinsOnMap(mapInstance, layerGroup, pins) {
       fillOpacity: isCompleted ? 0.9 : 0.8
     });
 
-    // タッチ/クリック時の詳細オーバーレイ表示
+    // タッチ/クリック時の詳細オーバーレイ表示 (SSOT準拠: エリア名・状態・マスター情報)
     marker.on('click', () => {
       showAreaDetail({
         name: pin.fullName,
-        count: isCompleted ? '配布済' : (isInProgress ? '配布中' : '未配布'),
-        staff: isCompleted ? '完了エリア' : (isInProgress ? '作業中' : '--'),
-        time: isCompleted || isInProgress ? '本日' : '--'
+        status: isCompleted ? '● 配布済' : (isInProgress ? '🔵 配布中' : '○ 未配布'),
+        meta: `ID: ${pin.rowId} ｜ 座標: ${pin.lat.toFixed(4)}, ${pin.lng.toFixed(4)}`
       });
     });
 
@@ -479,29 +478,26 @@ function renderRankingFacts(ranking) {
   // 2. 配布トップ（実データが存在する場合のみ表示）
   const topMember = rankingList.length > 0 ? rankingList[0] : null;
 
-  const lTimeEl = document.getElementById('latest-activity-time');
-  const lStaffEl = document.getElementById('latest-activity-staff');
-  const lLocEl = document.getElementById('latest-activity-location');
-  const lCountEl = document.getElementById('latest-activity-count');
-  const lImgEl = document.getElementById('latest-activity-img');
-  const lPlaceholderEl = document.getElementById('latest-activity-placeholder');
+  const topBadgeEl = document.getElementById('top-ranking-badge');
+  const topRankEl = document.getElementById('top-ranking-rank');
+  const topStaffIdEl = document.getElementById('top-ranking-staff-id');
+  const topStaffNameEl = document.getElementById('top-ranking-staff-name');
+  const topCountEl = document.getElementById('top-ranking-count');
 
   if (topMember) {
-    if (lTimeEl) lTimeEl.textContent = `第${topMember.rank || 1}位`;
-    if (lStaffEl) lStaffEl.textContent = topMember.staffId;
-    if (lLocEl) lLocEl.textContent = topMember.name || topMember.staffId;
-    if (lCountEl) lCountEl.textContent = Number(topMember.count || 0).toLocaleString();
-
-    if (lImgEl) lImgEl.classList.add('hidden');
-    if (lPlaceholderEl) lPlaceholderEl.classList.remove('hidden');
+    const rank = topMember.rank || 1;
+    if (topBadgeEl) topBadgeEl.textContent = rank === 1 ? '🥇' : (rank === 2 ? '🥈' : (rank === 3 ? '🥉' : '🏆'));
+    if (topRankEl) topRankEl.textContent = `第${rank}位`;
+    if (topStaffIdEl) topStaffIdEl.textContent = topMember.staffId;
+    if (topStaffNameEl) topStaffNameEl.textContent = topMember.name || topMember.staffId;
+    if (topCountEl) topCountEl.textContent = Number(topMember.count || 0).toLocaleString();
   } else {
     // 実データが存在しない場合
-    if (lTimeEl) lTimeEl.textContent = '--';
-    if (lStaffEl) lStaffEl.textContent = '--';
-    if (lLocEl) lLocEl.textContent = '配布実績データなし';
-    if (lCountEl) lCountEl.textContent = '0';
-    if (lImgEl) lImgEl.classList.add('hidden');
-    if (lPlaceholderEl) lPlaceholderEl.classList.remove('hidden');
+    if (topBadgeEl) topBadgeEl.textContent = '🏆';
+    if (topRankEl) topRankEl.textContent = '--';
+    if (topStaffIdEl) topStaffIdEl.textContent = '--';
+    if (topStaffNameEl) topStaffNameEl.textContent = '配布実績データなし';
+    if (topCountEl) topCountEl.textContent = '0';
   }
 
   // 3. 横並び配布実績フィード（下段：ランキング上位）
@@ -539,14 +535,12 @@ function renderRankingFacts(ranking) {
 function showAreaDetail(data) {
   const detailEl = document.getElementById('map-area-detail');
   const nameEl = document.getElementById('selected-area-name');
-  const countEl = document.getElementById('selected-area-count');
-  const staffEl = document.getElementById('selected-area-staff');
-  const timeEl = document.getElementById('selected-area-time');
+  const statusEl = document.getElementById('selected-area-status');
+  const metaEl = document.getElementById('selected-area-meta');
 
   if (nameEl) nameEl.textContent = data.name;
-  if (countEl) countEl.textContent = data.count;
-  if (staffEl) staffEl.textContent = data.staff;
-  if (timeEl) timeEl.textContent = data.time;
+  if (statusEl) statusEl.textContent = data.status;
+  if (metaEl) metaEl.textContent = data.meta;
 
   if (detailEl) detailEl.classList.remove('hidden');
 }
@@ -609,7 +603,7 @@ function focusCard(type) {
           <div class="flex items-center justify-between p-3.5 rounded-xl bg-[#222C3E] border border-[#2A3547]">
             <div>
               <div class="font-bold text-xs text-[#E6ECF3]">${s.location || '保管拠点'}</div>
-              <div class="text-[11px] text-[#A8B3C7] mt-0.5">担当: ${s.staffName || s.staffId || '未設定'} ｜ 更新: ${s.updatedAt || '本日'}</div>
+              <div class="text-[11px] text-[#A8B3C7] mt-0.5">担当: ${s.staffName || s.staffId || '未設定'} ｜ 更新: ${s.updatedAt || '--'}</div>
             </div>
             <div class="text-right">
               <span class="text-xl font-black font-mono text-white">${(Number(s.count) || 0).toLocaleString()}</span>
