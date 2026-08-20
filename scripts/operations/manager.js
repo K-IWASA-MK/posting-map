@@ -93,6 +93,43 @@ const AREA_STATUS_CONFIG = {
   }
 };
 
+/**
+ * ズームレベルに応じたピン半径（radius）動的スケーリング
+ * - 広域（Lv11全域初期表示）では858件の密集を防ぐため、極小ドット（2.2px / 3.0px）で表示し、
+ *   道路網や市町名（四日市・桑名・いなべ等）の可読性を最大化。
+ * - ズームインするにつれて段階的に拡大し、街区・丁目レベル（Lv15〜17）では特大ピン（10px〜24px）へ拡張。
+ *
+ * 【計算仕様】
+ * - Lv <= 8: 1.2 px (広域極小)
+ * - Lv 9〜10: 1.6 px
+ * - Lv 11 (全域初期): 2.2 px (未配布) / 3.0 px (配布済) ← 密集解消の黄金バランス
+ * - Lv 12: 3.2 px
+ * - Lv 13 (自治体): 4.8 px (未配布) / 6.4 px (配布済)
+ * - Lv 14: 7.0 px
+ * - Lv 15 (街区): 10.5 px
+ * - Lv 16: 15.0 px
+ * - Lv 17+: 22.0 px (丁目詳細)
+ */
+function getZoomScaledRadius(baseRadius, currentZoom) {
+  const scale = 0.50 * Math.pow(2, (currentZoom - 11) * 0.52);
+  const radius = baseRadius * scale;
+  return Math.max(1.2, Math.min(24.0, Math.round(radius * 10) / 10));
+}
+
+/**
+ * レイヤー内の全ピン半径を現在のマップズームに合わせて一括更新
+ */
+function updatePinsRadiusOnZoom(mapInstance, layerGroup) {
+  if (!mapInstance || !layerGroup) return;
+  const currentZoom = typeof mapInstance.getZoom === 'function' ? mapInstance.getZoom() : 11;
+  layerGroup.eachLayer(layer => {
+    if (layer instanceof L.CircleMarker && layer.options && layer.options._baseRadius) {
+      const newRadius = getZoomScaledRadius(layer.options._baseRadius, currentZoom);
+      layer.setRadius(newRadius);
+    }
+  });
+}
+
 function getAreaStatusConfig(isCompleted, isInProgress) {
   if (isCompleted) return AREA_STATUS_CONFIG.COMPLETED;
   if (isInProgress) return AREA_STATUS_CONFIG.IN_PROGRESS;
@@ -234,14 +271,18 @@ function initMap() {
       attributionControl: false
     }).setView(CITY_GEO['ALL'].center, CITY_GEO['ALL'].zoom);
 
-    // CartoDB Voyager ライト系高コントラストタイル
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      maxZoom: 19,
-      subdomains: 'abcd'
+    // OpenStreetMap Japan 日本語優先高コントラストタイル
+    L.tileLayer('https://tile.openstreetmap.jp/{z}/{x}/{y}.png', {
+      maxZoom: 18
     }).addTo(map);
 
     DashboardState.markersLayer = L.layerGroup().addTo(map);
     DashboardState.map = map;
+
+    // ズーム変更時のピンサイズ動的スケーリング (ズーム中および完了時)
+    map.on('zoom zoomend', () => {
+      updatePinsRadiusOnZoom(DashboardState.map, DashboardState.markersLayer);
+    });
 
     setTimeout(() => {
       map.invalidateSize();
@@ -359,9 +400,12 @@ function renderPinsOnMap(mapInstance, layerGroup, pins) {
 
     // 確定状態SSOT設定の取得
     const statusCfg = getAreaStatusConfig(isCompleted, isInProgress);
+    const currentZoom = typeof mapInstance.getZoom === 'function' ? mapInstance.getZoom() : 11;
+    const scaledRadius = getZoomScaledRadius(statusCfg.radius, currentZoom);
 
     const marker = L.circleMarker([pin.lat, pin.lng], {
-      radius: statusCfg.radius,
+      radius: scaledRadius,
+      _baseRadius: statusCfg.radius,
       fillColor: statusCfg.color,
       color: statusCfg.strokeColor,
       weight: statusCfg.weight,
@@ -637,13 +681,18 @@ function focusCard(type) {
         attributionControl: false
       }).setView(CITY_GEO[DashboardState.selectedCity]?.center || CITY_GEO['ALL'].center, CITY_GEO[DashboardState.selectedCity]?.zoom || 11);
 
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        maxZoom: 19,
-        subdomains: 'abcd'
+      // OpenStreetMap Japan 日本語優先高コントラストタイル
+      L.tileLayer('https://tile.openstreetmap.jp/{z}/{x}/{y}.png', {
+        maxZoom: 18
       }).addTo(fsMap);
       
       DashboardState.fullscreenMarkersLayer = L.layerGroup().addTo(fsMap);
       DashboardState.fullscreenMap = fsMap;
+
+      // 全画面MAPのズーム変更時ピンサイズ動的スケーリング (ズーム中および完了時)
+      fsMap.on('zoom zoomend', () => {
+        updatePinsRadiusOnZoom(DashboardState.fullscreenMap, DashboardState.fullscreenMarkersLayer);
+      });
 
       // 現場アプリと同一のピンを描画
       renderPinsOnMap(fsMap, DashboardState.fullscreenMarkersLayer, DashboardState.masterPins858);
