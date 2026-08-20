@@ -1,4 +1,0 @@
-UserEmail,Plan,Status,StripeCustomerID,StripeSubID,LastPaymentDate,ExpiryDate,ClientSheetID,CreatedDate,Memo
-test@example.com,Enterprise,active,cus_12345,sub_67890,2026-05-01,2026-06-01,SHEET_ID_HERE,2026-05-01,テスト用
-demo-starter@example.com,Starter,active,cus_abcde,sub_fghij,2026-05-01,2026-06-01,SHEET_ID_HERE,2026-05-01,デモ用
-expired-user@example.com,Business,canceled,cus_xyz,sub_123,2026-04-01,2026-05-01,,2026-04-01,期限切れテスト

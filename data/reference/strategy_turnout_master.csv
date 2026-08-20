@@ -1,7 +1,0 @@
-district_id,district_name,city_name,turnout_rate,source_url,last_updated
-MIE_02,三重県第2区,伊賀市,60.54,https://www.pref.mie.lg.jp/common/content/001099688.pdf,2026-02-09
-MIE_02,三重県第2区,名張市,58.18,https://www.pref.mie.lg.jp/common/content/001099688.pdf,2026-02-09
-MIE_02,三重県第2区,亀山市,57.49,https://www.pref.mie.lg.jp/common/content/001099688.pdf,2026-02-09
-MIE_02,三重県第2区,鈴鹿市,67.43,https://www.pref.mie.lg.jp/common/content/001099688.pdf,2026-02-09
-MIE_02,三重県第2区,四日市市,54.68,https://www.pref.mie.lg.jp/common/content/001099688.pdf,2026-02-09
-NATIONAL,全国,全国平均,56.26,https://www.soumu.go.jp/,2026-02-09

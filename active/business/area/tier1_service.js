@@ -17,66 +17,86 @@
 
     getTier1() {
       try {
-        const cityTotals = {
-          "四日市市": 304,
-          "桑名市": 97,
-          "いなべ市": 96,
-          "桑名郡木曽岬町": 13,
-          "員弁郡東員町": 44,
-          "三重郡菰野町": 149,
-          "三重郡朝日町": 61,
-          "三重郡川越町": 94
-        };
-
-        // 配布実績シート SSOT から自治体別 done を算出
+        const cityTotals = {};
         const cityDoneMap = {};
-        try {
-          if (typeof getSS === 'function') {
-            const ss = getSS();
-            if (ss) {
-              const distSheet = ss.getSheetByName("配布実績");
-              const masterSheet = ss.getSheetByName("MIE03_ADDRESS_MASTER");
-              if (distSheet && masterSheet) {
-                const distLr = distSheet.getLastRow();
-                const masterLr = masterSheet.getLastRow();
-                if (distLr > 0 && masterLr > 1) {
-                  const masterData = masterSheet.getRange(2, 1, masterLr - 1, 3).getValues();
-                  const rowCityMap = {};
-                  masterData.forEach(r => {
-                    const rId = parseInt(r[0], 10);
+
+        // 1. スプレッドシート SSOT から自治体別 total および done を動的算出
+        if (typeof getSS === 'function') {
+          const ss = getSS();
+          if (ss) {
+            const masterSheet = ss.getSheetByName("MIE03_ADDRESS_MASTER");
+            const distSheet = ss.getSheetByName("配布実績");
+
+            if (masterSheet) {
+              const masterData = masterSheet.getDataRange().getValues();
+              if (masterData.length > 1) {
+                const header = masterData[0].map(h => String(h || "").toLowerCase().trim());
+                let rowIdIdx = header.findIndex(h => h === 'rowid' || h === 'id');
+                if (rowIdIdx === -1) rowIdIdx = 0;
+
+                let cityIdx = header.findIndex(h => h === 'city_name' || h === 'city' || h === 'municipality');
+                if (cityIdx === -1) cityIdx = 1; // CSV/Sheet SSOT 標準: 列1 (city_name)
+
+                const rowCityMap = {};
+                for (let i = 1; i < masterData.length; i++) {
+                  const row = masterData[i];
+                  const rId = parseInt(row[rowIdIdx], 10);
+                  const cityName = String(row[cityIdx] || "").trim();
+
+                  if (cityName) {
+                    cityTotals[cityName] = (cityTotals[cityName] || 0) + 1;
                     if (!isNaN(rId)) {
-                      rowCityMap[rId] = String(r[2] || "").trim();
+                      rowCityMap[rId] = cityName;
                     }
-                  });
+                  }
+                }
 
-                  const distValues = distSheet.getRange(1, 1, distLr, 4).getValues();
-                  const completedRowIds = new Set(
-                    distValues
-                      .filter(r => r[0] && r[3] !== "" && r[3] !== null)
-                      .map(r => parseInt(r[0], 10))
-                      .filter(id => !isNaN(id))
-                  );
+                // 配布実績シートからの完了集計
+                if (distSheet) {
+                  const distLr = distSheet.getLastRow();
+                  if (distLr > 0) {
+                    const distValues = distSheet.getRange(1, 1, distLr, 4).getValues();
+                    const completedRowIds = new Set(
+                      distValues
+                        .filter(r => r[0] && r[3] !== "" && r[3] !== null)
+                        .map(r => parseInt(r[0], 10))
+                        .filter(id => !isNaN(id))
+                    );
 
-                  completedRowIds.forEach(rowId => {
-                    const cityName = rowCityMap[rowId];
-                    if (cityName) {
-                      cityDoneMap[cityName] = (cityDoneMap[cityName] || 0) + 1;
-                    }
-                  });
+                    completedRowIds.forEach(rowId => {
+                      const cityName = rowCityMap[rowId];
+                      if (cityName) {
+                        cityDoneMap[cityName] = (cityDoneMap[cityName] || 0) + 1;
+                      }
+                    });
+                  }
                 }
               }
             }
           }
-        } catch (e) {
-          // 安全フォールバック
         }
 
-        const orderedCities = getMunicipalityOrder();
+        // 2. 表示順序SSOT (getMunicipalityOrder) に基づき自治体リストを動的生成
+        let orderedCities = [];
+        if (typeof getMunicipalityOrder === 'function') {
+          orderedCities = getMunicipalityOrder();
+        } else {
+          orderedCities = Object.keys(cityTotals);
+        }
+
+        // 順序リストに含まれない自治体がもしあれば末尾に追加
+        Object.keys(cityTotals).forEach(cName => {
+          if (!orderedCities.includes(cName)) {
+            orderedCities.push(cName);
+          }
+        });
+
         const cities = orderedCities.map(cityName => ({
           name: cityName,
           total: cityTotals[cityName] || 0,
           done: cityDoneMap[cityName] || 0
         }));
+
         return {
           success: true,
           cities: cities

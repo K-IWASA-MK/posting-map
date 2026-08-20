@@ -17,24 +17,6 @@ function getAssetRegistry() {
   },
   "masters": {
     "global": {
-      "postalMaster": {
-        "fileId": "1m6e6tH8vwBKs1HJuXAeEFCAU8wlKpSHl",
-        "name": "KEN_ALL.CSV",
-        "location": "01_MASTER/Reference/Postal",
-        "version": "2026-07",
-        "source": "日本郵便",
-        "checksum": "941a1737b13b0c1441525f5baa2915e908f1a00dc1e87f85eeebdf7740bb9922",
-        "updatedAt": "2026-07-18T10:43:16.309Z"
-      },
-      "addressMaster": {
-        "fileId": "1jr272nvp4bUWh7maGfEnTKDa9qEqSbgP",
-        "name": "postal.csv",
-        "location": "01_MASTER/Reference/Address",
-        "version": "2026-07",
-        "source": "日本郵便",
-        "checksum": "076dfa01ef8508cb61151b4fa2e71f6b81ad0d5bfa25f896cb5c85471fc29c2f",
-        "updatedAt": "2026-07-18T10:43:16.312Z"
-      },
       "electionMaster": {
         "fileId": "",
         "name": "三重県選挙区区割り.csv",

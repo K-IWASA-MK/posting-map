@@ -407,25 +407,12 @@ function verifyDistrictDeployment(e) {
     }
   }
 
-  // District & Postal CSV Deep Audit Inspector
+  // District CSV Deep Audit Inspector
   if (params.inspectCsvRules === "true" || params.inspectCsvRules === true) {
     try {
       const districtFileId = CONFIG.get("DISTRICT_CSV_FILE_ID");
       const districtFile = DriveApp.getFileById(districtFileId);
       const districtData = getCsvOrSheetDataFromFile(districtFile);
-
-      const postalFileId = CONFIG.get("POSTAL_CSV_FILE_ID");
-      const postalFile = DriveApp.getFileById(postalFileId);
-      const postalData = getCsvOrSheetDataFromFile(postalFile);
-
-      // 自治体ごとの件数集計
-      const mieCitiesCount = {};
-      postalData.forEach(r => {
-        if (r && r[6] === "三重県") {
-          const city = r[7];
-          mieCitiesCount[city] = (mieCitiesCount[city] || 0) + 1;
-        }
-      });
 
       // 全国ルール監査
       const gunRules = [];
@@ -459,8 +446,7 @@ function verifyDistrictDeployment(e) {
         cityRulesCount: cityRules.length,
         gunRules: gunRules,
         specialRules: specialRules,
-        allRows: districtData,
-        mieCitiesCount: mieCitiesCount
+        allRows: districtData
       };
     } catch (err) {
       return {
@@ -519,7 +505,7 @@ function verifyDistrictDeployment(e) {
   // 調査専用: inspectDriveCsv
   if (params.inspectDriveCsv === "true" || params.inspectDriveCsv === true) {
     try {
-      const fileId = CONFIG.get("POSTAL_CSV_FILE_ID");
+      const fileId = params.fileId || CONFIG.get("DISTRICT_CSV_FILE_ID");
       let fileFound = false;
       let fileName = "";
       let fileSize = 0;
@@ -583,69 +569,6 @@ function verifyDistrictDeployment(e) {
       };
     } catch (err) {
       return { success: false, error: err.toString() };
-    }
-  }
-
-  // Postal CSV Builder Action
-  if (params.buildPrefPostalCsv === "true" || params.buildPrefPostalCsv === true) {
-    try {
-      const targetPref = params.targetPref || "三重県";
-      const postalFileId = CONFIG.get("POSTAL_ALT_FILE_ID") || CONFIG.get("POSTAL_CSV_FILE_ID");
-      const postalFile = DriveApp.getFileById(postalFileId);
-      const postalData = getCsvOrSheetDataFromFile(postalFile);
-
-      // 1. 指定県の行のみフィルタ抽出
-      const prefRows = postalData.filter(r => r && r[6] === targetPref);
-
-      // 2. 自治体コード (JISコード r[0]) 昇順 ➔ 自治体内部の郵便番号 (r[2]) 数値昇順 の 2段階正規化ソート
-      prefRows.sort((a, b) => {
-        const cityCodeA = parseInt((a[0] || "0").toString().trim(), 10);
-        const cityCodeB = parseInt((b[0] || "0").toString().trim(), 10);
-        if (cityCodeA !== cityCodeB) {
-          return cityCodeA - cityCodeB; // 第1キー: 自治体コード順 (桑名市, いなべ市, 木曽岬町, 東員町...)
-        }
-        const p1 = parseInt((a[2] || "0").toString().replace(/-/g, ""), 10);
-        const p2 = parseInt((b[2] || "0").toString().replace(/-/g, ""), 10);
-        return p1 - p2; // 第2キー: 自治体内部での郵便番号数値昇順
-      });
-
-      // 3. CSVフォーマット文字列を生成
-      const csvLines = prefRows.map(r => r.map(cell => {
-        const str = (cell || "").toString();
-        return str.includes(",") ? `"${str}"` : str;
-      }).join(","));
-
-      const csvContent = csvLines.join("\n");
-      const fileName = "MIE_POSTAL.CSV";
-
-      // 4. Google Drive の設定フォルダ（または親フォルダ）に MIE_POSTAL.CSV を生成/上書き
-      let parentFolder = DriveApp.getRootFolder();
-      try {
-        const storageId = CONFIG.get("STORAGE_PARENT_ID");
-        if (storageId) parentFolder = DriveApp.getFolderById(storageId);
-      } catch (fErr) {}
-
-      // 既存ファイルがあればゴミ箱へ
-      const existingFiles = parentFolder.getFilesByName(fileName);
-      while (existingFiles.hasNext()) {
-        existingFiles.next().setTrashed(true);
-      }
-
-      const newFile = parentFolder.createFile(fileName, csvContent, MimeType.CSV);
-      const newFileId = newFile.getId();
-
-      return {
-        success: true,
-        fileName: fileName,
-        fileId: newFileId,
-        totalRows: prefRows.length,
-        is2TierNormalized: true
-      };
-    } catch (err) {
-      return {
-        success: false,
-        message: "Failed buildPrefPostalCsv: " + err.toString()
-      };
     }
   }
 
@@ -1093,13 +1016,10 @@ function verifyDistrictDeployment(e) {
       const targetDistrict = params.districtName || "三重第3区";
       const targetPrefecture = params.prefecture || "三重県";
       
-      const postalFileId = CONFIG.get("POSTAL_CSV_FILE_ID") || "1m6e6tH8vwBKs1HJuXAeEFCAU8wlKpSHl";
       const districtFileId = CONFIG.get("DISTRICT_CSV_FILE_ID") || "1LGeZIaxidgKihq5iirYp-KXygJlBQ5Wm";
 
-      let postalFileName = "KEN_ALL.CSV";
       let districtFileName = "三重県選挙区区割り.csv";
       try {
-        if (postalFileId) postalFileName = DriveApp.getFileById(postalFileId).getName();
         if (districtFileId) districtFileName = DriveApp.getFileById(districtFileId).getName();
       } catch (eName) {}
 
@@ -1115,8 +1035,6 @@ function verifyDistrictDeployment(e) {
         audit: {
           targetDistrict: targetDistrict,
           targetPrefecture: targetPrefecture,
-          postalFileId: postalFileId,
-          postalFileName: postalFileName,
           districtFileId: districtFileId,
           districtFileName: districtFileName,
           totalCount: totalCount,

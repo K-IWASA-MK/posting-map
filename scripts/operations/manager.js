@@ -29,24 +29,9 @@ const DashboardState = {
   globalPinStatus: { inProgress: [], completed: [] },
   masterPins858: [], // SSOT 858件マスターピン
   selectedCity: 'ALL',
-  currentFocus: null,
+  currentFocus: 'areas',
   map: null,
-  markersLayer: null,
-  fullscreenMap: null,
-  fullscreenMarkersLayer: null
-};
-
-// 各自治体の代表座標とズームレベル
-const CITY_GEO = {
-  'ALL': { center: [35.0641, 136.6200], zoom: 11 },
-  '桑名市': { center: [35.0641, 136.6800], zoom: 13 },
-  '四日市市': { center: [34.9641, 136.6200], zoom: 13 },
-  'いなべ市': { center: [35.1561, 136.5167], zoom: 13 },
-  '員弁郡東員町': { center: [35.0744, 136.5922], zoom: 14 },
-  '桑名郡木曽岬町': { center: [35.0611, 136.7361], zoom: 14 },
-  '三重郡菰野町': { center: [35.0119, 136.5161], zoom: 13 },
-  '三重郡朝日町': { center: [35.0389, 136.6667], zoom: 14 },
-  '三重郡川越町': { center: [35.0194, 136.6722], zoom: 14 }
+  markersLayer: null
 };
 
 // エリア配布状態の確定SSOT定義（ピン・ポップアップ・下部詳細で同一定義を使用）
@@ -144,6 +129,7 @@ if (document.readyState === 'loading') {
 
 async function initDashboard() {
   initMap();
+  updateNavHighlight('areas');
   
   // 1. SSOT 858件住所マスターの読み込み
   await loadAddressMaster858();
@@ -166,7 +152,6 @@ async function initDashboard() {
   // ウィンドウリサイズ時のマップ再描画フィット
   window.addEventListener('resize', () => {
     if (DashboardState.map) DashboardState.map.invalidateSize();
-    if (DashboardState.fullscreenMap) DashboardState.fullscreenMap.invalidateSize();
   });
 }
 
@@ -250,12 +235,53 @@ async function loadAddressMaster858() {
     DashboardState.masterPins858 = pins;
     console.log(`[SSOT Master Pins Loaded] Total: ${pins.length} items (SSOT 858 verified)`);
 
+    // SSOTマスターからユニークな自治体リストを抽出（出現順SSOTを尊重）
+    const uniqueCities = [];
+    const citySet = new Set();
+    for (const p of pins) {
+      if (p.cityName && !citySet.has(p.cityName)) {
+        citySet.add(p.cityName);
+        uniqueCities.push(p.cityName);
+      }
+    }
+    DashboardState.cities = uniqueCities;
+
+    // 自治体セレクターをSSOTから動的生成
+    populateCitySelector(uniqueCities);
+
     // マップにピンを描画
     renderPinsOnMap(DashboardState.map, DashboardState.markersLayer, pins);
 
   } catch (err) {
     console.error('[SSOT Load Error]', err);
   }
+}
+
+/**
+ * SSOT自治体セレクターの動的生成
+ */
+function populateCitySelector(cities) {
+  const select = document.getElementById('city-selector');
+  if (!select) return;
+
+  const currentVal = DashboardState.selectedCity || 'ALL';
+  select.innerHTML = '';
+
+  // 1. 全域プリセット (ALL: 表示範囲プリセット)
+  const allOpt = document.createElement('option');
+  allOpt.value = 'ALL';
+  allOpt.textContent = '全域 (三重第3区)';
+  select.appendChild(allOpt);
+
+  // 2. SSOTから動的抽出された自治体リスト
+  cities.forEach(cityName => {
+    const opt = document.createElement('option');
+    opt.value = cityName;
+    opt.textContent = cityName;
+    select.appendChild(opt);
+  });
+
+  select.value = currentVal;
 }
 
 /**
@@ -269,7 +295,7 @@ function initMap() {
     const map = L.map('map', {
       zoomControl: true,
       attributionControl: false
-    }).setView(CITY_GEO['ALL'].center, CITY_GEO['ALL'].zoom);
+    }).setView([35.0641, 136.6200], 11);
 
     // OpenStreetMap Japan 日本語優先高コントラストタイル
     L.tileLayer('https://tile.openstreetmap.jp/{z}/{x}/{y}.png', {
@@ -358,12 +384,9 @@ async function syncDashboardData() {
     // 8. 現在選択中の自治体に合わせて画面全体を再描画
     renderCurrentView();
 
-    // 9. 通常マップと全画面マップのピンを再描画
+    // 9. 通常マップのピンを再描画
     if (DashboardState.map && DashboardState.markersLayer) {
       renderPinsOnMap(DashboardState.map, DashboardState.markersLayer, DashboardState.masterPins858);
-    }
-    if (DashboardState.fullscreenMap && DashboardState.fullscreenMarkersLayer) {
-      renderPinsOnMap(DashboardState.fullscreenMap, DashboardState.fullscreenMarkersLayer, DashboardState.masterPins858);
     }
 
     // 同期状態の表示
@@ -445,18 +468,23 @@ function onCitySelected(cityName) {
   if (DashboardState.map && DashboardState.markersLayer) {
     renderPinsOnMap(DashboardState.map, DashboardState.markersLayer, DashboardState.masterPins858);
   }
-  if (DashboardState.fullscreenMap && DashboardState.fullscreenMarkersLayer) {
-    renderPinsOnMap(DashboardState.fullscreenMap, DashboardState.fullscreenMarkersLayer, DashboardState.masterPins858);
-  }
 
-  // マップの連動ズーム移動
-  const activeMap = DashboardState.currentFocus === 'areas' ? DashboardState.fullscreenMap : DashboardState.map;
-  if (activeMap) {
-    const target = CITY_GEO[cityName] || CITY_GEO['ALL'];
-    activeMap.flyTo(target.center, target.zoom, {
-      duration: 1.2,
-      easeLinearity: 0.25
-    });
+  // マップの連動ズーム移動（SSOT住所マスターデータから動的にフォーカス）
+  if (DashboardState.map) {
+    if (cityName === 'ALL') {
+      if (DashboardState.masterPins858.length > 0) {
+        const bounds = L.latLngBounds(DashboardState.masterPins858.map(p => [p.lat, p.lng]));
+        DashboardState.map.fitBounds(bounds, { padding: [20, 20], maxZoom: 11 });
+      } else {
+        DashboardState.map.setView([35.0641, 136.6200], 11);
+      }
+    } else {
+      const cityPins = DashboardState.masterPins858.filter(p => p.cityName === cityName);
+      if (cityPins.length > 0) {
+        const bounds = L.latLngBounds(cityPins.map(p => [p.lat, p.lng]));
+        DashboardState.map.fitBounds(bounds, { padding: [30, 30], maxZoom: 13 });
+      }
+    }
   }
 }
 
@@ -508,6 +536,12 @@ function renderCurrentView() {
 
   // 3. 配布実績ランキングの描画（現場アプリの計算済み結果を直接利用）
   renderRankingFacts(DashboardState.ranking);
+
+  // 4. 現在アクティブな中央メインステージのビューを再描画
+  if (DashboardState.currentFocus === 'records') renderMainStageRecords(DashboardState.ranking);
+  if (DashboardState.currentFocus === 'stocks') renderMainStageStocks(DashboardState.stocks);
+  if (DashboardState.currentFocus === 'roster') renderMainStageRoster(DashboardState.roster);
+  if (DashboardState.currentFocus === 'requests') renderMainStageRequests(DashboardState.requests);
 }
 
 /**
@@ -652,235 +686,198 @@ function closeAreaDetail() {
 }
 
 /**
- * 視点切り替えインタラクション（同一Dashboard内で見たい現実が主役になる）
+ * 中央メインステージ用: 配布実績ランキングの描画
  */
-function focusCard(type) {
-  const defaultGrid = document.getElementById('default-view-grid');
-  const focusContainer = document.getElementById('focus-view-container');
-  const focusHeader = document.getElementById('focus-header');
-  const focusTitle = document.getElementById('focus-title');
-  const focusIcon = document.getElementById('focus-icon');
-  const focusContent = document.getElementById('focus-content');
-  const streamBar = document.getElementById('activity-stream-bar');
+function renderMainStageRecords(ranking) {
+  const contentEl = document.getElementById('main-stage-records-content');
+  if (!contentEl) return;
 
-  if (!defaultGrid || !focusContainer || !focusContent) return;
+  const rankingList = ranking || [];
+  if (rankingList.length === 0) {
+    contentEl.innerHTML = `<div class="text-xs text-[#94A3B8]/60 text-center py-12">配布実績データはありません</div>`;
+    return;
+  }
 
-  DashboardState.currentFocus = type;
-  defaultGrid.classList.add('hidden');
-  if (streamBar) streamBar.classList.add('hidden');
-  focusContainer.classList.remove('hidden');
-  if (focusHeader) focusHeader.classList.remove('hidden');
-
-  updateNavHighlight(type);
-
-  if (type === 'areas') {
-    if (focusTitle) focusTitle.textContent = '配布エリア MAP (全画面)';
-    if (focusIcon) focusIcon.textContent = '🗺️';
-
-    // 既存の全画面Leafletインスタンスを安全に破棄
-    if (DashboardState.fullscreenMap && typeof DashboardState.fullscreenMap.remove === 'function') {
-      try {
-        DashboardState.fullscreenMap.remove();
-      } catch (e) {
-        console.warn('[Leaflet Cleanup Warning]', e);
-      }
-      DashboardState.fullscreenMap = null;
-      DashboardState.fullscreenMarkersLayer = null;
+  let html = '<div class="space-y-2">';
+  rankingList.forEach((item, index) => {
+    const rank = item.rank || (index + 1);
+    let rankBadgeHtml = '';
+    if (rank === 1) {
+      rankBadgeHtml = `<span class="w-7 h-7 flex items-center justify-center text-lg select-none">🥇</span>`;
+    } else if (rank === 2) {
+      rankBadgeHtml = `<span class="w-7 h-7 flex items-center justify-center text-lg select-none">🥈</span>`;
+    } else if (rank === 3) {
+      rankBadgeHtml = `<span class="w-7 h-7 flex items-center justify-center text-lg select-none">🥉</span>`;
+    } else {
+      rankBadgeHtml = `<span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black font-mono bg-white/5 text-white/50">${rank}</span>`;
     }
 
-    focusContent.innerHTML = `
-      <div class="flex-1 w-full rounded-xl overflow-hidden relative border border-[#2A3547] min-h-0" id="fullscreen-map-box">
-        <div id="fullscreen-map" class="absolute inset-0 w-full h-full"></div>
+    html += `
+      <div class="flex items-center justify-between p-3 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
+        <div class="flex items-center gap-3">
+          ${rankBadgeHtml}
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-[#E6ECF3] text-sm font-mono">${item.staffId}</span>
+              ${item.name ? `<span class="text-xs text-[#94A3B8]">(${item.name})</span>` : ''}
+            </div>
+            <div class="text-[11px] text-statusGreen font-semibold mt-0.5">● 稼働確認済</div>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="text-lg font-mono font-black text-white">${(Number(item.count) || 0).toLocaleString()}</span>
+          <span class="text-xs text-[#94A3B8] ml-0.5">枚 完了</span>
+        </div>
       </div>
     `;
-
-    setTimeout(() => {
-      const mapBox = document.getElementById('fullscreen-map');
-      if (!mapBox) return;
-
-      const fsMap = L.map('fullscreen-map', {
-        zoomControl: true,
-        attributionControl: false
-      }).setView(CITY_GEO[DashboardState.selectedCity]?.center || CITY_GEO['ALL'].center, CITY_GEO[DashboardState.selectedCity]?.zoom || 11);
-
-      // OpenStreetMap Japan 日本語優先高コントラストタイル
-      L.tileLayer('https://tile.openstreetmap.jp/{z}/{x}/{y}.png', {
-        maxZoom: 18
-      }).addTo(fsMap);
-      
-      DashboardState.fullscreenMarkersLayer = L.layerGroup().addTo(fsMap);
-      DashboardState.fullscreenMap = fsMap;
-
-      // 全画面MAPのズーム変更時ピンサイズ動的スケーリング (ズーム中および完了時)
-      fsMap.on('zoom zoomend', () => {
-        updatePinsRadiusOnZoom(DashboardState.fullscreenMap, DashboardState.fullscreenMarkersLayer);
-      });
-
-      // 現場アプリと同一のピンを描画
-      renderPinsOnMap(fsMap, DashboardState.fullscreenMarkersLayer, DashboardState.masterPins858);
-      fsMap.invalidateSize();
-    }, 100);
-
-  } else if (type === 'stocks') {
-    if (focusTitle) focusTitle.textContent = '保有チラシ 一覧';
-    if (focusIcon) focusIcon.textContent = '📦';
-    
-    let html = '<div class="space-y-2.5">';
-    if (DashboardState.stocks.length === 0) {
-      html += `<div class="text-xs text-[#A8B3C7]/60 text-center py-6">保有チラシの登録データはありません</div>`;
-    } else {
-      DashboardState.stocks.forEach(s => {
-        html += `
-          <div class="flex items-center justify-between p-3.5 rounded-xl bg-[#222C3E] border border-[#2A3547]">
-            <div>
-              <div class="font-bold text-xs text-[#E6ECF3]">${s.location || '保管拠点'}</div>
-              <div class="text-[11px] text-[#A8B3C7] mt-0.5">担当: ${s.staffName || s.staffId || '未設定'} ｜ 更新: ${s.updatedAt || '--'}</div>
-            </div>
-            <div class="text-right">
-              <span class="text-xl font-black font-mono text-white">${(Number(s.count) || 0).toLocaleString()}</span>
-              <span class="text-[11px] text-[#A8B3C7] ml-0.5">枚</span>
-            </div>
-          </div>
-        `;
-      });
-    }
-    html += '</div>';
-    focusContent.innerHTML = html;
-
-  } else if (type === 'records') {
-    if (focusTitle) focusTitle.textContent = '配布実績 ランキング一覧';
-    if (focusIcon) focusIcon.textContent = '🏆';
-
-    let html = '<div class="space-y-2.5">';
-    if (DashboardState.ranking.length === 0) {
-      html += `<div class="text-xs text-[#A8B3C7]/60 text-center py-6">配布実績データはありません</div>`;
-    } else {
-      DashboardState.ranking.forEach((item, index) => {
-        const rank = item.rank || (index + 1);
-        let rankBadgeHtml = '';
-        if (rank === 1) {
-          rankBadgeHtml = `<span class="w-6 h-6 flex items-center justify-center text-base select-none">🥇</span>`;
-        } else if (rank === 2) {
-          rankBadgeHtml = `<span class="w-6 h-6 flex items-center justify-center text-base select-none">🥈</span>`;
-        } else if (rank === 3) {
-          rankBadgeHtml = `<span class="w-6 h-6 flex items-center justify-center text-base select-none">🥉</span>`;
-        } else {
-          rankBadgeHtml = `<span class="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black font-mono bg-white/5 text-white/50">${rank}</span>`;
-        }
-
-        html += `
-          <div class="flex items-center justify-between p-3.5 rounded-xl bg-[#222C3E] border border-[#2A3547]">
-            <div class="flex items-center gap-3">
-              ${rankBadgeHtml}
-              <div>
-                <span class="font-bold text-[#E6ECF3] text-xs font-mono">${item.staffId}</span>
-                ${item.name ? `<span class="text-[11px] text-[#A8B3C7] ml-1.5">${item.name}</span>` : ''}
-              </div>
-            </div>
-            <div class="text-right">
-              <span class="text-lg font-mono font-black text-white">${(Number(item.count) || 0).toLocaleString()}</span>
-              <span class="text-[11px] text-[#A8B3C7] ml-0.5">枚</span>
-            </div>
-          </div>
-        `;
-      });
-    }
-    html += '</div>';
-    focusContent.innerHTML = html;
-
-  } else if (type === 'roster') {
-    if (focusTitle) focusTitle.textContent = '名簿 (登録配布員)';
-    if (focusIcon) focusIcon.textContent = '📋';
-
-    let html = '<div class="space-y-2.5">';
-    if (DashboardState.roster.length === 0) {
-      html += `<div class="text-xs text-[#A8B3C7]/60 text-center py-6">登録配布員データはありません</div>`;
-    } else {
-      DashboardState.roster.forEach(r => {
-        html += `
-          <div class="p-3.5 rounded-xl bg-[#222C3E] border border-[#2A3547] flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <span class="font-mono font-bold text-xs text-brand">${r.id || ''}</span>
-              <span class="font-bold text-xs text-[#E6ECF3]">${r.name || ''}</span>
-            </div>
-          </div>
-        `;
-      });
-    }
-    html += '</div>';
-    focusContent.innerHTML = html;
-
-  } else if (type === 'requests') {
-    if (focusTitle) focusTitle.textContent = '受渡要請';
-    if (focusIcon) focusIcon.textContent = '🤝';
-
-    let html = '<div class="space-y-2.5">';
-    if (DashboardState.requests.length === 0) {
-      html += `<div class="text-xs text-[#A8B3C7]/60 text-center py-6">現在、受渡要請はありません</div>`;
-    } else {
-      DashboardState.requests.forEach(req => {
-        html += `
-          <div class="p-3.5 rounded-xl bg-[#222C3E] border border-[#2A3547]">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="font-bold text-xs text-[#E6ECF3]">${req.requesterName || req.requesterId}</span>
-                <span class="text-[10px] text-[#A8B3C7]">➔</span>
-                <span class="font-bold text-xs text-[#E6ECF3]">${req.holderName || req.holderId}</span>
-              </div>
-              <span class="font-mono text-[10px] text-[#A8B3C7]">${req.requestTime || ''}</span>
-            </div>
-            <div class="text-[11px] text-[#A8B3C7] mt-1">
-              連絡先: ${req.contactMethod ? `[${req.contactMethod}] ` : ''}${req.contactValue || ''}
-            </div>
-          </div>
-        `;
-      });
-    }
-    html += '</div>';
-    focusContent.innerHTML = html;
-  }
+  });
+  html += '</div>';
+  contentEl.innerHTML = html;
 }
 
 /**
- * フォーカスをリセットして全体ビューに戻る
+ * 中央メインステージ用: 保有チラシ一覧の描画
  */
-function resetFocus() {
-  const defaultGrid = document.getElementById('default-view-grid');
-  const focusContainer = document.getElementById('focus-view-container');
-  const focusHeader = document.getElementById('focus-header');
-  const streamBar = document.getElementById('activity-stream-bar');
+function renderMainStageStocks(stocks) {
+  const contentEl = document.getElementById('main-stage-stocks-content');
+  if (!contentEl) return;
 
-  if (defaultGrid && focusContainer) {
-    DashboardState.currentFocus = null;
-    defaultGrid.classList.remove('hidden');
-    if (streamBar) streamBar.classList.remove('hidden');
-    focusContainer.classList.add('hidden');
-    if (focusHeader) focusHeader.classList.add('hidden');
+  const stocksList = stocks || [];
+  if (stocksList.length === 0) {
+    contentEl.innerHTML = `<div class="text-xs text-[#94A3B8]/60 text-center py-12">保有チラシの登録データはありません</div>`;
+    return;
   }
 
-  // 全画面Leafletインスタンスの安全破棄
-  if (DashboardState.fullscreenMap && typeof DashboardState.fullscreenMap.remove === 'function') {
-    try {
-      DashboardState.fullscreenMap.remove();
-    } catch (e) {
-      console.warn('[Leaflet Cleanup Warning]', e);
-    }
-    DashboardState.fullscreenMap = null;
-    DashboardState.fullscreenMarkersLayer = null;
-  }
-
-  updateNavHighlight('areas');
-  if (DashboardState.map) {
-    DashboardState.map.invalidateSize();
-    renderPinsOnMap(DashboardState.map, DashboardState.markersLayer, DashboardState.masterPins858);
-  }
+  let html = '<div class="space-y-2">';
+  stocksList.forEach(s => {
+    html += `
+      <div class="flex items-center justify-between p-3 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
+        <div>
+          <div class="font-bold text-sm text-[#E6ECF3]">${s.location || '保管拠点'}</div>
+          <div class="text-xs text-[#94A3B8] mt-0.5">担当: ${s.staffName || s.staffId || '未設定'} ｜ 更新: ${s.updatedAt || '--'}</div>
+        </div>
+        <div class="text-right">
+          <span class="text-xl font-black font-mono text-white">${(Number(s.count) || 0).toLocaleString()}</span>
+          <span class="text-xs text-[#94A3B8] ml-0.5">枚</span>
+        </div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  contentEl.innerHTML = html;
 }
 
 /**
- * 左ナビゲーションからの視点切り替え
+ * 中央メインステージ用: 登録配布員名簿の描画
+ */
+function renderMainStageRoster(roster) {
+  const contentEl = document.getElementById('main-stage-roster-content');
+  if (!contentEl) return;
+
+  const rosterList = roster || [];
+  if (rosterList.length === 0) {
+    contentEl.innerHTML = `<div class="text-xs text-[#94A3B8]/60 text-center py-12">登録配布員データはありません</div>`;
+    return;
+  }
+
+  let html = '<div class="space-y-2">';
+  rosterList.forEach(r => {
+    html += `
+      <div class="p-3 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] flex items-center justify-between transition-colors">
+        <div class="flex items-center gap-3">
+          <span class="w-8 h-8 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-bold text-xs text-brand">${r.id || ''}</span>
+          <div>
+            <div class="font-bold text-sm text-[#E6ECF3]">${r.name || ''}</div>
+            <div class="text-[11px] text-[#94A3B8] mt-0.5">区分: 正式登録配布員</div>
+          </div>
+        </div>
+        <span class="text-xs text-statusGreen font-semibold px-2 py-1 rounded bg-statusGreen/10 border border-statusGreen/20">有効</span>
+      </div>
+    `;
+  });
+  html += '</div>';
+  contentEl.innerHTML = html;
+}
+
+/**
+ * 中央メインステージ用: チラシ受渡要請の描画
+ */
+function renderMainStageRequests(requests) {
+  const contentEl = document.getElementById('main-stage-requests-content');
+  if (!contentEl) return;
+
+  const reqList = requests || [];
+  if (reqList.length === 0) {
+    contentEl.innerHTML = `<div class="text-xs text-[#94A3B8]/60 text-center py-12">現在、受渡要請はありません</div>`;
+    return;
+  }
+
+  let html = '<div class="space-y-2">';
+  reqList.forEach(req => {
+    html += `
+      <div class="p-3 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-sm text-[#E6ECF3]">${req.requesterName || req.requesterId}</span>
+            <span class="text-xs text-[#94A3B8]">➔</span>
+            <span class="font-bold text-sm text-[#E6ECF3]">${req.holderName || req.holderId}</span>
+          </div>
+          <span class="font-mono text-xs text-[#94A3B8]">${req.requestTime || ''}</span>
+        </div>
+        <div class="text-xs text-[#94A3B8] mt-1.5 flex items-center justify-between">
+          <span>連絡先: ${req.contactMethod ? `[${req.contactMethod}] ` : ''}${req.contactValue || ''}</span>
+          <span class="text-brand font-semibold">要請中</span>
+        </div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  contentEl.innerHTML = html;
+}
+
+/**
+ * 左ナビゲーションからの排他的メインステージ切り替え
+ * - areas: 中央メインステージにMAPを表示 (初期状態)
+ * - records: 中央メインステージに配布実績ランキングを表示
+ * - stocks: 中央メインステージに保有チラシ一覧を表示
+ * - roster: 中央メインステージに名簿一覧を表示
+ * - requests: 中央メインステージに受渡要請一覧を表示
+ * ※ NAV、統括BAR、NOW/STOCKパネル、Activity Streamは常時固定
  */
 function switchView(type) {
-  focusCard(type);
+  const views = ['areas', 'records', 'stocks', 'roster', 'requests'];
+  const targetView = views.includes(type) ? type : 'areas';
+
+  views.forEach(v => {
+    const el = document.getElementById(`main-view-${v}`);
+    if (el) {
+      if (v === targetView) {
+        el.classList.remove('hidden');
+      } else {
+        el.classList.add('hidden');
+      }
+    }
+  });
+
+  DashboardState.currentFocus = targetView;
+  updateNavHighlight(targetView);
+
+  if (targetView === 'areas') {
+    if (DashboardState.map) {
+      setTimeout(() => {
+        DashboardState.map.invalidateSize();
+        renderPinsOnMap(DashboardState.map, DashboardState.markersLayer, DashboardState.masterPins858);
+      }, 50);
+    }
+  } else if (targetView === 'records') {
+    renderMainStageRecords(DashboardState.ranking);
+  } else if (targetView === 'stocks') {
+    renderMainStageStocks(DashboardState.stocks);
+  } else if (targetView === 'roster') {
+    renderMainStageRoster(DashboardState.roster);
+  } else if (targetView === 'requests') {
+    renderMainStageRequests(DashboardState.requests);
+  }
 }
 
 function updateNavHighlight(activeType) {
@@ -889,9 +886,9 @@ function updateNavHighlight(activeType) {
     const el = document.getElementById(`nav-${t}`);
     if (el) {
       if (t === activeType) {
-        el.className = 'nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-brand/15 text-brand border border-brand/30 font-bold transition-all text-left';
+        el.className = 'nav-item nav-item-active w-full flex items-center gap-2.5 px-3 py-2 rounded-xl border border-brand/40 font-bold text-left';
       } else {
-        el.className = 'nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-textSub hover:text-white hover:bg-white/5 transition-all text-left font-bold';
+        el.className = 'nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-bold';
       }
     }
   });

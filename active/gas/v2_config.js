@@ -20,8 +20,6 @@ const DEFAULT_STORE = {
 
     // ファイル名設定
     DISTRICT_CSV: "三重県選挙区区割り",
-    POSTAL_CSV: "MIE_POSTAL.CSV",
-    TURNOUT_CSV: "voter_turnout.csv",
     TARGET_GOAL: 300000,
 
     // シート名設定
@@ -49,13 +47,10 @@ const DEFAULT_STORE = {
 
     // 参照データソース基盤 (REFERENCE_FILES)
     REFERENCE_FILES: {
-      POSTAL_CSV_FILE_ID: "1sVIEgWgtK9dF0nkqbwe4k7zwPnn8O6DY",   // MIE_POSTAL.CSV (数値昇順保証)
-      POSTAL_ALT_FILE_ID: "1m6e6tH8vwBKs1HJuXAeEFCAU8wlKpSHl",     // KEN_ALL.CSV
       DISTRICT_CSV_FILE_ID: "1LGeZIaxidgKihq5iirYp-KXygJlBQ5Wm", // 三重県選挙区区割り.csv
       MUNICIPALITY_CSV_FILE_ID: ""
     },
 
-    POSTAL_CSV_FILE_ID: "1sVIEgWgtK9dF0nkqbwe4k7zwPnn8O6DY",
     DISTRICT_CSV_FILE_ID: "1LGeZIaxidgKihq5iirYp-KXygJlBQ5Wm",
     DEFAULT_TENANT_ID: "MIE-03",
     DEFAULT_BRANCH_ID: "MIE-03",

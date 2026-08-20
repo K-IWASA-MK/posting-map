@@ -51,40 +51,8 @@ function openPointDetailModal(rowId) {
   }
   let p = allPoints.find(point => point.rowId === rowId);
 
-  // MASTER_858 fallback generated temporary point
   if (!p) {
-    const masterRow = window.ADDRESS_MASTER_DATA?.find(item => item.rowId === rowId);
-    if (masterRow) {
-      const areaName = (masterRow.town_name && masterRow.town_name.includes(masterRow.city_name))
-        ? masterRow.town_name
-        : `${masterRow.city_name}_${masterRow.town_name}`;
-
-      window.currentCityDetailAreaName = areaName;
-
-      // 既存の全体進捗(areaSummary)から進捗状況を逆引き
-      let isDone = false;
-      let count = 0;
-      if (typeof areaSummary !== 'undefined' && Array.isArray(areaSummary)) {
-        const summary = areaSummary.find(s => s.name === areaName || s.name === masterRow.town_name);
-        if (summary) {
-          isDone = (summary.done > 0);
-          count = summary.count || 0;
-        }
-      }
-
-      p = {
-        rowId: rowId,
-        address: `${masterRow.city_name} ${masterRow.town_name}`,
-        isDone: isDone,
-        count: count,
-        staffName: '',
-        staffId: '',
-        gps: '',
-        photoUrl: '',
-        source: "MASTER_858_FALLBACK"
-      };
-      allPoints.push(p);
-    }
+    return;
   }
 
   if (!p) return;
@@ -460,18 +428,10 @@ function renderStorageList(stocks) {
     groups[loc].push(s);
   });
 
-  // ADDRESS_MASTER_858.CSV (tier1Cache / ADDRESS_MASTER_DATA) の出現順を SSOT として取得
+  // tier1Cache の出現順を SSOT として取得
   let masterCities = [];
   if (typeof tier1Cache !== 'undefined' && Array.isArray(tier1Cache) && tier1Cache.length > 0) {
     masterCities = tier1Cache.map(c => typeof c === 'string' ? c : (c.name || ''));
-  } else if (typeof window !== 'undefined' && window.ADDRESS_MASTER_DATA && Array.isArray(window.ADDRESS_MASTER_DATA)) {
-    const seen = new Set();
-    window.ADDRESS_MASTER_DATA.forEach(row => {
-      if (row.city_name && !seen.has(row.city_name)) {
-        seen.add(row.city_name);
-        masterCities.push(row.city_name);
-      }
-    });
   }
 
   const sortedLocations = Object.keys(groups).sort((a, b) => {
@@ -857,8 +817,8 @@ window.initMainMap = function() {
   };
 
   // 初回のみ 858件の Marker 生成を実行（2回目以降は既存Markerを保持・再利用）
-  if (window.masterMarkers.length === 0 && window.ADDRESS_MASTER_DATA && Array.isArray(window.ADDRESS_MASTER_DATA)) {
-    window.ADDRESS_MASTER_DATA.forEach(row => {
+  if (window.masterMarkers.length === 0 && Array.isArray(window.masterPins858)) {
+    window.masterPins858.forEach(row => {
       if (typeof row.latitude === 'number' && typeof row.longitude === 'number') {
         const marker = new google.maps.Marker({
           map: map,

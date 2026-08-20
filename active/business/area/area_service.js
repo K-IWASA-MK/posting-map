@@ -21,12 +21,9 @@ if (typeof AreaService === 'undefined') {
 
     getCityName(areaName) {
       if (!areaName) return 'その他';
-      if (areaName.indexOf('四日市') === 0) return '四日市市';
-      if (areaName.indexOf('鈴鹿') === 0) return '鈴鹿市';
-      if (areaName.indexOf('亀山') === 0) return '亀山市';
       const match = areaName.match(/^[^市町\(\d]+(?:市|町)/);
       if (match) return match[0];
-      return areaName + '市';
+      return areaName;
     }
 
 

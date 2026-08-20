@@ -112,6 +112,17 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
+
+    /* Left Nav Smooth Item & Micro Glow */
+    .nav-item {
+      transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .nav-item-active {
+      background-color: rgba(234, 95, 8, 0.15) !important;
+      color: #EA5F08 !important;
+      border-color: rgba(234, 95, 8, 0.45) !important;
+      box-shadow: 0 0 16px rgba(234, 95, 8, 0.28), inset 0 0 6px rgba(234, 95, 8, 0.12) !important;
+    }
   </style>
 </head>
 <body class="bg-appBg text-textMain h-screen h-[100dvh] w-screen overflow-hidden flex antialiased">
@@ -119,50 +130,48 @@
   <!-- ==================== LEFT SIDEBAR (NAV & SYSTEM LINE) ==================== -->
   <aside class="w-48 bg-containerBg border-r border-borderNormal p-3 flex flex-col justify-between flex-shrink-0 z-20">
 
-    <!-- Top: Branding -->
+    <!-- Top: Branding (公式ロゴ: 大型正円) -->
     <div>
-      <div class="flex items-center gap-2 px-1 py-1 mb-4">
-        <div class="w-6 h-6 rounded-lg bg-brand/20 border border-brand/40 flex items-center justify-center flex-shrink-0">
-          <span class="w-2.5 h-2.5 rounded-sm bg-brand"></span>
-        </div>
-        <div>
-          <div class="font-black text-xs tracking-wider text-white leading-tight">POSTING MAP</div>
-          <div class="text-[9px] font-semibold tracking-widest text-textSub/70 uppercase">管理者コックピット</div>
+      <div class="flex flex-col items-center justify-center pt-2 pb-2">
+        <div class="w-28 h-28 rounded-full overflow-hidden shadow-2xl border-2 border-white/20 bg-white flex items-center justify-center">
+          <img src="/active/dashboard/assets/icon180-v2.png" alt="POSTING MAP" class="w-full h-full object-cover">
         </div>
       </div>
 
-      <!-- Navigation Menu -->
-      <nav class="space-y-1">
-        <button id="nav-areas" onclick="switchView('areas')" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-brand/15 text-brand border border-brand/30 font-bold transition-all text-left">
+      <!-- 自治体セレクター (SSOTから動的生成) -->
+      <div class="mt-3">
+        <select id="city-selector" onchange="onCitySelected(this.value)" class="w-full bg-[#0B1019]/80 text-textMain border border-borderNormal hover:border-brand/50 rounded-xl px-2.5 py-2 text-xs font-bold focus:outline-none focus:border-brand cursor-pointer transition-colors shadow-inner text-center">
+          <option value="ALL">全域 (三重第3区)</option>
+        </select>
+      </div>
+
+      <!-- Navigation Menu (枠線付きの1つのブロックに統合) -->
+      <nav class="space-y-1 mt-3.5 p-1.5 rounded-2xl bg-[#0B1019]/70 border border-borderNormal shadow-inner">
+        <button id="nav-areas" onclick="switchView('areas')" class="nav-item nav-item-active w-full flex items-center gap-2.5 px-3 py-2 rounded-xl border border-brand/40 font-bold text-left">
           <span class="text-sm">🗺️</span>
           <span class="text-xs">配布エリア</span>
         </button>
-        <button id="nav-records" onclick="switchView('records')" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-textSub hover:text-white hover:bg-white/5 transition-all text-left">
+        <button id="nav-records" onclick="switchView('records')" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-bold">
           <span class="text-sm">📝</span>
           <span class="text-xs font-bold">配布実績</span>
         </button>
-        <button id="nav-stocks" onclick="switchView('stocks')" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-textSub hover:text-white hover:bg-white/5 transition-all text-left">
+        <button id="nav-stocks" onclick="switchView('stocks')" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-bold">
           <span class="text-sm">📦</span>
           <span class="text-xs font-bold">保有チラシ</span>
         </button>
-        <button id="nav-roster" onclick="switchView('roster')" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-textSub hover:text-white hover:bg-white/5 transition-all text-left">
+        <button id="nav-roster" onclick="switchView('roster')" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-bold">
           <span class="text-sm">📋</span>
           <span class="text-xs font-bold">名簿</span>
         </button>
-        <button id="nav-requests" onclick="switchView('requests')" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-textSub hover:text-white hover:bg-white/5 transition-all text-left">
+        <button id="nav-requests" onclick="switchView('requests')" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-bold">
           <span class="text-sm">🤝</span>
           <span class="text-xs font-bold">受渡要請</span>
         </button>
       </nav>
     </div>
 
-    <!-- Bottom: 全体復帰 ＆ 常時監視ステータスライン -->
-    <div class="space-y-2 pt-2 border-t border-borderNormal">
-      <button onclick="resetFocus()" class="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-cardBg border border-borderNormal hover:border-borderHighlight text-[11px] text-textSub hover:text-white transition-all">
-        <span>⤺</span>
-        <span>全体を見る</span>
-      </button>
-
+    <!-- Bottom: 常時監視ステータスライン -->
+    <div class="pt-2 border-t border-borderNormal">
       <!-- Live Sync Status Line -->
       <div class="px-2 py-1.5 rounded-lg bg-[#0B1019]/60 border border-borderNormal/50 text-[10px]">
         <div class="flex items-center gap-1.5">
@@ -214,8 +223,8 @@
         </div>
       </div>
 
-      <!-- Mid-Right: リソース残量 (在庫 / 稼働) -->
-      <div class="flex items-center gap-4 flex-shrink-0 text-xs">
+      <!-- Right: リソース残量 (在庫 / 稼働) -->
+      <div class="flex items-center gap-4 flex-shrink-0 text-xs pr-1">
         <div class="flex items-center gap-1.5">
           <span class="text-xs opacity-70">📦</span>
           <span class="text-[10px] text-textSub">在庫</span>
@@ -230,83 +239,112 @@
         </div>
       </div>
 
-      <!-- Right: 自治体セレクター -->
-      <div class="flex items-center gap-1.5 flex-shrink-0">
-        <select id="city-selector" onchange="onCitySelected(this.value)" class="bg-cardBg text-textMain border border-borderNormal hover:border-brand/50 rounded-lg px-2.5 py-1 text-xs font-semibold focus:outline-none focus:border-brand cursor-pointer transition-colors">
-          <option value="ALL">全域 (三重第3区)</option>
-          <option value="四日市市">四日市市</option>
-          <option value="桑名市">桑名市</option>
-          <option value="いなべ市">いなべ市</option>
-          <option value="三重郡菰野町">菰野町</option>
-          <option value="三重郡朝日町">朝日町</option>
-          <option value="三重郡川越町">川越町</option>
-          <option value="員弁郡東員町">東員町</option>
-          <option value="桑名郡木曽岬町">木曽岬町</option>
-        </select>
-      </div>
-
     </div>
 
-    <!-- ========== ② & ③ MAIN COCKPIT BODY (MAP主役 ＆ 判断パネル) ========== -->
+    <!-- ========== ② & ③ MAIN COCKPIT BODY (中央MAIN STAGE ＆ 右側判断パネル) ========== -->
     <div id="default-view-grid" class="flex-1 flex gap-2 min-h-0 overflow-hidden">
 
-      <!-- ===== ② LEFT: 配布エリア MAP 【画面の視覚的主役】 ===== -->
-      <div class="flex-1 flex flex-col pm-card p-2 relative overflow-hidden min-w-0">
+      <!-- ===== ② CENTER: MAIN STAGE 【ここだけが切り替わる排他的ビュー】 ===== -->
+      <div id="main-stage-container" class="flex-1 flex flex-col pm-card p-2 relative overflow-hidden min-w-0">
 
-        <!-- マップ上部バー -->
-        <div class="flex items-center justify-between px-2 py-1 flex-shrink-0 z-10">
-          <div class="flex items-center gap-2">
-            <span class="font-black text-xs text-white tracking-wide">配布エリア MAP</span>
-            <span id="map-district-label" class="text-[11px] font-mono text-brand font-bold">三重第3区 (858エリア)</span>
+        <!-- 1. 配布エリア MAP ビュー (areas) -->
+        <div id="main-view-areas" class="flex-1 flex flex-col min-h-0">
+          <!-- マップ上部バー -->
+          <div class="flex items-center justify-between px-2 py-1 flex-shrink-0 z-10">
+            <div class="flex items-center gap-2">
+              <span class="font-black text-xs text-white tracking-wide">配布エリア MAP</span>
+              <span id="map-district-label" class="text-[11px] font-mono text-brand font-bold">三重第3区 (858エリア)</span>
+            </div>
           </div>
-          <button onclick="focusCard('areas')" class="text-[11px] text-brand hover:text-brandLight font-bold transition-colors">
-            全画面 ➔
-          </button>
-        </div>
 
-        <!-- Leaflet Map Canvas (最大面積確保) -->
-        <div class="flex-1 w-full rounded-lg overflow-hidden relative border border-borderNormal mt-1">
-          <div id="map" class="w-full h-full"></div>
+          <!-- Leaflet Map Canvas (最大面積確保) -->
+          <div class="flex-1 w-full rounded-lg overflow-hidden relative border border-borderNormal mt-1">
+            <div id="map" class="w-full h-full"></div>
 
-          <!-- マップ上ピンタップ時の詳細オーバーレイ -->
-          <div id="map-area-detail" class="absolute bottom-2 left-2 right-2 p-2.5 rounded-xl bg-containerBg/95 border border-borderHighlight backdrop-blur-md z-[1000] hidden transition-all shadow-2xl">
-            <div class="flex items-center justify-between">
-              <div>
-                <div id="selected-area-name" class="font-bold text-xs text-white">--</div>
-                <div class="text-[10px] text-textSub mt-0.5">
-                  状態: <span id="selected-area-status" class="font-mono font-bold">--</span> ｜
-                  <span id="selected-area-meta" class="text-textSub/70">ID: --</span>
+            <!-- マップ上ピンタップ時の詳細オーバーレイ -->
+            <div id="map-area-detail" class="absolute bottom-2 left-2 right-2 p-2.5 rounded-xl bg-containerBg/95 border border-borderHighlight backdrop-blur-md z-[1000] hidden transition-all shadow-2xl">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div id="selected-area-name" class="font-bold text-xs text-white">--</div>
+                  <div class="text-[10px] text-textSub mt-0.5">
+                    状態: <span id="selected-area-status" class="font-mono font-bold">--</span> ｜
+                    <span id="selected-area-meta" class="text-textSub/70">ID: --</span>
+                  </div>
                 </div>
+                <button onclick="closeAreaDetail()" class="text-textSub hover:text-white px-2 py-1 text-xs">✕</button>
               </div>
-              <button onclick="closeAreaDetail()" class="text-textSub hover:text-white px-2 py-1 text-xs">✕</button>
+            </div>
+          </div>
+
+          <!-- 地図内フッター: 状態凡例バー -->
+          <div class="flex items-center justify-between px-2 pt-1.5 flex-shrink-0 text-[10px] text-textSub font-medium">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-statusGreen"></span>
+                <span>未配布エリア</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-brandBlue"></span>
+                <span>配布中エリア</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-brand"></span>
+                <span>完了エリア</span>
+              </div>
+            </div>
+            <div class="text-[9px] text-textSub/60 font-mono">
+              858マスターピン連動
             </div>
           </div>
         </div>
 
-        <!-- 地図内フッター: 状態凡例バー -->
-        <div class="flex items-center justify-between px-2 pt-1.5 flex-shrink-0 text-[10px] text-textSub font-medium">
-          <div class="flex items-center gap-3">
-            <div class="flex items-center gap-1">
-              <span class="w-2 h-2 rounded-full bg-statusGreen"></span>
-              <span>未配布エリア</span>
-            </div>
-            <div class="flex items-center gap-1">
-              <span class="w-2 h-2 rounded-full bg-brandBlue"></span>
-              <span>配布中エリア</span>
-            </div>
-            <div class="flex items-center gap-1">
-              <span class="w-2 h-2 rounded-full bg-brand"></span>
-              <span>完了エリア</span>
-            </div>
+        <!-- 2. 配布実績 ビュー (records) -->
+        <div id="main-view-records" class="flex-1 flex flex-col min-h-0 p-2.5 hidden">
+          <div class="flex items-center gap-2 pb-2.5 border-b border-borderNormal flex-shrink-0">
+            <span class="text-base">🏆</span>
+            <span class="font-black text-xs text-white tracking-wide">配布実績 ランキング一覧</span>
           </div>
-          <div class="text-[9px] text-textSub/60 font-mono">
-            858マスターピン連動
+          <div id="main-stage-records-content" class="flex-1 overflow-y-auto pt-2.5 space-y-2 pr-1">
+            <!-- 動的レンダリング -->
+          </div>
+        </div>
+
+        <!-- 3. 保有チラシ ビュー (stocks) -->
+        <div id="main-view-stocks" class="flex-1 flex flex-col min-h-0 p-2.5 hidden">
+          <div class="flex items-center gap-2 pb-2.5 border-b border-borderNormal flex-shrink-0">
+            <span class="text-base">📦</span>
+            <span class="font-black text-xs text-white tracking-wide">保有チラシ 拠点別一覧</span>
+          </div>
+          <div id="main-stage-stocks-content" class="flex-1 overflow-y-auto pt-2.5 space-y-2 pr-1">
+            <!-- 動的レンダリング -->
+          </div>
+        </div>
+
+        <!-- 4. 名簿 ビュー (roster) -->
+        <div id="main-view-roster" class="flex-1 flex flex-col min-h-0 p-2.5 hidden">
+          <div class="flex items-center gap-2 pb-2.5 border-b border-borderNormal flex-shrink-0">
+            <span class="text-base">📋</span>
+            <span class="font-black text-xs text-white tracking-wide">登録配布員 名簿一覧</span>
+          </div>
+          <div id="main-stage-roster-content" class="flex-1 overflow-y-auto pt-2.5 space-y-2 pr-1">
+            <!-- 動的レンダリング -->
+          </div>
+        </div>
+
+        <!-- 5. 受渡要請 ビュー (requests) -->
+        <div id="main-view-requests" class="flex-1 flex flex-col min-h-0 p-2.5 hidden">
+          <div class="flex items-center gap-2 pb-2.5 border-b border-borderNormal flex-shrink-0">
+            <span class="text-base">🤝</span>
+            <span class="font-black text-xs text-white tracking-wide">チラシ受渡要請 一覧</span>
+          </div>
+          <div id="main-stage-requests-content" class="flex-1 overflow-y-auto pt-2.5 space-y-2 pr-1">
+            <!-- 動的レンダリング -->
           </div>
         </div>
 
       </div>
 
-      <!-- ===== ③ RIGHT: 現場判断パネル (NOW ＆ STOCK) ===== -->
+      <!-- ===== ③ RIGHT: 現場判断パネル (NOW ＆ STOCK) 【常時固定】 ===== -->
       <div class="w-72 sm:w-80 flex-shrink-0 flex flex-col gap-2 min-h-0 overflow-hidden">
 
         <!-- 上段: NOW (現在の現場) -->
@@ -316,9 +354,6 @@
               <span class="text-xs text-brand font-black">NOW</span>
               <span class="font-bold text-xs text-white">現在の現場</span>
             </div>
-            <button onclick="focusCard('records')" class="text-[10px] text-brand hover:text-brandLight font-bold transition-colors">
-              詳細 ➔
-            </button>
           </div>
 
           <!-- 最新完了事実ハイライト -->
@@ -352,9 +387,6 @@
               <span class="text-xs text-brandBlue font-black">STOCK</span>
               <span class="font-bold text-xs text-white">チラシ残量</span>
             </div>
-            <button onclick="focusCard('stocks')" class="text-[10px] text-brand hover:text-brandLight font-bold transition-colors">
-              一覧 ➔
-            </button>
           </div>
 
           <!-- 拠点別在庫リスト -->
@@ -373,7 +405,7 @@
 
     </div>
 
-    <!-- ========== ④ ACTIVITY STREAM (現場時間軸ストリーム) ========== -->
+    <!-- ========== ④ ACTIVITY STREAM (現場時間軸ストリーム) 【常時固定】 ========== -->
     <div id="activity-stream-bar" class="h-9 pm-card px-3 flex items-center justify-between flex-shrink-0 overflow-hidden">
       <div class="flex items-center gap-1.5 flex-shrink-0">
         <span class="text-xs">⏱</span>
@@ -386,30 +418,14 @@
       <div id="distribution-records-list" class="flex-1 flex items-center gap-2 overflow-x-auto hide-scrollbar px-1 min-w-0">
         <div class="text-[10px] text-textSub/50">データ読み込み中...</div>
       </div>
-
-      <button onclick="focusCard('records')" class="text-[10px] text-brand hover:text-brandLight font-bold flex-shrink-0 ml-2 whitespace-nowrap">
-        詳細 ➔
-      </button>
     </div>
 
-    <!-- ========== ⑤ FOCUS VIEW CONTAINER (詳細展開ビュー) ========== -->
-    <div id="focus-view-container" class="flex-1 pm-card p-4 flex flex-col min-h-0 overflow-hidden hidden">
-      <div id="focus-header" class="flex items-center justify-between pb-3 border-b border-borderNormal flex-shrink-0">
-        <div class="flex items-center gap-2">
-          <span id="focus-icon" class="text-lg">🗺️</span>
-          <h2 id="focus-title" class="font-bold text-sm text-white">詳細ビュー</h2>
-        </div>
-        <button onclick="resetFocus()" class="px-3 py-1 rounded-lg bg-cardSubBg border border-borderNormal hover:border-borderHighlight text-xs font-medium text-textSub hover:text-white transition-all">
-          ⤺ 全体画面に戻る
-        </button>
-      </div>
-      <div id="focus-content" class="flex-1 overflow-y-auto pt-3 flex flex-col min-h-0">
-        <!-- Dynamically populated by focusCard(type) -->
-      </div>
-    </div>
-
-  </main>
-
-  <script src="manager.js"></script>
+  <script>
+    (function() {
+      var s = document.createElement('script');
+      s.src = 'manager.js?_t=' + Date.now();
+      document.body.appendChild(s);
+    })();
+  </script>
 </body>
 </html>
