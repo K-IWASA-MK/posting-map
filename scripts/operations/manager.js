@@ -49,6 +49,56 @@ const CITY_GEO = {
   '三重郡川越町': { center: [35.0194, 136.6722], zoom: 14 }
 };
 
+// エリア配布状態の確定SSOT定義（ピン・ポップアップ・下部詳細で同一定義を使用）
+const AREA_STATUS_CONFIG = {
+  COMPLETED: {
+    statusKey: 'COMPLETED',
+    statusText: '● 配布済',
+    color: '#EA5F08',
+    strokeColor: '#fb923c',
+    radius: 6,
+    weight: 1.5,
+    opacity: 0.9,
+    fillOpacity: 0.9
+  },
+  IN_PROGRESS: {
+    statusKey: 'IN_PROGRESS',
+    statusText: '🔵 配布中',
+    color: '#00B7FF',
+    strokeColor: '#0284c7',
+    radius: 5.5,
+    weight: 1,
+    opacity: 0.9,
+    fillOpacity: 0.8
+  },
+  UNALLOCATED: {
+    statusKey: 'UNALLOCATED',
+    statusText: '○ 未配布',
+    color: '#22C55E',
+    strokeColor: '#16a34a',
+    radius: 4.5,
+    weight: 1,
+    opacity: 0.9,
+    fillOpacity: 0.8
+  },
+  UNKNOWN: {
+    statusKey: 'UNKNOWN',
+    statusText: '？ 状態不明',
+    color: '#A8B3C7',
+    strokeColor: '#64748b',
+    radius: 4.5,
+    weight: 1,
+    opacity: 0.7,
+    fillOpacity: 0.5
+  }
+};
+
+function getAreaStatusConfig(isCompleted, isInProgress) {
+  if (isCompleted) return AREA_STATUS_CONFIG.COMPLETED;
+  if (isInProgress) return AREA_STATUS_CONFIG.IN_PROGRESS;
+  return AREA_STATUS_CONFIG.UNALLOCATED;
+}
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initDashboard);
 } else {
@@ -307,41 +357,23 @@ function renderPinsOnMap(mapInstance, layerGroup, pins) {
     const isCompleted = completedList.includes(pin.rowId);
     const isInProgress = inProgressList.includes(pin.rowId);
 
-    // 地図ピンの確定3色ルール
-    // 🟢 未配布 → #22C55E (枠: #16a34a)
-    // 🔵 配布中 → #00B7FF (枠: #0284c7)
-    // 🟠 完了   → #EA5F08 (枠: #fb923c)
-    let pinColor = '#22C55E';
-    let strokeColor = '#16a34a';
-    let pinRadius = 4.5;
-    let statusText = '○ 未配布';
-
-    if (isCompleted) {
-      pinColor = '#EA5F08';
-      strokeColor = '#fb923c';
-      pinRadius = 6;
-      statusText = '● 配布済';
-    } else if (isInProgress) {
-      pinColor = '#00B7FF';
-      strokeColor = '#0284c7';
-      pinRadius = 5.5;
-      statusText = '🔵 配布中';
-    }
+    // 確定状態SSOT設定の取得
+    const statusCfg = getAreaStatusConfig(isCompleted, isInProgress);
 
     const marker = L.circleMarker([pin.lat, pin.lng], {
-      radius: pinRadius,
-      fillColor: pinColor,
-      color: strokeColor,
-      weight: isCompleted ? 1.5 : 1,
-      opacity: 0.9,
-      fillOpacity: isCompleted ? 0.9 : 0.8
+      radius: statusCfg.radius,
+      fillColor: statusCfg.color,
+      color: statusCfg.strokeColor,
+      weight: statusCfg.weight,
+      opacity: statusCfg.opacity,
+      fillOpacity: statusCfg.fillOpacity
     });
 
-    // タッチ/クリック時の詳細オーバーレイ表示 (SSOT準拠: エリア名・状態・マスター情報)
+    // タッチ/クリック時の詳細オーバーレイ表示 (SSOT準拠: エリア名・状態SSOT・マスター情報)
     marker.on('click', () => {
       showAreaDetail({
         name: pin.fullName,
-        status: isCompleted ? '● 配布済' : (isInProgress ? '🔵 配布中' : '○ 未配布'),
+        statusCfg: statusCfg,
         meta: `ID: ${pin.rowId} ｜ 座標: ${pin.lat.toFixed(4)}, ${pin.lng.toFixed(4)}`
       });
     });
@@ -349,7 +381,7 @@ function renderPinsOnMap(mapInstance, layerGroup, pins) {
     marker.bindPopup(`
       <div class="text-xs">
         <div class="font-bold text-white text-xs mb-0.5">${pin.fullName}</div>
-        <div class="text-white/80 text-[11px]">状態: <span class="font-mono font-bold" style="color: ${pinColor}">${statusText}</span></div>
+        <div class="text-white/80 text-[11px]">状態: <span class="font-mono font-bold" style="color: ${statusCfg.color}">${statusCfg.statusText}</span></div>
         <div class="text-white/40 text-[10px] mt-0.5">ID: ${pin.rowId} ｜ 座標: ${pin.lat.toFixed(4)}, ${pin.lng.toFixed(4)}</div>
       </div>
     `);
@@ -538,8 +570,13 @@ function showAreaDetail(data) {
   const statusEl = document.getElementById('selected-area-status');
   const metaEl = document.getElementById('selected-area-meta');
 
+  const cfg = data.statusCfg || AREA_STATUS_CONFIG.UNKNOWN;
+
   if (nameEl) nameEl.textContent = data.name;
-  if (statusEl) statusEl.textContent = data.status;
+  if (statusEl) {
+    statusEl.textContent = cfg.statusText;
+    statusEl.style.color = cfg.color;
+  }
   if (metaEl) metaEl.textContent = data.meta;
 
   if (detailEl) detailEl.classList.remove('hidden');
