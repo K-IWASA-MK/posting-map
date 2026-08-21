@@ -1,5 +1,44 @@
 # POSTING MAP - AGENTS.md (AI Contract)
 
+## 🏛️ Highest-Level Product Architecture Principle: District-Agnostic Template Architecture
+
+POSTING MAP is NOT a district-specific application.
+
+POSTING MAP MUST be implemented and maintained as a district-agnostic application template that can be independently deployed to any district by:
+1. **Copying the entire application folder.**
+2. **Replacing the district Static Master CSV.**
+3. **Configuring the destination Runtime Backend / GAS connection.**
+
+The copied application MUST operate as an independent district instance without modifying application logic.
+
+### Absolute Rules (最高位絶対禁止事項)
+- **No District Dependency**: Application code MUST NOT depend on a specific district.
+- **No Hard-coded Names**: Application code MUST NOT hard-code district names or municipality names.
+- **No Hard-coded Counts**: Application code MUST NOT hard-code address counts or population numbers.
+- **No District Address Masters in Code**: Application code MUST NOT hard-code district-specific address masters.
+- **No District Backend Sheets**: Application code MUST NOT require a district-specific Backend Sheet.
+- **No Reference Instance Leak**: `MIE-03`, `MIE03_ADDRESS_MASTER`, `858`, or any other district-specific value MUST NOT become an application-level dependency. MIE-03 is strictly a Reference Instance and MUST NOT be conflated with the product template itself.
+- **Static Master CSV is SSOT**: District-specific information MUST come from external configuration and/or the Static Master CSV (`data/*.csv`). The Static Master CSV is the SSOT for district geography, municipalities, towns, coordinates, and map pin population.
+- **Standardized Backend Contract**: Runtime Backend MUST expose only the standardized POSTING MAP operational contract (the 5 standard sheets: `名簿`, `配布実績`, `保有チラシ枚数`, `受渡要請履歴`, `PinStatus`).
+- **Dynamic Consumption**: Dashboard and application logic MUST consume district data dynamically.
+- **No District If/Else**: Adding `if/else` branching for other districts is strictly forbidden.
+
+### Replication Requirement (レプリケーション要件)
+The canonical deployment model is:
+```
+POSTING MAP Template → Copy entire folder → Replace district CSV → Configure Runtime Backend connection → Launch independent district instance
+```
+A district replication test MUST require:
+- Application code changes: **0**
+- District-specific source-code modifications: **0**
+- Existing district instance: **unaffected**
+
+### Development Gate (開発ゲート)
+Any implementation that introduces a dependency on a specific district, municipality, address master, fixed population, or district-specific Backend structure MUST be rejected before implementation.
+This principle has higher priority than individual Phase-level implementation convenience.
+
+---
+
 ## 🛑 No Implementation Without Explicit Plan Approval
 AIエージェントは、いかなるコードの修正、コミット、プッシュ、またはその他の実行環境への変更を行う際も、事前に以下のステップを100%遵守しなければならない。
 1. **設計・計画の明記**: 必ず `implementation_plan.md` を作成または更新する。

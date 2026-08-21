@@ -816,9 +816,25 @@ window.initMainMap = function() {
     return 1.05;
   };
 
-  // 初回のみ 858件の Marker 生成を実行（2回目以降は既存Markerを保持・再利用）
-  if (window.masterMarkers.length === 0 && Array.isArray(window.masterPins858)) {
-    window.masterPins858.forEach(row => {
+  // 初回のみ Marker 生成を実行（2回目以降は既存Markerを保持・再利用、二重生成防止）
+  const renderMasterMarkers = async () => {
+    if (window.masterMarkers.length > 0) return;
+
+    let pins = [];
+    if (window.AddressMasterService && typeof window.AddressMasterService.getInstance === 'function') {
+      try {
+        pins = await window.AddressMasterService.getInstance().getAll();
+      } catch (err) {
+        console.warn("[initMainMap] AddressMasterService.getAll failed:", err);
+      }
+    }
+
+    if (!Array.isArray(pins) || pins.length === 0) return;
+    if (window.masterMarkers.length > 0) return;
+
+    window.masterPins = pins;
+
+    pins.forEach(row => {
       if (typeof row.latitude === 'number' && typeof row.longitude === 'number') {
         const marker = new google.maps.Marker({
           map: map,
@@ -836,7 +852,7 @@ window.initMainMap = function() {
         marker.rowId = row.rowId;
 
         marker.addListener('click', () => {
-          const cleanTown = row.town_name.replace(/^大字/, '');
+          const cleanTown = (row.town_name || '').replace(/^大字/, '');
           const mapQuery = encodeURIComponent(`${row.city_name} ${cleanTown}`);
           const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
 
@@ -996,7 +1012,13 @@ window.initMainMap = function() {
         window.masterMarkers.push(marker);
       }
     });
-  }
+
+    if (typeof window.refreshMainMapPins === 'function') {
+      window.refreshMainMapPins();
+    }
+  };
+
+  renderMasterMarkers();
 
   let zoomFrameId = null;
   let currentAppliedScale = getPinScale(map.getZoom());

@@ -1,5 +1,17 @@
 # Architecture Rules
 
+## 🏛️ Highest-Level Architecture Principle: District-Agnostic Template Architecture
+
+本リポジトリの全コード・全機能は、**`AGENTS.md`** および **`docs/architecture/DISTRICT_AGNOSTIC_ARCHITECTURE_PRINCIPLE.md`** に規定された「District-Agnostic Template Architecture（地区非依存テンプレート構造）」に完全準拠しなければならない。
+
+### 実装時の絶対禁止事項
+- **特定地区への依存禁止**: アプリケーションコード内に `MIE-03` 等の特定地区、`四日市市` 等の自治体名、`858` 等の固定件数・座標をハードコードしてはならない。
+- **地区固有Backendの禁止**: Backend Spreadsheet に地区固有の住所マスターシート（旧 `MIE03_ADDRESS_MASTER` 等）を要求してはならない。Backend は実在する標準5シート（`名簿`, `配布実績`, `保有チラシ枚数`, `受渡要請履歴`, `PinStatus`）のみで稼働する。
+- **Static Master (data/*.csv) へのSSOT集約**: 地区の地理情報・自治体・町名・座標・ピン生成基盤はすべて Static Master CSV から動的にパース・自動認識されなければならない。
+- **フォルダーコピー＋CSV差替による独立稼働**: フォルダーを丸ごとコピーし、CSVを差し替えて接続先を設定するだけで、アプリケーションコードを1行も修正することなく新地区インスタンスとして稼働できなければならない。
+
+---
+
 ## 起動時非再帰ルール (No Recursive Startup Rule)
 アプリ起動処理（Startup Runtime: LIFF初期化から Dashboard Ready / ID表示完了まで）における循環参照や排他デッドロックを防止するため、以下の実装規則を厳守すること。
 
