@@ -1,8 +1,7 @@
 /**
  * POSTING MAP - Tier 1 Service (Generation 2)
  * エリア Tier 1 (市町村一覧) 専用サービス
- * 責務: スプレッドシート(SSOT)からの Tier 1 市町村サマリー取得
- * 基準変更: MIE03_ADDRESS_MASTER city_name 直接参照化
+ * 責務: 実在スプレッドシート(SSOT)からの Tier 1 市町村サマリー取得
  */
 (function(global) {
   class Tier1Service {
@@ -20,59 +19,42 @@
         const cityTotals = {};
         const cityDoneMap = {};
 
-        // 1. スプレッドシート SSOT から自治体別 total および done を動的算出
+        // 1. スプレッドシートから実在するエリアシートおよび配布実績の集計
         if (typeof getSS === 'function') {
           const ss = getSS();
           if (ss) {
-            const masterSheet = ss.getSheetByName("MIE03_ADDRESS_MASTER");
-            const distSheet = ss.getSheetByName("配布実績");
+            const excludeSheets = [
+              "名簿", "原本", "保有チラシ枚数", "受渡要請履歴", "管理者ID",
+              "__SYSTEM_CACHE__", "📥 集計用マスターデータ", "郵便番号", "区割り",
+              "初めての方「使い方ガイド」", "📖 らくらくマニュアル", "らくらくマニュアル", "📄 活動報告書",
+              "__TEMP_ADDRESSES__", "TraceLog", "配布実績", "PinStatus"
+            ];
 
-            if (masterSheet) {
-              const masterData = masterSheet.getDataRange().getValues();
-              if (masterData.length > 1) {
-                const header = masterData[0].map(h => String(h || "").toLowerCase().trim());
-                let rowIdIdx = header.findIndex(h => h === 'rowid' || h === 'id');
-                if (rowIdIdx === -1) rowIdIdx = 0;
+            const sheets = ss.getSheets();
+            sheets.forEach(sheet => {
+              const sName = sheet.getName();
+              if (excludeSheets.includes(sName) || sheet.isSheetHidden()) return;
+              if (sName.includes("MASTER") || sName.includes("DATABASE") || sName.includes("EXPORT")) return;
 
-                let cityIdx = header.findIndex(h => h === 'city_name' || h === 'city' || h === 'municipality');
-                if (cityIdx === -1) cityIdx = 1; // CSV/Sheet SSOT 標準: 列1 (city_name)
+              const lastRow = sheet.getLastRow();
+              if (lastRow < 2) return;
 
-                const rowCityMap = {};
-                for (let i = 1; i < masterData.length; i++) {
-                  const row = masterData[i];
-                  const rId = parseInt(row[rowIdIdx], 10);
-                  const cityName = String(row[cityIdx] || "").trim();
+              const baseCity = sName.replace(/\(\d+\)$/, '').trim();
+              const count = lastRow - 1;
+              cityTotals[baseCity] = (cityTotals[baseCity] || 0) + count;
 
-                  if (cityName) {
-                    cityTotals[cityName] = (cityTotals[cityName] || 0) + 1;
-                    if (!isNaN(rId)) {
-                      rowCityMap[rId] = cityName;
-                    }
-                  }
+              // D2:D11 の範囲から isDone を集計
+              const targetRange = sheet.getRange(2, 4, Math.min(count, 10), 1);
+              const isDoneValues = targetRange.getValues();
+              let sheetDone = 0;
+              isDoneValues.forEach(row => {
+                const val = row[0];
+                if (val === true || val === 'true' || (typeof val === 'string' && val.toLowerCase() === 'true')) {
+                  sheetDone++;
                 }
-
-                // 配布実績シートからの完了集計
-                if (distSheet) {
-                  const distLr = distSheet.getLastRow();
-                  if (distLr > 0) {
-                    const distValues = distSheet.getRange(1, 1, distLr, 4).getValues();
-                    const completedRowIds = new Set(
-                      distValues
-                        .filter(r => r[0] && r[3] !== "" && r[3] !== null)
-                        .map(r => parseInt(r[0], 10))
-                        .filter(id => !isNaN(id))
-                    );
-
-                    completedRowIds.forEach(rowId => {
-                      const cityName = rowCityMap[rowId];
-                      if (cityName) {
-                        cityDoneMap[cityName] = (cityDoneMap[cityName] || 0) + 1;
-                      }
-                    });
-                  }
-                }
-              }
-            }
+              });
+              cityDoneMap[baseCity] = (cityDoneMap[baseCity] || 0) + sheetDone;
+            });
           }
         }
 
@@ -81,7 +63,16 @@
         if (typeof getMunicipalityOrder === 'function') {
           orderedCities = getMunicipalityOrder();
         } else {
-          orderedCities = Object.keys(cityTotals);
+          orderedCities = [
+            "四日市市",
+            "桑名市",
+            "いなべ市",
+            "桑名郡木曽岬町",
+            "員弁郡東員町",
+            "三重郡菰野町",
+            "三重郡朝日町",
+            "三重郡川越町"
+          ];
         }
 
         // 順序リストに含まれない自治体がもしあれば末尾に追加

@@ -35,7 +35,6 @@ function getProtectedSheetSet() {
     "📥 集計用マスターデータ",
     "郵便番号",
     "区割り",
-    "MIE03_ADDRESS_MASTER",
     "初めての方「使い方ガイド」",
     "📖 らくらくマニュアル",
     "らくらくマニュアル",

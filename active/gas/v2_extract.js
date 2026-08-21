@@ -9,43 +9,9 @@
 // =============================
 
 function extractDistrictAddresses(targetDistrictName, targetPrefecture) {
-  const ss = getSS();
-  const results = [];
-
-  if (ss) {
-    const masterSheet = ss.getSheetByName("MIE03_ADDRESS_MASTER");
-    if (masterSheet) {
-      const data = masterSheet.getDataRange().getValues();
-      if (data.length > 1) {
-        const header = data[0].map(h => String(h || "").toLowerCase().trim());
-        const cityIdx = header.findIndex(h => h === "city_name" || h === "city" || h === "municipality");
-        const townIdx = header.findIndex(h => h === "town_name" || h === "town");
-        const fullAddrIdx = header.findIndex(h => h === "full_address" || h === "address");
-        const zipIdx = header.findIndex(h => h === "postal_code" || h === "postalcode" || h === "zip");
-
-        for (let i = 1; i < data.length; i++) {
-          const row = data[i];
-          const city = String(row[cityIdx !== -1 ? cityIdx : 1] || "").trim();
-          const town = String(row[townIdx !== -1 ? townIdx : 2] || "").trim();
-          const fullAddress = String(row[fullAddrIdx !== -1 ? fullAddrIdx : 2] || (city + " " + town)).trim();
-          const postal = zipIdx !== -1 ? String(row[zipIdx] || "").trim() : "";
-
-          if (city) {
-            results.push({
-              prefecture: targetPrefecture || "三重県",
-              district: matchDistrict(fullAddress, city),
-              city: city,
-              town: town,
-              address: fullAddress,
-              postalCode: postal
-            });
-          }
-        }
-      }
-    }
-  }
-
-  return results;
+  // Static Master (data/MIE03_ADDRESS_MASTER_858.csv) はクライアント側 SSOT として分離
+  // GAS Runtime 上の架空シート探索は完全撤去し、安全な空配列を返却
+  return [];
 }
 /**
  * 指定したキーワード（パターン）を含むファイルをドライブから検索する。

@@ -10,6 +10,13 @@ function startLocalServer() {
   return new Promise((resolve) => {
     const server = http.createServer((req, res) => {
       let relativePath = req.url.split('?')[0];
+      if (relativePath.startsWith('/app/')) {
+        relativePath = relativePath.replace('/app/', '/active/dashboard/');
+      } else if (relativePath === '/app') {
+        relativePath = '/active/dashboard/index.html';
+      } else if (relativePath.startsWith('/business/')) {
+        relativePath = relativePath.replace('/business/', '/active/business/');
+      }
       let filePath = path.join(rootDir, relativePath);
       
       if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
@@ -26,6 +33,7 @@ function startLocalServer() {
           if (filePath.endsWith('.css')) contentType = 'text/css';
           if (filePath.endsWith('.json')) contentType = 'application/json';
           if (filePath.endsWith('.png')) contentType = 'image/png';
+          if (filePath.endsWith('.csv')) contentType = 'text/plain; charset=utf-8';
           res.writeHead(200, { 'Content-Type': contentType });
           res.end(data);
         }
@@ -51,20 +59,34 @@ async function runTest(url, label) {
 
   const page = await browser.newPage();
 
+  await page.setRequestInterception(true);
+  page.on('request', req => {
+    if (req.url().includes('sdk.js')) {
+      req.respond({
+        status: 200,
+        contentType: 'application/javascript',
+        body: `
+          window.liff = {
+            init: () => Promise.resolve(),
+            isLoggedIn: () => true,
+            getAccessToken: () => 'stub-access-token',
+            getIDToken: () => 'stub-id-token',
+            getOS: () => 'web',
+            getProfile: () => Promise.resolve({
+              userId: 'U_IWASA_CEO_OFFICIAL',
+              displayName: 'テスト配布員',
+              pictureUrl: ''
+            })
+          };
+        `
+      });
+    } else {
+      req.continue();
+    }
+  });
+
   // Mock window.liff and set mock user_info in localStorage to bypass login
   await page.evaluateOnNewDocument(() => {
-    window.liff = {
-      init: () => Promise.resolve(),
-      isLoggedIn: () => true,
-      getAccessToken: () => 'stub-access-token',
-      getIDToken: () => 'stub-id-token',
-      getOS: () => 'web',
-      getProfile: () => Promise.resolve({
-        userId: 'U_IWASA_CEO_OFFICIAL',
-        displayName: 'テスト配布員',
-        pictureUrl: ''
-      })
-    };
     localStorage.setItem('user_info', JSON.stringify({
       id: 'STAFF123',
       last: 'テスト',
@@ -138,7 +160,7 @@ async function runTest(url, label) {
     // Open detail
     await page.evaluate(async () => {
       if (window.HAppWorkflow && window.HAppWorkflow.openDetail) {
-        await window.HAppWorkflow.openDetail('MIE03_ADDRESS_MASTER');
+        await window.HAppWorkflow.openDetail('四日市市');
       }
     });
     await new Promise(r => setTimeout(r, 2000));
@@ -164,7 +186,7 @@ async function runTest(url, label) {
       // Trigger Distribution Start
       await page.evaluate(async () => {
         if (window.HAppWorkflow && window.HAppWorkflow.startDistribution) {
-          await window.HAppWorkflow.startDistribution('MIE03_ADDRESS_MASTER', 101);
+          await window.HAppWorkflow.startDistribution('四日市市', 101);
         }
       });
       stepResults.startDistribution = true;
@@ -175,7 +197,7 @@ async function runTest(url, label) {
       // Test Numpad
       await page.evaluate(() => {
         if (window.HAppWorkflow && window.HAppWorkflow.openNumpad) {
-          window.HAppWorkflow.openNumpad('MIE03_ADDRESS_MASTER', 101, 25);
+          window.HAppWorkflow.openNumpad('四日市市', 101, 25);
           window.HAppWorkflow.pressNum('OK');
         }
       });
@@ -185,7 +207,7 @@ async function runTest(url, label) {
       // Test Submit Execution
       await page.evaluate(async () => {
         if (window.HAppWorkflow && window.HAppWorkflow.executeCommitDistribution) {
-          await window.HAppWorkflow.executeCommitDistribution('MIE03_ADDRESS_MASTER', 101);
+          await window.HAppWorkflow.executeCommitDistribution('四日市市', 101);
         }
       });
       stepResults.submit = true;
