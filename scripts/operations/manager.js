@@ -270,7 +270,7 @@ function populateCitySelector(cities) {
   // 1. 全域プリセット (ALL: 表示範囲プリセット)
   const allOpt = document.createElement('option');
   allOpt.value = 'ALL';
-  allOpt.textContent = '全域 (三重第3区)';
+  allOpt.textContent = '全域';
   select.appendChild(allOpt);
 
   // 2. SSOTから動的抽出された自治体リスト
@@ -436,22 +436,13 @@ function renderPinsOnMap(mapInstance, layerGroup, pins) {
       fillOpacity: statusCfg.fillOpacity
     });
 
-    // タッチ/クリック時の詳細オーバーレイ表示 (SSOT準拠: エリア名・状態SSOT・マスター情報)
+    // タッチ/クリック時の詳細オーバーレイ表示 (SSOT準拠: エリア名・状態SSOT)
     marker.on('click', () => {
       showAreaDetail({
         name: pin.fullName,
-        statusCfg: statusCfg,
-        meta: `ID: ${pin.rowId} ｜ 座標: ${pin.lat.toFixed(4)}, ${pin.lng.toFixed(4)}`
+        statusCfg: statusCfg
       });
     });
-
-    marker.bindPopup(`
-      <div class="text-xs">
-        <div class="font-bold text-white text-xs mb-0.5">${pin.fullName}</div>
-        <div class="text-white/80 text-[11px]">状態: <span class="font-mono font-bold" style="color: ${statusCfg.color}">${statusCfg.statusText}</span></div>
-        <div class="text-white/40 text-[10px] mt-0.5">ID: ${pin.rowId} ｜ 座標: ${pin.lat.toFixed(4)}, ${pin.lng.toFixed(4)}</div>
-      </div>
-    `);
 
     layerGroup.addLayer(marker);
   });
@@ -528,7 +519,9 @@ function renderCurrentView() {
   if (completedEl) completedEl.textContent = doneAreas.toLocaleString();
 
   if (districtLabelEl) {
-    districtLabelEl.textContent = isAll ? (DashboardState.summary?.districtName || '三重第3区 (858エリア)') : `${selected} (${totalAreas}エリア)`;
+    const districtCode = DashboardState.summary?.districtName;
+    const labelPrefix = districtCode ? districtCode : '全域';
+    districtLabelEl.textContent = isAll ? `${labelPrefix} (${totalAreas}エリア)` : `${selected} (${totalAreas}エリア)`;
   }
 
   // 2. 保有チラシの描画
@@ -542,6 +535,29 @@ function renderCurrentView() {
   if (DashboardState.currentFocus === 'stocks') renderMainStageStocks(DashboardState.stocks);
   if (DashboardState.currentFocus === 'roster') renderMainStageRoster(DashboardState.roster);
   if (DashboardState.currentFocus === 'requests') renderMainStageRequests(DashboardState.requests);
+}
+
+/**
+ * 自治体マスター順序（DashboardState.cities）に基づくソートインデックス取得
+ * 1. 完全一致 ➔ 2. 前方一致/包含 ➔ 3. 未知拠点 (最後尾)
+ */
+function getCityMasterIndex(location, masterCities) {
+  if (!location || !masterCities || masterCities.length === 0) return 99999;
+  
+  // 1. 完全一致
+  const exactIdx = masterCities.indexOf(location);
+  if (exactIdx !== -1) return exactIdx;
+
+  // 2. 前方一致 / 包含一致
+  for (let i = 0; i < masterCities.length; i++) {
+    const city = masterCities[i];
+    if (location.startsWith(city) || location.includes(city)) {
+      return i;
+    }
+  }
+
+  // 3. 未知拠点・Master外
+  return 99999;
 }
 
 /**
@@ -577,13 +593,21 @@ function renderStockFacts(stocks, selectedCity) {
     return;
   }
 
+  // DashboardState.cities (SSOT順) に基づいてソート
+  const masterCities = DashboardState.cities || [];
+  locations.sort((a, b) => {
+    const idxA = getCityMasterIndex(a, masterCities);
+    const idxB = getCityMasterIndex(b, masterCities);
+    return idxA - idxB;
+  });
+
   let html = '';
   locations.forEach(loc => {
     const count = locationMap[loc];
     html += `
       <div class="flex items-center justify-between p-1.5 px-2 rounded-lg bg-[#182130] border border-[#243044] text-xs">
-        <span class="font-medium text-[#E6ECF3] truncate text-[11px]">${loc}</span>
-        <span class="font-mono font-bold text-white text-xs">${count.toLocaleString()} <span class="text-[9px] text-[#94A3B8] font-normal">枚</span></span>
+        <span class="font-medium text-[#E6ECF3] truncate text-xs">${loc}</span>
+        <span class="font-mono font-bold text-white text-sm">${count.toLocaleString()} <span class="text-[10px] text-[#94A3B8] font-normal">枚</span></span>
       </div>
     `;
   });
@@ -631,7 +655,7 @@ function renderRankingFacts(ranking) {
   const recordsListEl = document.getElementById('distribution-records-list');
   if (recordsListEl) {
     if (rankingList.length === 0) {
-      recordsListEl.innerHTML = `<div class="text-[10px] text-[#94A3B8]/60 py-0.5">配布実績データはありません</div>`;
+      recordsListEl.innerHTML = `<div class="text-[11px] text-[#94A3B8]/60 py-0.5">配布実績データはありません</div>`;
       return;
     }
 
@@ -645,14 +669,14 @@ function renderRankingFacts(ranking) {
       else if (rank === 3) rankIcon = '🥉';
 
       recordsHtml += `
-        <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[#182130] border border-[#243044] text-[10px] flex-shrink-0 whitespace-nowrap">
+        <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[#182130] border border-[#243044] text-[11px] flex-shrink-0 whitespace-nowrap">
           <span class="${rankColor} font-bold">${rankIcon}</span>
           <span class="font-mono font-bold text-white">${item.staffId}</span>
           ${item.name ? `<span class="text-[#94A3B8] font-medium">(${item.name})</span>` : ''}
           <span class="font-mono font-bold text-brandLight">${(Number(item.count) || 0).toLocaleString()}枚</span>
-          <span class="text-[9px] text-statusGreen font-semibold">✓ 完了</span>
+          <span class="text-[10px] text-statusGreen font-semibold">✓ 完了</span>
         </div>
-        ${idx < rankingList.slice(0, 8).length - 1 ? '<span class="text-[#243044] text-[10px] flex-shrink-0">➔</span>' : ''}
+        ${idx < rankingList.slice(0, 8).length - 1 ? '<span class="text-[#243044] text-[11px] flex-shrink-0">➔</span>' : ''}
       `;
     });
     recordsListEl.innerHTML = recordsHtml;
@@ -675,7 +699,13 @@ function showAreaDetail(data) {
     statusEl.textContent = cfg.statusText;
     statusEl.style.color = cfg.color;
   }
-  if (metaEl) metaEl.textContent = data.meta;
+  if (metaEl) {
+    if (data.meta) {
+      metaEl.textContent = data.meta;
+    } else {
+      metaEl.textContent = '';
+    }
+  }
 
   if (detailEl) detailEl.classList.remove('hidden');
 }
@@ -709,7 +739,7 @@ function renderMainStageRecords(ranking) {
     } else if (rank === 3) {
       rankBadgeHtml = `<span class="w-7 h-7 flex items-center justify-center text-lg select-none">🥉</span>`;
     } else {
-      rankBadgeHtml = `<span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black font-mono bg-white/5 text-white/50">${rank}</span>`;
+      rankBadgeHtml = `<span class="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black font-mono bg-white/5 text-white/50">${rank}</span>`;
     }
 
     html += `
@@ -718,15 +748,15 @@ function renderMainStageRecords(ranking) {
           ${rankBadgeHtml}
           <div>
             <div class="flex items-center gap-2">
-              <span class="font-bold text-[#E6ECF3] text-sm font-mono">${item.staffId}</span>
-              ${item.name ? `<span class="text-xs text-[#94A3B8]">(${item.name})</span>` : ''}
+              <span class="font-bold text-[#E6ECF3] text-base font-mono">${item.staffId}</span>
+              ${item.name ? `<span class="text-sm text-[#94A3B8]">(${item.name})</span>` : ''}
             </div>
-            <div class="text-[11px] text-statusGreen font-semibold mt-0.5">● 稼働確認済</div>
+            <div class="text-xs text-statusGreen font-semibold mt-0.5">● 稼働確認済</div>
           </div>
         </div>
         <div class="text-right">
-          <span class="text-lg font-mono font-black text-white">${(Number(item.count) || 0).toLocaleString()}</span>
-          <span class="text-xs text-[#94A3B8] ml-0.5">枚 完了</span>
+          <span class="text-xl font-mono font-black text-white">${(Number(item.count) || 0).toLocaleString()}</span>
+          <span class="text-sm text-[#94A3B8] ml-0.5">枚 完了</span>
         </div>
       </div>
     `;
@@ -744,21 +774,29 @@ function renderMainStageStocks(stocks) {
 
   const stocksList = stocks || [];
   if (stocksList.length === 0) {
-    contentEl.innerHTML = `<div class="text-xs text-[#94A3B8]/60 text-center py-12">保有チラシの登録データはありません</div>`;
+    contentEl.innerHTML = `<div class="text-sm text-[#94A3B8]/60 text-center py-12">保有チラシの登録データはありません</div>`;
     return;
   }
 
+  // DashboardState.cities (SSOT順) に基づいてソート
+  const masterCities = DashboardState.cities || [];
+  const sortedStocks = [...stocksList].sort((a, b) => {
+    const idxA = getCityMasterIndex(a.location, masterCities);
+    const idxB = getCityMasterIndex(b.location, masterCities);
+    return idxA - idxB;
+  });
+
   let html = '<div class="space-y-2">';
-  stocksList.forEach(s => {
+  sortedStocks.forEach(s => {
     html += `
       <div class="flex items-center justify-between p-3 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
         <div>
-          <div class="font-bold text-sm text-[#E6ECF3]">${s.location || '保管拠点'}</div>
-          <div class="text-xs text-[#94A3B8] mt-0.5">担当: ${s.staffName || s.staffId || '未設定'} ｜ 更新: ${s.updatedAt || '--'}</div>
+          <div class="font-bold text-base text-[#E6ECF3]">${s.location || '保管拠点'}</div>
+          <div class="text-sm text-[#94A3B8] mt-0.5">担当: ${s.staffName || s.staffId || '未設定'} ｜ 更新: ${s.updatedAt || '--'}</div>
         </div>
         <div class="text-right">
-          <span class="text-xl font-black font-mono text-white">${(Number(s.count) || 0).toLocaleString()}</span>
-          <span class="text-xs text-[#94A3B8] ml-0.5">枚</span>
+          <span class="text-2xl font-black font-mono text-white">${(Number(s.count) || 0).toLocaleString()}</span>
+          <span class="text-sm text-[#94A3B8] ml-0.5">枚</span>
         </div>
       </div>
     `;
@@ -776,7 +814,7 @@ function renderMainStageRoster(roster) {
 
   const rosterList = roster || [];
   if (rosterList.length === 0) {
-    contentEl.innerHTML = `<div class="text-xs text-[#94A3B8]/60 text-center py-12">登録配布員データはありません</div>`;
+    contentEl.innerHTML = `<div class="text-sm text-[#94A3B8]/60 text-center py-12">登録配布員データはありません</div>`;
     return;
   }
 
@@ -785,13 +823,13 @@ function renderMainStageRoster(roster) {
     html += `
       <div class="p-3 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] flex items-center justify-between transition-colors">
         <div class="flex items-center gap-3">
-          <span class="w-8 h-8 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-bold text-xs text-brand">${r.id || ''}</span>
+          <span class="w-8 h-8 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-bold text-sm text-brand">${r.id || ''}</span>
           <div>
-            <div class="font-bold text-sm text-[#E6ECF3]">${r.name || ''}</div>
-            <div class="text-[11px] text-[#94A3B8] mt-0.5">区分: 正式登録配布員</div>
+            <div class="font-bold text-base text-[#E6ECF3]">${r.name || ''}</div>
+            <div class="text-xs text-[#94A3B8] mt-0.5">区分: 正式登録配布員</div>
           </div>
         </div>
-        <span class="text-xs text-statusGreen font-semibold px-2 py-1 rounded bg-statusGreen/10 border border-statusGreen/20">有効</span>
+        <span class="text-sm text-statusGreen font-semibold px-2 py-1 rounded bg-statusGreen/10 border border-statusGreen/20">有効</span>
       </div>
     `;
   });
@@ -808,7 +846,7 @@ function renderMainStageRequests(requests) {
 
   const reqList = requests || [];
   if (reqList.length === 0) {
-    contentEl.innerHTML = `<div class="text-xs text-[#94A3B8]/60 text-center py-12">現在、受渡要請はありません</div>`;
+    contentEl.innerHTML = `<div class="text-sm text-[#94A3B8]/60 text-center py-12">現在、受渡要請はありません</div>`;
     return;
   }
 
@@ -818,15 +856,15 @@ function renderMainStageRequests(requests) {
       <div class="p-3 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <span class="font-bold text-sm text-[#E6ECF3]">${req.requesterName || req.requesterId}</span>
-            <span class="text-xs text-[#94A3B8]">➔</span>
-            <span class="font-bold text-sm text-[#E6ECF3]">${req.holderName || req.holderId}</span>
+            <span class="font-bold text-base text-[#E6ECF3]">${req.requesterName || req.requesterId}</span>
+            <span class="text-sm text-[#94A3B8]">➔</span>
+            <span class="font-bold text-base text-[#E6ECF3]">${req.holderName || req.holderId}</span>
           </div>
-          <span class="font-mono text-xs text-[#94A3B8]">${req.requestTime || ''}</span>
+          <span class="font-mono text-sm text-[#94A3B8]">${req.requestTime || ''}</span>
         </div>
-        <div class="text-xs text-[#94A3B8] mt-1.5 flex items-center justify-between">
+        <div class="text-sm text-[#94A3B8] mt-1.5 flex items-center justify-between">
           <span>連絡先: ${req.contactMethod ? `[${req.contactMethod}] ` : ''}${req.contactValue || ''}</span>
-          <span class="text-brand font-semibold">要請中</span>
+          <span class="text-brand font-bold text-sm">要請中</span>
         </div>
       </div>
     `;
