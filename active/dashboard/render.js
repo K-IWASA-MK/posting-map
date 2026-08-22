@@ -52,6 +52,31 @@ function openPointDetailModal(rowId) {
   let p = allPoints.find(point => point.rowId === rowId);
 
   if (!p) {
+    // 【Hアプリ専用フォールバック】allPointsが未初期化、または対象データが存在しない場合
+    // initMainMap完了済みの masterPins から構造データを復元する。
+    // ※実績データはスプレッドシートのもの（Dashboardが見るもの）と混同しないよう、初期状態をセット。
+    if (Array.isArray(window.masterPins)) {
+      const csvRow = window.masterPins.find(item => String(item.rowId) === String(rowId));
+      if (csvRow) {
+        p = {
+          rowId: csvRow.rowId,
+          cityName: csvRow.cityName,
+          townName: csvRow.townName,
+          name: csvRow.townName, // legacy compatibility
+          lat: csvRow.lat,
+          lng: csvRow.lng,
+          total: 0,
+          done: 0,
+          status: '未着手',
+          photoUrl: '',
+          gpsLog: ''
+        };
+        allPoints.push(p);
+      }
+    }
+  }
+
+  if (!p) {
     return;
   }
 
