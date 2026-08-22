@@ -798,13 +798,22 @@ async function submitMissionComplete(areaName, rowId) {
   if (p.syncStatus === 'submitting') return;
   p.syncStatus = 'submitting';
 
-  // 状態駆動UI用のモーダル全体再描画（バックグラウンド更新時のSSOT担保）
-  const modalContent = $('detail-modal-content');
-  if (modalContent && typeof renderDetailModalContent === 'function') {
-    modalContent.innerHTML = renderDetailModalContent(p);
+  // 過去の正常時（bc78c47）および在庫登録画面に倣い、DOMを直接操作して即座にUIをロック・テキスト変更
+  const submitBtn = $('submit-mission-btn');
+  const cancelBtn = $('cancel-mission-btn');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = '0.75';
+    submitBtn.style.cursor = 'not-allowed';
+    submitBtn.innerHTML = '⏳ 提出処理中...';
+  }
+  if (cancelBtn) {
+    cancelBtn.disabled = true;
+    cancelBtn.style.opacity = '0.35';
+    cancelBtn.style.cursor = 'not-allowed';
   }
 
-  // 状態変更をブラウザに確実に描画(Paint)させてから非同期保存処理へ進む（bc78c47の正常動作を復元）
+  // DOM変更をブラウザに確実に描画(Paint)させてから非同期保存処理へ進む
   await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
 
   try {
@@ -826,24 +835,36 @@ async function submitMissionComplete(areaName, rowId) {
         staffId:    p.staffId || ''
       });
 
-      // IndexedDBへのローカル保存成功：同期待ち状態へ設定
-      p.syncStatus = 'pending';
-
-      if (typeof window.setPinInProgress === 'function') {
-        window.setPinInProgress(rowId, "remove");
-      }
-      if (window.globalPinStatus) {
-        if (!window.globalPinStatus.completed.includes(rowId)) {
-          window.globalPinStatus.completed.push(rowId);
+      // CEO Phase 4-B: GAS保存成功(キュー消滅)を待機 (bc78c47の正常動作を復元)
+      while (true) {
+        if (typeof window.getRowStatus !== 'function') {
+          throw new Error("Sync check mechanism is missing.");
         }
-        window.globalPinStatus.inProgress = window.globalPinStatus.inProgress.filter(id => id !== rowId);
-      }
-      if (typeof window.lockActivePinAndBubble === 'function') {
-        window.lockActivePinAndBubble(rowId);
+        const status = await window.getRowStatus(Number(rowId));
+        if (status === null) {
+          // キューから消滅 ＝ GAS保存成功（データ送信成功＝ロック）
+          if (typeof window.setPinInProgress === 'function') {
+            window.setPinInProgress(rowId, "remove");
+          }
+          if (window.globalPinStatus) {
+            if (!window.globalPinStatus.completed.includes(rowId)) {
+              window.globalPinStatus.completed.push(rowId);
+            }
+            window.globalPinStatus.inProgress = window.globalPinStatus.inProgress.filter(id => id !== rowId);
+          }
+          if (typeof window.lockActivePinAndBubble === 'function') {
+            window.lockActivePinAndBubble(rowId);
+          }
+          break;
+        }
+        if (status === 'RETRY') {
+          throw new Error("GAS Save Failed");
+        }
+        await new Promise(r => setTimeout(r, 500));
       }
     }
 
-    // ローカル保存完了後、モーダルを即座に閉じて現場作業を継続可能にする
+    // 保存成功確定後に既存の戻る処理を実行
     if (typeof closeDetailModal === 'function') {
       closeDetailModal();
     }
@@ -851,9 +872,17 @@ async function submitMissionComplete(areaName, rowId) {
     console.error("Submission failed:", err);
     p.syncStatus = 'pending';
 
-    // エラー時のみ元の表示と操作可能状態に復帰
-    if (modalContent && typeof renderDetailModalContent === 'function') {
-      modalContent.innerHTML = renderDetailModalContent(p);
+    // エラー時のみ元の表示と操作可能状態に復帰 (bc78c47の正常動作を復元)
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '1';
+      submitBtn.style.cursor = 'pointer';
+      submitBtn.innerHTML = '🚀 この内容で提出する';
+    }
+    if (cancelBtn) {
+      cancelBtn.disabled = false;
+      cancelBtn.style.opacity = '1';
+      cancelBtn.style.cursor = 'pointer';
     }
   }
 }
