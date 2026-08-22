@@ -780,25 +780,38 @@ function pressNum(key) {
 
 // モーダルの「この内容で提出する」ボタン押下時に呼ばれる
 async function submitMissionComplete(areaName, rowId) {
+  const t0 = performance.now();
+  console.log(`[SUBMIT_TRACE] [${new Date().toISOString()}] [0] submitMissionComplete START: rowId=${rowId}`);
+
   const p = (typeof allPoints !== 'undefined' && Array.isArray(allPoints) && allPoints.find(point => point.rowId === rowId)) ||
             (typeof window.allPoints !== 'undefined' && Array.isArray(window.allPoints) && window.allPoints.find(point => point.rowId === rowId));
-  if (!p) return;
+  if (!p) {
+    console.warn(`[SUBMIT_TRACE] Point not found for rowId=${rowId}`);
+    return;
+  }
 
   // 提出前の厳格なバリデーション
-  if (p.gpsStatus === 'pending') return;
-  if (p.photoStatus !== 'OK') return;
-  if (!p.photoBase64) return;
+  if (p.gpsStatus === 'pending' || p.photoStatus !== 'OK' || !p.photoBase64) {
+    console.warn(`[SUBMIT_TRACE] Validation failed: photo=${p.photoStatus}, hasPhotoBase64=${!!p.photoBase64}, gps=${p.gpsStatus}`);
+    return;
+  }
 
   if (p.gpsStatus === 'OK') {
-    if (!Number.isFinite(Number(p.latitude))) return;
-    if (!Number.isFinite(Number(p.longitude))) return;
+    if (!Number.isFinite(Number(p.latitude)) || !Number.isFinite(Number(p.longitude))) {
+      console.warn(`[SUBMIT_TRACE] GPS coordinate validation failed: lat=${p.latitude}, lng=${p.longitude}`);
+      return;
+    }
   }
 
   // 二重送信の防止
-  if (p.syncStatus === 'submitting') return;
+  if (p.syncStatus === 'submitting') {
+    console.warn(`[SUBMIT_TRACE] Duplicate submission blocked`);
+    return;
+  }
   p.syncStatus = 'submitting';
 
-  // 過去の正常時（bc78c47）および在庫登録画面に倣い、DOMを直接操作して即座にUIをロック・テキスト変更
+  // 1. 提出ボタンのDOM操作直前
+  console.log(`[SUBMIT_TRACE] [${(performance.now() - t0).toFixed(2)}ms] [T1] Before DOM update`);
   const submitBtn = $('submit-mission-btn');
   const cancelBtn = $('cancel-mission-btn');
   if (submitBtn) {
@@ -813,8 +826,13 @@ async function submitMissionComplete(areaName, rowId) {
     cancelBtn.style.cursor = 'not-allowed';
   }
 
+  // 2. innerHTML = '⏳ 提出処理中...' 実行直後
+  console.log(`[SUBMIT_TRACE] [${(performance.now() - t0).toFixed(2)}ms] [T2] After DOM update (innerHTML applied)`);
+
   try {
     if (typeof enqueueSync === 'function') {
+      // 3. enqueueSync() 開始
+      console.log(`[SUBMIT_TRACE] [${(performance.now() - t0).toFixed(2)}ms] [T3] enqueueSync START`);
       await enqueueSync({
         areaName,
         rowId: Number(rowId),
@@ -832,14 +850,25 @@ async function submitMissionComplete(areaName, rowId) {
         staffId:    p.staffId || ''
       });
 
-      // CEO Phase 4-B: GAS保存成功(キュー消滅)を待機 (bc78c47の正常動作を復元)
+      // 4. enqueueSync() 完了
+      console.log(`[SUBMIT_TRACE] [${(performance.now() - t0).toFixed(2)}ms] [T4] enqueueSync COMPLETED`);
+
+      // 5. CEO Phase 4-B: GAS保存成功(キュー消滅)を待機 (bc78c47の正常動作を復元)
+      let pollCount = 0;
       while (true) {
+        pollCount++;
         if (typeof window.getRowStatus !== 'function') {
           throw new Error("Sync check mechanism is missing.");
         }
+        // 5. getRowStatus() 開始
+        console.log(`[SUBMIT_TRACE] [${(performance.now() - t0).toFixed(2)}ms] [T5] getRowStatus START (poll #${pollCount})`);
         const status = await window.getRowStatus(Number(rowId));
+        // 6. getRowStatus() 結果
+        console.log(`[SUBMIT_TRACE] [${(performance.now() - t0).toFixed(2)}ms] [T6] getRowStatus RESULT: status=${status}`);
+
         if (status === null) {
           // キューから消滅 ＝ GAS保存成功（データ送信成功＝ロック）
+          console.log(`[SUBMIT_TRACE] [${(performance.now() - t0).toFixed(2)}ms] [T6_SUCCESS] Queue cleared, GAS save confirmed`);
           if (typeof window.setPinInProgress === 'function') {
             window.setPinInProgress(rowId, "remove");
           }
@@ -861,12 +890,14 @@ async function submitMissionComplete(areaName, rowId) {
       }
     }
 
-    // 保存成功確定後に既存の戻る処理を実行
+    // 7. closeDetailModal()
+    console.log(`[SUBMIT_TRACE] [${(performance.now() - t0).toFixed(2)}ms] [T7] closeDetailModal START`);
     if (typeof closeDetailModal === 'function') {
       closeDetailModal();
     }
   } catch (err) {
-    console.error("Submission failed:", err);
+    // 8. catch
+    console.error(`[SUBMIT_TRACE] [${(performance.now() - t0).toFixed(2)}ms] [T_ERR] catch ERROR:`, err);
     p.syncStatus = 'pending';
 
     // エラー時のみ元の表示と操作可能状態に復帰 (bc78c47の正常動作を復元)
