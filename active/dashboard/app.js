@@ -813,9 +813,6 @@ async function submitMissionComplete(areaName, rowId) {
     cancelBtn.style.cursor = 'not-allowed';
   }
 
-  // DOM変更をブラウザに確実に描画(Paint)させてから非同期保存処理へ進む
-  await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
-
   try {
     if (typeof enqueueSync === 'function') {
       await enqueueSync({
