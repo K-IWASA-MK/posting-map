@@ -804,6 +804,9 @@ async function submitMissionComplete(areaName, rowId) {
     modalContent.innerHTML = renderDetailModalContent(p);
   }
 
+  // 状態変更をブラウザに確実に描画(Paint)させてから非同期保存処理へ進む（bc78c47の正常動作を復元）
+  await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
+
   try {
     if (typeof enqueueSync === 'function') {
       await enqueueSync({
