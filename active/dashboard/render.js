@@ -59,17 +59,36 @@ function openPointDetailModal(rowId) {
       const csvRow = window.masterPins.find(item => String(item.rowId) === String(rowId));
       if (csvRow) {
         p = {
+          // 基本・位置情報 (CSVマッピング修正)
           rowId: csvRow.rowId,
-          cityName: csvRow.cityName,
-          townName: csvRow.townName,
-          name: csvRow.townName, // legacy compatibility
-          lat: csvRow.lat,
-          lng: csvRow.lng,
+          address: `${csvRow.city_name} ${csvRow.town_name}`,
+          cityName: csvRow.city_name,
+          townName: csvRow.town_name,
+          name: csvRow.town_name, // legacy compatibility
+          lat: csvRow.latitude,
+          latitude: csvRow.latitude,
+          lng: csvRow.longitude,
+          longitude: csvRow.longitude,
+          
+          // 業務ステータス初期化
+          isDone: false,
+          count: 0,
+          staffName: '',
+          staffId: '',
+          completedAt: '',
           total: 0,
           done: 0,
           status: '未着手',
+
+          // UI・同期状態管理（正常系動作に必須）
+          syncStatus: '',
+          photoStatus: 'NONE',
+          photoBase64: null,
           photoUrl: '',
-          gpsLog: ''
+          gpsStatus: 'NO',
+          gps: '',
+          gpsLog: '',
+          accuracy: null
         };
         allPoints.push(p);
       }
