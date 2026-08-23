@@ -122,6 +122,11 @@
       color: #EA5F08 !important;
       border-color: rgba(234, 95, 8, 0.35) !important;
     }
+
+    /* Dark-tone filter for Leaflet map tiles (Contrast Alignment) */
+    .leaflet-tile-pane img {
+      filter: brightness(0.78) saturate(0.72) contrast(1.05);
+    }
   </style>
 </head>
 <body class="bg-appBg text-textMain h-screen h-[100dvh] w-screen overflow-hidden flex antialiased">
