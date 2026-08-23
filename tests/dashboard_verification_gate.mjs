@@ -167,9 +167,9 @@ async function runDashboardQualityGate() {
     results.phase3.details.push(`Backend rankingCount (生存確認): ${state3.rankingCount}`);
 
     // -------------------------------------------------------------
-    // PHASE 4: cities SSOT & ノイズ除外 & 左ナビインライン開閉確認
+    // PHASE 4: cities SSOT & ノイズ除外 & 選択時展開維持確認
     // -------------------------------------------------------------
-    console.log("\n▶ [PHASE 4] cities SSOT & ノイズ除外 & インライン開閉確認 実行中...");
+    console.log("\n▶ [PHASE 4] cities SSOT & ノイズ除外 & 選択時展開維持確認 実行中...");
     const page4 = await browser.newPage();
     await page4.goto('http://localhost:8080/scripts/operations/index.html', { waitUntil: 'networkidle0' });
     await page4.waitForFunction(() => window.DashboardState && window.DashboardState.cities.length > 0, { timeout: 10000 });
@@ -180,41 +180,52 @@ async function runDashboardQualityGate() {
       const currentLabel = document.getElementById('city-selector-current');
 
       const initialClosed = list?.classList.contains('hidden') && trigger?.getAttribute('aria-expanded') === 'false';
-      const initialText = currentLabel?.textContent;
 
       // 1. トリガーをクリックして展開テスト
       trigger?.click();
-      const openedAfterClick = !list?.classList.contains('hidden') && trigger?.getAttribute('aria-expanded') === 'true';
+      const openedAfterFirstClick = !list?.classList.contains('hidden') && trigger?.getAttribute('aria-expanded') === 'true';
 
       // 2. アイテム一覧取得
       const items = Array.from(list?.querySelectorAll('button[data-city-val]') || []).map(b => b.getAttribute('data-city-val'));
 
-      // 3. 2番目の自治体をクリックして選択＆自動折りたたみテスト
-      let selectWorks = false;
+      // 3. 四日市市 (items[1]) をクリック ➔ 選択後も「OPENのまま」であることを検証
+      let firstCityWorksAndStaysOpen = false;
       if (items.length > 1) {
-        const targetCity = items[1]; // 最初の自治体 (例: 四日市市)
-        const targetBtn = list.querySelector(`button[data-city-val="${targetCity}"]`);
-        targetBtn?.click();
+        const city1 = items[1];
+        const btn1 = list.querySelector(`button[data-city-val="${city1}"]`);
+        btn1?.click();
 
-        const closedAfterSelect = list?.classList.contains('hidden') && trigger?.getAttribute('aria-expanded') === 'false';
-        const labelUpdated = currentLabel?.textContent === targetCity;
-        const stateUpdated = window.DashboardState?.selectedCity === targetCity;
-
-        selectWorks = closedAfterSelect && labelUpdated && stateUpdated;
+        const stillOpen1 = !list?.classList.contains('hidden') && trigger?.getAttribute('aria-expanded') === 'true';
+        const label1 = currentLabel?.textContent === city1;
+        const state1 = window.DashboardState?.selectedCity === city1;
+        firstCityWorksAndStaysOpen = stillOpen1 && label1 && state1;
       }
 
-      // 4. 全域に戻すテスト
-      const allBtn = list?.querySelector('button[data-city-val="ALL"]');
-      allBtn?.click();
-      const allRestored = currentLabel?.textContent === '全域' && window.DashboardState?.selectedCity === 'ALL';
+      // 4. 桑名市 (items[2]) を連続クリック ➔ 選択後も「OPENのまま」であることを検証
+      let secondCityWorksAndStaysOpen = false;
+      if (items.length > 2) {
+        const city2 = items[2];
+        const btn2 = list.querySelector(`button[data-city-val="${city2}"]`);
+        btn2?.click();
+
+        const stillOpen2 = !list?.classList.contains('hidden') && trigger?.getAttribute('aria-expanded') === 'true';
+        const label2 = currentLabel?.textContent === city2;
+        const state2 = window.DashboardState?.selectedCity === city2;
+        secondCityWorksAndStaysOpen = stillOpen2 && label2 && state2;
+      }
+
+      // 5. トリガーを再度クリック ➔ 明示的に閉じることを検証
+      trigger?.click();
+      const closedAfterTriggerReclick = list?.classList.contains('hidden') && trigger?.getAttribute('aria-expanded') === 'false';
 
       return {
         stateCities: window.DashboardState.cities,
         renderedItems: items,
         initialClosed,
-        openedAfterClick,
-        selectWorks,
-        allRestored
+        openedAfterFirstClick,
+        firstCityWorksAndStaysOpen,
+        secondCityWorksAndStaysOpen,
+        closedAfterTriggerReclick
       };
     });
     await page4.close();
@@ -226,15 +237,17 @@ async function runDashboardQualityGate() {
       hasValidCities &&
       citiesCheck.renderedItems.includes('ALL') &&
       citiesCheck.initialClosed &&
-      citiesCheck.openedAfterClick &&
-      citiesCheck.selectWorks &&
-      citiesCheck.allRestored
+      citiesCheck.openedAfterFirstClick &&
+      citiesCheck.firstCityWorksAndStaysOpen &&
+      citiesCheck.secondCityWorksAndStaysOpen &&
+      citiesCheck.closedAfterTriggerReclick
     );
 
     results.phase4.pass = phase4Pass;
     results.phase4.details.push(`自治体数: ${citiesCheck.stateCities.length}`);
     results.phase4.details.push(`ノイズ除外('原本'): ${hasOriginalNoise ? 'FAIL (混入)' : 'PASS (除外済)'}`);
-    results.phase4.details.push(`左ナビインライン展開・自動折りたたみ動作: ${citiesCheck.initialClosed && citiesCheck.openedAfterClick && citiesCheck.selectWorks ? 'PASS' : 'FAIL'}`);
+    results.phase4.details.push(`選択時展開維持 (開いたまま連続切替): ${citiesCheck.firstCityWorksAndStaysOpen && citiesCheck.secondCityWorksAndStaysOpen ? 'PASS' : 'FAIL'}`);
+    results.phase4.details.push(`トリガー再タップで閉じる: ${citiesCheck.closedAfterTriggerReclick ? 'PASS' : 'FAIL'}`);
     results.phase4.details.push(`セレクター項目: ${citiesCheck.renderedItems.join(', ')}`);
 
     // -------------------------------------------------------------

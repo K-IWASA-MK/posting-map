@@ -392,7 +392,7 @@ function closeCityDropdown() {
 }
 
 /**
- * 自治体選択ハンドラ（UIラベル更新 ➔ 自動折りたたみ ➔ 既存onCitySelected発火）
+ * 自治体選択ハンドラ（UIラベル更新 ➔ 展開状態維持 ➔ 既存onCitySelected発火）
  */
 function selectCity(cityName) {
   DashboardState.selectedCity = cityName;
@@ -402,7 +402,7 @@ function selectCity(cityName) {
     currentLabelEl.textContent = cityName === 'ALL' ? '全域' : cityName;
   }
 
-  closeCityDropdown();
+  // 選択後もリストを開いたまま維持（トリガー再タップ時のみ閉じる）
   updateCitySelectorHighlight(cityName);
   onCitySelected(cityName);
 }
