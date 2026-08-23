@@ -6,16 +6,24 @@
  * 「現場アプリが持っている“現実の現場データ”を、ダッシュボードが正確に映す。」
  * 
  * SSOT原則:
- * 1. 住所マスター: /data/MIE03_ADDRESS_MASTER_858.csv (全858件)
- * 2. 状態判定: 現場アプリ (active/dashboard/app.js, render.js) と完全同一の
- *    callApiPost('getGlobalPinStatus') 経由の実 completed / inProgress 配列と rowId 結合。
+ * 1. 住所マスター: config.js の staticMaster.addressCsvFilename で指定（地図座標専用）
+ * 2. 自治体一覧: Backend getTier1 が唯一の正
+ * 3. 状態判定: 現場アプリと完全同一の callApiPost('getGlobalPinStatus') 経由
  */
 
 function getApiUrl() {
   if (typeof window !== 'undefined' && window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.api && window.PMS_CLIENT_CONFIG.api.gasWebAppUrl) {
     return window.PMS_CLIENT_CONFIG.api.gasWebAppUrl;
   }
-  return "https://script.google.com/macros/s/AKfycbyjNwgZ_6CCv258lqKMrCXJYi0wDR23ZCyyzOQIV1R_WcCF5TQxYXOzZWWSJd_vMyu_/exec";
+  throw new Error('[Dashboard Config Error] PMS_CLIENT_CONFIG.api.gasWebAppUrl が未設定です。config.js を確認してください。');
+}
+
+/** config.js から静的マスター設定を取得するヘルパー */
+function getStaticMasterConfig() {
+  if (typeof window !== 'undefined' && window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.staticMaster) {
+    return window.PMS_CLIENT_CONFIG.staticMaster;
+  }
+  return {};
 }
 
 // 現場データ保持用ステート（現場アプリと同一構造）
@@ -29,7 +37,8 @@ const DashboardState = {
   liveRecords: [], // Backendから取得した最新配布実績レコード (SSOT)
   latestSeenRecordId: null, // アニメーション検知用最新レコードID
   globalPinStatus: { inProgress: [], completed: [] },
-  masterPins858: [], // SSOT 858件マスターピン
+  masterPins: [], // SSOT マスターピン（config.js で指定された CSV から動的取得）
+  masterLoadStatus: 'PENDING', // 'PENDING' | 'LOADED' | 'ERROR'
   boundariesGeoJson: null, // 国勢調査小地域境界GeoJSON（純粋地理背景）
   boundariesLayer: null, // Leaflet GeoJSON レイヤー
   selectedCity: 'ALL',
@@ -87,7 +96,7 @@ const AREA_STATUS_CONFIG = {
 
 /**
  * ズームレベルに応じたピン半径（radius）動的スケーリング
- * - 広域（Lv11全域初期表示）では858件の密集を防ぐため、極小ドット（2.2px / 3.0px）で表示し、
+ * - 広域（Lv11全域初期表示）では大量ピンの密集を防ぐため、極小ドット（2.2px / 3.0px）で表示し、
  *   道路網や市町名（四日市・桑名・いなべ等）の可読性を最大化。
  * - ズームインするにつれて段階的に拡大し、街区・丁目レベル（Lv15〜17）では特大ピン（10px〜24px）へ拡張。
  *
@@ -138,10 +147,10 @@ async function initDashboard() {
   initMap();
   updateNavHighlight('areas');
   
-  // 1. SSOT 858件住所マスターの読み込み
-  await loadAddressMaster858();
+  // 1. SSOT 住所マスターの読み込み
+  await loadAddressMaster();
 
-  // 2. 858エリア町丁目境界GeoJSONの読み込み（独立レイヤー）
+  // 2. エリア町丁目境界GeoJSONの読み込み（独立レイヤー）
   await loadBoundariesGeoJson();
 
   // 3. 現場実データの同期（現場アプリと完全同一のPOST経路）
@@ -226,11 +235,14 @@ async function callApiPost(action, payload = {}) {
 }
 
 /**
- * SSOT: data/MIE03_ADDRESS_MASTER_858.csv の取得とパース
+ * SSOT: 住所マスター CSV の取得とパース（config.js で指定されたファイル名を使用）
  */
-async function loadAddressMaster858() {
+async function loadAddressMaster() {
   try {
-    const res = await fetchStaticDataFile('MIE03_ADDRESS_MASTER_858.csv');
+    const cfg = getStaticMasterConfig();
+    const csvFilename = cfg.addressCsvFilename;
+    if (!csvFilename) throw new Error('[Config Error] staticMaster.addressCsvFilename が未設定です');
+    const res = await fetchStaticDataFile(csvFilename);
     const text = await res.text();
     const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
     
@@ -258,38 +270,41 @@ async function loadAddressMaster858() {
       }
     }
 
-    DashboardState.masterPins858 = pins;
-    console.log(`[SSOT Master Pins Loaded] Total: ${pins.length} items (SSOT 858 verified)`);
-
-    // SSOTマスターからユニークな自治体リストを抽出（出現順SSOTを尊重）
-    const uniqueCities = [];
-    const citySet = new Set();
-    for (const p of pins) {
-      if (p.cityName && !citySet.has(p.cityName)) {
-        citySet.add(p.cityName);
-        uniqueCities.push(p.cityName);
-      }
-    }
-    DashboardState.cities = uniqueCities;
-
-    // 自治体セレクターをSSOTから動的生成
-    populateCitySelector(uniqueCities);
+    DashboardState.masterLoadStatus = 'LOADED';
+    DashboardState.masterPins = pins;
+    console.log(`[SSOT Master Pins Loaded] Total: ${pins.length} items`);
 
     // マップにピンを描画
     renderPinsOnMap(DashboardState.map, DashboardState.markersLayer, pins);
 
+    // マスターピンの有効座標から自動的に表示範囲を算出
+    if (DashboardState.map && pins.length > 0) {
+      const validCoords = pins
+        .filter(p => isFinite(p.lat) && isFinite(p.lng) && p.lat !== 0 && p.lng !== 0)
+        .map(p => [p.lat, p.lng]);
+      if (validCoords.length > 0) {
+        const bounds = L.latLngBounds(validCoords);
+        DashboardState.map.fitBounds(bounds, { padding: [20, 20], maxZoom: 13 });
+      }
+      // validCoords が 0件なら initMap() の config 座標がそのまま残る
+    }
+
   } catch (err) {
     console.error('[SSOT Load Error]', err);
+    DashboardState.masterLoadStatus = 'ERROR';
   }
 }
 
 /**
- * 国勢調査小地域境界 (data/MIE03_BOUNDARIES.geojson) の取得と背景レイヤー初期化
- * - 純粋な地理的背景情報として描画（業務データやrowIdとの紐付けは一切行わない）
+ * 国勢調査小地域境界 GeoJSON の取得と背景レイヤー初期化（config.js で指定されたファイル名を使用）
+ * - 純粋な地理的背景情報として描画（業務データやrowIdとの紐付きは一切行わない）
  */
 async function loadBoundariesGeoJson() {
   try {
-    const res = await fetchStaticDataFile('MIE03_BOUNDARIES.geojson');
+    const cfg = getStaticMasterConfig();
+    const geojsonFilename = cfg.boundariesGeojsonFilename;
+    if (!geojsonFilename) { console.warn('[Config] boundariesGeojsonFilename 未設定 - 境界線スキップ'); return; }
+    const res = await fetchStaticDataFile(geojsonFilename);
     const geojsonData = await res.json();
     DashboardState.boundariesGeoJson = geojsonData;
 
@@ -340,33 +355,118 @@ if (typeof window !== 'undefined') {
   window.showAreaDetail = showAreaDetail;
   window.closeAreaDetail = closeAreaDetail;
   window.AREA_STATUS_CONFIG = AREA_STATUS_CONFIG;
+  window.toggleCityDropdown = toggleCityDropdown;
+  window.closeCityDropdown = closeCityDropdown;
+  window.selectCity = selectCity;
+  window.onCitySelected = onCitySelected;
 }
 
 /**
- * SSOT自治体セレクターの動的生成
+ * 左ナビ内インライン自治体セレクターの開閉トグル
+ */
+function toggleCityDropdown() {
+  const listEl = document.getElementById('city-selector-list');
+  const triggerEl = document.getElementById('city-selector-trigger');
+  const arrowEl = document.getElementById('city-selector-arrow');
+  if (!listEl) return;
+
+  const isHidden = listEl.classList.contains('hidden');
+  if (isHidden) {
+    listEl.classList.remove('hidden');
+    if (triggerEl) triggerEl.setAttribute('aria-expanded', 'true');
+    if (arrowEl) arrowEl.textContent = '▲';
+  } else {
+    listEl.classList.add('hidden');
+    if (triggerEl) triggerEl.setAttribute('aria-expanded', 'false');
+    if (arrowEl) arrowEl.textContent = '▼';
+  }
+}
+
+function closeCityDropdown() {
+  const listEl = document.getElementById('city-selector-list');
+  const triggerEl = document.getElementById('city-selector-trigger');
+  const arrowEl = document.getElementById('city-selector-arrow');
+  if (listEl) listEl.classList.add('hidden');
+  if (triggerEl) triggerEl.setAttribute('aria-expanded', 'false');
+  if (arrowEl) arrowEl.textContent = '▼';
+}
+
+/**
+ * 自治体選択ハンドラ（UIラベル更新 ➔ 自動折りたたみ ➔ 既存onCitySelected発火）
+ */
+function selectCity(cityName) {
+  DashboardState.selectedCity = cityName;
+
+  const currentLabelEl = document.getElementById('city-selector-current');
+  if (currentLabelEl) {
+    currentLabelEl.textContent = cityName === 'ALL' ? '全域' : cityName;
+  }
+
+  closeCityDropdown();
+  updateCitySelectorHighlight(cityName);
+  onCitySelected(cityName);
+}
+
+/**
+ * 自治体リストアイテムのアクティブハイライト更新
+ */
+function updateCitySelectorHighlight(selectedCity) {
+  const listEl = document.getElementById('city-selector-list');
+  if (!listEl) return;
+
+  const buttons = listEl.querySelectorAll('button[data-city-val]');
+  buttons.forEach(btn => {
+    const val = btn.getAttribute('data-city-val');
+    if (val === selectedCity) {
+      btn.className = 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-between bg-brand/15 text-brand border border-brand/30';
+      const checkSpan = btn.querySelector('.city-check');
+      if (checkSpan) checkSpan.textContent = '✓';
+    } else {
+      btn.className = 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center justify-between text-textSub hover:text-white hover:bg-white/5 border border-transparent';
+      const checkSpan = btn.querySelector('.city-check');
+      if (checkSpan) checkSpan.textContent = '';
+    }
+  });
+}
+
+/**
+ * SSOT自治体セレクターの動的生成（左ナビ内インラインリスト）
  */
 function populateCitySelector(cities) {
-  const select = document.getElementById('city-selector');
-  if (!select) return;
+  const listEl = document.getElementById('city-selector-list');
+  const currentLabelEl = document.getElementById('city-selector-current');
+  if (!listEl) return;
 
   const currentVal = DashboardState.selectedCity || 'ALL';
-  select.innerHTML = '';
+  listEl.innerHTML = '';
 
-  // 1. 全域プリセット (ALL: 表示範囲プリセット)
-  const allOpt = document.createElement('option');
-  allOpt.value = 'ALL';
-  allOpt.textContent = '全域';
-  select.appendChild(allOpt);
+  // 1. 全域プリセット (ALL)
+  const allBtn = document.createElement('button');
+  allBtn.type = 'button';
+  allBtn.setAttribute('data-city-val', 'ALL');
+  allBtn.onclick = () => selectCity('ALL');
+  allBtn.innerHTML = `<span>全域</span><span class="city-check text-[11px] font-bold">${currentVal === 'ALL' ? '✓' : ''}</span>`;
+  allBtn.className = currentVal === 'ALL'
+    ? 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-between bg-brand/15 text-brand border border-brand/30'
+    : 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center justify-between text-textSub hover:text-white hover:bg-white/5 border border-transparent';
+  listEl.appendChild(allBtn);
 
   // 2. SSOTから動的抽出された自治体リスト
   cities.forEach(cityName => {
-    const opt = document.createElement('option');
-    opt.value = cityName;
-    opt.textContent = cityName;
-    select.appendChild(opt);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.setAttribute('data-city-val', cityName);
+    btn.onclick = () => selectCity(cityName);
+    btn.innerHTML = `<span>${cityName}</span><span class="city-check text-[11px] font-bold">${currentVal === cityName ? '✓' : ''}</span>`;
+    btn.className = currentVal === cityName
+      ? 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-between bg-brand/15 text-brand border border-brand/30'
+      : 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center justify-between text-textSub hover:text-white hover:bg-white/5 border border-transparent';
+    listEl.appendChild(btn);
   });
 
-  select.value = currentVal;
+  if (currentLabelEl) {
+    currentLabelEl.textContent = currentVal === 'ALL' ? '全域' : currentVal;
+  }
 }
 
 /**
@@ -377,10 +477,13 @@ function initMap() {
   if (!mapEl || DashboardState.map) return;
 
   try {
+    const cfg = getStaticMasterConfig();
+    const defaultCenter = cfg.mapDefaultCenter || [35.0, 137.0];
+    const defaultZoom = cfg.mapDefaultZoom || 10;
     const map = L.map('map', {
       zoomControl: true,
       attributionControl: false
-    }).setView([35.0641, 136.6200], 11);
+    }).setView(defaultCenter, defaultZoom);
 
     // 境界線専用カスタムペインの作成 (タイルの上・ピンの下)
     if (!map.getPane('boundariesPane')) {
@@ -441,8 +544,12 @@ async function syncDashboardData() {
     }
 
     // 2. 自治体サマリーデータ
+    // 自治体一覧: Backend getTier1 が唯一の正（SSOT）
     if (isTier1Ok && Array.isArray(tier1Res.cities)) {
-      DashboardState.cities = tier1Res.cities.map(c => typeof c === 'string' ? c : (c.name || '')).filter(Boolean);
+      DashboardState.cities = tier1Res.cities
+        .map(c => typeof c === 'string' ? c : (c.name || ''))
+        .filter(name => name && !name.includes('原本') && !name.includes('テンプレート'));
+      populateCitySelector(DashboardState.cities);
     }
 
     // 3. 保有チラシデータ
@@ -485,7 +592,7 @@ async function syncDashboardData() {
 
     // 10. 通常マップのピンを再描画
     if (DashboardState.map && DashboardState.markersLayer) {
-      renderPinsOnMap(DashboardState.map, DashboardState.markersLayer, DashboardState.masterPins858);
+      renderPinsOnMap(DashboardState.map, DashboardState.markersLayer, DashboardState.masterPins);
     }
 
     // 同期状態の表示
@@ -556,20 +663,28 @@ function onCitySelected(cityName) {
 
   // ピンの再フィルタ描画
   if (DashboardState.map && DashboardState.markersLayer) {
-    renderPinsOnMap(DashboardState.map, DashboardState.markersLayer, DashboardState.masterPins858);
+    renderPinsOnMap(DashboardState.map, DashboardState.markersLayer, DashboardState.masterPins);
   }
 
   // マップの連動ズーム移動（SSOT住所マスターデータから動的にフォーカス）
   if (DashboardState.map) {
     if (cityName === 'ALL') {
-      if (DashboardState.masterPins858.length > 0) {
-        const bounds = L.latLngBounds(DashboardState.masterPins858.map(p => [p.lat, p.lng]));
-        DashboardState.map.fitBounds(bounds, { padding: [20, 20], maxZoom: 11 });
+      if (DashboardState.masterPins.length > 0) {
+        const validCoords = DashboardState.masterPins
+          .filter(p => isFinite(p.lat) && isFinite(p.lng) && p.lat !== 0 && p.lng !== 0)
+          .map(p => [p.lat, p.lng]);
+        if (validCoords.length > 0) {
+          const bounds = L.latLngBounds(validCoords);
+          DashboardState.map.fitBounds(bounds, { padding: [20, 20], maxZoom: 11 });
+        }
       } else {
-        DashboardState.map.setView([35.0641, 136.6200], 11);
+        const cfg = getStaticMasterConfig();
+        const defaultCenter = cfg.mapDefaultCenter || [35.0, 137.0];
+        const defaultZoom = cfg.mapDefaultZoom || 10;
+        DashboardState.map.setView(defaultCenter, defaultZoom);
       }
     } else {
-      const cityPins = DashboardState.masterPins858.filter(p => p.cityName === cityName);
+      const cityPins = DashboardState.masterPins.filter(p => p.cityName === cityName);
       if (cityPins.length > 0) {
         const bounds = L.latLngBounds(cityPins.map(p => [p.lat, p.lng]));
         DashboardState.map.fitBounds(bounds, { padding: [30, 30], maxZoom: 13 });
@@ -587,21 +702,6 @@ function renderCurrentView() {
   const completedList = DashboardState.globalPinStatus.completed || [];
   const inProgressList = DashboardState.globalPinStatus.inProgress || [];
 
-  // 1. トップの事実数字（SSOT 858件 ＆ 実配布完了データ連動）
-  let totalAreas = DashboardState.masterPins858.length || 858;
-  let doneAreas = DashboardState.masterPins858.filter(p => completedList.includes(p.rowId)).length;
-  let progAreas = DashboardState.masterPins858.filter(p => inProgressList.includes(p.rowId)).length;
-
-  if (!isAll && DashboardState.masterPins858.length > 0) {
-    const cityPins = DashboardState.masterPins858.filter(p => p.cityName.includes(selected) || selected.includes(p.cityName));
-    totalAreas = cityPins.length;
-    doneAreas = cityPins.filter(p => completedList.includes(p.rowId)).length;
-    progAreas = cityPins.filter(p => inProgressList.includes(p.rowId)).length;
-  }
-
-  const unallocatedAreas = Math.max(0, totalAreas - doneAreas - progAreas);
-  const progressPercent = totalAreas > 0 ? Math.round((doneAreas / totalAreas) * 100) : 0;
-
   const doneAreasEl = document.getElementById('fact-done-areas');
   const totalAreasEl = document.getElementById('fact-total-areas');
   const progressBadgeEl = document.getElementById('fact-progress-badge');
@@ -609,19 +709,54 @@ function renderCurrentView() {
   const inProgressEl = document.getElementById('fact-inprogress-areas');
   const completedEl = document.getElementById('fact-completed-areas');
   const districtLabelEl = document.getElementById('map-district-label');
+  const masterLabelEl = document.getElementById('master-pin-label');
 
-  if (doneAreasEl) doneAreasEl.textContent = doneAreas.toLocaleString();
-  if (totalAreasEl) totalAreasEl.textContent = totalAreas.toLocaleString();
-  if (progressBadgeEl) progressBadgeEl.textContent = `${progressPercent}%`;
-  if (unallocatedEl) unallocatedEl.textContent = unallocatedAreas.toLocaleString();
-  if (inProgressEl) inProgressEl.textContent = progAreas.toLocaleString();
-  if (completedEl) completedEl.textContent = doneAreas.toLocaleString();
+  // --- マスター件数（Static Master 由来）---
+  // 3状態: PENDING(--) / LOADED(実件数) / ERROR(ERR)
+  const masterOk = DashboardState.masterLoadStatus === 'LOADED';
 
-  if (districtLabelEl) {
-    const districtCode = DashboardState.summary?.districtName;
-    const labelPrefix = districtCode ? districtCode : '全域';
-    districtLabelEl.textContent = isAll ? `${labelPrefix} (${totalAreas}エリア)` : `${selected} (${totalAreas}エリア)`;
+  if (DashboardState.masterLoadStatus === 'PENDING') {
+    // 未取得 — 初期値 '--' のまま。マスター依存の描画だけスキップ。
+  } else if (DashboardState.masterLoadStatus === 'ERROR') {
+    if (doneAreasEl) doneAreasEl.textContent = 'ERR';
+    if (totalAreasEl) totalAreasEl.textContent = 'ERR';
+    if (progressBadgeEl) progressBadgeEl.textContent = '--';
+    // ★ return しない — Backend由来の描画は続行 ★
+  } else {
+    // 1. トップの事実数字（マスターピン件数 ＆ 実配布完了データ連動）
+    let totalAreas = DashboardState.masterPins.length;
+    let doneAreas = DashboardState.masterPins.filter(p => completedList.includes(p.rowId)).length;
+    let progAreas = DashboardState.masterPins.filter(p => inProgressList.includes(p.rowId)).length;
+
+    if (!isAll && DashboardState.masterPins.length > 0) {
+      const cityPins = DashboardState.masterPins.filter(p => p.cityName.includes(selected) || selected.includes(p.cityName));
+      totalAreas = cityPins.length;
+      doneAreas = cityPins.filter(p => completedList.includes(p.rowId)).length;
+      progAreas = cityPins.filter(p => inProgressList.includes(p.rowId)).length;
+    }
+
+    const unallocatedAreas = Math.max(0, totalAreas - doneAreas - progAreas);
+    const progressPercent = totalAreas > 0 ? Math.round((doneAreas / totalAreas) * 100) : 0;
+
+    if (doneAreasEl) doneAreasEl.textContent = doneAreas.toLocaleString();
+    if (totalAreasEl) totalAreasEl.textContent = totalAreas.toLocaleString();
+    if (progressBadgeEl) progressBadgeEl.textContent = `${progressPercent}%`;
+    if (unallocatedEl) unallocatedEl.textContent = unallocatedAreas.toLocaleString();
+    if (inProgressEl) inProgressEl.textContent = progAreas.toLocaleString();
+    if (completedEl) completedEl.textContent = doneAreas.toLocaleString();
+
+    if (districtLabelEl) {
+      const districtCode = DashboardState.summary?.districtName;
+      const labelPrefix = districtCode ? districtCode : '全域';
+      districtLabelEl.textContent = isAll ? `${labelPrefix} (${totalAreas}エリア)` : `${selected} (${totalAreas}エリア)`;
+    }
+
+    if (masterLabelEl) {
+      masterLabelEl.textContent = `${totalAreas}マスターピン連動`;
+    }
   }
+
+  // --- ここから Backend SSOT 由来の描画（Master状態に関係なく実行）---
 
   // 2. 保有チラシの描画
   renderStockFacts(DashboardState.stocks, selected);
@@ -951,7 +1086,7 @@ function switchView(type) {
     if (DashboardState.map) {
       setTimeout(() => {
         DashboardState.map.invalidateSize();
-        renderPinsOnMap(DashboardState.map, DashboardState.markersLayer, DashboardState.masterPins858);
+        renderPinsOnMap(DashboardState.map, DashboardState.markersLayer, DashboardState.masterPins);
       }, 50);
     }
   } else if (targetView === 'records') {

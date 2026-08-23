@@ -147,7 +147,7 @@
 <body class="bg-appBg text-textMain h-screen h-[100dvh] w-screen overflow-hidden flex antialiased">
 
   <!-- ==================== LEFT SIDEBAR (NAV & SYSTEM LINE) ==================== -->
-  <aside class="w-56 bg-containerBg border-r border-borderNormal p-3 flex flex-col justify-between flex-shrink-0 z-20">
+  <aside class="w-56 bg-containerBg border-r border-borderNormal p-3 flex flex-col justify-between flex-shrink-0 z-20 overflow-y-auto">
 
     <!-- Top: Branding (公式ロゴ: 大型正円) -->
     <div>
@@ -157,11 +157,15 @@
         </div>
       </div>
 
-      <!-- 自治体セレクター (SSOTから動的生成) -->
-      <div class="mt-3">
-        <select id="city-selector" onchange="onCitySelected(this.value)" class="w-full h-10 bg-[#0B1019] text-white border border-borderNormal hover:border-brand/50 rounded-xl px-3 text-sm font-semibold focus:outline-none focus:border-brand cursor-pointer transition-colors shadow-inner text-center">
-          <option value="ALL">全域</option>
-        </select>
+      <!-- 自治体セレクター (左ナビ内完結・インラインアコーディオン) -->
+      <div id="city-selector-container" class="mt-3">
+        <button id="city-selector-trigger" type="button" onclick="toggleCityDropdown()" aria-expanded="false" class="w-full h-10 bg-[#0B1019] text-white border border-borderNormal hover:border-brand/50 rounded-xl px-3 text-sm font-semibold flex items-center justify-between transition-colors shadow-inner cursor-pointer">
+          <span id="city-selector-current" class="truncate font-semibold text-white">全域</span>
+          <span id="city-selector-arrow" class="text-xs text-textSub transition-transform duration-200">▼</span>
+        </button>
+        <div id="city-selector-list" class="hidden mt-1.5 p-1 rounded-xl bg-[#0B1019] border border-borderNormal max-h-48 overflow-y-auto space-y-0.5">
+          <!-- populateCitySelector で動的生成 -->
+        </div>
       </div>
 
       <!-- Navigation Menu (枠線付きの1つのブロックに統合) -->
@@ -216,7 +220,7 @@
         <span class="text-[11px] font-medium text-textSub tracking-wider uppercase">配布状況</span>
         <div class="flex items-baseline gap-1">
           <span id="fact-done-areas" class="text-2xl font-bold font-mono text-white leading-none tracking-tight">--</span>
-          <span class="text-xs text-textSub font-mono font-normal">/ <span id="fact-total-areas">858</span></span>
+          <span class="text-xs text-textSub font-mono font-normal">/ <span id="fact-total-areas">--</span></span>
         </div>
         <span id="fact-progress-badge" class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-brand/15 text-brand border border-brand/30">
           --%
@@ -304,8 +308,8 @@
                 <span>完了エリア</span>
               </div>
             </div>
-            <div class="text-[9px] text-textSub/60 font-mono">
-              858マスターピン連動
+            <div id="master-pin-label" class="text-[9px] text-textSub/60 font-mono">
+              マスターピン連動
             </div>
           </div>
         </div>
