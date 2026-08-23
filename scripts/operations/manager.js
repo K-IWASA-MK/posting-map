@@ -673,18 +673,12 @@ function renderStockFacts(stocks, selectedCity) {
 }
 
 /**
- * 配布実績・現場稼働の描画（ヘッダー稼働人数および最下部 Activity Stream の更新）
+ * 配布実績・現場稼働の描画（画面最下部 Activity Stream の更新）
  */
 function renderRankingFacts(ranking) {
   const rankingList = ranking || [];
 
-  // 1. 配布した人の実人数（ヘッダー事実数字: 現場アプリのランキング件数と完全一致）
-  const activeMembersEl = document.getElementById('fact-active-members');
-  if (activeMembersEl) {
-    activeMembersEl.textContent = rankingList.length;
-  }
-
-  // 2. Activity Stream（画面最下部: 時系列現場ログフィード）
+  // Activity Stream（画面最下部: 時系列現場ログフィード）
   const recordsListEl = document.getElementById('distribution-records-list');
   if (recordsListEl) {
     if (rankingList.length === 0) {
