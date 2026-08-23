@@ -682,7 +682,7 @@ function renderStockFacts(stocks, selectedCity) {
 }
 
 /**
- * 最下部 LIVE 配布実績フィードの描画（Backend SSOT: 常時最新3件固定・スライディングウィンドウ）
+ * 最下部 LIVE 配布実績フィードの描画（Backend SSOT: 常時最新4件固定・スライディングウィンドウ）
  */
 function renderLiveFeed(liveRecords) {
   const containerEl = document.getElementById('live-feed-container');
@@ -694,12 +694,12 @@ function renderLiveFeed(liveRecords) {
     return;
   }
 
-  // 常時最新3件（新しいものが左）
-  const latest3 = records.slice(0, 3);
-  const isNewArrival = latest3.length > 0 && latest3[0].recordId !== DashboardState.latestSeenRecordId;
+  // 常時最新4件（新しいものが左）
+  const latest4 = records.slice(0, 4);
+  const isNewArrival = latest4.length > 0 && latest4[0].recordId !== DashboardState.latestSeenRecordId;
 
   let html = '';
-  latest3.forEach((rec, idx) => {
+  latest4.forEach((rec, idx) => {
     const isFirstNew = (idx === 0 && isNewArrival);
     const areaText = rec.cityName && rec.townName
       ? `${rec.cityName} ${rec.townName}`
@@ -717,7 +717,7 @@ function renderLiveFeed(liveRecords) {
     `;
 
     // カード間の矢印デリミタ（最後の要素以外）
-    if (idx < latest3.length - 1) {
+    if (idx < latest4.length - 1) {
       html += `<span class="text-[#243044] text-[11px] flex-shrink-0">➔</span>`;
     }
   });
@@ -725,8 +725,8 @@ function renderLiveFeed(liveRecords) {
   containerEl.innerHTML = html;
 
   // 最新レコードIDを記録
-  if (latest3.length > 0) {
-    DashboardState.latestSeenRecordId = latest3[0].recordId;
+  if (latest4.length > 0) {
+    DashboardState.latestSeenRecordId = latest4[0].recordId;
   }
 }
 
