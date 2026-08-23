@@ -254,8 +254,13 @@ if (typeof DistributionRepository === 'undefined') {
         });
       }
 
-      // D列の実際の配布日時（timestamp）の降順（新しい順）で厳密ソート
-      records.sort((a, b) => b.timestamp - a.timestamp);
+      // D列の実際の配布日時（timestamp）の降順、同一timestampの場合は rowId 降順（第2キー）で決定論的ソート
+      records.sort((a, b) => {
+        if (b.timestamp !== a.timestamp) {
+          return b.timestamp - a.timestamp;
+        }
+        return (parseInt(b.rowId, 10) || 0) - (parseInt(a.rowId, 10) || 0);
+      });
 
       return records.slice(0, limit);
     }
