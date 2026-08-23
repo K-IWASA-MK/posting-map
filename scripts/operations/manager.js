@@ -28,10 +28,8 @@ const DashboardState = {
   requests: [], // 受渡要請 (getTransferRequests)
   globalPinStatus: { inProgress: [], completed: [] },
   masterPins858: [], // SSOT 858件マスターピン
-  boundariesGeoJson: null, // 858エリア町丁目境界GeoJSON
+  boundariesGeoJson: null, // 国勢調査小地域境界GeoJSON（純粋地理背景）
   boundariesLayer: null, // Leaflet GeoJSON レイヤー
-  boundaryLayersByRowId: {}, // rowId による O(1) 境界レイヤールックアップ
-  selectedBoundaryLayer: null, // 現在ハイライト中の境界レイヤー
   selectedCity: 'ALL',
   currentFocus: 'areas',
   map: null,
@@ -284,7 +282,8 @@ async function loadAddressMaster858() {
 }
 
 /**
- * 858エリア町丁目境界マスター (data/MIE03_BOUNDARIES.geojson) の取得とレイヤー初期化
+ * 国勢調査小地域境界 (data/MIE03_BOUNDARIES.geojson) の取得と背景レイヤー初期化
+ * - 純粋な地理的背景情報として描画（業務データやrowIdとの紐付けは一切行わない）
  */
 async function loadBoundariesGeoJson() {
   try {
@@ -292,7 +291,6 @@ async function loadBoundariesGeoJson() {
     const geojsonData = await res.json();
     DashboardState.boundariesGeoJson = geojsonData;
 
-    const layerMap = {};
     const layer = L.geoJSON(geojsonData, {
       pane: 'boundariesPane',
       interactive: false, // 境界ポリゴン自体はクリックを奪わずピン操作を最優先
@@ -302,22 +300,15 @@ async function loadBoundariesGeoJson() {
         opacity: 0.55,
         fillColor: '#3B82F6',
         fillOpacity: 0.03
-      }),
-      onEachFeature: (feature, featureLayer) => {
-        const rId = feature.properties && feature.properties.rowId;
-        if (rId) {
-          layerMap[rId] = featureLayer;
-        }
-      }
+      })
     });
 
     DashboardState.boundariesLayer = layer;
-    DashboardState.boundaryLayersByRowId = layerMap;
 
     // ズーム状態に応じて Attach / Detach を判定
     updateBoundariesVisibility();
 
-    console.log(`[Boundaries Layer Loaded] Total: ${Object.keys(layerMap).length} features mapped to rowId`);
+    console.log('[Boundaries Layer Loaded] Pure geographic background layer initialized.');
   } catch (err) {
     console.warn('[Boundaries Load Error - Map continues normally]', err);
   }
@@ -343,41 +334,7 @@ function updateBoundariesVisibility() {
   }
 }
 
-/**
- * rowId に連動した境界ポリゴンのハイライト強調
- */
-function highlightBoundaryByRowId(rowId) {
-  // 前回選択された境界ポリゴンのリセット
-  if (DashboardState.selectedBoundaryLayer) {
-    DashboardState.selectedBoundaryLayer.setStyle({
-      color: '#475569',
-      weight: 1.0,
-      opacity: 0.55,
-      fillColor: '#3B82F6',
-      fillOpacity: 0.03
-    });
-    DashboardState.selectedBoundaryLayer = null;
-  }
-
-  if (!rowId || !DashboardState.boundaryLayersByRowId) return;
-
-  const targetLayer = DashboardState.boundaryLayersByRowId[rowId];
-  if (targetLayer) {
-    targetLayer.setStyle({
-      color: '#EA5F08',
-      weight: 2.5,
-      opacity: 0.95,
-      fillColor: '#EA5F08',
-      fillOpacity: 0.20
-    });
-    if (typeof targetLayer.bringToFront === 'function') {
-      targetLayer.bringToFront();
-    }
-    DashboardState.selectedBoundaryLayer = targetLayer;
-  }
-}
 if (typeof window !== 'undefined') {
-  window.highlightBoundaryByRowId = highlightBoundaryByRowId;
   window.showAreaDetail = showAreaDetail;
   window.closeAreaDetail = closeAreaDetail;
   window.AREA_STATUS_CONFIG = AREA_STATUS_CONFIG;
@@ -569,9 +526,8 @@ function renderPinsOnMap(mapInstance, layerGroup, pins) {
       fillOpacity: statusCfg.fillOpacity
     });
 
-    // タッチ/クリック時の詳細オーバーレイ表示 ＆ 境界ポリゴンハイライト連動 (SSOT準拠: エリア名・状態SSOT・rowId)
+    // タッチ/クリック時の詳細オーバーレイ表示 (SSOT準拠: エリア名・状態SSOT)
     marker.on('click', () => {
-      highlightBoundaryByRowId(pin.rowId);
       showAreaDetail({
         name: pin.fullName,
         statusCfg: statusCfg
@@ -852,7 +808,6 @@ function showAreaDetail(data) {
 function closeAreaDetail() {
   const detailEl = document.getElementById('map-area-detail');
   if (detailEl) detailEl.classList.add('hidden');
-  highlightBoundaryByRowId(null);
 }
 
 /**
