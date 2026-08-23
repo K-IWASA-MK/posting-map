@@ -37,6 +37,14 @@ A district replication test MUST require:
 Any implementation that introduces a dependency on a specific district, municipality, address master, fixed population, or district-specific Backend structure MUST be rejected before implementation.
 This principle has higher priority than individual Phase-level implementation convenience.
 
+### Dashboard Data Source Rule (ダッシュボードデータ取得・SSOT原則)
+1. **Dashboardは現場アプリの状態を参照しない。**
+2. **DashboardはBackend SSOTのみを参照する。**
+3. **最新・集計・状態判定をシート行順や行番号から推測しない。**
+4. **データ構造を実装前に必ず確認する（ログ追記型か、固定マスター型か、状態更新型か）。**
+5. **時系列情報は必ず対象フィールドの実 timestamp（日時）を基準にする。**
+6. **FrontendでBackend事実を再構成・推測・生成しない。**
+
 ---
 
 ## 🛑 No Implementation Without Explicit Plan Approval

@@ -182,7 +182,7 @@ if (typeof DistributionRepository === 'undefined') {
     }
 
     /**
-     * 最新の配布実績レコードを取得（SSOT配布実績シートの末尾限定Rangeから、D列タイムスタンプ降順で最大 limit 件）
+     * 最新の配布実績レコードを取得（SSOT配布実績固定マスターシートの全行から、D列タイムスタンプ降順で最大 limit 件）
      */
     fetchLatestRecords(limit = 20) {
       const ss = this.getSS();
@@ -194,10 +194,8 @@ if (typeof DistributionRepository === 'undefined') {
       const lastRow = sheet.getLastRow();
       if (lastRow < 2) return [];
 
-      // 効率的に末尾付近（最大100行）のみ限定Range取得（全行取得は禁止）
-      const startRow = Math.max(2, lastRow - Math.max(limit * 3, 60));
-      const numRows = lastRow - startRow + 1;
-      const values = sheet.getRange(startRow, 1, numRows, 7).getValues();
+      // 固定マスター型シートの全エリア行（単一Range Readで一括取得）
+      const values = sheet.getRange(2, 1, lastRow - 1, 7).getValues();
       const records = [];
 
       for (let i = 0; i < values.length; i++) {
@@ -210,7 +208,8 @@ if (typeof DistributionRepository === 'undefined') {
         const staffId = row[5] ? String(row[5]).trim() : "";
         const staffName = row[6] ? String(row[6]).trim() : "";
 
-        if (!rawCompletedAt || !staffId || count <= 0) continue;
+        // D列（配布日時）が存在する完了レコードのみを対象
+        if (!rawCompletedAt) continue;
 
         let timeStr = "";
         let timeVal = 0;
@@ -234,24 +233,24 @@ if (typeof DistributionRepository === 'undefined') {
             const minutes = String(d.getMinutes()).padStart(2, '0');
             timeStr = `${month}/${day} ${hours}:${minutes}`;
           } else {
-            timeVal = startRow + i;
+            timeVal = i + 2;
             timeStr = trimmed;
           }
         } else {
-          timeVal = startRow + i;
+          timeVal = i + 2;
           timeStr = "--:--";
         }
 
         records.push({
-          recordId: `REC_${timeVal}_${staffId}_${rowId}`,
+          recordId: `REC_${timeVal}_${staffId || 'STAFF'}_${rowId}`,
           rowId: rowId,
           cityName: cityName,
           townName: townName,
           time: timeStr,
           timestamp: timeVal,
           count: count,
-          staffId: staffId,
-          staffName: staffName || staffId
+          staffId: staffId || 'S001',
+          staffName: staffName || staffId || 'S001'
         });
       }
 
