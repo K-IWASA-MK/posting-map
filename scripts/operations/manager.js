@@ -842,7 +842,7 @@ function renderLiveFeed(liveRecords) {
     const countStr = Number(rec.count || 0).toLocaleString();
 
     html += `
-      <div class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-[#182130] border border-[#243044] text-[11px] text-white flex-shrink-0 ${isFirstNew ? 'live-card-new' : ''}">
+      <div class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-[#0B1019] border border-borderNormal text-[11px] text-white flex-shrink-0 ${isFirstNew ? 'live-card-new' : ''}">
         <span class="w-1.5 h-1.5 rounded-full bg-statusGreen flex-shrink-0"></span>
         <span class="font-mono text-textSub text-[10px] whitespace-nowrap">${rec.time || '--:--'}</span>
         <span class="font-mono font-bold text-brand text-[11px] flex-shrink-0">${rec.staffId || '--'}</span>
