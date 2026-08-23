@@ -653,11 +653,10 @@ function getCityMasterIndex(location, masterCities) {
 }
 
 /**
- * 保有チラシの描画
+ * 保有チラシの描画（ヘッダー事実数字の更新）
  */
 function renderStockFacts(stocks, selectedCity) {
   let totalStock = 0;
-  const locationMap = {};
 
   stocks.forEach(s => {
     const loc = s.location || 'その他拠点';
@@ -665,88 +664,27 @@ function renderStockFacts(stocks, selectedCity) {
     
     // 選択自治体でフィルタ
     if (selectedCity === 'ALL' || loc.includes(selectedCity) || selectedCity.includes(loc)) {
-      locationMap[loc] = (locationMap[loc] || 0) + count;
       totalStock += count;
     }
   });
 
   const totalStocksEl = document.getElementById('fact-total-stocks');
-  const totalSummaryEl = document.getElementById('stock-total-summary');
   if (totalStocksEl) totalStocksEl.textContent = totalStock.toLocaleString();
-  if (totalSummaryEl) totalSummaryEl.textContent = totalStock.toLocaleString();
-
-  // 保有チラシリスト（中段カード）
-  const listEl = document.getElementById('stock-location-list');
-  if (!listEl) return;
-
-  const locations = Object.keys(locationMap);
-  if (locations.length === 0) {
-    listEl.innerHTML = `<div class="text-[11px] text-[#94A3B8]/60 text-center py-2">保管データなし</div>`;
-    return;
-  }
-
-  // DashboardState.cities (SSOT順) に基づいてソート
-  const masterCities = DashboardState.cities || [];
-  locations.sort((a, b) => {
-    const idxA = getCityMasterIndex(a, masterCities);
-    const idxB = getCityMasterIndex(b, masterCities);
-    return idxA - idxB;
-  });
-
-  let html = '';
-  locations.forEach(loc => {
-    const count = locationMap[loc];
-    html += `
-      <div class="flex items-center justify-between p-2 px-2.5 rounded-lg bg-[#182130] border border-[#243044] text-xs">
-        <span class="font-medium text-[#E6ECF3] truncate text-xs">${loc}</span>
-        <div class="flex items-baseline gap-0.5">
-          <span class="font-mono font-bold text-white text-sm">${count.toLocaleString()}</span>
-          <span class="text-[10px] text-[#94A3B8] font-normal">枚</span>
-        </div>
-      </div>
-    `;
-  });
-  listEl.innerHTML = html;
 }
 
 /**
- * 配布実績ランキングの描画（現場アプリの計算済み結果をそのまま表示）
+ * 配布実績・現場稼働の描画（ヘッダー稼働人数および最下部 Activity Stream の更新）
  */
 function renderRankingFacts(ranking) {
   const rankingList = ranking || [];
 
-  // 1. 配布した人の実人数（現場アプリのランキング件数と完全一致）
+  // 1. 配布した人の実人数（ヘッダー事実数字: 現場アプリのランキング件数と完全一致）
   const activeMembersEl = document.getElementById('fact-active-members');
   if (activeMembersEl) {
     activeMembersEl.textContent = rankingList.length;
   }
 
-  // 2. 配布トップ（実データが存在する場合のみ表示）
-  const topMember = rankingList.length > 0 ? rankingList[0] : null;
-
-  const topBadgeEl = document.getElementById('top-ranking-badge');
-  const topRankEl = document.getElementById('top-ranking-rank');
-  const topStaffIdEl = document.getElementById('top-ranking-staff-id');
-  const topStaffNameEl = document.getElementById('top-ranking-staff-name');
-  const topCountEl = document.getElementById('top-ranking-count');
-
-  if (topMember) {
-    const rank = topMember.rank || 1;
-    if (topBadgeEl) topBadgeEl.textContent = rank === 1 ? '🥇' : (rank === 2 ? '🥈' : (rank === 3 ? '🥉' : '🏆'));
-    if (topRankEl) topRankEl.textContent = `第${rank}位`;
-    if (topStaffIdEl) topStaffIdEl.textContent = topMember.staffId;
-    if (topStaffNameEl) topStaffNameEl.textContent = topMember.name || topMember.staffId;
-    if (topCountEl) topCountEl.textContent = Number(topMember.count || 0).toLocaleString();
-  } else {
-    // 実データが存在しない場合
-    if (topBadgeEl) topBadgeEl.textContent = '🏆';
-    if (topRankEl) topRankEl.textContent = '--';
-    if (topStaffIdEl) topStaffIdEl.textContent = '--';
-    if (topStaffNameEl) topStaffNameEl.textContent = '配布実績データなし';
-    if (topCountEl) topCountEl.textContent = '0';
-  }
-
-  // 3. Activity Stream（時系列現場ログフィード）
+  // 2. Activity Stream（画面最下部: 時系列現場ログフィード）
   const recordsListEl = document.getElementById('distribution-records-list');
   if (recordsListEl) {
     if (rankingList.length === 0) {
