@@ -182,7 +182,7 @@ if (typeof DistributionRepository === 'undefined') {
     }
 
     /**
-     * 最新の配布実績レコードを取得（SSOT配布実績シートの末尾から最大 limit 件）
+     * 最新の配布実績レコードを取得（SSOT配布実績シートの末尾限定Rangeから、D列タイムスタンプ降順で最大 limit 件）
      */
     fetchLatestRecords(limit = 20) {
       const ss = this.getSS();
@@ -194,13 +194,13 @@ if (typeof DistributionRepository === 'undefined') {
       const lastRow = sheet.getLastRow();
       if (lastRow < 2) return [];
 
-      const startRow = Math.max(2, lastRow - limit * 3); // 効率的に末尾付近を取得
+      // 効率的に末尾付近（最大100行）のみ限定Range取得（全行取得は禁止）
+      const startRow = Math.max(2, lastRow - Math.max(limit * 3, 60));
       const numRows = lastRow - startRow + 1;
       const values = sheet.getRange(startRow, 1, numRows, 7).getValues();
       const records = [];
 
-      // 末尾（最新行）から逆順に走査
-      for (let i = values.length - 1; i >= 0; i--) {
+      for (let i = 0; i < values.length; i++) {
         const row = values[i];
         const rowId = row[0];
         const cityName = row[1] ? String(row[1]).trim() : "";
@@ -214,20 +214,29 @@ if (typeof DistributionRepository === 'undefined') {
 
         let timeStr = "";
         let timeVal = 0;
+
         if (rawCompletedAt instanceof Date && !isNaN(rawCompletedAt.getTime())) {
           timeVal = rawCompletedAt.getTime();
+          const month = String(rawCompletedAt.getMonth() + 1).padStart(2, '0');
+          const day = String(rawCompletedAt.getDate()).padStart(2, '0');
           const hours = String(rawCompletedAt.getHours()).padStart(2, '0');
           const minutes = String(rawCompletedAt.getMinutes()).padStart(2, '0');
-          timeStr = `${hours}:${minutes}`;
+          timeStr = `${month}/${day} ${hours}:${minutes}`;
         } else if (typeof rawCompletedAt === 'string') {
-          const match = rawCompletedAt.match(/(\d{1,2}):(\d{2})/);
-          if (match) {
-            timeStr = `${match[1].padStart(2, '0')}:${match[2]}`;
+          const trimmed = rawCompletedAt.trim();
+          const parsed = Date.parse(trimmed.replace(/-/g, '/'));
+          if (!isNaN(parsed)) {
+            timeVal = parsed;
+            const d = new Date(parsed);
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const hours = String(d.getHours()).padStart(2, '0');
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            timeStr = `${month}/${day} ${hours}:${minutes}`;
           } else {
-            timeStr = rawCompletedAt;
+            timeVal = startRow + i;
+            timeStr = trimmed;
           }
-          const parsed = Date.parse(rawCompletedAt.replace(/-/g, '/'));
-          timeVal = isNaN(parsed) ? (startRow + i) : parsed;
         } else {
           timeVal = startRow + i;
           timeStr = "--:--";
@@ -239,15 +248,17 @@ if (typeof DistributionRepository === 'undefined') {
           cityName: cityName,
           townName: townName,
           time: timeStr,
+          timestamp: timeVal,
           count: count,
           staffId: staffId,
           staffName: staffName || staffId
         });
-
-        if (records.length >= limit) break;
       }
 
-      return records;
+      // D列の実際の配布日時（timestamp）の降順（新しい順）で厳密ソート
+      records.sort((a, b) => b.timestamp - a.timestamp);
+
+      return records.slice(0, limit);
     }
   };
   DistributionRepository.instance = null;
