@@ -26,6 +26,8 @@ const DashboardState = {
   ranking: [], // 現場アプリと完全同一の計算済みランキング (getRanking)
   roster: [],
   requests: [], // 受渡要請 (getTransferRequests)
+  liveRecords: [], // Backendから取得した最新配布実績レコード (SSOT)
+  latestSeenRecordId: null, // アニメーション検知用最新レコードID
   globalPinStatus: { inProgress: [], completed: [] },
   masterPins858: [], // SSOT 858件マスターピン
   boundariesGeoJson: null, // 国勢調査小地域境界GeoJSON（純粋地理背景）
@@ -413,14 +415,15 @@ function initMap() {
  */
 async function syncDashboardData() {
   try {
-    const [summaryRes, tier1Res, stockRes, rankRes, pinStatusRes, rosterRes, reqRes] = await Promise.all([
+    const [summaryRes, tier1Res, stockRes, rankRes, pinStatusRes, rosterRes, reqRes, latestDistRes] = await Promise.all([
       callApiPost('getSystemSummary').catch(e => ({ success: false, error: e.message })),
       callApiPost('getTier1').catch(e => ({ success: false, error: e.message })),
       callApiPost('getFlyerStock').catch(e => ({ success: false, error: e.message })),
       callApiPost('getRanking').catch(e => ({ success: false, error: e.message })),
       callApiPost('getGlobalPinStatus').catch(e => ({ success: false, error: e.message })),
       callApiPost('getRoster').catch(e => ({ success: false, error: e.message })),
-      callApiPost('getTransferRequests').catch(e => ({ success: false, error: e.message }))
+      callApiPost('getTransferRequests').catch(e => ({ success: false, error: e.message })),
+      callApiPost('getLatestDistribution', { limit: 20 }).catch(e => ({ success: false, error: e.message }))
     ]);
 
     const isSummaryOk = summaryRes && summaryRes.success;
@@ -430,6 +433,7 @@ async function syncDashboardData() {
     const isPinStatusOk = pinStatusRes && pinStatusRes.success;
     const isRosterOk = rosterRes && rosterRes.success;
     const isReqOk = reqRes && reqRes.success;
+    const isLatestDistOk = latestDistRes && latestDistRes.success;
 
     // 1. 配布エリア事実データ
     if (isSummaryOk) {
@@ -471,10 +475,15 @@ async function syncDashboardData() {
       DashboardState.ranking = [];
     }
 
-    // 8. 現在選択中の自治体に合わせて画面全体を再描画
+    // 8. 最新配布実績レコード (Backend SSOT)
+    if (isLatestDistOk && Array.isArray(latestDistRes.records)) {
+      DashboardState.liveRecords = latestDistRes.records;
+    }
+
+    // 9. 現在選択中の自治体に合わせて画面全体を再描画
     renderCurrentView();
 
-    // 9. 通常マップのピンを再描画
+    // 10. 通常マップのピンを再描画
     if (DashboardState.map && DashboardState.markersLayer) {
       renderPinsOnMap(DashboardState.map, DashboardState.markersLayer, DashboardState.masterPins858);
     }
@@ -617,8 +626,8 @@ function renderCurrentView() {
   // 2. 保有チラシの描画
   renderStockFacts(DashboardState.stocks, selected);
 
-  // 3. 配布実績ランキングの描画（現場アプリの計算済み結果を直接利用）
-  renderRankingFacts(DashboardState.ranking);
+  // 3. 最下部 LIVE 配布実績フィードの描画 (Backend SSOT)
+  renderLiveFeed(DashboardState.liveRecords);
 
   // 4. 現在アクティブな中央メインステージのビューを再描画
   if (DashboardState.currentFocus === 'records') renderMainStageRecords(DashboardState.ranking);
@@ -673,40 +682,52 @@ function renderStockFacts(stocks, selectedCity) {
 }
 
 /**
- * 配布実績・現場稼働の描画（画面最下部 Activity Stream の更新）
+ * 最下部 LIVE 配布実績フィードの描画（Backend SSOT: 常時最新3件固定・スライディングウィンドウ）
  */
-function renderRankingFacts(ranking) {
-  const rankingList = ranking || [];
+function renderLiveFeed(liveRecords) {
+  const containerEl = document.getElementById('live-feed-container');
+  if (!containerEl) return;
 
-  // Activity Stream（画面最下部: 時系列現場ログフィード）
-  const recordsListEl = document.getElementById('distribution-records-list');
-  if (recordsListEl) {
-    if (rankingList.length === 0) {
-      recordsListEl.innerHTML = `<div class="text-[11px] text-[#94A3B8]/60 py-0.5">配布実績データはありません</div>`;
-      return;
+  const records = Array.isArray(liveRecords) ? liveRecords : [];
+  if (records.length === 0) {
+    containerEl.innerHTML = `<div class="text-[11px] text-[#94A3B8]/60 py-0.5">配布実績データはありません</div>`;
+    return;
+  }
+
+  // 常時最新3件（新しいものが左）
+  const latest3 = records.slice(0, 3);
+  const isNewArrival = latest3.length > 0 && latest3[0].recordId !== DashboardState.latestSeenRecordId;
+
+  let html = '';
+  latest3.forEach((rec, idx) => {
+    const isFirstNew = (idx === 0 && isNewArrival);
+    const areaText = rec.cityName && rec.townName
+      ? `${rec.cityName} ${rec.townName}`
+      : (rec.townName || rec.cityName || `エリア #${rec.rowId}`);
+    const countStr = Number(rec.count || 0).toLocaleString();
+
+    html += `
+      <div class="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#182130] border border-[#243044] text-xs text-white flex-shrink-0 ${isFirstNew ? 'live-card-new' : ''}">
+        <span class="w-1.5 h-1.5 rounded-full bg-statusGreen"></span>
+        <span class="font-mono text-textSub text-[11px]">${rec.time || '--:--'}</span>
+        <span class="font-mono font-bold text-brand text-[11px]">${rec.staffId || '--'}</span>
+        <span class="font-medium text-white truncate max-w-[150px] text-xs">${areaText}</span>
+        <span class="font-mono font-bold text-white text-xs">${countStr}<span class="text-[10px] font-normal text-textSub ml-0.5">枚</span></span>
+        <span class="text-[10px] text-statusGreen px-1.5 py-0.2 rounded bg-statusGreen/15 font-normal whitespace-nowrap">配布完了</span>
+      </div>
+    `;
+
+    // カード間の矢印デリミタ（最後の要素以外）
+    if (idx < latest3.length - 1) {
+      html += `<span class="text-[#243044] text-xs flex-shrink-0">➔</span>`;
     }
+  });
 
-    let recordsHtml = '';
-    rankingList.slice(0, 8).forEach((item, idx) => {
-      const rank = item.rank || (idx + 1);
-      let rankIcon = '●';
-      let rankColor = 'text-brand';
-      if (rank === 1) rankIcon = '🥇';
-      else if (rank === 2) rankIcon = '🥈';
-      else if (rank === 3) rankIcon = '🥉';
+  containerEl.innerHTML = html;
 
-      recordsHtml += `
-        <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[#182130] border border-[#243044] text-[11px] flex-shrink-0 whitespace-nowrap">
-          <span class="${rankColor} font-normal">${rankIcon}</span>
-          <span class="font-mono font-semibold text-white">${item.staffId}</span>
-          ${item.name ? `<span class="text-[#94A3B8] font-normal">(${item.name})</span>` : ''}
-          <span class="font-mono font-bold text-white">${(Number(item.count) || 0).toLocaleString()}枚</span>
-          <span class="text-[10px] text-statusGreen font-normal">✓ 完了</span>
-        </div>
-        ${idx < rankingList.slice(0, 8).length - 1 ? '<span class="text-[#243044] text-[11px] flex-shrink-0">➔</span>' : ''}
-      `;
-    });
-    recordsListEl.innerHTML = recordsHtml;
+  // 最新レコードIDを記録
+  if (latest3.length > 0) {
+    DashboardState.latestSeenRecordId = latest3[0].recordId;
   }
 }
 

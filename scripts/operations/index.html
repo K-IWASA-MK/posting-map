@@ -127,6 +127,21 @@
     .leaflet-tile-pane img {
       filter: brightness(0.78) saturate(0.72) contrast(1.05);
     }
+
+    /* LIVE feed smooth slide-in */
+    @keyframes liveSlideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    .live-card-new {
+      animation: liveSlideIn 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
   </style>
 </head>
 <body class="bg-appBg text-textMain h-screen h-[100dvh] w-screen overflow-hidden flex antialiased">
@@ -357,18 +372,18 @@
 
     </div>
 
-    <!-- ========== ④ ACTIVITY STREAM (現場時間軸ストリーム) 【常時固定】 ========== -->
-    <div id="activity-stream-bar" class="h-9 pm-card px-3 flex items-center justify-between flex-shrink-0 overflow-hidden">
+    <!-- ========== ④ LIVE (最新配布実績フィード: 常時最新3件固定) 【常時固定】 ========== -->
+    <div id="live-feed-bar" class="h-9 pm-card px-3 flex items-center justify-between flex-shrink-0 overflow-hidden">
       <div class="flex items-center gap-1.5 flex-shrink-0">
-        <span class="text-sm opacity-80">⏱</span>
-        <span class="font-bold text-[11px] text-textSub tracking-wider uppercase whitespace-nowrap">ACTIVITY STREAM</span>
+        <span class="w-2 h-2 rounded-full bg-statusGreen animate-pulse"></span>
+        <span class="font-bold text-[11px] text-white tracking-wider uppercase whitespace-nowrap">LIVE</span>
       </div>
 
       <div class="h-3.5 w-px bg-borderNormal mx-2.5 flex-shrink-0"></div>
 
-      <!-- 横スクロール時系列ログフィード -->
-      <div id="distribution-records-list" class="flex-1 flex items-center gap-2 overflow-x-auto hide-scrollbar px-1 min-w-0">
-        <div class="text-[11px] text-textSub/50">データ読み込み中...</div>
+      <!-- 常時3件固定スライディングウィンドウ -->
+      <div id="live-feed-container" class="flex-1 flex items-center gap-2.5 overflow-hidden px-1 min-w-0">
+        <div class="text-[11px] text-textSub/50">Backend配布実績データ読み込み中...</div>
       </div>
     </div>
   </main>

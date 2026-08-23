@@ -48,6 +48,7 @@ function doGet(e) {
     'getTier1',
     'getFlyerStock',
     'getRanking',
+    'getLatestDistribution',
     'getMapsApiKey',
     'getDeliveryStats',
     'getEvidence',
@@ -91,6 +92,16 @@ function processGetActionLegacy(action, e) {
         break;
       case 'getRanking':
         response = { success: true, ranking: getRankingData() };
+        break;
+      case 'getLatestDistribution':
+        try {
+          const records = typeof DistributionRepository !== 'undefined' && DistributionRepository.getInstance
+            ? DistributionRepository.getInstance().fetchLatestRecords(20)
+            : [];
+          response = { success: true, records: records };
+        } catch (err) {
+          response = { success: false, error: err.toString(), records: [] };
+        }
         break;
       case 'getRoster':
         response = { success: true, roster: getRoster() };
@@ -148,6 +159,7 @@ function doPost(e) {
     'getTier1',
     'getFlyerStock',
     'getRanking',
+    'getLatestDistribution',
     'getMapsApiKey',
     'getDeliveryStats',
     'getEvidence',
@@ -220,6 +232,15 @@ function processPostAction(action, postData, e) {
 
     case 'getRanking':
       return { success: true, ranking: getRankingData() };
+    case 'getLatestDistribution':
+      try {
+        const records = typeof DistributionRepository !== 'undefined' && DistributionRepository.getInstance
+          ? DistributionRepository.getInstance().fetchLatestRecords(postData.limit || 20)
+          : [];
+        return { success: true, records: records };
+      } catch (err) {
+        return { success: false, error: err.toString(), records: [] };
+      }
     case 'getRoster':
       return { success: true, roster: getRoster() };
     case 'getAreaDetails':

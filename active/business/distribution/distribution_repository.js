@@ -180,6 +180,75 @@ if (typeof DistributionRepository === 'undefined') {
         };
       });
     }
+
+    /**
+     * 最新の配布実績レコードを取得（SSOT配布実績シートの末尾から最大 limit 件）
+     */
+    fetchLatestRecords(limit = 20) {
+      const ss = this.getSS();
+      if (!ss) return [];
+
+      const sheet = ss.getSheetByName("配布実績");
+      if (!sheet) return [];
+
+      const lastRow = sheet.getLastRow();
+      if (lastRow < 2) return [];
+
+      const startRow = Math.max(2, lastRow - limit * 3); // 効率的に末尾付近を取得
+      const numRows = lastRow - startRow + 1;
+      const values = sheet.getRange(startRow, 1, numRows, 7).getValues();
+      const records = [];
+
+      // 末尾（最新行）から逆順に走査
+      for (let i = values.length - 1; i >= 0; i--) {
+        const row = values[i];
+        const rowId = row[0];
+        const cityName = row[1] ? String(row[1]).trim() : "";
+        const townName = row[2] ? String(row[2]).trim() : "";
+        const rawCompletedAt = row[3];
+        const count = parseFloat(row[4]) || 0;
+        const staffId = row[5] ? String(row[5]).trim() : "";
+        const staffName = row[6] ? String(row[6]).trim() : "";
+
+        if (!rawCompletedAt || !staffId || count <= 0) continue;
+
+        let timeStr = "";
+        let timeVal = 0;
+        if (rawCompletedAt instanceof Date && !isNaN(rawCompletedAt.getTime())) {
+          timeVal = rawCompletedAt.getTime();
+          const hours = String(rawCompletedAt.getHours()).padStart(2, '0');
+          const minutes = String(rawCompletedAt.getMinutes()).padStart(2, '0');
+          timeStr = `${hours}:${minutes}`;
+        } else if (typeof rawCompletedAt === 'string') {
+          const match = rawCompletedAt.match(/(\d{1,2}):(\d{2})/);
+          if (match) {
+            timeStr = `${match[1].padStart(2, '0')}:${match[2]}`;
+          } else {
+            timeStr = rawCompletedAt;
+          }
+          const parsed = Date.parse(rawCompletedAt.replace(/-/g, '/'));
+          timeVal = isNaN(parsed) ? (startRow + i) : parsed;
+        } else {
+          timeVal = startRow + i;
+          timeStr = "--:--";
+        }
+
+        records.push({
+          recordId: `REC_${timeVal}_${staffId}_${rowId}`,
+          rowId: rowId,
+          cityName: cityName,
+          townName: townName,
+          time: timeStr,
+          count: count,
+          staffId: staffId,
+          staffName: staffName || staffId
+        });
+
+        if (records.length >= limit) break;
+      }
+
+      return records;
+    }
   };
   DistributionRepository.instance = null;
 }
