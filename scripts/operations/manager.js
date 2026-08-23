@@ -347,8 +347,8 @@ async function syncDashboardData() {
     }
 
     // 2. 自治体サマリーデータ
-    if (isTier1Ok) {
-      DashboardState.cities = tier1Res.cities || [];
+    if (isTier1Ok && Array.isArray(tier1Res.cities)) {
+      DashboardState.cities = tier1Res.cities.map(c => typeof c === 'string' ? c : (c.name || '')).filter(Boolean);
     }
 
     // 3. 保有チラシデータ
@@ -544,13 +544,15 @@ function renderCurrentView() {
 function getCityMasterIndex(location, masterCities) {
   if (!location || !masterCities || masterCities.length === 0) return 99999;
   
+  const cityNames = masterCities.map(c => typeof c === 'string' ? c : (c.name || '')).filter(Boolean);
+
   // 1. 完全一致
-  const exactIdx = masterCities.indexOf(location);
+  const exactIdx = cityNames.indexOf(location);
   if (exactIdx !== -1) return exactIdx;
 
   // 2. 前方一致 / 包含一致
-  for (let i = 0; i < masterCities.length; i++) {
-    const city = masterCities[i];
+  for (let i = 0; i < cityNames.length; i++) {
+    const city = cityNames[i];
     if (location.startsWith(city) || location.includes(city)) {
       return i;
     }
