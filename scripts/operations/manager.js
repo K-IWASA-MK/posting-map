@@ -707,13 +707,12 @@ function renderLiveFeed(liveRecords) {
     const countStr = Number(rec.count || 0).toLocaleString();
 
     html += `
-      <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-[#182130] border border-[#243044] text-[11px] text-white flex-shrink-0 ${isFirstNew ? 'live-card-new' : ''}">
+      <div class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-[#182130] border border-[#243044] text-[11px] text-white flex-shrink-0 ${isFirstNew ? 'live-card-new' : ''}">
         <span class="w-1.5 h-1.5 rounded-full bg-statusGreen flex-shrink-0"></span>
         <span class="font-mono text-textSub text-[10px] whitespace-nowrap">${rec.time || '--:--'}</span>
         <span class="font-mono font-bold text-brand text-[11px] flex-shrink-0">${rec.staffId || '--'}</span>
-        <span class="font-medium text-white truncate max-w-[125px] text-[11px]">${areaText}</span>
+        <span class="font-medium text-white truncate max-w-[155px] text-[11px]">${areaText}</span>
         <span class="font-mono font-bold text-white text-[11px] flex-shrink-0">${countStr}<span class="text-[9px] font-normal text-textSub ml-0.5">枚</span></span>
-        <span class="text-[9px] text-statusGreen px-1 py-0.2 rounded bg-statusGreen/15 font-normal whitespace-nowrap flex-shrink-0">配布完了</span>
       </div>
     `;
 
