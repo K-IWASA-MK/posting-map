@@ -709,7 +709,6 @@ function renderCurrentView() {
   const inProgressEl = document.getElementById('fact-inprogress-areas');
   const completedEl = document.getElementById('fact-completed-areas');
   const districtLabelEl = document.getElementById('map-district-label');
-  const masterLabelEl = document.getElementById('master-pin-label');
 
   // --- マスター件数（Static Master 由来）---
   // 3状態: PENDING(--) / LOADED(実件数) / ERROR(ERR)
@@ -749,10 +748,6 @@ function renderCurrentView() {
       const districtCode = DashboardState.summary?.districtName;
       const labelPrefix = districtCode ? districtCode : '全域';
       districtLabelEl.textContent = isAll ? `${labelPrefix} (${totalAreas}エリア)` : `${selected} (${totalAreas}エリア)`;
-    }
-
-    if (masterLabelEl) {
-      masterLabelEl.textContent = `${totalAreas}マスターピン連動`;
     }
   }
 

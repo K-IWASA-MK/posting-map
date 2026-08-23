@@ -215,8 +215,8 @@
     <!-- ========== ① 統括状況 BAR (単一の統合計器ライン) ========== -->
     <div id="situation-bar" class="h-11 flex-shrink-0 flex items-center justify-between px-3 bg-containerBg border border-borderNormal rounded-xl overflow-hidden">
 
-      <!-- Left: 配布状況進捗 -->
-      <div class="flex items-center gap-2.5 flex-shrink-0">
+      <!-- Left: 配布状況カード -->
+      <div class="flex items-center gap-2.5 px-3 py-1 rounded-lg bg-[#0B1019] border border-borderNormal flex-shrink-0">
         <span class="text-[11px] font-medium text-textSub tracking-wider uppercase">配布状況</span>
         <div class="flex items-baseline gap-1">
           <span id="fact-done-areas" class="text-2xl font-bold font-mono text-white leading-none tracking-tight">--</span>
@@ -227,27 +227,27 @@
         </span>
       </div>
 
-      <!-- Mid-Left: 内訳インジケーター (未/中/済) -->
-      <div class="hidden md:flex items-center gap-3 px-3 py-1 rounded-lg bg-[#0B1019] border border-borderNormal text-xs flex-shrink-0 font-mono">
-        <div class="flex items-center gap-1">
+      <!-- Mid-Left: 内訳インジケーターカード (未配布/配布中/完了) -->
+      <div class="hidden md:flex items-center gap-3.5 px-3.5 py-1 rounded-lg bg-[#0B1019] border border-borderNormal text-xs flex-shrink-0 font-mono">
+        <div class="flex items-center gap-1.5">
           <span class="w-2 h-2 rounded-full bg-statusGreen"></span>
-          <span class="text-textSub font-normal">未</span>
+          <span class="text-textSub font-normal">未配布</span>
           <span id="fact-unallocated-areas" class="font-semibold text-white">--</span>
         </div>
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-1.5">
           <span class="w-2 h-2 rounded-full bg-brandBlue"></span>
-          <span class="text-textSub font-normal">中</span>
+          <span class="text-textSub font-normal">配布中</span>
           <span id="fact-inprogress-areas" class="font-semibold text-white">--</span>
         </div>
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-1.5">
           <span class="w-2 h-2 rounded-full bg-brand"></span>
-          <span class="text-textSub font-normal">済</span>
+          <span class="text-textSub font-normal">完了</span>
           <span id="fact-completed-areas" class="font-semibold text-white">--</span>
         </div>
       </div>
 
-      <!-- Right: リソース残量 (在庫) -->
-      <div class="flex items-center gap-2 flex-shrink-0 text-xs pr-1">
+      <!-- Right: 在庫カード -->
+      <div class="flex items-center gap-2 px-3 py-1 rounded-lg bg-[#0B1019] border border-borderNormal flex-shrink-0 text-xs">
         <div class="flex items-center gap-1.5">
           <span class="text-xs opacity-70">📦</span>
           <span class="text-[11px] font-medium text-textSub">在庫</span>
@@ -289,27 +289,6 @@
                 </div>
                 <button onclick="closeAreaDetail()" class="text-textSub hover:text-white px-2 py-1 text-xs flex-shrink-0">✕</button>
               </div>
-            </div>
-          </div>
-
-          <!-- 地図内フッター: 状態凡例バー -->
-          <div class="flex items-center justify-between px-2 pt-1.5 flex-shrink-0 text-[10px] text-textSub font-medium">
-            <div class="flex items-center gap-3">
-              <div class="flex items-center gap-1">
-                <span class="w-2 h-2 rounded-full bg-statusGreen"></span>
-                <span>未配布エリア</span>
-              </div>
-              <div class="flex items-center gap-1">
-                <span class="w-2 h-2 rounded-full bg-brandBlue"></span>
-                <span>配布中エリア</span>
-              </div>
-              <div class="flex items-center gap-1">
-                <span class="w-2 h-2 rounded-full bg-brand"></span>
-                <span>完了エリア</span>
-              </div>
-            </div>
-            <div id="master-pin-label" class="text-[9px] text-textSub/60 font-mono">
-              マスターピン連動
             </div>
           </div>
         </div>
