@@ -607,9 +607,12 @@ function renderStockFacts(stocks, selectedCity) {
   locations.forEach(loc => {
     const count = locationMap[loc];
     html += `
-      <div class="flex items-center justify-between p-1.5 px-2 rounded-lg bg-[#182130] border border-[#243044] text-xs">
+      <div class="flex items-center justify-between p-2 px-2.5 rounded-lg bg-[#182130] border border-[#243044] text-xs">
         <span class="font-medium text-[#E6ECF3] truncate text-xs">${loc}</span>
-        <span class="font-mono font-bold text-white text-sm">${count.toLocaleString()} <span class="text-[10px] text-[#94A3B8] font-normal">枚</span></span>
+        <div class="flex items-baseline gap-0.5">
+          <span class="font-mono font-bold text-white text-sm">${count.toLocaleString()}</span>
+          <span class="text-[10px] text-[#94A3B8] font-normal">枚</span>
+        </div>
       </div>
     `;
   });
@@ -672,11 +675,11 @@ function renderRankingFacts(ranking) {
 
       recordsHtml += `
         <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[#182130] border border-[#243044] text-[11px] flex-shrink-0 whitespace-nowrap">
-          <span class="${rankColor} font-bold">${rankIcon}</span>
-          <span class="font-mono font-bold text-white">${item.staffId}</span>
-          ${item.name ? `<span class="text-[#94A3B8] font-medium">(${item.name})</span>` : ''}
-          <span class="font-mono font-bold text-brandLight">${(Number(item.count) || 0).toLocaleString()}枚</span>
-          <span class="text-[10px] text-statusGreen font-semibold">✓ 完了</span>
+          <span class="${rankColor} font-normal">${rankIcon}</span>
+          <span class="font-mono font-semibold text-white">${item.staffId}</span>
+          ${item.name ? `<span class="text-[#94A3B8] font-normal">(${item.name})</span>` : ''}
+          <span class="font-mono font-bold text-white">${(Number(item.count) || 0).toLocaleString()}枚</span>
+          <span class="text-[10px] text-statusGreen font-normal">✓ 完了</span>
         </div>
         ${idx < rankingList.slice(0, 8).length - 1 ? '<span class="text-[#243044] text-[11px] flex-shrink-0">➔</span>' : ''}
       `;
@@ -730,35 +733,35 @@ function renderMainStageRecords(ranking) {
     return;
   }
 
-  let html = '<div class="space-y-2">';
+  let html = '<div class="space-y-1.5">';
   rankingList.forEach((item, index) => {
     const rank = item.rank || (index + 1);
     let rankBadgeHtml = '';
     if (rank === 1) {
-      rankBadgeHtml = `<span class="w-7 h-7 flex items-center justify-center text-lg select-none">🥇</span>`;
+      rankBadgeHtml = `<span class="w-7 h-7 flex items-center justify-center text-base select-none">🥇</span>`;
     } else if (rank === 2) {
-      rankBadgeHtml = `<span class="w-7 h-7 flex items-center justify-center text-lg select-none">🥈</span>`;
+      rankBadgeHtml = `<span class="w-7 h-7 flex items-center justify-center text-base select-none">🥈</span>`;
     } else if (rank === 3) {
-      rankBadgeHtml = `<span class="w-7 h-7 flex items-center justify-center text-lg select-none">🥉</span>`;
+      rankBadgeHtml = `<span class="w-7 h-7 flex items-center justify-center text-base select-none">🥉</span>`;
     } else {
-      rankBadgeHtml = `<span class="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black font-mono bg-white/5 text-white/50">${rank}</span>`;
+      rankBadgeHtml = `<span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold font-mono bg-white/5 text-white/70">${rank}</span>`;
     }
 
     html += `
-      <div class="flex items-center justify-between p-3 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
+      <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
         <div class="flex items-center gap-3">
           ${rankBadgeHtml}
           <div>
             <div class="flex items-center gap-2">
-              <span class="font-bold text-[#E6ECF3] text-base font-mono">${item.staffId}</span>
-              ${item.name ? `<span class="text-sm text-[#94A3B8]">(${item.name})</span>` : ''}
+              <span class="font-semibold text-white text-sm font-mono">${item.staffId}</span>
+              ${item.name ? `<span class="text-xs text-[#94A3B8] font-normal">(${item.name})</span>` : ''}
             </div>
-            <div class="text-xs text-statusGreen font-semibold mt-0.5">● 稼働確認済</div>
+            <div class="text-[11px] text-statusGreen font-normal mt-0.5">● 稼働確認済</div>
           </div>
         </div>
         <div class="text-right">
-          <span class="text-xl font-mono font-black text-white">${(Number(item.count) || 0).toLocaleString()}</span>
-          <span class="text-sm text-[#94A3B8] ml-0.5">枚 完了</span>
+          <span class="text-lg font-mono font-bold text-white">${(Number(item.count) || 0).toLocaleString()}</span>
+          <span class="text-xs text-[#94A3B8] font-normal ml-0.5">枚 完了</span>
         </div>
       </div>
     `;
@@ -788,17 +791,17 @@ function renderMainStageStocks(stocks) {
     return idxA - idxB;
   });
 
-  let html = '<div class="space-y-2">';
+  let html = '<div class="space-y-1.5">';
   sortedStocks.forEach(s => {
     html += `
-      <div class="flex items-center justify-between p-3 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
+      <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
         <div>
-          <div class="font-bold text-base text-[#E6ECF3]">${s.location || '保管拠点'}</div>
-          <div class="text-sm text-[#94A3B8] mt-0.5">担当: ${s.staffName || s.staffId || '未設定'} ｜ 更新: ${s.updatedAt || '--'}</div>
+          <div class="font-semibold text-sm text-white">${s.location || '保管拠点'}</div>
+          <div class="text-xs text-[#94A3B8] font-normal mt-0.5">担当: ${s.staffName || s.staffId || '未設定'} ｜ 更新: ${s.updatedAt || '--'}</div>
         </div>
         <div class="text-right">
-          <span class="text-2xl font-black font-mono text-white">${(Number(s.count) || 0).toLocaleString()}</span>
-          <span class="text-sm text-[#94A3B8] ml-0.5">枚</span>
+          <span class="text-xl font-bold font-mono text-white">${(Number(s.count) || 0).toLocaleString()}</span>
+          <span class="text-xs text-[#94A3B8] font-normal ml-0.5">枚</span>
         </div>
       </div>
     `;
@@ -820,18 +823,18 @@ function renderMainStageRoster(roster) {
     return;
   }
 
-  let html = '<div class="space-y-2">';
+  let html = '<div class="space-y-1.5">';
   rosterList.forEach(r => {
     html += `
-      <div class="p-3 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] flex items-center justify-between transition-colors">
+      <div class="p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] flex items-center justify-between transition-colors">
         <div class="flex items-center gap-3">
-          <span class="w-8 h-8 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-bold text-sm text-brand">${r.id || ''}</span>
+          <span class="w-7 h-7 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-semibold text-xs text-brand">${r.id || ''}</span>
           <div>
-            <div class="font-bold text-base text-[#E6ECF3]">${r.name || ''}</div>
-            <div class="text-xs text-[#94A3B8] mt-0.5">区分: 正式登録配布員</div>
+            <div class="font-semibold text-sm text-white">${r.name || ''}</div>
+            <div class="text-xs text-[#94A3B8] font-normal mt-0.5">区分: 正式登録配布員</div>
           </div>
         </div>
-        <span class="text-sm text-statusGreen font-semibold px-2 py-1 rounded bg-statusGreen/10 border border-statusGreen/20">有効</span>
+        <span class="text-xs text-statusGreen font-medium px-2 py-0.5 rounded bg-statusGreen/10 border border-statusGreen/20">有効</span>
       </div>
     `;
   });
@@ -852,21 +855,21 @@ function renderMainStageRequests(requests) {
     return;
   }
 
-  let html = '<div class="space-y-2">';
+  let html = '<div class="space-y-1.5">';
   reqList.forEach(req => {
     html += `
-      <div class="p-3 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
+      <div class="p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <span class="font-bold text-base text-[#E6ECF3]">${req.requesterName || req.requesterId}</span>
-            <span class="text-sm text-[#94A3B8]">➔</span>
-            <span class="font-bold text-base text-[#E6ECF3]">${req.holderName || req.holderId}</span>
+            <span class="font-semibold text-sm text-white">${req.requesterName || req.requesterId}</span>
+            <span class="text-xs text-[#94A3B8]">➔</span>
+            <span class="font-semibold text-sm text-white">${req.holderName || req.holderId}</span>
           </div>
-          <span class="font-mono text-sm text-[#94A3B8]">${req.requestTime || ''}</span>
+          <span class="font-mono text-xs text-[#94A3B8] font-normal">${req.requestTime || ''}</span>
         </div>
-        <div class="text-sm text-[#94A3B8] mt-1.5 flex items-center justify-between">
+        <div class="text-xs text-[#94A3B8] font-normal mt-1 flex items-center justify-between">
           <span>連絡先: ${req.contactMethod ? `[${req.contactMethod}] ` : ''}${req.contactValue || ''}</span>
-          <span class="text-brand font-bold text-sm">要請中</span>
+          <span class="text-brand font-medium text-xs">要請中</span>
         </div>
       </div>
     `;
@@ -926,9 +929,9 @@ function updateNavHighlight(activeType) {
     const el = document.getElementById(`nav-${t}`);
     if (el) {
       if (t === activeType) {
-        el.className = 'nav-item nav-item-active w-full flex items-center gap-2.5 px-3 py-2 rounded-xl border border-brand/40 font-bold text-left';
+        el.className = 'nav-item nav-item-active w-full h-10 flex items-center gap-2.5 px-3 rounded-xl border border-brand/35 text-brand font-semibold text-left';
       } else {
-        el.className = 'nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-bold';
+        el.className = 'nav-item w-full h-10 flex items-center gap-2.5 px-3 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-medium';
       }
     }
   });

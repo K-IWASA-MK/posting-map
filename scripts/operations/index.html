@@ -113,59 +113,58 @@
       scrollbar-width: none;
     }
 
-    /* Left Nav Smooth Item & Micro Glow */
+    /* Left Nav Smooth Item & Clean Selection (No Neon Glow) */
     .nav-item {
       transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
     }
     .nav-item-active {
-      background-color: rgba(234, 95, 8, 0.15) !important;
+      background-color: rgba(234, 95, 8, 0.12) !important;
       color: #EA5F08 !important;
-      border-color: rgba(234, 95, 8, 0.45) !important;
-      box-shadow: 0 0 16px rgba(234, 95, 8, 0.28), inset 0 0 6px rgba(234, 95, 8, 0.12) !important;
+      border-color: rgba(234, 95, 8, 0.35) !important;
     }
   </style>
 </head>
 <body class="bg-appBg text-textMain h-screen h-[100dvh] w-screen overflow-hidden flex antialiased">
 
   <!-- ==================== LEFT SIDEBAR (NAV & SYSTEM LINE) ==================== -->
-  <aside class="w-48 bg-containerBg border-r border-borderNormal p-3 flex flex-col justify-between flex-shrink-0 z-20">
+  <aside class="w-56 bg-containerBg border-r border-borderNormal p-3 flex flex-col justify-between flex-shrink-0 z-20">
 
     <!-- Top: Branding (公式ロゴ: 大型正円) -->
     <div>
-      <div class="flex flex-col items-center justify-center pt-2 pb-2">
-        <div class="w-28 h-28 rounded-full overflow-hidden shadow-2xl border-2 border-white/20 bg-white flex items-center justify-center">
+      <div class="flex flex-col items-center justify-center pt-2 pb-3">
+        <div class="w-[120px] h-[120px] rounded-full overflow-hidden border border-white/10 bg-white flex items-center justify-center p-1">
           <img src="/active/dashboard/assets/icon180-v2.png" alt="POSTING MAP" class="w-full h-full object-cover">
         </div>
       </div>
 
       <!-- 自治体セレクター (SSOTから動的生成) -->
       <div class="mt-3">
-        <select id="city-selector" onchange="onCitySelected(this.value)" class="w-full bg-[#0B1019]/80 text-textMain border border-borderNormal hover:border-brand/50 rounded-xl px-2.5 py-2 text-sm font-bold focus:outline-none focus:border-brand cursor-pointer transition-colors shadow-inner text-center">
+        <select id="city-selector" onchange="onCitySelected(this.value)" class="w-full h-10 bg-[#0B1019] text-white border border-borderNormal hover:border-brand/50 rounded-xl px-3 text-sm font-semibold focus:outline-none focus:border-brand cursor-pointer transition-colors shadow-inner text-center">
           <option value="ALL">全域</option>
         </select>
       </div>
 
       <!-- Navigation Menu (枠線付きの1つのブロックに統合) -->
-      <nav class="space-y-1 mt-3.5 p-1.5 rounded-2xl bg-[#0B1019]/70 border border-borderNormal shadow-inner">
-        <button id="nav-areas" onclick="switchView('areas')" class="nav-item nav-item-active w-full flex items-center gap-2.5 px-3 py-2 rounded-xl border border-brand/40 font-bold text-left">
-          <span class="text-base">🗺️</span>
-          <span class="text-sm font-bold">配布エリア</span>
+      <nav class="space-y-1 mt-3 p-1.5 rounded-2xl bg-[#0B1019]/80 border border-borderNormal">
+        <button id="nav-areas" onclick="switchView('areas')" class="nav-item nav-item-active w-full h-10 flex items-center gap-2.5 px-3 rounded-xl border border-brand/35 text-brand font-semibold text-left">
+          <span class="w-5 text-base flex items-center justify-center flex-shrink-0">🗺️</span>
+          <span class="text-sm">配布エリア</span>
         </button>
-        <button id="nav-records" onclick="switchView('records')" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-bold">
-          <span class="text-base">📝</span>
-          <span class="text-sm font-bold">配布実績</span>
+        <button id="nav-records" onclick="switchView('records')" class="nav-item w-full h-10 flex items-center gap-2.5 px-3 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-medium">
+          <span class="w-5 text-base flex items-center justify-center flex-shrink-0">📝</span>
+          <span class="text-sm">配布実績</span>
         </button>
-        <button id="nav-stocks" onclick="switchView('stocks')" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-bold">
-          <span class="text-base">📦</span>
-          <span class="text-sm font-bold">保有チラシ</span>
+        <button id="nav-stocks" onclick="switchView('stocks')" class="nav-item w-full h-10 flex items-center gap-2.5 px-3 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-medium">
+          <span class="w-5 text-base flex items-center justify-center flex-shrink-0">📦</span>
+          <span class="text-sm">保有チラシ</span>
         </button>
-        <button id="nav-roster" onclick="switchView('roster')" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-bold">
-          <span class="text-base">📋</span>
-          <span class="text-sm font-bold">名簿</span>
+        <button id="nav-roster" onclick="switchView('roster')" class="nav-item w-full h-10 flex items-center gap-2.5 px-3 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-medium">
+          <span class="w-5 text-base flex items-center justify-center flex-shrink-0">📋</span>
+          <span class="text-sm">名簿</span>
         </button>
-        <button id="nav-requests" onclick="switchView('requests')" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-bold">
-          <span class="text-base">🤝</span>
-          <span class="text-sm font-bold">受渡要請</span>
+        <button id="nav-requests" onclick="switchView('requests')" class="nav-item w-full h-10 flex items-center gap-2.5 px-3 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-medium">
+          <span class="w-5 text-base flex items-center justify-center flex-shrink-0">🤝</span>
+          <span class="text-sm">受渡要請</span>
         </button>
       </nav>
     </div>
@@ -173,12 +172,12 @@
     <!-- Bottom: 常時監視ステータスライン -->
     <div class="pt-2 border-t border-borderNormal">
       <!-- Live Sync Status Line -->
-      <div class="px-2 py-1.5 rounded-lg bg-[#0B1019]/60 border border-borderNormal/50 text-[10px]">
+      <div class="px-2.5 py-1.5 rounded-lg bg-[#0B1019]/60 border border-borderNormal/50 text-[11px]">
         <div class="flex items-center gap-1.5">
           <span id="live-dot" class="w-2 h-2 rounded-full bg-statusGreen"></span>
-          <span id="live-status-text" class="font-bold text-white/90">現場データ同期</span>
+          <span id="live-status-text" class="font-medium text-white/90">現場データ同期</span>
         </div>
-        <div class="flex items-center justify-between text-textSub/70 mt-1 text-[9px] font-mono">
+        <div class="flex items-center justify-between text-textSub/70 mt-1 text-[10px] font-mono">
           <span>最終同期</span>
           <span id="sync-clock">--:--:--</span>
         </div>
@@ -194,12 +193,12 @@
 
       <!-- Left: 配布状況進捗 -->
       <div class="flex items-center gap-2.5 flex-shrink-0">
-        <span class="text-xs font-bold text-textSub tracking-wider uppercase">配布状況</span>
+        <span class="text-[11px] font-medium text-textSub tracking-wider uppercase">配布状況</span>
         <div class="flex items-baseline gap-1">
-          <span id="fact-done-areas" class="text-xl font-black font-mono text-white leading-none">--</span>
-          <span class="text-xs text-textSub font-mono">/ <span id="fact-total-areas">858</span></span>
+          <span id="fact-done-areas" class="text-2xl font-bold font-mono text-white leading-none tracking-tight">--</span>
+          <span class="text-xs text-textSub font-mono font-normal">/ <span id="fact-total-areas">858</span></span>
         </div>
-        <span id="fact-progress-badge" class="px-1.5 py-0.5 rounded text-xs font-mono font-bold bg-brand/15 text-brand border border-brand/30">
+        <span id="fact-progress-badge" class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-brand/15 text-brand border border-brand/30">
           --%
         </span>
       </div>
@@ -208,18 +207,18 @@
       <div class="hidden md:flex items-center gap-3 px-3 py-1 rounded-lg bg-[#0B1019]/50 border border-borderNormal/40 text-xs flex-shrink-0 font-mono">
         <div class="flex items-center gap-1">
           <span class="w-2 h-2 rounded-full bg-statusGreen"></span>
-          <span class="text-textSub">未</span>
-          <span id="fact-unallocated-areas" class="font-bold text-white">--</span>
+          <span class="text-textSub font-normal">未</span>
+          <span id="fact-unallocated-areas" class="font-semibold text-white">--</span>
         </div>
         <div class="flex items-center gap-1">
           <span class="w-2 h-2 rounded-full bg-brandBlue"></span>
-          <span class="text-textSub">中</span>
-          <span id="fact-inprogress-areas" class="font-bold text-white">--</span>
+          <span class="text-textSub font-normal">中</span>
+          <span id="fact-inprogress-areas" class="font-semibold text-white">--</span>
         </div>
         <div class="flex items-center gap-1">
           <span class="w-2 h-2 rounded-full bg-brand"></span>
-          <span class="text-textSub">済</span>
-          <span id="fact-completed-areas" class="font-bold text-white">--</span>
+          <span class="text-textSub font-normal">済</span>
+          <span id="fact-completed-areas" class="font-semibold text-white">--</span>
         </div>
       </div>
 
@@ -227,15 +226,15 @@
       <div class="flex items-center gap-4 flex-shrink-0 text-xs pr-1">
         <div class="flex items-center gap-1.5">
           <span class="text-xs opacity-70">📦</span>
-          <span class="text-xs text-textSub">在庫</span>
-          <span id="fact-total-stocks" class="font-mono font-black text-white text-base leading-none">--</span>
-          <span class="text-[11px] text-textSub">枚</span>
+          <span class="text-[11px] font-medium text-textSub">在庫</span>
+          <span id="fact-total-stocks" class="font-mono font-bold text-white text-lg leading-none">--</span>
+          <span class="text-[11px] font-normal text-textSub">枚</span>
         </div>
         <div class="flex items-center gap-1.5">
           <span class="text-xs opacity-70">👥</span>
-          <span class="text-xs text-textSub">稼働</span>
-          <span id="fact-active-members" class="font-mono font-black text-white text-base leading-none">--</span>
-          <span class="text-[11px] text-textSub">人</span>
+          <span class="text-[11px] font-medium text-textSub">稼働</span>
+          <span id="fact-active-members" class="font-mono font-bold text-white text-lg leading-none">--</span>
+          <span class="text-[11px] font-normal text-textSub">人</span>
         </div>
       </div>
 
@@ -298,45 +297,46 @@
         </div>
 
         <!-- 2. 配布実績 ビュー (records) -->
+        <!-- 2. 配布実績 ビュー (records) -->
         <div id="main-view-records" class="flex-1 flex flex-col min-h-0 p-2.5 hidden">
-          <div class="flex items-center gap-2 pb-2.5 border-b border-borderNormal flex-shrink-0">
+          <div class="flex items-center gap-2 pb-2 border-b border-borderNormal flex-shrink-0">
             <span class="text-base">🏆</span>
-            <span class="font-black text-sm text-white tracking-wide">配布実績 ランキング一覧</span>
+            <span class="font-bold text-sm text-white tracking-wide">配布実績 ランキング一覧</span>
           </div>
-          <div id="main-stage-records-content" class="flex-1 overflow-y-auto pt-2.5 space-y-2 pr-1">
+          <div id="main-stage-records-content" class="flex-1 overflow-y-auto pt-2 space-y-1.5 pr-1">
             <!-- 動的レンダリング -->
           </div>
         </div>
 
         <!-- 3. 保有チラシ ビュー (stocks) -->
         <div id="main-view-stocks" class="flex-1 flex flex-col min-h-0 p-2.5 hidden">
-          <div class="flex items-center gap-2 pb-2.5 border-b border-borderNormal flex-shrink-0">
+          <div class="flex items-center gap-2 pb-2 border-b border-borderNormal flex-shrink-0">
             <span class="text-base">📦</span>
-            <span class="font-black text-sm text-white tracking-wide">保有チラシ 拠点別一覧</span>
+            <span class="font-bold text-sm text-white tracking-wide">保有チラシ 拠点別一覧</span>
           </div>
-          <div id="main-stage-stocks-content" class="flex-1 overflow-y-auto pt-2.5 space-y-2 pr-1">
+          <div id="main-stage-stocks-content" class="flex-1 overflow-y-auto pt-2 space-y-1.5 pr-1">
             <!-- 動的レンダリング -->
           </div>
         </div>
 
         <!-- 4. 名簿 ビュー (roster) -->
         <div id="main-view-roster" class="flex-1 flex flex-col min-h-0 p-2.5 hidden">
-          <div class="flex items-center gap-2 pb-2.5 border-b border-borderNormal flex-shrink-0">
+          <div class="flex items-center gap-2 pb-2 border-b border-borderNormal flex-shrink-0">
             <span class="text-base">📋</span>
-            <span class="font-black text-sm text-white tracking-wide">登録配布員 名簿一覧</span>
+            <span class="font-bold text-sm text-white tracking-wide">登録配布員 名簿一覧</span>
           </div>
-          <div id="main-stage-roster-content" class="flex-1 overflow-y-auto pt-2.5 space-y-2 pr-1">
+          <div id="main-stage-roster-content" class="flex-1 overflow-y-auto pt-2 space-y-1.5 pr-1">
             <!-- 動的レンダリング -->
           </div>
         </div>
 
         <!-- 5. 受渡要請 ビュー (requests) -->
         <div id="main-view-requests" class="flex-1 flex flex-col min-h-0 p-2.5 hidden">
-          <div class="flex items-center gap-2 pb-2.5 border-b border-borderNormal flex-shrink-0">
+          <div class="flex items-center gap-2 pb-2 border-b border-borderNormal flex-shrink-0">
             <span class="text-base">🤝</span>
-            <span class="font-black text-sm text-white tracking-wide">チラシ受渡要請 一覧</span>
+            <span class="font-bold text-sm text-white tracking-wide">チラシ受渡要請 一覧</span>
           </div>
-          <div id="main-stage-requests-content" class="flex-1 overflow-y-auto pt-2.5 space-y-2 pr-1">
+          <div id="main-stage-requests-content" class="flex-1 overflow-y-auto pt-2 space-y-1.5 pr-1">
             <!-- 動的レンダリング -->
           </div>
         </div>
@@ -350,25 +350,26 @@
         <div class="flex-1 pm-card p-3 flex flex-col justify-between overflow-hidden">
           <div class="flex items-center justify-between flex-shrink-0">
             <div class="flex items-center gap-1.5">
-              <span class="text-sm text-brand font-black">NOW</span>
+              <span class="text-xs font-bold text-brand mr-0.5">NOW</span>
               <span class="font-bold text-sm text-white">現在の現場</span>
             </div>
           </div>
 
           <!-- 最新完了事実ハイライト -->
           <div class="my-auto flex items-center gap-3">
-            <div class="w-12 h-12 rounded-xl bg-cardSubBg border border-borderNormal flex-shrink-0 flex items-center justify-center">
-              <span id="top-ranking-badge" class="text-2xl select-none">🥇</span>
+            <div class="w-11 h-11 rounded-xl bg-cardSubBg border border-borderNormal flex-shrink-0 flex items-center justify-center">
+              <span id="top-ranking-badge" class="text-xl select-none">🥇</span>
             </div>
 
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-1.5">
-                <span id="top-ranking-rank" class="font-mono text-[11px] px-1.5 py-0.5 rounded bg-brand/15 text-brand font-bold">第1位</span>
-                <span id="top-ranking-staff-id" class="font-mono font-bold text-white text-sm">--</span>
+                <span id="top-ranking-rank" class="font-mono text-[11px] px-1.5 py-0.5 rounded bg-brand/15 text-brand font-medium">第1位</span>
+                <span id="top-ranking-staff-id" class="font-mono font-normal text-textSub text-xs">--</span>
               </div>
-              <div id="top-ranking-staff-name" class="font-semibold text-sm text-white truncate mt-1">配布実績データなし</div>
-              <div class="text-xs text-textSub mt-0.5">
-                <span id="top-ranking-count" class="font-mono font-black text-white text-base">--</span> 枚 配布完了
+              <div id="top-ranking-staff-name" class="font-semibold text-sm text-white truncate mt-0.5">配布実績データなし</div>
+              <div class="text-xs text-textSub mt-0.5 flex items-baseline gap-1">
+                <span id="top-ranking-count" class="font-mono font-bold text-white text-2xl leading-none">--</span>
+                <span class="text-xs text-textSub font-normal">枚 配布完了</span>
               </div>
             </div>
           </div>
@@ -379,20 +380,23 @@
         <div class="flex-1 pm-card p-3 flex flex-col justify-between overflow-hidden">
           <div class="flex items-center justify-between flex-shrink-0">
             <div class="flex items-center gap-1.5">
-              <span class="text-sm text-brandBlue font-black">STOCK</span>
+              <span class="text-xs font-bold text-brandBlue mr-0.5">STOCK</span>
               <span class="font-bold text-sm text-white">チラシ残量</span>
             </div>
           </div>
 
           <!-- 拠点別在庫リスト -->
           <div id="stock-location-list" class="space-y-1.5 overflow-y-auto max-h-[105px] pr-1">
-            <div class="text-[11px] text-textSub/50 text-center py-2">保管データ読み込み中...</div>
+            <div class="text-[11px] text-textSub/60 text-center py-2">保管データ読み込み中...</div>
           </div>
 
           <!-- 合計残量バー -->
-          <div class="flex items-center justify-between px-2 py-1 rounded-lg bg-[#0B1019]/60 border border-borderNormal/50 text-xs flex-shrink-0 mt-1">
-            <span class="font-bold text-xs text-textSub">TOTAL 在庫</span>
-            <span class="font-mono font-black text-white text-sm"><span id="stock-total-summary">--</span> <span class="text-[10px] text-textSub font-normal">枚</span></span>
+          <div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#0B1019]/60 border border-borderNormal/50 text-xs flex-shrink-0 mt-1">
+            <span class="font-medium text-xs text-textSub">TOTAL 在庫</span>
+            <div class="flex items-baseline gap-1">
+              <span id="stock-total-summary" class="font-mono font-bold text-white text-base">--</span>
+              <span class="text-[11px] text-textSub font-normal">枚</span>
+            </div>
           </div>
         </div>
 
@@ -403,11 +407,11 @@
     <!-- ========== ④ ACTIVITY STREAM (現場時間軸ストリーム) 【常時固定】 ========== -->
     <div id="activity-stream-bar" class="h-9 pm-card px-3 flex items-center justify-between flex-shrink-0 overflow-hidden">
       <div class="flex items-center gap-1.5 flex-shrink-0">
-        <span class="text-sm">⏱</span>
-        <span class="font-black text-xs text-textSub tracking-wider uppercase whitespace-nowrap">ACTIVITY STREAM</span>
+        <span class="text-sm opacity-80">⏱</span>
+        <span class="font-bold text-[11px] text-textSub tracking-wider uppercase whitespace-nowrap">ACTIVITY STREAM</span>
       </div>
 
-      <div class="h-4 w-px bg-borderNormal mx-2 flex-shrink-0"></div>
+      <div class="h-3.5 w-px bg-borderNormal mx-2.5 flex-shrink-0"></div>
 
       <!-- 横スクロール時系列ログフィード -->
       <div id="distribution-records-list" class="flex-1 flex items-center gap-2 overflow-x-auto hide-scrollbar px-1 min-w-0">
