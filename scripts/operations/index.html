@@ -218,7 +218,7 @@
     <div id="situation-bar" class="h-11 flex-shrink-0 flex items-center justify-between gap-2 px-2.5 bg-containerBg border border-borderNormal rounded-xl overflow-hidden">
 
       <!-- 1. 🗺️ 配布状況 カード (進捗) -->
-      <div class="flex-1 min-w-0 h-9 flex items-center justify-between px-2.5 rounded-lg bg-[#0B1019] border border-borderNormal">
+      <div class="flex-1 min-w-0 h-9 flex items-center justify-between px-3 rounded-lg bg-[#0B1019] border border-borderNormal">
         <span class="text-[11px] font-medium text-textSub tracking-wider uppercase truncate">配布状況</span>
         <div class="flex items-baseline gap-1">
           <span id="fact-done-areas" class="text-xl font-bold font-mono text-white leading-none tracking-tight">--</span>
@@ -229,27 +229,27 @@
         </span>
       </div>
 
-      <!-- 2. エリア内訳 カード (未配布 / 配布中 / 完了: 正式名称表記) -->
-      <div class="flex-1 min-w-0 h-9 flex items-center justify-between px-2.5 rounded-lg bg-[#0B1019] border border-borderNormal text-xs font-mono">
-        <div class="flex items-center gap-1">
+      <!-- 2. エリア内訳 カード (未配布 / 配布中 / 完了: 3桁対応均等配置) -->
+      <div class="flex-1 min-w-0 h-9 flex items-center justify-center gap-2 px-2.5 rounded-lg bg-[#0B1019] border border-borderNormal text-xs font-mono">
+        <div class="flex items-center gap-1 whitespace-nowrap">
           <span class="w-2 h-2 rounded-full bg-statusGreen flex-shrink-0"></span>
-          <span class="text-textSub font-normal text-[11px] whitespace-nowrap">未配布</span>
-          <span id="fact-unallocated-areas" class="font-bold text-white text-base leading-none">--</span>
+          <span class="text-textSub font-normal text-[11px]">未配布</span>
+          <span id="fact-unallocated-areas" class="font-bold text-white text-sm leading-none">--</span>
         </div>
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-1 whitespace-nowrap">
           <span class="w-2 h-2 rounded-full bg-brandBlue flex-shrink-0"></span>
-          <span class="text-textSub font-normal text-[11px] whitespace-nowrap">配布中</span>
-          <span id="fact-inprogress-areas" class="font-bold text-white text-base leading-none">--</span>
+          <span class="text-textSub font-normal text-[11px]">配布中</span>
+          <span id="fact-inprogress-areas" class="font-bold text-white text-sm leading-none">--</span>
         </div>
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-1 whitespace-nowrap">
           <span class="w-2 h-2 rounded-full bg-brand flex-shrink-0"></span>
-          <span class="text-textSub font-normal text-[11px] whitespace-nowrap">完了</span>
-          <span id="fact-completed-areas" class="font-bold text-white text-base leading-none">--</span>
+          <span class="text-textSub font-normal text-[11px]">完了</span>
+          <span id="fact-completed-areas" class="font-bold text-white text-sm leading-none">--</span>
         </div>
       </div>
 
       <!-- 3. 📝 配布実績 カード -->
-      <div class="flex-1 min-w-0 h-9 flex items-center justify-between px-2.5 rounded-lg bg-[#0B1019] border border-borderNormal">
+      <div class="flex-1 min-w-0 h-9 flex items-center justify-between px-3 rounded-lg bg-[#0B1019] border border-borderNormal">
         <div class="flex items-center gap-1 min-w-0">
           <span class="text-xs flex-shrink-0">📝</span>
           <span class="text-[11px] font-medium text-textSub truncate">配布実績</span>
@@ -261,7 +261,7 @@
       </div>
 
       <!-- 4. 📦 保有チラシ カード -->
-      <div class="flex-1 min-w-0 h-9 flex items-center justify-between px-2.5 rounded-lg bg-[#0B1019] border border-borderNormal">
+      <div class="flex-1 min-w-0 h-9 flex items-center justify-between px-3 rounded-lg bg-[#0B1019] border border-borderNormal">
         <div class="flex items-center gap-1 min-w-0">
           <span class="text-xs flex-shrink-0">📦</span>
           <span class="text-[11px] font-medium text-textSub truncate">保有チラシ</span>
@@ -273,7 +273,7 @@
       </div>
 
       <!-- 5. 📋 名簿 カード -->
-      <div class="flex-1 min-w-0 h-9 flex items-center justify-between px-2.5 rounded-lg bg-[#0B1019] border border-borderNormal">
+      <div class="flex-1 min-w-0 h-9 flex items-center justify-between px-3 rounded-lg bg-[#0B1019] border border-borderNormal">
         <div class="flex items-center gap-1 min-w-0">
           <span class="text-xs flex-shrink-0">📋</span>
           <span class="text-[11px] font-medium text-textSub truncate">名簿</span>
