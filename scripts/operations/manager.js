@@ -917,6 +917,9 @@ function closeAreaDetail() {
 /**
  * 中央メインステージ用: 配布実績ランキングの描画
  */
+/**
+ * 中央メインステージ用: 配布実績ランキングの描画 (2件表示窓 ＆ 左右矢印ページ送り)
+ */
 function renderMainStageRecords(ranking) {
   const contentEl = document.getElementById('main-stage-records-content');
   if (!contentEl) return;
@@ -925,6 +928,10 @@ function renderMainStageRecords(ranking) {
   if (rankingList.length === 0) {
     contentEl.innerHTML = `<div class="text-xs text-[#94A3B8]/60 text-center py-12">配布実績データはありません</div>`;
     return;
+  }
+
+  if (!DashboardState.staffFeedPages) {
+    DashboardState.staffFeedPages = {};
   }
 
   let html = '<div class="space-y-1.5">';
@@ -941,12 +948,22 @@ function renderMainStageRecords(ranking) {
       rankBadgeHtml = `<span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold font-mono bg-white/5 text-white/70">${rank}</span>`;
     }
 
-    // 直近2件の配布地域フィードを抽出 (Backend SSOT: liveRecords)
+    // 各スタッフごとの配布履歴抽出 (Backend SSOT: liveRecords)
     const staffRecords = (DashboardState.liveRecords || []).filter(r => r.staffId === item.staffId);
-    const recent2 = staffRecords.slice(0, 2);
+    const totalRecordsCount = staffRecords.length;
+    const pageSize = 2;
+    const totalPages = Math.ceil(totalRecordsCount / pageSize) || 1;
+
+    const currentPage = DashboardState.staffFeedPages[item.staffId] || 0;
+    const validPage = Math.max(0, Math.min(currentPage, totalPages - 1));
+    DashboardState.staffFeedPages[item.staffId] = validPage;
+
+    const start = validPage * pageSize;
+    const pageRecords = staffRecords.slice(start, start + pageSize);
+
     let recentFeedHtml = '';
-    if (recent2.length > 0) {
-      const itemsHtml = recent2.map(rec => {
+    if (pageRecords.length > 0) {
+      const itemsHtml = pageRecords.map(rec => {
         const areaName = rec.townName || rec.cityName || `エリア #${rec.rowId}`;
         const countStr = Number(rec.count || 0).toLocaleString();
         return `
@@ -959,7 +976,22 @@ function renderMainStageRecords(ranking) {
         `;
       }).join('<span class="text-[#243044] text-[11px] flex-shrink-0">➔</span>');
 
-      recentFeedHtml = `<div class="flex items-center gap-1.5 mx-2 overflow-hidden justify-center flex-1 min-w-0">${itemsHtml}</div>`;
+      if (totalPages > 1) {
+        const hasPrev = validPage > 0;
+        const hasNext = validPage < totalPages - 1;
+        const prevBtn = `
+          <button type="button" onclick="changeStaffFeedPage('${item.staffId}', -1, event)" ${!hasPrev ? 'disabled' : ''} class="w-5 h-5 flex items-center justify-center rounded text-xs font-mono transition-colors ${hasPrev ? 'text-white hover:bg-white/10 cursor-pointer' : 'text-white/20 cursor-not-allowed'}">‹</button>
+        `;
+        const nextBtn = `
+          <button type="button" onclick="changeStaffFeedPage('${item.staffId}', 1, event)" ${!hasNext ? 'disabled' : ''} class="w-5 h-5 flex items-center justify-center rounded text-xs font-mono transition-colors ${hasNext ? 'text-white hover:bg-white/10 cursor-pointer' : 'text-white/20 cursor-not-allowed'}">›</button>
+        `;
+        const pageIndicator = `
+          <span class="font-mono text-[10px] text-textSub whitespace-nowrap ml-1">${validPage + 1}/${totalPages}</span>
+        `;
+        recentFeedHtml = `<div class="flex items-center gap-1.5 mx-2 overflow-hidden justify-center flex-1 min-w-0">${prevBtn}${itemsHtml}${nextBtn}${pageIndicator}</div>`;
+      } else {
+        recentFeedHtml = `<div class="flex items-center gap-1.5 mx-2 overflow-hidden justify-center flex-1 min-w-0">${itemsHtml}</div>`;
+      }
     } else {
       recentFeedHtml = `<div class="flex-1"></div>`;
     }
@@ -984,6 +1016,20 @@ function renderMainStageRecords(ranking) {
   html += '</div>';
   contentEl.innerHTML = html;
 }
+
+/**
+ * スタッフごとの配布履歴フィードのページ送り (2件単位)
+ */
+function changeStaffFeedPage(staffId, delta, event) {
+  if (event) event.stopPropagation();
+  if (!DashboardState.staffFeedPages) {
+    DashboardState.staffFeedPages = {};
+  }
+  const current = DashboardState.staffFeedPages[staffId] || 0;
+  DashboardState.staffFeedPages[staffId] = current + delta;
+  renderMainStageRecords(DashboardState.ranking);
+}
+window.changeStaffFeedPage = changeStaffFeedPage;
 
 /**
  * 中央メインステージ用: 保有チラシ一覧の描画
