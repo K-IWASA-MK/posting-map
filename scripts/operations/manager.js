@@ -753,10 +753,32 @@ function renderCurrentView() {
 
   // --- ここから Backend SSOT 由来の描画（Master状態に関係なく実行）---
 
-  // 2. 保有チラシの描画
+  // 2. 配布実績枚数の描画 (Backend SSOT: ranking / 自治体選択時は liveRecords 連動)
+  const totalRecordsEl = document.getElementById('fact-total-records');
+  if (totalRecordsEl) {
+    let totalDelivered = 0;
+    if (isAll) {
+      // 全域SSOT: ranking の合計
+      totalDelivered = (DashboardState.ranking || []).reduce((acc, item) => acc + (Number(item.count) || 0), 0);
+    } else {
+      // 自治体選択時: 該当自治体の配布実績
+      const matchedLive = (DashboardState.liveRecords || []).filter(r => (r.cityName && r.cityName.includes(selected)) || (selected && selected.includes(r.cityName)));
+      totalDelivered = matchedLive.reduce((acc, r) => acc + (Number(r.count) || 0), 0);
+    }
+    totalRecordsEl.textContent = totalDelivered.toLocaleString();
+  }
+
+  // 3. 保有チラシの描画 (Backend SSOT: stocks)
   renderStockFacts(DashboardState.stocks, selected);
 
-  // 3. 最下部 LIVE 配布実績フィードの描画 (Backend SSOT)
+  // 4. 名簿人数の描画 (Backend SSOT: roster)
+  const totalRosterEl = document.getElementById('fact-total-roster');
+  if (totalRosterEl) {
+    const rosterCount = (DashboardState.roster || []).length;
+    totalRosterEl.textContent = rosterCount.toLocaleString();
+  }
+
+  // 5. 最下部 LIVE 配布実績フィードの描画 (Backend SSOT)
   renderLiveFeed(DashboardState.liveRecords);
 
   // 4. 現在アクティブな中央メインステージのビューを再描画

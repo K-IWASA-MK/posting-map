@@ -86,7 +86,9 @@ async function runDashboardQualityGate() {
         totalAreasText: document.getElementById('fact-total-areas')?.textContent,
         doneAreasText: document.getElementById('fact-done-areas')?.textContent,
         unallocatedAreasText: document.getElementById('fact-unallocated-areas')?.textContent,
+        totalRecordsText: document.getElementById('fact-total-records')?.textContent,
         totalStocksText: document.getElementById('fact-total-stocks')?.textContent,
+        totalRosterText: document.getElementById('fact-total-roster')?.textContent,
         mapDistrictLabelText: document.getElementById('map-district-label')?.textContent,
         liveCardsCount: document.querySelectorAll('#live-feed-container > div').length
       };
@@ -98,6 +100,9 @@ async function runDashboardQualityGate() {
       state1.totalAreasText === expectedCsvPinsCount.toLocaleString() &&
       state1.mapDistrictLabelText.includes(`${expectedCsvPinsCount}エリア`) &&
       state1.unallocatedAreasText !== '--' &&
+      state1.totalRecordsText !== '--' &&
+      state1.totalStocksText !== '--' &&
+      state1.totalRosterText !== '--' &&
       appErrors1.length === 0
     );
 
@@ -105,6 +110,9 @@ async function runDashboardQualityGate() {
     results.phase1.details.push(`masterLoadStatus: ${state1.masterLoadStatus}`);
     results.phase1.details.push(`masterPinsCount: ${state1.masterPinsCount} (期待値: ${expectedCsvPinsCount})`);
     results.phase1.details.push(`totalAreasText: ${state1.totalAreasText}`);
+    results.phase1.details.push(`totalRecordsText: ${state1.totalRecordsText}`);
+    results.phase1.details.push(`totalStocksText: ${state1.totalStocksText}`);
+    results.phase1.details.push(`totalRosterText: ${state1.totalRosterText}`);
     results.phase1.details.push(`mapDistrictLabel: ${state1.mapDistrictLabelText}`);
     results.phase1.details.push(`App Errors: ${appErrors1.length} ${appErrors1.length > 0 ? `(${appErrors1.join(', ')})` : '(0件: PASS)'}`);
     await page1.close();

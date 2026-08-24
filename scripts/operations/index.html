@@ -214,47 +214,67 @@
   <!-- ==================== MAIN CONTROL CANVAS (管制メインキャンバス) ==================== -->
   <main class="flex-1 flex flex-col p-2.5 gap-2 overflow-hidden bg-appBg min-w-0">
 
-    <!-- ========== ① 統括状況 BAR (単一の統合計器ライン) ========== -->
+    <!-- ========== ① 統括状況 BAR (単一の統合計器ライン: 左ナビ順 ＆ 完全一致ラベル) ========== -->
     <div id="situation-bar" class="h-11 flex-shrink-0 flex items-center justify-between px-3 bg-containerBg border border-borderNormal rounded-xl overflow-hidden">
 
-      <!-- Left: 配布状況カード -->
-      <div class="flex items-center gap-2.5 px-3 py-1 rounded-lg bg-[#0B1019] border border-borderNormal flex-shrink-0">
-        <span class="text-[11px] font-medium text-textSub tracking-wider uppercase">配布状況</span>
-        <div class="flex items-baseline gap-1">
-          <span id="fact-done-areas" class="text-2xl font-bold font-mono text-white leading-none tracking-tight">--</span>
-          <span class="text-xs text-textSub font-mono font-normal">/ <span id="fact-total-areas">--</span></span>
+      <!-- Left Group: 🗺️ 配布エリア (進捗 ＆ 内訳) -->
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <!-- 1. 配布状況カード -->
+        <div class="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#0B1019] border border-borderNormal flex-shrink-0">
+          <span class="text-[11px] font-medium text-textSub tracking-wider uppercase">配布状況</span>
+          <div class="flex items-baseline gap-1">
+            <span id="fact-done-areas" class="text-xl font-bold font-mono text-white leading-none tracking-tight">--</span>
+            <span class="text-xs text-textSub font-mono font-normal">/ <span id="fact-total-areas">--</span></span>
+          </div>
+          <span id="fact-progress-badge" class="px-1.5 py-0.5 rounded text-xs font-mono font-bold bg-brand/15 text-brand border border-brand/30">
+            --%
+          </span>
         </div>
-        <span id="fact-progress-badge" class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-brand/15 text-brand border border-brand/30">
-          --%
-        </span>
+
+        <!-- 2. 内訳インジケーターカード (未配布/配布中/完了) -->
+        <div class="hidden sm:flex items-center gap-2.5 px-2.5 py-1 rounded-lg bg-[#0B1019] border border-borderNormal text-xs flex-shrink-0 font-mono">
+          <div class="flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-statusGreen"></span>
+            <span class="text-textSub font-normal">未</span>
+            <span id="fact-unallocated-areas" class="font-semibold text-white">--</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-brandBlue"></span>
+            <span class="text-textSub font-normal">中</span>
+            <span id="fact-inprogress-areas" class="font-semibold text-white">--</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-brand"></span>
+            <span class="text-textSub font-normal">済</span>
+            <span id="fact-completed-areas" class="font-semibold text-white">--</span>
+          </div>
+        </div>
       </div>
 
-      <!-- Mid-Left: 内訳インジケーターカード (未配布/配布中/完了) -->
-      <div class="hidden md:flex items-center gap-3.5 px-3.5 py-1 rounded-lg bg-[#0B1019] border border-borderNormal text-xs flex-shrink-0 font-mono">
-        <div class="flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-statusGreen"></span>
-          <span class="text-textSub font-normal">未配布</span>
-          <span id="fact-unallocated-areas" class="font-semibold text-white">--</span>
+      <!-- Right Group: 左ナビ順 (📝配布実績 ➔ 📦保有チラシ ➔ 📋名簿) -->
+      <div class="flex items-center gap-2 flex-shrink-0 text-xs">
+        <!-- 3. 📝 配布実績 カード -->
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0B1019] border border-borderNormal flex-shrink-0">
+          <span class="text-xs">📝</span>
+          <span class="text-[11px] font-medium text-textSub">配布実績</span>
+          <span id="fact-total-records" class="font-mono font-bold text-white text-base leading-none">--</span>
+          <span class="text-[10px] font-normal text-textSub">枚</span>
         </div>
-        <div class="flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-brandBlue"></span>
-          <span class="text-textSub font-normal">配布中</span>
-          <span id="fact-inprogress-areas" class="font-semibold text-white">--</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-brand"></span>
-          <span class="text-textSub font-normal">完了</span>
-          <span id="fact-completed-areas" class="font-semibold text-white">--</span>
-        </div>
-      </div>
 
-      <!-- Right: 在庫カード -->
-      <div class="flex items-center gap-2 px-3 py-1 rounded-lg bg-[#0B1019] border border-borderNormal flex-shrink-0 text-xs">
-        <div class="flex items-center gap-1.5">
-          <span class="text-xs opacity-70">📦</span>
-          <span class="text-[11px] font-medium text-textSub">在庫</span>
-          <span id="fact-total-stocks" class="font-mono font-bold text-white text-lg leading-none">--</span>
-          <span class="text-[11px] font-normal text-textSub">枚</span>
+        <!-- 4. 📦 保有チラシ カード -->
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0B1019] border border-borderNormal flex-shrink-0">
+          <span class="text-xs">📦</span>
+          <span class="text-[11px] font-medium text-textSub">保有チラシ</span>
+          <span id="fact-total-stocks" class="font-mono font-bold text-white text-base leading-none">--</span>
+          <span class="text-[10px] font-normal text-textSub">枚</span>
+        </div>
+
+        <!-- 5. 📋 名簿 カード -->
+        <div class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0B1019] border border-borderNormal flex-shrink-0">
+          <span class="text-xs">📋</span>
+          <span class="text-[11px] font-medium text-textSub">名簿</span>
+          <span id="fact-total-roster" class="font-mono font-bold text-white text-base leading-none">--</span>
+          <span class="text-[10px] font-normal text-textSub">名</span>
         </div>
       </div>
 
