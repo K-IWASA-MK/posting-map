@@ -214,67 +214,73 @@
   <!-- ==================== MAIN CONTROL CANVAS (管制メインキャンバス) ==================== -->
   <main class="flex-1 flex flex-col p-2.5 gap-2 overflow-hidden bg-appBg min-w-0">
 
-    <!-- ========== ① 統括状況 BAR (単一の統合計器ライン: 左ナビ順 ＆ 完全一致ラベル) ========== -->
-    <div id="situation-bar" class="h-11 flex-shrink-0 flex items-center justify-between px-3 bg-containerBg border border-borderNormal rounded-xl overflow-hidden">
+    <!-- ========== ① 統括状況 BAR (5枚の均等・等間隔計器カードライン: h-9 / flex-1 / #0B1019) ========== -->
+    <div id="situation-bar" class="h-11 flex-shrink-0 flex items-center justify-between gap-2 px-2.5 bg-containerBg border border-borderNormal rounded-xl overflow-hidden">
 
-      <!-- Left Group: 🗺️ 配布エリア (進捗 ＆ 内訳) -->
-      <div class="flex items-center gap-2 flex-shrink-0">
-        <!-- 1. 配布状況カード -->
-        <div class="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#0B1019] border border-borderNormal flex-shrink-0">
-          <span class="text-[11px] font-medium text-textSub tracking-wider uppercase">配布状況</span>
-          <div class="flex items-baseline gap-1">
-            <span id="fact-done-areas" class="text-xl font-bold font-mono text-white leading-none tracking-tight">--</span>
-            <span class="text-xs text-textSub font-mono font-normal">/ <span id="fact-total-areas">--</span></span>
-          </div>
-          <span id="fact-progress-badge" class="px-1.5 py-0.5 rounded text-xs font-mono font-bold bg-brand/15 text-brand border border-brand/30">
-            --%
-          </span>
+      <!-- 1. 🗺️ 配布状況 カード (進捗) -->
+      <div class="flex-1 min-w-0 h-9 flex items-center justify-between px-2.5 rounded-lg bg-[#0B1019] border border-borderNormal">
+        <span class="text-[11px] font-medium text-textSub tracking-wider uppercase truncate">配布状況</span>
+        <div class="flex items-baseline gap-1">
+          <span id="fact-done-areas" class="text-xl font-bold font-mono text-white leading-none tracking-tight">--</span>
+          <span class="text-xs text-textSub font-mono font-normal">/ <span id="fact-total-areas">--</span></span>
         </div>
+        <span id="fact-progress-badge" class="px-1.5 py-0.5 rounded text-xs font-mono font-bold bg-brand/15 text-brand border border-brand/30 leading-none">
+          --%
+        </span>
+      </div>
 
-        <!-- 2. 内訳インジケーターカード (未配布/配布中/完了) -->
-        <div class="hidden sm:flex items-center gap-2.5 px-2.5 py-1 rounded-lg bg-[#0B1019] border border-borderNormal text-xs flex-shrink-0 font-mono">
-          <div class="flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-statusGreen"></span>
-            <span class="text-textSub font-normal">未</span>
-            <span id="fact-unallocated-areas" class="font-semibold text-white">--</span>
-          </div>
-          <div class="flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-brandBlue"></span>
-            <span class="text-textSub font-normal">中</span>
-            <span id="fact-inprogress-areas" class="font-semibold text-white">--</span>
-          </div>
-          <div class="flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-brand"></span>
-            <span class="text-textSub font-normal">済</span>
-            <span id="fact-completed-areas" class="font-semibold text-white">--</span>
-          </div>
+      <!-- 2. エリア内訳 カード (未/中/済: 3項目横並びのため text-base 最適化) -->
+      <div class="flex-1 min-w-0 h-9 flex items-center justify-around px-2 rounded-lg bg-[#0B1019] border border-borderNormal text-xs font-mono">
+        <div class="flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-statusGreen flex-shrink-0"></span>
+          <span class="text-textSub font-normal text-[11px]">未</span>
+          <span id="fact-unallocated-areas" class="font-bold text-white text-base leading-none">--</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-brandBlue flex-shrink-0"></span>
+          <span class="text-textSub font-normal text-[11px]">中</span>
+          <span id="fact-inprogress-areas" class="font-bold text-white text-base leading-none">--</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-brand flex-shrink-0"></span>
+          <span class="text-textSub font-normal text-[11px]">済</span>
+          <span id="fact-completed-areas" class="font-bold text-white text-base leading-none">--</span>
         </div>
       </div>
 
-      <!-- Right Group: 左ナビ順 (📝配布実績 ➔ 📦保有チラシ ➔ 📋名簿) -->
-      <div class="flex items-center gap-2 flex-shrink-0 text-xs">
-        <!-- 3. 📝 配布実績 カード -->
-        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0B1019] border border-borderNormal flex-shrink-0">
-          <span class="text-xs">📝</span>
-          <span class="text-[11px] font-medium text-textSub">配布実績</span>
-          <span id="fact-total-records" class="font-mono font-bold text-white text-base leading-none">--</span>
-          <span class="text-[10px] font-normal text-textSub">枚</span>
+      <!-- 3. 📝 配布実績 カード -->
+      <div class="flex-1 min-w-0 h-9 flex items-center justify-between px-2.5 rounded-lg bg-[#0B1019] border border-borderNormal">
+        <div class="flex items-center gap-1 min-w-0">
+          <span class="text-xs flex-shrink-0">📝</span>
+          <span class="text-[11px] font-medium text-textSub truncate">配布実績</span>
         </div>
-
-        <!-- 4. 📦 保有チラシ カード -->
-        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0B1019] border border-borderNormal flex-shrink-0">
-          <span class="text-xs">📦</span>
-          <span class="text-[11px] font-medium text-textSub">保有チラシ</span>
-          <span id="fact-total-stocks" class="font-mono font-bold text-white text-base leading-none">--</span>
-          <span class="text-[10px] font-normal text-textSub">枚</span>
+        <div class="flex items-baseline gap-0.5 flex-shrink-0">
+          <span id="fact-total-records" class="font-mono font-bold text-white text-xl leading-none">--</span>
+          <span class="text-[11px] font-normal text-textSub">枚</span>
         </div>
+      </div>
 
-        <!-- 5. 📋 名簿 カード -->
-        <div class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0B1019] border border-borderNormal flex-shrink-0">
-          <span class="text-xs">📋</span>
-          <span class="text-[11px] font-medium text-textSub">名簿</span>
-          <span id="fact-total-roster" class="font-mono font-bold text-white text-base leading-none">--</span>
-          <span class="text-[10px] font-normal text-textSub">名</span>
+      <!-- 4. 📦 保有チラシ カード -->
+      <div class="flex-1 min-w-0 h-9 flex items-center justify-between px-2.5 rounded-lg bg-[#0B1019] border border-borderNormal">
+        <div class="flex items-center gap-1 min-w-0">
+          <span class="text-xs flex-shrink-0">📦</span>
+          <span class="text-[11px] font-medium text-textSub truncate">保有チラシ</span>
+        </div>
+        <div class="flex items-baseline gap-0.5 flex-shrink-0">
+          <span id="fact-total-stocks" class="font-mono font-bold text-white text-xl leading-none">--</span>
+          <span class="text-[11px] font-normal text-textSub">枚</span>
+        </div>
+      </div>
+
+      <!-- 5. 📋 名簿 カード -->
+      <div class="flex-1 min-w-0 h-9 flex items-center justify-between px-2.5 rounded-lg bg-[#0B1019] border border-borderNormal">
+        <div class="flex items-center gap-1 min-w-0">
+          <span class="text-xs flex-shrink-0">📋</span>
+          <span class="text-[11px] font-medium text-textSub truncate">名簿</span>
+        </div>
+        <div class="flex items-baseline gap-0.5 flex-shrink-0">
+          <span id="fact-total-roster" class="font-mono font-bold text-white text-xl leading-none">--</span>
+          <span class="text-[11px] font-normal text-textSub">名</span>
         </div>
       </div>
 
