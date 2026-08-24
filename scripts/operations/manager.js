@@ -941,19 +941,40 @@ function renderMainStageRecords(ranking) {
       rankBadgeHtml = `<span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold font-mono bg-white/5 text-white/70">${rank}</span>`;
     }
 
+    // 直近2件の配布地域フィードを抽出 (Backend SSOT: liveRecords)
+    const staffRecords = (DashboardState.liveRecords || []).filter(r => r.staffId === item.staffId);
+    const recent2 = staffRecords.slice(0, 2);
+    let recentFeedHtml = '';
+    if (recent2.length > 0) {
+      const itemsHtml = recent2.map(rec => {
+        const areaName = rec.townName || rec.cityName || `エリア #${rec.rowId}`;
+        const countStr = Number(rec.count || 0).toLocaleString();
+        return `
+          <div class="flex items-center gap-1 px-2 py-0.5 rounded bg-[#0B1019] border border-borderNormal text-[11px] text-white flex-shrink-0">
+            <span class="w-1.5 h-1.5 rounded-full bg-statusGreen flex-shrink-0"></span>
+            <span class="font-mono text-textSub text-[10px] whitespace-nowrap">${rec.time || '--:--'}</span>
+            <span class="font-medium text-white truncate max-w-[120px] text-[11px]">${areaName}</span>
+            <span class="font-mono font-bold text-white text-[11px] flex-shrink-0">${countStr}<span class="text-[9px] font-normal text-textSub ml-0.5">枚</span></span>
+          </div>
+        `;
+      }).join('<span class="text-[#243044] text-[11px] flex-shrink-0">➔</span>');
+
+      recentFeedHtml = `<div class="flex items-center gap-1.5 mx-2 overflow-hidden justify-center flex-1 min-w-0">${itemsHtml}</div>`;
+    } else {
+      recentFeedHtml = `<div class="flex-1"></div>`;
+    }
+
     html += `
       <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2.5 flex-shrink-0">
           ${rankBadgeHtml}
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="font-semibold text-white text-sm font-mono">${item.staffId}</span>
-              ${item.name ? `<span class="text-xs text-[#94A3B8] font-normal">(${item.name})</span>` : ''}
-            </div>
-            <div class="text-[11px] text-statusGreen font-normal mt-0.5">● 稼働確認済</div>
+          <div class="flex items-center gap-1.5">
+            <span class="font-semibold text-white text-sm font-mono">${item.staffId}</span>
+            ${item.name ? `<span class="text-xs text-[#94A3B8] font-normal">(${item.name})</span>` : ''}
           </div>
         </div>
-        <div class="text-right">
+        ${recentFeedHtml}
+        <div class="text-right flex-shrink-0">
           <span class="text-lg font-mono font-bold text-white">${(Number(item.count) || 0).toLocaleString()}</span>
           <span class="text-xs text-[#94A3B8] font-normal ml-0.5">枚 完了</span>
         </div>
