@@ -939,11 +939,11 @@ function renderMainStageRecords(ranking) {
     const rank = item.rank || (index + 1);
     let rankBadgeHtml = '';
     if (rank === 1) {
-      rankBadgeHtml = `<span class="w-7 h-7 flex items-center justify-center text-base select-none">🥇</span>`;
+      rankBadgeHtml = `<span class="w-7 h-7 flex items-center justify-center text-lg select-none">🥇</span>`;
     } else if (rank === 2) {
-      rankBadgeHtml = `<span class="w-7 h-7 flex items-center justify-center text-base select-none">🥈</span>`;
+      rankBadgeHtml = `<span class="w-7 h-7 flex items-center justify-center text-lg select-none">🥈</span>`;
     } else if (rank === 3) {
-      rankBadgeHtml = `<span class="w-7 h-7 flex items-center justify-center text-base select-none">🥉</span>`;
+      rankBadgeHtml = `<span class="w-7 h-7 flex items-center justify-center text-lg select-none">🥉</span>`;
     } else {
       rankBadgeHtml = `<span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold font-mono bg-white/5 text-white/70">${rank}</span>`;
     }
@@ -967,26 +967,26 @@ function renderMainStageRecords(ranking) {
         const areaName = rec.townName || rec.cityName || `エリア #${rec.rowId}`;
         const countStr = Number(rec.count || 0).toLocaleString();
         return `
-          <div class="flex items-center gap-1 px-2 py-0.5 rounded bg-[#0B1019] border border-borderNormal text-[11px] text-white flex-shrink-0">
+          <div class="flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-[#0B1019] border border-borderNormal text-xs text-white flex-shrink-0">
             <span class="w-1.5 h-1.5 rounded-full bg-statusGreen flex-shrink-0"></span>
-            <span class="font-mono text-textSub text-[10px] whitespace-nowrap">${rec.time || '--:--'}</span>
-            <span class="font-medium text-white truncate max-w-[120px] text-[11px]">${areaName}</span>
-            <span class="font-mono font-bold text-white text-[11px] flex-shrink-0">${countStr}<span class="text-[9px] font-normal text-textSub ml-0.5">枚</span></span>
+            <span class="font-mono text-textSub text-[11px] whitespace-nowrap">${rec.time || '--:--'}</span>
+            <span class="font-medium text-white truncate max-w-[130px] text-xs">${areaName}</span>
+            <span class="font-mono font-bold text-white text-xs flex-shrink-0">${countStr}<span class="text-[10px] font-normal text-textSub ml-0.5">枚</span></span>
           </div>
         `;
-      }).join('<span class="text-[#243044] text-[11px] flex-shrink-0">➔</span>');
+      }).join('<span class="text-[#243044] text-xs flex-shrink-0">➔</span>');
 
       if (totalPages > 1) {
         const hasPrev = validPage > 0;
         const hasNext = validPage < totalPages - 1;
         const prevBtn = `
-          <button type="button" onclick="changeStaffFeedPage('${item.staffId}', -1, event)" ${!hasPrev ? 'disabled' : ''} class="w-5 h-5 flex items-center justify-center rounded text-xs font-mono transition-colors ${hasPrev ? 'text-white hover:bg-white/10 cursor-pointer' : 'text-white/20 cursor-not-allowed'}">‹</button>
+          <button type="button" onclick="changeStaffFeedPage('${item.staffId}', -1, event)" ${!hasPrev ? 'disabled' : ''} class="w-6 h-6 flex items-center justify-center rounded text-sm font-bold font-mono transition-colors ${hasPrev ? 'text-white hover:bg-white/10 cursor-pointer' : 'text-white/20 cursor-not-allowed'}">‹</button>
         `;
         const nextBtn = `
-          <button type="button" onclick="changeStaffFeedPage('${item.staffId}', 1, event)" ${!hasNext ? 'disabled' : ''} class="w-5 h-5 flex items-center justify-center rounded text-xs font-mono transition-colors ${hasNext ? 'text-white hover:bg-white/10 cursor-pointer' : 'text-white/20 cursor-not-allowed'}">›</button>
+          <button type="button" onclick="changeStaffFeedPage('${item.staffId}', 1, event)" ${!hasNext ? 'disabled' : ''} class="w-6 h-6 flex items-center justify-center rounded text-sm font-bold font-mono transition-colors ${hasNext ? 'text-white hover:bg-white/10 cursor-pointer' : 'text-white/20 cursor-not-allowed'}">›</button>
         `;
         const pageIndicator = `
-          <span class="font-mono text-[10px] text-textSub whitespace-nowrap ml-1">${validPage + 1}/${totalPages}</span>
+          <span class="font-mono text-xs text-textSub whitespace-nowrap ml-1">${validPage + 1}/${totalPages}</span>
         `;
         recentFeedHtml = `<div class="flex items-center gap-1.5 mx-2 overflow-hidden justify-center flex-1 min-w-0">${prevBtn}${itemsHtml}${nextBtn}${pageIndicator}</div>`;
       } else {
@@ -1001,8 +1001,8 @@ function renderMainStageRecords(ranking) {
         <div class="flex items-center gap-2.5 flex-shrink-0">
           ${rankBadgeHtml}
           <div class="flex items-center gap-1.5">
-            <span class="font-semibold text-white text-sm font-mono">${item.staffId}</span>
-            ${item.name ? `<span class="text-xs text-[#94A3B8] font-normal">(${item.name})</span>` : ''}
+            <span class="font-bold text-white text-lg font-mono">${item.staffId}</span>
+            ${item.name ? `<span class="text-sm text-[#94A3B8] font-normal">(${item.name})</span>` : ''}
           </div>
         </div>
         ${recentFeedHtml}
@@ -1057,11 +1057,11 @@ function renderMainStageStocks(stocks) {
     html += `
       <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
         <div>
-          <div class="font-semibold text-sm text-white">${s.location || '保管拠点'}</div>
-          <div class="text-xs text-[#94A3B8] font-normal mt-0.5">担当: ${s.staffName || s.staffId || '未設定'} ｜ 更新: ${s.updatedAt || '--'}</div>
+          <div class="font-semibold text-lg text-white">${s.location || '保管拠点'}</div>
+          <div class="text-sm text-[#94A3B8] font-normal mt-0.5">担当: ${s.staffName || s.staffId || '未設定'} ｜ 更新: ${s.updatedAt || '--'}</div>
         </div>
         <div class="text-right">
-          <span class="text-xl font-bold font-mono text-white">${(Number(s.count) || 0).toLocaleString()}</span>
+          <span class="text-lg font-bold font-mono text-white">${(Number(s.count) || 0).toLocaleString()}</span>
           <span class="text-xs text-[#94A3B8] font-normal ml-0.5">枚</span>
         </div>
       </div>
@@ -1089,13 +1089,13 @@ function renderMainStageRoster(roster) {
     html += `
       <div class="p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] flex items-center justify-between transition-colors">
         <div class="flex items-center gap-3">
-          <span class="w-7 h-7 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-semibold text-xs text-brand">${r.id || ''}</span>
+          <span class="w-8 h-8 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-bold text-sm text-brand flex-shrink-0">${r.id || ''}</span>
           <div>
-            <div class="font-semibold text-sm text-white">${r.name || ''}</div>
-            <div class="text-xs text-[#94A3B8] font-normal mt-0.5">区分: 正式登録配布員</div>
+            <div class="font-semibold text-lg text-white">${r.name || ''}</div>
+            <div class="text-sm text-[#94A3B8] font-normal mt-0.5">区分: 正式登録配布員</div>
           </div>
         </div>
-        <span class="text-xs text-statusGreen font-medium px-2 py-0.5 rounded bg-statusGreen/10 border border-statusGreen/20">有効</span>
+        <span class="text-xs text-statusGreen font-medium px-2.5 py-1 rounded bg-statusGreen/10 border border-statusGreen/20 flex-shrink-0">有効</span>
       </div>
     `;
   });
@@ -1122,15 +1122,15 @@ function renderMainStageRequests(requests) {
       <div class="p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <span class="font-semibold text-sm text-white">${req.requesterName || req.requesterId}</span>
-            <span class="text-xs text-[#94A3B8]">➔</span>
-            <span class="font-semibold text-sm text-white">${req.holderName || req.holderId}</span>
+            <span class="font-semibold text-lg text-white">${req.requesterName || req.requesterId}</span>
+            <span class="text-sm text-[#94A3B8]">➔</span>
+            <span class="font-semibold text-lg text-white">${req.holderName || req.holderId}</span>
           </div>
           <span class="font-mono text-xs text-[#94A3B8] font-normal">${req.requestTime || ''}</span>
         </div>
-        <div class="text-xs text-[#94A3B8] font-normal mt-1 flex items-center justify-between">
+        <div class="text-sm text-[#94A3B8] font-normal mt-1 flex items-center justify-between">
           <span>連絡先: ${req.contactMethod ? `[${req.contactMethod}] ` : ''}${req.contactValue || ''}</span>
-          <span class="text-brand font-medium text-xs">要請中</span>
+          <span class="text-xs font-medium text-brand px-2.5 py-0.5 rounded bg-brand/10 border border-brand/20">要請中</span>
         </div>
       </div>
     `;
