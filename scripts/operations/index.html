@@ -229,21 +229,21 @@
         </span>
       </div>
 
-      <!-- 2. エリア内訳 カード (未/中/済: 3項目横並びのため text-base 最適化) -->
-      <div class="flex-1 min-w-0 h-9 flex items-center justify-around px-2 rounded-lg bg-[#0B1019] border border-borderNormal text-xs font-mono">
+      <!-- 2. エリア内訳 カード (未配布 / 配布中 / 完了: 正式名称表記) -->
+      <div class="flex-1 min-w-0 h-9 flex items-center justify-between px-2.5 rounded-lg bg-[#0B1019] border border-borderNormal text-xs font-mono">
         <div class="flex items-center gap-1">
           <span class="w-2 h-2 rounded-full bg-statusGreen flex-shrink-0"></span>
-          <span class="text-textSub font-normal text-[11px]">未</span>
+          <span class="text-textSub font-normal text-[11px] whitespace-nowrap">未配布</span>
           <span id="fact-unallocated-areas" class="font-bold text-white text-base leading-none">--</span>
         </div>
         <div class="flex items-center gap-1">
           <span class="w-2 h-2 rounded-full bg-brandBlue flex-shrink-0"></span>
-          <span class="text-textSub font-normal text-[11px]">中</span>
+          <span class="text-textSub font-normal text-[11px] whitespace-nowrap">配布中</span>
           <span id="fact-inprogress-areas" class="font-bold text-white text-base leading-none">--</span>
         </div>
         <div class="flex items-center gap-1">
           <span class="w-2 h-2 rounded-full bg-brand flex-shrink-0"></span>
-          <span class="text-textSub font-normal text-[11px]">済</span>
+          <span class="text-textSub font-normal text-[11px] whitespace-nowrap">完了</span>
           <span id="fact-completed-areas" class="font-bold text-white text-base leading-none">--</span>
         </div>
       </div>
