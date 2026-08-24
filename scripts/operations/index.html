@@ -268,14 +268,16 @@
 
         <!-- 1. 配布エリア MAP ビュー (areas) -->
         <div id="main-view-areas" class="flex-1 flex flex-col min-h-0">
-          <!-- マップ上部ヘッダーカード (中央揃え) -->
-          <div class="h-9 px-3 rounded-lg bg-[#0B1019] border border-borderNormal flex items-center justify-center gap-2 shadow-inner flex-shrink-0">
-            <span class="font-bold text-sm text-white tracking-wide">配布エリア MAP</span>
-            <span id="map-district-label" class="text-xs font-mono text-brand font-bold">全域</span>
+          <!-- マップ上部ヘッダー (文字幅フィットカード・中央配置) -->
+          <div class="flex items-center justify-center pb-1 flex-shrink-0 z-10">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-lg bg-[#0B1019] border border-borderNormal shadow-inner">
+              <span class="font-bold text-sm text-white tracking-wide">配布エリア MAP</span>
+              <span id="map-district-label" class="text-xs font-mono text-brand font-bold">全域</span>
+            </div>
           </div>
 
           <!-- Leaflet Map Canvas (最大面積確保) -->
-          <div class="flex-1 w-full rounded-lg overflow-hidden relative border border-borderNormal mt-1.5">
+          <div class="flex-1 w-full rounded-lg overflow-hidden relative border border-borderNormal">
             <div id="map" class="w-full h-full"></div>
 
             <!-- マップ上ピンタップ時の詳細オーバーレイ -->
@@ -295,44 +297,52 @@
 
         <!-- 2. 配布実績 ビュー (records) -->
         <div id="main-view-records" class="flex-1 flex flex-col min-h-0 hidden">
-          <div class="h-9 px-3 rounded-lg bg-[#0B1019] border border-borderNormal flex items-center justify-center gap-2 shadow-inner flex-shrink-0">
-            <span class="text-base">🏆</span>
-            <span class="font-bold text-sm text-white tracking-wide">配布実績 ランキング一覧</span>
+          <div class="flex items-center justify-center pb-1 flex-shrink-0">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-lg bg-[#0B1019] border border-borderNormal shadow-inner">
+              <span class="text-base">🏆</span>
+              <span class="font-bold text-sm text-white tracking-wide">配布実績 ランキング一覧</span>
+            </div>
           </div>
-          <div id="main-stage-records-content" class="flex-1 overflow-y-auto pt-2 space-y-1.5 pr-1">
+          <div id="main-stage-records-content" class="flex-1 overflow-y-auto pt-1 space-y-1.5 pr-1">
             <!-- 動的レンダリング -->
           </div>
         </div>
 
         <!-- 3. 保有チラシ ビュー (stocks) -->
         <div id="main-view-stocks" class="flex-1 flex flex-col min-h-0 hidden">
-          <div class="h-9 px-3 rounded-lg bg-[#0B1019] border border-borderNormal flex items-center justify-center gap-2 shadow-inner flex-shrink-0">
-            <span class="text-base">📦</span>
-            <span class="font-bold text-sm text-white tracking-wide">保有チラシ 拠点別一覧</span>
+          <div class="flex items-center justify-center pb-1 flex-shrink-0">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-lg bg-[#0B1019] border border-borderNormal shadow-inner">
+              <span class="text-base">📦</span>
+              <span class="font-bold text-sm text-white tracking-wide">保有チラシ 拠点別一覧</span>
+            </div>
           </div>
-          <div id="main-stage-stocks-content" class="flex-1 overflow-y-auto pt-2 space-y-1.5 pr-1">
+          <div id="main-stage-stocks-content" class="flex-1 overflow-y-auto pt-1 space-y-1.5 pr-1">
             <!-- 動的レンダリング -->
           </div>
         </div>
 
         <!-- 4. 名簿 ビュー (roster) -->
         <div id="main-view-roster" class="flex-1 flex flex-col min-h-0 hidden">
-          <div class="h-9 px-3 rounded-lg bg-[#0B1019] border border-borderNormal flex items-center justify-center gap-2 shadow-inner flex-shrink-0">
-            <span class="text-base">📋</span>
-            <span class="font-bold text-sm text-white tracking-wide">登録配布員 名簿一覧</span>
+          <div class="flex items-center justify-center pb-1 flex-shrink-0">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-lg bg-[#0B1019] border border-borderNormal shadow-inner">
+              <span class="text-base">📋</span>
+              <span class="font-bold text-sm text-white tracking-wide">登録配布員 名簿一覧</span>
+            </div>
           </div>
-          <div id="main-stage-roster-content" class="flex-1 overflow-y-auto pt-2 space-y-1.5 pr-1">
+          <div id="main-stage-roster-content" class="flex-1 overflow-y-auto pt-1 space-y-1.5 pr-1">
             <!-- 動的レンダリング -->
           </div>
         </div>
 
         <!-- 5. 受渡要請 ビュー (requests) -->
         <div id="main-view-requests" class="flex-1 flex flex-col min-h-0 hidden">
-          <div class="h-9 px-3 rounded-lg bg-[#0B1019] border border-borderNormal flex items-center justify-center gap-2 shadow-inner flex-shrink-0">
-            <span class="text-base">🤝</span>
-            <span class="font-bold text-sm text-white tracking-wide">チラシ受渡要請 一覧</span>
+          <div class="flex items-center justify-center pb-1 flex-shrink-0">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-lg bg-[#0B1019] border border-borderNormal shadow-inner">
+              <span class="text-base">🤝</span>
+              <span class="font-bold text-sm text-white tracking-wide">チラシ受渡要請 一覧</span>
+            </div>
           </div>
-          <div id="main-stage-requests-content" class="flex-1 overflow-y-auto pt-2 space-y-1.5 pr-1">
+          <div id="main-stage-requests-content" class="flex-1 overflow-y-auto pt-1 space-y-1.5 pr-1">
             <!-- 動的レンダリング -->
           </div>
         </div>
