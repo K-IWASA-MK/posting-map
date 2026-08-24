@@ -214,11 +214,11 @@
   <!-- ==================== MAIN CONTROL CANVAS (管制メインキャンバス) ==================== -->
   <main class="flex-1 flex flex-col p-2.5 gap-2 overflow-hidden bg-appBg min-w-0">
 
-    <!-- ========== ① 統括状況 BAR (4桁完全耐性 固定幅グリッド計器ライン: 195 -> 295 -> 180 -> 180 -> 130 / h-9 / #0B1019) ========== -->
+    <!-- ========== ① 統括状況 BAR (全項目4桁完全耐性 固定幅グリッド計器ライン: 190 -> 315 -> 170 -> 170 -> 135 / h-9 / #0B1019) ========== -->
     <div id="situation-bar" class="h-11 flex-shrink-0 flex items-center justify-between gap-2 px-2.5 bg-containerBg border border-borderNormal rounded-xl overflow-hidden">
 
-      <!-- 1. 🗺️ 配布状況 カード (w-[195px]) -->
-      <div class="w-[195px] flex-shrink-0 h-9 flex items-center justify-between px-3 rounded-lg bg-[#0B1019] border border-borderNormal">
+      <!-- 1. 🗺️ 配布状況 カード (w-[190px]) -->
+      <div class="w-[190px] flex-shrink-0 h-9 flex items-center justify-between px-3 rounded-lg bg-[#0B1019] border border-borderNormal">
         <span class="text-[11px] font-medium text-textSub tracking-wider uppercase truncate">配布状況</span>
         <div class="flex items-baseline gap-1">
           <span id="fact-done-areas" class="text-lg font-bold font-mono text-white leading-none tracking-tight">--</span>
@@ -229,8 +229,8 @@
         </span>
       </div>
 
-      <!-- 2. エリア内訳 カード (w-[295px]: 4桁耐性・数字text-lg・1行固定) -->
-      <div class="w-[295px] flex-shrink-0 h-9 flex items-center justify-between px-3 rounded-lg bg-[#0B1019] border border-borderNormal text-xs font-mono whitespace-nowrap overflow-hidden">
+      <!-- 2. エリア内訳 カード (w-[315px]: 全項目4桁完全耐性・数字text-lg・1行固定) -->
+      <div class="w-[315px] flex-shrink-0 h-9 flex items-center justify-between px-3 rounded-lg bg-[#0B1019] border border-borderNormal text-xs font-mono whitespace-nowrap overflow-hidden">
         <div class="flex items-center gap-1.5 whitespace-nowrap">
           <span class="w-2 h-2 rounded-full bg-statusGreen flex-shrink-0"></span>
           <span class="text-textSub font-normal text-[11px]">未配布</span>
@@ -248,8 +248,8 @@
         </div>
       </div>
 
-      <!-- 3. 📝 配布実績 カード (w-[180px]) -->
-      <div class="w-[180px] flex-shrink-0 h-9 flex items-center justify-between px-3 rounded-lg bg-[#0B1019] border border-borderNormal">
+      <!-- 3. 📝 配布実績 カード (w-[170px]) -->
+      <div class="w-[170px] flex-shrink-0 h-9 flex items-center justify-between px-3 rounded-lg bg-[#0B1019] border border-borderNormal">
         <div class="flex items-center gap-1 min-w-0 flex-shrink-0">
           <span class="text-xs flex-shrink-0">📝</span>
           <span class="text-[11px] font-medium text-textSub truncate">配布実績</span>
@@ -260,8 +260,8 @@
         </div>
       </div>
 
-      <!-- 4. 📦 保有チラシ カード (w-[180px]) -->
-      <div class="w-[180px] flex-shrink-0 h-9 flex items-center justify-between px-3 rounded-lg bg-[#0B1019] border border-borderNormal">
+      <!-- 4. 📦 保有チラシ カード (w-[170px]) -->
+      <div class="w-[170px] flex-shrink-0 h-9 flex items-center justify-between px-3 rounded-lg bg-[#0B1019] border border-borderNormal">
         <div class="flex items-center gap-1 min-w-0 flex-shrink-0">
           <span class="text-xs flex-shrink-0">📦</span>
           <span class="text-[11px] font-medium text-textSub truncate">保有チラシ</span>
@@ -272,8 +272,8 @@
         </div>
       </div>
 
-      <!-- 5. 📋 名簿 カード (w-[130px]) -->
-      <div class="w-[130px] flex-shrink-0 h-9 flex items-center justify-between px-3 rounded-lg bg-[#0B1019] border border-borderNormal">
+      <!-- 5. 📋 名簿 カード (w-[135px]) -->
+      <div class="w-[135px] flex-shrink-0 h-9 flex items-center justify-between px-3 rounded-lg bg-[#0B1019] border border-borderNormal">
         <div class="flex items-center gap-1 min-w-0 flex-shrink-0">
           <span class="text-xs flex-shrink-0">📋</span>
           <span class="text-[11px] font-medium text-textSub truncate">名簿</span>
