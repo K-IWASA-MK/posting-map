@@ -1119,7 +1119,7 @@ function renderMainStageRoster(roster) {
 }
 
 /**
- * 中央メインステージ用: チラシ受渡要請の描画
+ * 中央メインステージ用: チラシ受渡要請の描画 (1行3カラム 50px レイアウト)
  */
 function renderMainStageRequests(requests) {
   const contentEl = document.getElementById('main-stage-requests-content');
@@ -1133,19 +1133,44 @@ function renderMainStageRequests(requests) {
 
   let html = '<div class="space-y-1.5">';
   reqList.forEach(req => {
+    let formattedDate = '--';
+    if (req.requestTime) {
+      const match = String(req.requestTime).trim().match(/(?:^\d{4}[\/-])?(\d{1,2}[\/-]\d{1,2}\s+\d{1,2}:\d{2})/);
+      formattedDate = match ? match[1].replace('-', '/') : String(req.requestTime).substring(0, 16);
+    }
+
+    const requesterBadge = req.requesterId
+      ? `<span class="h-7 px-1.5 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-bold text-xs text-brand flex-shrink-0">${req.requesterId}</span>`
+      : '';
+    const holderBadge = req.holderId
+      ? `<span class="h-7 px-1.5 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-bold text-xs text-brand flex-shrink-0">${req.holderId}</span>`
+      : '';
+
     html += `
-      <div class="p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="font-semibold text-lg text-white">${req.requesterName || req.requesterId}</span>
-            <span class="text-sm text-[#94A3B8]">➔</span>
-            <span class="font-semibold text-lg text-white">${req.holderName || req.holderId}</span>
+      <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
+        <!-- Column 1: IDと名前 (要請者 ➔ 保管者) -->
+        <div class="flex items-center gap-2 flex-shrink-0 w-[320px] min-w-0">
+          <div class="flex items-center gap-1.5 min-w-0 flex-1">
+            ${requesterBadge}
+            <span class="font-semibold text-white truncate text-base">${req.requesterName || ''}</span>
           </div>
-          <span class="font-mono text-xs text-[#94A3B8] font-normal">${req.requestTime || ''}</span>
+          <span class="text-xs text-[#94A3B8] flex-shrink-0">➔</span>
+          <div class="flex items-center gap-1.5 min-w-0 flex-1">
+            ${holderBadge}
+            <span class="font-semibold text-white truncate text-base">${req.holderName || ''}</span>
+          </div>
         </div>
-        <div class="text-sm text-[#94A3B8] font-normal mt-1 flex items-center justify-between">
-          <span>連絡先: ${req.contactMethod ? `[${req.contactMethod}] ` : ''}${req.contactValue || ''}</span>
-          <span class="text-xs font-medium text-brand px-2.5 py-0.5 rounded bg-brand/10 border border-brand/20">要請中</span>
+
+        <!-- Column 2: 連絡方法・連絡先 -->
+        <div class="flex items-center gap-2 text-sm text-[#94A3B8] flex-1 min-w-0 mx-2">
+          <span class="text-xs text-[#94A3B8] truncate">
+            連絡先: ${req.contactMethod ? `<span class="text-[#94A3B8]/80">[${req.contactMethod}]</span> ` : ''}<span class="text-white/90 font-mono">${req.contactValue || '--'}</span>
+          </span>
+        </div>
+
+        <!-- Column 3: 日時 -->
+        <div class="text-right flex-shrink-0">
+          <span class="font-mono text-xs text-[#94A3B8]">${formattedDate}</span>
         </div>
       </div>
     `;
