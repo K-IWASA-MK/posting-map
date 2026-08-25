@@ -55,7 +55,8 @@ function doGet(e) {
     'getAreaDetails',
     'getGlobalPinStatus',
     'getRoster',
-    'resetRoster'
+    'resetRoster',
+    'getTransferRequests'
   ].includes(action);
 
   // Authentication Gate
@@ -170,7 +171,8 @@ function doPost(e) {
     'getAreaDetails',
     'getGlobalPinStatus',
     'getRoster',
-    'resetRoster'
+    'resetRoster',
+    'getTransferRequests'
   ].includes(action);
 
   // Authentication Gate
@@ -288,6 +290,8 @@ function processPostAction(action, postData, e) {
       return resolveTransferRequest(postData);
     case 'getFlyerStock':
       return { success: true, stocks: getFlyerStock() };
+    case 'getTransferRequests':
+      return { success: true, requests: getTransferRequests() };
     case 'updateFlyerStock':
       return updateFlyerStock(
         postData.location,
