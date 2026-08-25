@@ -1271,11 +1271,11 @@ function renderMainStageRecords(ranking) {
             <span class="font-medium text-white truncate max-w-[130px] text-xs">${areaName}</span>
             <span class="font-mono font-bold text-white text-xs flex-shrink-0">${countStr}<span class="text-[10px] font-normal text-textSub ml-0.5">枚</span></span>
             <span class="text-[#243044] text-xs flex-shrink-0">|</span>
-            <span class="text-[11px] font-mono flex items-center gap-1 flex-shrink-0 ${gpsStatus === 'OK' ? 'text-textSub' : 'text-textSub/60'}">
-              <span>📍</span><span>GPS</span><span class="font-bold ${gpsStatus === 'OK' ? 'text-[#10B981]' : 'text-[#EF4444]'}">${gpsStatus}</span>
+            <span class="text-[11px] font-mono flex items-center gap-1 flex-shrink-0 text-textSub">
+              <span>📍</span><span>GPS</span><span class="${gpsStatus === 'OK' ? 'text-textSub font-medium' : 'text-[#EF4444] font-bold'}">${gpsStatus}</span>
             </span>
-            <span class="text-[11px] font-mono flex items-center gap-1 flex-shrink-0 ${photoStatus === 'OK' ? 'text-textSub' : 'text-textSub/60'}">
-              <span>🤳</span><span class="font-bold ${photoStatus === 'OK' ? 'text-[#10B981]' : 'text-[#EF4444]'}">${photoStatus}</span>
+            <span class="text-[11px] font-mono flex items-center gap-1 flex-shrink-0 text-textSub">
+              <span>🤳</span><span class="${photoStatus === 'OK' ? 'text-textSub font-medium' : 'text-[#EF4444] font-bold'}">${photoStatus}</span>
             </span>
           </div>
         `;
