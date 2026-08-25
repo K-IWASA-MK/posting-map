@@ -1109,7 +1109,7 @@ function renderMainStageRoster(roster) {
           <span class="text-xs text-[#94A3B8]">登録: <span class="font-mono text-white/90">${formattedDate}</span></span>
         </div>
         <div class="text-right flex-shrink-0">
-          <span class="text-xs text-statusGreen font-medium px-2.5 py-1 rounded bg-statusGreen/10 border border-statusGreen/20">有効</span>
+          <span class="text-xs text-[#94A3B8] font-medium px-2.5 py-1 rounded bg-[#94A3B8]/10 border border-[#94A3B8]/20">有効</span>
         </div>
       </div>
     `;
