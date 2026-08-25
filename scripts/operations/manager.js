@@ -1101,7 +1101,7 @@ function renderRightBottomAreaStats(selectedPin) {
         <div class="space-y-1 text-xs font-mono">
           <div class="flex justify-between">
             <span class="text-textSub">投函枚数:</span>
-            <span class="font-bold text-brand">${Number(doneCount).toLocaleString()} 枚</span>
+            <span class="font-bold text-white">${Number(doneCount).toLocaleString()} <span class="text-[10px] font-normal text-textSub">枚</span></span>
           </div>
           <div class="flex justify-between">
             <span class="text-textSub">担当:</span>
