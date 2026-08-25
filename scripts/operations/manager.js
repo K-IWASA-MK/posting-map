@@ -1011,28 +1011,28 @@ function renderRightTopTurnout(selectedCity) {
   containerEl.innerHTML = `
     <div class="flex flex-col justify-between h-full">
       <div>
-        <div class="flex items-center justify-between pb-2 border-b border-borderNormal">
-          <div class="flex items-center gap-1.5 text-xs font-bold text-white tracking-wide">
+        <div class="flex items-center justify-between pb-2.5 border-b border-borderNormal">
+          <div class="flex items-center gap-1.5 text-sm font-bold text-white tracking-wide">
             <span>🗳️</span>
             <span>投票率データ</span>
           </div>
-          <span class="text-[11px] font-bold text-brand bg-brand/10 border border-brand/20 px-2 py-0.5 rounded">${data.name}</span>
+          <span class="text-xs font-bold text-brand bg-brand/10 border border-brand/20 px-2.5 py-0.5 rounded">${data.name}</span>
         </div>
 
-        <div class="mt-2 flex items-baseline justify-between">
+        <div class="mt-3 flex items-baseline justify-between">
           <div>
-            <div class="text-2xl font-mono font-bold text-white tracking-tight">${data.turnout}<span class="text-sm font-normal text-textSub ml-0.5">%</span></div>
-            <div class="text-[10px] text-textSub mt-0.5 font-medium">第51回 衆院選 (${data.electionDate})</div>
+            <div class="text-[28px] font-mono font-bold text-white tracking-tight leading-none">${data.turnout}<span class="text-base font-normal text-textSub ml-0.5">%</span></div>
+            <div class="text-xs text-textSub mt-1.5 font-medium">第51回 衆院選 (${data.electionDate})</div>
           </div>
           <div class="text-right">
-            <span class="text-[11px] font-mono font-medium text-[#94A3B8] bg-[#94A3B8]/10 border border-[#94A3B8]/20 px-2 py-0.5 rounded">
+            <span class="text-xs font-mono font-medium text-[#94A3B8] bg-[#94A3B8]/10 border border-[#94A3B8]/20 px-2.5 py-1 rounded">
               前回比 ${data.diffPt}pt ${diffIcon}
             </span>
           </div>
         </div>
       </div>
 
-      <div class="pt-2 border-t border-borderNormal flex items-center justify-between text-[11px] text-textSub font-mono">
+      <div class="pt-2.5 border-t border-borderNormal flex items-center justify-between text-xs text-textSub font-mono">
         <div>全国: <span class="text-white font-semibold">${data.nationalTurnout}%</span></div>
         <div>3区平均: <span class="text-white font-semibold">${data.districtTurnout}%</span></div>
       </div>
@@ -1050,14 +1050,14 @@ function renderRightBottomAreaStats(selectedPin) {
   if (!selectedPin) {
     containerEl.innerHTML = `
       <div class="flex flex-col justify-between h-full">
-        <div class="flex items-center justify-between pb-2 border-b border-borderNormal">
-          <div class="flex items-center gap-1.5 text-xs font-bold text-white tracking-wide">
+        <div class="flex items-center justify-between pb-2.5 border-b border-borderNormal">
+          <div class="flex items-center gap-1.5 text-sm font-bold text-white tracking-wide">
             <span>👥</span>
             <span>エリア統計</span>
           </div>
         </div>
         <div class="flex-1 flex flex-col items-center justify-center text-center p-3">
-          <span class="text-2xl mb-1 opacity-70">🗺️</span>
+          <span class="text-3xl mb-1.5 opacity-75">🗺️</span>
           <span class="text-xs text-textSub font-medium leading-relaxed">マップ上のピンまたは境界を<br>選択して詳細を表示</span>
         </div>
       </div>
@@ -1072,7 +1072,7 @@ function renderRightBottomAreaStats(selectedPin) {
   const isInProgress = inProgressList.includes(selectedPin.rowId);
 
   const statusCfg = getAreaStatusConfig(isCompleted, isInProgress);
-  const statusBadgeHtml = `<span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded" style="color: ${statusCfg.color}; background-color: ${statusCfg.color}1A; border: 1px solid ${statusCfg.color}33;">${statusCfg.statusText}</span>`;
+  const statusBadgeHtml = `<span class="text-xs font-mono font-bold px-2.5 py-0.5 rounded" style="color: ${statusCfg.color}; background-color: ${statusCfg.color}1A; border: 1px solid ${statusCfg.color}33;">${statusCfg.statusText}</span>`;
 
   // 世帯数・推定人口（マスターデータ または 決定論的安定計算）
   const households = selectedPin.households || Math.max(120, ((selectedPin.rowId * 137 + 240) % 480) + 160);
@@ -1088,30 +1088,30 @@ function renderRightBottomAreaStats(selectedPin) {
     const doneCount = liveRec.count || Math.round(households * 0.85);
 
     resultSectionHtml = `
-      <div class="pt-2 mt-1 border-t border-borderNormal">
-        <div class="text-[11px] font-bold text-textSub mb-1 flex items-center gap-1">
+      <div class="pt-2.5 mt-2.5 border-t border-borderNormal">
+        <div class="text-[13px] font-bold text-textSub mb-1.5 flex items-center gap-1">
           <span>📊</span><span>実績</span>
         </div>
-        <div class="space-y-1 text-xs font-mono">
-          <div class="flex justify-between">
+        <div class="space-y-1.5 text-[13px]">
+          <div class="flex justify-between items-center">
             <span class="text-textSub">投函枚数:</span>
-            <span class="font-bold text-white">${Number(doneCount).toLocaleString()} <span class="text-[10px] font-normal text-textSub">枚</span></span>
+            <span class="font-bold text-white font-mono text-[15px]">${Number(doneCount).toLocaleString()} <span class="text-xs font-normal text-textSub">枚</span></span>
           </div>
-          <div class="flex justify-between">
+          <div class="flex justify-between items-center">
             <span class="text-textSub">担当:</span>
             <span class="text-white">${staffId} ${staffName}</span>
           </div>
-          <div class="flex justify-between">
+          <div class="flex justify-between items-center">
             <span class="text-textSub">完了日時:</span>
-            <span class="text-textSub">${doneTime}</span>
+            <span class="text-textSub font-mono text-xs">${doneTime}</span>
           </div>
         </div>
       </div>
     `;
   } else if (isInProgress) {
     resultSectionHtml = `
-      <div class="pt-2 mt-1 border-t border-borderNormal text-center">
-        <span class="text-xs text-blue-400 font-medium">⏱️ 担当スタッフ配布中...</span>
+      <div class="pt-2.5 mt-2.5 border-t border-borderNormal text-center">
+        <span class="text-[13px] text-blue-400 font-medium py-1 inline-block">⏱️ 担当スタッフ配布中...</span>
       </div>
     `;
   }
@@ -1119,22 +1119,22 @@ function renderRightBottomAreaStats(selectedPin) {
   containerEl.innerHTML = `
     <div class="flex flex-col justify-between h-full">
       <div>
-        <div class="flex items-center justify-between pb-2 border-b border-borderNormal">
-          <div class="flex items-center gap-1.5 text-xs font-bold text-white tracking-wide">
+        <div class="flex items-center justify-between pb-2.5 border-b border-borderNormal">
+          <div class="flex items-center gap-1.5 text-sm font-bold text-white tracking-wide">
             <span>👥</span>
             <span>エリア統計</span>
           </div>
           ${statusBadgeHtml}
         </div>
 
-        <div class="mt-2 space-y-1.5">
-          <div class="flex justify-between items-center text-xs">
+        <div class="mt-3 space-y-2.5">
+          <div class="flex justify-between items-center text-[13px]">
             <span class="text-textSub flex items-center gap-1"><span>🏠</span><span>世帯数</span></span>
-            <span class="font-mono font-bold text-white">${households.toLocaleString()} <span class="text-[10px] font-normal text-textSub">世帯</span></span>
+            <span class="font-mono font-bold text-white text-[15px]">${households.toLocaleString()} <span class="text-xs font-normal text-textSub">世帯</span></span>
           </div>
-          <div class="flex justify-between items-center text-xs">
+          <div class="flex justify-between items-center text-[13px]">
             <span class="text-textSub flex items-center gap-1"><span>👥</span><span>推定人口</span></span>
-            <span class="font-mono font-bold text-white">${population.toLocaleString()} <span class="text-[10px] font-normal text-textSub">人</span></span>
+            <span class="font-mono font-bold text-white text-[15px]">${population.toLocaleString()} <span class="text-xs font-normal text-textSub">人</span></span>
           </div>
         </div>
       </div>
