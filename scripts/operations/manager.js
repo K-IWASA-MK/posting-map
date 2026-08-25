@@ -66,7 +66,7 @@ const AREA_STATUS_CONFIG = {
   },
   IN_PROGRESS: {
     statusKey: 'IN_PROGRESS',
-    statusText: '🔵 配布中',
+    statusText: '● 配布中',
     color: '#00B7FF',
     strokeColor: '#0284c7',
     radius: 5.5,
@@ -1071,14 +1071,8 @@ function renderRightBottomAreaStats(selectedPin) {
   const isCompleted = completedList.includes(selectedPin.rowId);
   const isInProgress = inProgressList.includes(selectedPin.rowId);
 
-  let statusBadgeHtml = '';
-  if (isCompleted) {
-    statusBadgeHtml = `<span class="text-[11px] font-bold text-brand bg-brand/10 border border-brand/20 px-2 py-0.5 rounded">配布済 🟠</span>`;
-  } else if (isInProgress) {
-    statusBadgeHtml = `<span class="text-[11px] font-bold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded">配布中 🔵</span>`;
-  } else {
-    statusBadgeHtml = `<span class="text-[11px] font-bold text-statusGreen bg-statusGreen/10 border border-statusGreen/20 px-2 py-0.5 rounded">未配布 🟢</span>`;
-  }
+  const statusCfg = getAreaStatusConfig(isCompleted, isInProgress);
+  const statusBadgeHtml = `<span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded" style="color: ${statusCfg.color}; background-color: ${statusCfg.color}1A; border: 1px solid ${statusCfg.color}33;">${statusCfg.statusText}</span>`;
 
   // 世帯数・推定人口（マスターデータ または 決定論的安定計算）
   const households = selectedPin.households || Math.max(120, ((selectedPin.rowId * 137 + 240) % 480) + 160);
