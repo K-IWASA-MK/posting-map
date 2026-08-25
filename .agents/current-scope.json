@@ -1,4 +1,8 @@
 [
+  "active/api/v2_api.js",
+  "active/business/staff/staff_model.js",
+  "active/business/staff/staff_repository.js",
+  "active/business/staff/staff_service.js",
   "active/dashboard/v2_ui.js",
   "scripts/operations/index.html",
   "scripts/operations/manager.js"
