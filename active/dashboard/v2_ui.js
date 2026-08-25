@@ -548,21 +548,22 @@ function formatRosterSheet() {
   const maxRows = sheet.getMaxRows();
   const maxCols = sheet.getMaxColumns();
 
-  // 全列を表示させてから、D列以降を隠す
+  // 全列を表示させてから、E列以降を隠す
   sheet.showColumns(1, maxCols);
   sheet.setHiddenGridlines(true);
 
-  // 列幅設定 (ID: 100, 名前: 250, アプリ名: 250)
+  // 列幅設定 (ID: 100, 名前: 250, LINE_USER_ID: 300, 登録日時: 200)
   sheet.setColumnWidth(1, 100);
   sheet.setColumnWidth(2, 250);
-  sheet.setColumnWidth(3, 250);
+  sheet.setColumnWidth(3, 300);
+  sheet.setColumnWidth(4, 200);
 
-  if (maxCols > 3) {
-    sheet.hideColumns(4, maxCols - 3);
+  if (maxCols > 4) {
+    sheet.hideColumns(5, maxCols - 4);
   }
 
-  // ヘッダーデザイン (A1:C1)
-  const header = sheet.getRange("A1:C1");
+  // ヘッダーデザイン (A1:D1)
+  const header = sheet.getRange("A1:D1");
   header
     .setBackground("#1a237e")
     .setFontColor("#ffffff")
@@ -574,7 +575,7 @@ function formatRosterSheet() {
 
   // データ行のデザイン（1000行分あらかじめ設定）
   const lastRow = 1000;
-  const dataRange = sheet.getRange(2, 1, lastRow - 1, 3);
+  const dataRange = sheet.getRange(2, 1, lastRow - 1, 4);
   dataRange
     .setFontSize(18)
     .setFontWeight("bold")
@@ -589,7 +590,7 @@ function formatRosterSheet() {
 }
 
 /**
- * 名簿シートを初期化（ID・苗字・名前の3列構成にする）
+ * 名簿シートを初期化（ID・名前・LINE_USER_ID・登録日時の4列構成にする）
  */
 function setupRosterSheet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -600,7 +601,7 @@ function setupRosterSheet() {
 
   // ★ 修正: 一旦全データをクリアして真っ新にする
   sheet.clear();
-  sheet.getRange(1, 1, 1, 3).setValues([["ID", "名前", "アプリ名"]]);
+  sheet.getRange(1, 1, 1, 4).setValues([["ID", "名前", "LINE_USER_ID", "登録日時"]]);
   sheet.setFrozenRows(1); // 1行目を固定
   
   formatRosterSheet(); // 整形も同時に行う
