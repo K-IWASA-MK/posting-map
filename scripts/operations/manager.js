@@ -1247,7 +1247,7 @@ function renderMainStageRecords(ranking) {
     // 各スタッフごとの配布履歴抽出 (Backend SSOT: liveRecords)
     const staffRecords = (DashboardState.liveRecords || []).filter(r => r.staffId === item.staffId);
     const totalRecordsCount = staffRecords.length;
-    const pageSize = 2;
+    const pageSize = 1;
     const totalPages = Math.ceil(totalRecordsCount / pageSize) || 1;
 
     const currentPage = DashboardState.staffFeedPages[item.staffId] || 0;
@@ -1262,15 +1262,24 @@ function renderMainStageRecords(ranking) {
       const itemsHtml = pageRecords.map(rec => {
         const areaName = rec.townName || rec.cityName || `エリア #${rec.rowId}`;
         const countStr = Number(rec.count || 0).toLocaleString();
+        const gpsStatus = rec.gpsStatus === "OK" ? "OK" : "NO";
+        const photoStatus = rec.photoStatus === "OK" ? "OK" : "NO";
         return `
-          <div class="flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-[#0B1019] border border-borderNormal text-xs text-white flex-shrink-0">
+          <div class="flex items-center gap-2 px-2.5 py-0.5 rounded bg-[#0B1019] border border-borderNormal text-xs text-white flex-shrink-0">
             <span class="w-1.5 h-1.5 rounded-full bg-statusGreen flex-shrink-0"></span>
             <span class="font-mono text-textSub text-[11px] whitespace-nowrap">${rec.time || '--:--'}</span>
             <span class="font-medium text-white truncate max-w-[130px] text-xs">${areaName}</span>
             <span class="font-mono font-bold text-white text-xs flex-shrink-0">${countStr}<span class="text-[10px] font-normal text-textSub ml-0.5">枚</span></span>
+            <span class="text-[#243044] text-xs flex-shrink-0">|</span>
+            <span class="text-[11px] font-mono flex items-center gap-1 flex-shrink-0 ${gpsStatus === 'OK' ? 'text-textSub' : 'text-textSub/60'}">
+              <span>📍</span><span>GPS</span><span class="font-bold ${gpsStatus === 'OK' ? 'text-[#10B981]' : 'text-[#EF4444]'}">${gpsStatus}</span>
+            </span>
+            <span class="text-[11px] font-mono flex items-center gap-1 flex-shrink-0 ${photoStatus === 'OK' ? 'text-textSub' : 'text-textSub/60'}">
+              <span>🤳</span><span class="font-bold ${photoStatus === 'OK' ? 'text-[#10B981]' : 'text-[#EF4444]'}">${photoStatus}</span>
+            </span>
           </div>
         `;
-      }).join('<span class="text-[#243044] text-xs flex-shrink-0">➔</span>');
+      }).join('');
 
       if (totalPages > 1) {
         const hasPrev = validPage > 0;
@@ -1314,7 +1323,7 @@ function renderMainStageRecords(ranking) {
 }
 
 /**
- * スタッフごとの配布履歴フィードのページ送り (2件単位)
+ * スタッフごとの配布履歴フィードのページ送り (1件単位)
  */
 function changeStaffFeedPage(staffId, delta, event) {
   if (event) event.stopPropagation();

@@ -194,8 +194,8 @@ if (typeof DistributionRepository === 'undefined') {
       const lastRow = sheet.getLastRow();
       if (lastRow < 2) return [];
 
-      // 固定マスター型シートの全エリア行（単一Range Readで一括取得）
-      const values = sheet.getRange(2, 1, lastRow - 1, 7).getValues();
+      // 固定マスター型シートの全エリア行（単一Range Readで一括取得: A〜I列）
+      const values = sheet.getRange(2, 1, lastRow - 1, 9).getValues();
       const records = [];
 
       for (let i = 0; i < values.length; i++) {
@@ -207,6 +207,8 @@ if (typeof DistributionRepository === 'undefined') {
         const count = parseFloat(row[4]) || 0;
         const staffId = row[5] ? String(row[5]).trim() : "";
         const staffName = row[6] ? String(row[6]).trim() : "";
+        const gpsStatus = row[7] === "OK" ? "OK" : "NO";
+        const photoStatus = row[8] === "OK" ? "OK" : "NO";
 
         // D列（配布日時）が存在する完了レコードのみを対象
         if (!rawCompletedAt) continue;
@@ -250,7 +252,9 @@ if (typeof DistributionRepository === 'undefined') {
           timestamp: timeVal,
           count: count,
           staffId: staffId || 'S001',
-          staffName: staffName || staffId || 'S001'
+          staffName: staffName || staffId || 'S001',
+          gpsStatus: gpsStatus,
+          photoStatus: photoStatus
         });
       }
 
