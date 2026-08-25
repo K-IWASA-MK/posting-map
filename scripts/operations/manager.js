@@ -1162,7 +1162,7 @@ function renderMainStageRequests(requests) {
         </div>
 
         <!-- Column 2: 連絡方法・連絡先 -->
-        <div class="flex items-center gap-2 text-sm text-[#94A3B8] flex-1 min-w-0 mx-2">
+        <div class="flex items-center gap-2 text-sm text-[#94A3B8] flex-1 min-w-0 ml-12">
           <span class="text-xs text-[#94A3B8] truncate">
             連絡先: ${req.contactMethod ? `<span class="text-[#94A3B8]/80">[${req.contactMethod}]</span> ` : ''}<span class="text-white/90 font-mono">${req.contactValue || '--'}</span>
           </span>
