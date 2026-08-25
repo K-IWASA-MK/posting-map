@@ -1054,15 +1054,16 @@ function renderMainStageStocks(stocks) {
 
   let html = '<div class="space-y-1.5">';
   sortedStocks.forEach(s => {
-    const staffInfoHtml = (s.staffId && s.staffName)
-      ? `<span class="font-mono font-bold text-white text-sm">${s.staffId}</span><span class="font-medium text-white text-sm ml-1.5">${s.staffName}</span>`
-      : `<span class="font-medium text-white text-sm">${s.staffName || s.staffId || '未設定'}</span>`;
+    const staffBadgeHtml = s.staffId
+      ? `<span class="h-7 px-2 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-bold text-xs text-brand flex-shrink-0">${s.staffId}</span>`
+      : '';
 
     html += `
       <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
-        <div class="font-semibold text-lg text-white flex-shrink-0 min-w-[120px]">${s.location || '保管拠点'}</div>
-        <div class="flex items-center gap-2 text-sm text-[#94A3B8] justify-center flex-1 min-w-0">
-          ${staffInfoHtml}
+        <div class="font-semibold text-lg text-white flex-shrink-0 w-[140px] truncate">${s.location || '保管拠点'}</div>
+        <div class="flex items-center gap-2.5 text-sm text-[#94A3B8] flex-1 min-w-0">
+          ${staffBadgeHtml}
+          <span class="font-medium text-white text-sm truncate max-w-[130px]">${s.staffName || (s.staffId ? '' : '未設定')}</span>
           <span class="text-[#243044] text-xs">|</span>
           <span class="text-textSub text-xs">更新: <span class="font-mono">${s.updatedAt || '--'}</span></span>
         </div>
