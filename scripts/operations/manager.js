@@ -1006,7 +1006,6 @@ function renderRightTopTurnout(selectedCity) {
 
   const data = getMunicipalityTurnout(DashboardState.electionTurnout, selectedCity);
   const isPositive = !String(data.diffPt).startsWith('-');
-  const diffBadgeColor = isPositive ? 'text-brand bg-brand/10 border border-brand/20' : 'text-blue-400 bg-blue-500/10 border border-blue-500/20';
   const diffIcon = isPositive ? '▲' : '▼';
 
   containerEl.innerHTML = `
@@ -1026,7 +1025,7 @@ function renderRightTopTurnout(selectedCity) {
             <div class="text-[10px] text-textSub mt-0.5 font-medium">第51回 衆院選 (${data.electionDate})</div>
           </div>
           <div class="text-right">
-            <span class="text-[11px] font-mono font-bold ${diffBadgeColor} px-2 py-0.5 rounded">
+            <span class="text-[11px] font-mono font-medium text-[#94A3B8] bg-[#94A3B8]/10 border border-[#94A3B8]/20 px-2 py-0.5 rounded">
               前回比 ${data.diffPt}pt ${diffIcon}
             </span>
           </div>
@@ -1081,10 +1080,9 @@ function renderRightBottomAreaStats(selectedPin) {
     statusBadgeHtml = `<span class="text-[11px] font-bold text-statusGreen bg-statusGreen/10 border border-statusGreen/20 px-2 py-0.5 rounded">未配布 🟢</span>`;
   }
 
-  // 世帯数・推定人口・推奨枚数（マスターデータ または 決定論的安定計算）
+  // 世帯数・推定人口（マスターデータ または 決定論的安定計算）
   const households = selectedPin.households || Math.max(120, ((selectedPin.rowId * 137 + 240) % 480) + 160);
   const population = selectedPin.population || Math.round(households * 2.35);
-  const recommendedCount = selectedPin.recommendedCount || Math.round(households * 0.85);
 
   let resultSectionHtml = '';
   if (isCompleted) {
@@ -1093,7 +1091,7 @@ function renderRightBottomAreaStats(selectedPin) {
     const staffId = liveRec.staffId || 'S001';
     const staffName = staffId === 'S001' ? 'K. IWASA' : (staffId === 'S002' ? 'なお' : '');
     const doneTime = liveRec.time || '08/23 09:36';
-    const doneCount = liveRec.count || recommendedCount;
+    const doneCount = liveRec.count || Math.round(households * 0.85);
 
     resultSectionHtml = `
       <div class="pt-2 mt-1 border-t border-borderNormal">
@@ -1143,10 +1141,6 @@ function renderRightBottomAreaStats(selectedPin) {
           <div class="flex justify-between items-center text-xs">
             <span class="text-textSub flex items-center gap-1"><span>👥</span><span>推定人口</span></span>
             <span class="font-mono font-bold text-white">${population.toLocaleString()} <span class="text-[10px] font-normal text-textSub">人</span></span>
-          </div>
-          <div class="flex justify-between items-center text-xs">
-            <span class="text-textSub flex items-center gap-1"><span>📄</span><span>推奨枚数</span></span>
-            <span class="font-mono font-bold text-white">${recommendedCount.toLocaleString()} <span class="text-[10px] font-normal text-textSub">枚 (目安)</span></span>
           </div>
         </div>
       </div>
