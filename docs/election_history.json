@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "2.0.0",
   "districtId": "MIE-03",
   "districtName": "三重第3区",
   "historyPolicy": {
@@ -8,52 +8,64 @@
   },
   "sourcePolicy": {
     "national": "総務省",
-    "district": "都道府県選挙管理委員会",
-    "municipality": "都道府県選挙管理委員会"
+    "district": "三重県選挙管理委員会",
+    "municipality": "三重県選挙管理委員会"
   },
   "elections": [
     {
       "electionId": "HOUSE-2026-02",
       "electionName": "第51回衆議院議員総選挙",
+      "year": "2026",
       "electionDate": "2026-02-08",
-      "nationalTurnout": 56.20,
-      "districtTurnout": 57.80,
-      "municipalitiesTurnout": [
-        { "name": "四日市市（一部）", "turnout": 56.90 },
-        { "name": "桑名市", "turnout": 58.70 },
-        { "name": "いなべ市", "turnout": 59.80 },
-        { "name": "桑名郡", "turnout": 56.40 },
-        { "name": "員弁郡", "turnout": 57.10 }
-      ]
+      "national": 56.26,
+      "district3": 58.80,
+      "municipalities": {
+        "四日市市": 57.24,
+        "桑名市": 58.25,
+        "いなべ市": 62.17,
+        "木曽岬町": 59.57,
+        "東員町": 63.16,
+        "菰野町": 62.23,
+        "朝日町": 64.07,
+        "川越町": 56.31
+      }
     },
     {
-      "electionId": "SENATE-2025",
-      "electionName": "第27回参議院議員通常選挙",
-      "electionDate": "2025-07-20",
-      "nationalTurnout": 54.10,
-      "districtTurnout": 55.40,
-      "municipalitiesTurnout": [
-        { "name": "四日市市（一部）", "turnout": 54.80 },
-        { "name": "桑名市", "turnout": 56.20 },
-        { "name": "いなべ市", "turnout": 57.50 },
-        { "name": "桑名郡", "turnout": 53.90 },
-        { "name": "員弁郡", "turnout": 54.60 }
-      ]
-    },
-    {
-      "electionId": "HOUSE-2024",
+      "electionId": "HOUSE-2024-10",
       "electionName": "第50回衆議院議員総選挙",
+      "year": "2024",
       "electionDate": "2024-10-27",
-      "nationalTurnout": 53.85,
-      "districtTurnout": 55.12,
-      "municipalitiesTurnout": [
-        { "name": "四日市市（一部）", "turnout": 54.20 },
-        { "name": "桑名市", "turnout": 56.10 },
-        { "name": "いなべ市", "turnout": 57.30 },
-        { "name": "桑名郡", "turnout": 53.90 },
-        { "name": "員弁郡", "turnout": 54.80 }
-      ]
+      "national": 53.85,
+      "district3": 56.64,
+      "municipalities": {
+        "四日市市": 54.97,
+        "桑名市": 56.82,
+        "いなべ市": 59.11,
+        "木曽岬町": 58.15,
+        "東員町": 60.46,
+        "菰野町": 59.68,
+        "朝日町": 62.34,
+        "川越町": 53.09
+      }
+    },
+    {
+      "electionId": "HOUSE-2021-10",
+      "electionName": "第49回衆議院議員総選挙",
+      "year": "2021",
+      "electionDate": "2021-10-31",
+      "national": 55.93,
+      "district3": 55.31,
+      "municipalities": {
+        "四日市市": 53.06,
+        "桑名市": 55.16,
+        "いなべ市": 59.17,
+        "木曽岬町": 57.96,
+        "東員町": 59.35,
+        "菰野町": 60.04,
+        "朝日町": 60.94,
+        "川越町": 53.68
+      }
     }
   ],
-  "lastUpdated": "2026-07-21T16:01:00+09:00"
+  "lastUpdated": "2026-08-25T22:45:00+09:00"
 }

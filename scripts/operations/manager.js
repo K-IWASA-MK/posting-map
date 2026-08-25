@@ -911,87 +911,102 @@ async function loadElectionTurnoutData() {
 }
 
 /**
- * 自治体ID/正規化名に基づく投票率データの抽出（District-Agnostic）
+ * 自治体ID/正規化名に基づく投票率データの抽出（District-Agnostic / 完全動的SSOT）
  */
 function getMunicipalityTurnout(electionData, cityName) {
-  const defaultTurnout = {
-    name: '全域',
-    electionName: '第51回 衆議院議員総選挙',
-    electionDate: '2026/02',
-    turnout: '57.80',
-    prevTurnout: '55.12',
-    diffPt: '+2.68',
-    nationalTurnout: '56.20',
-    districtTurnout: '57.80'
-  };
+  const isAll = !cityName || cityName === 'ALL';
+  const targetName = isAll ? '全域' : cityName;
 
   if (!electionData || !Array.isArray(electionData.elections) || electionData.elections.length === 0) {
-    if (cityName && cityName !== 'ALL') {
-      defaultTurnout.name = cityName;
-    }
-    return defaultTurnout;
-  }
-
-  const currentElection = electionData.elections[0] || {}; // 最新: 第51回 (2026-02)
-  const prevElection = electionData.elections.find(e => e.electionId === 'HOUSE-2024') || electionData.elections[1] || {};
-
-  const natTurnout = Number(currentElection.nationalTurnout || 56.20).toFixed(2);
-  const distTurnout = Number(currentElection.districtTurnout || 57.80).toFixed(2);
-
-  if (!cityName || cityName === 'ALL') {
-    const turnoutNum = Number(currentElection.districtTurnout || 57.80);
-    const prevTurnoutNum = Number(prevElection.districtTurnout || 55.12);
-    const diff = (turnoutNum - prevTurnoutNum).toFixed(2);
     return {
-      name: '全域',
-      electionName: currentElection.electionName || '第51回 衆議院議員総選挙',
-      electionDate: currentElection.electionDate ? currentElection.electionDate.substring(0, 7).replace('-', '/') : '2026/02',
-      turnout: turnoutNum.toFixed(2),
-      prevTurnout: prevTurnoutNum.toFixed(2),
-      diffPt: Number(diff) > 0 ? `+${diff}` : diff,
-      nationalTurnout: natTurnout,
-      districtTurnout: distTurnout
+      name: targetName,
+      electionName: '第51回 衆議院議員総選挙',
+      electionDate: '2026/02',
+      turnout: '--',
+      prevTurnout: '--',
+      diffPt: '±0.00',
+      diffIcon: '',
+      history: [],
+      nationalTurnout: '--',
+      districtTurnout: '--'
     };
   }
 
-  // 自治体正規化キーによる安全検索（ID/正規化対応）
-  const cleanTarget = cityName.replace(/（一部）/g, '').trim();
-  const currentCity = (currentElection.municipalitiesTurnout || []).find(m => {
-    const mClean = (m.name || '').replace(/（一部）/g, '').trim();
-    return cleanTarget.includes(mClean) || mClean.includes(cleanTarget);
+  const elections = electionData.elections;
+  const currentElection = elections[0] || {};
+  const prevElection = elections[1] || {};
+
+  // 自治体名ヘルパー（正規化マッチング）
+  const getCityValue = (election) => {
+    if (!election) return null;
+    if (isAll) return Number(election.district3 !== undefined ? election.district3 : (election.districtTurnout || 0));
+    const munis = election.municipalities || {};
+    // 完全一致検索
+    if (munis[cityName] !== undefined) return Number(munis[cityName]);
+    // 部分一致・正規化検索（例: "四日市市" ➔ "四日市市（一部）" 等）
+    const cleanTarget = cityName.replace(/（一部）/g, '').replace(/市|町|村|郡/g, '').trim();
+    for (const [key, val] of Object.entries(munis)) {
+      const cleanKey = key.replace(/（一部）/g, '').replace(/市|町|村|郡/g, '').trim();
+      if (cleanKey && (cleanTarget.includes(cleanKey) || cleanKey.includes(cleanTarget))) {
+        return Number(val);
+      }
+    }
+    // 旧スキーマ municipalitiesTurnout 互換
+    if (Array.isArray(election.municipalitiesTurnout)) {
+      const found = election.municipalitiesTurnout.find(m => {
+        const mClean = (m.name || '').replace(/（一部）/g, '').trim();
+        return cityName.includes(mClean) || mClean.includes(cityName);
+      });
+      if (found) return Number(found.turnout);
+    }
+    return Number(election.district3 !== undefined ? election.district3 : (election.districtTurnout || 0));
+  };
+
+  const currentVal = getCityValue(currentElection);
+  const prevVal = getCityValue(prevElection);
+
+  // 前回比動的計算
+  let diffPt = '±0.00';
+  let diffIcon = '';
+  if (currentVal !== null && prevVal !== null) {
+    const diff = Number((currentVal - prevVal).toFixed(2));
+    if (diff > 0) {
+      diffPt = `+${diff.toFixed(2)}`;
+      diffIcon = '▲';
+    } else if (diff < 0) {
+      diffPt = `${diff.toFixed(2)}`;
+      diffIcon = '▼';
+    } else {
+      diffPt = '±0.00';
+      diffIcon = '';
+    }
+  }
+
+  // 過去3回分の履歴配列
+  const history = elections.slice(0, 3).map(e => {
+    const val = getCityValue(e);
+    return {
+      year: e.year || (e.electionDate ? e.electionDate.substring(0, 4) : '--'),
+      turnout: val !== null ? val.toFixed(2) : '--'
+    };
   });
 
-  const prevCity = prevElection && Array.isArray(prevElection.municipalitiesTurnout)
-    ? prevElection.municipalitiesTurnout.find(m => {
-        const mClean = (m.name || '').replace(/（一部）/g, '').trim();
-        return cleanTarget.includes(mClean) || mClean.includes(cleanTarget);
-      })
-    : null;
+  const natTurnout = currentElection.national !== undefined
+    ? Number(currentElection.national).toFixed(2)
+    : Number(currentElection.nationalTurnout || 0).toFixed(2);
+  const distTurnout = currentElection.district3 !== undefined
+    ? Number(currentElection.district3).toFixed(2)
+    : Number(currentElection.districtTurnout || 0).toFixed(2);
 
-  if (currentCity) {
-    const turnoutNum = Number(currentCity.turnout || 0);
-    const prevTurnoutNum = prevCity ? Number(prevCity.turnout || 0) : null;
-    const diff = prevTurnoutNum !== null ? (turnoutNum - prevTurnoutNum).toFixed(2) : null;
-    return {
-      name: cityName,
-      electionName: currentElection.electionName || '第51回 衆議院議員総選挙',
-      electionDate: currentElection.electionDate ? currentElection.electionDate.substring(0, 7).replace('-', '/') : '2026/02',
-      turnout: turnoutNum.toFixed(2),
-      prevTurnout: prevTurnoutNum !== null ? prevTurnoutNum.toFixed(2) : '--',
-      diffPt: diff !== null ? (Number(diff) > 0 ? `+${diff}` : diff) : '--',
-      nationalTurnout: natTurnout,
-      districtTurnout: distTurnout
-    };
-  }
-
-  // フォールバック（未登録自治体時）
   return {
-    name: cityName,
+    name: targetName,
     electionName: currentElection.electionName || '第51回 衆議院議員総選挙',
-    electionDate: '2026/02',
-    turnout: distTurnout,
-    prevTurnout: '55.12',
-    diffPt: '+2.68',
+    electionDate: currentElection.electionDate ? currentElection.electionDate.substring(0, 7).replace('-', '/') : '2026/02',
+    turnout: currentVal !== null ? currentVal.toFixed(2) : '--',
+    prevTurnout: prevVal !== null ? prevVal.toFixed(2) : '--',
+    diffPt,
+    diffIcon,
+    history,
     nationalTurnout: natTurnout,
     districtTurnout: distTurnout
   };
@@ -1005,8 +1020,25 @@ function renderRightTopTurnout(selectedCity) {
   if (!containerEl) return;
 
   const data = getMunicipalityTurnout(DashboardState.electionTurnout, selectedCity);
-  const isPositive = !String(data.diffPt).startsWith('-');
-  const diffIcon = isPositive ? '▲' : '▼';
+
+  const historyHtml = Array.isArray(data.history) && data.history.length > 0
+    ? `
+      <div class="pt-2.5 mt-2.5 border-t border-borderNormal">
+        <div class="text-xs font-bold text-textSub mb-1.5 flex items-center justify-between">
+          <span>投票率の推移</span>
+          <span class="text-[11px] font-normal text-textSub/70">衆院選 過去3回</span>
+        </div>
+        <div class="grid grid-cols-3 gap-1.5 bg-[#0B1019] p-2 rounded-lg border border-borderNormal text-center">
+          ${data.history.map(h => `
+            <div>
+              <div class="text-xs text-textSub font-mono">${h.year}年</div>
+              <div class="text-[14px] font-mono font-bold text-white mt-0.5">${h.turnout}%</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `
+    : '';
 
   containerEl.innerHTML = `
     <div class="flex flex-col justify-between h-full">
@@ -1026,15 +1058,17 @@ function renderRightTopTurnout(selectedCity) {
           </div>
           <div class="text-right">
             <span class="text-xs font-mono font-medium text-[#94A3B8] bg-[#94A3B8]/10 border border-[#94A3B8]/20 px-2.5 py-1 rounded">
-              前回比 ${data.diffPt}pt ${diffIcon}
+              前回比 ${data.diffPt}pt ${data.diffIcon}
             </span>
           </div>
         </div>
+
+        ${historyHtml}
       </div>
 
       <div class="pt-2.5 border-t border-borderNormal flex items-center justify-between text-xs text-textSub font-mono">
         <div>全国: <span class="text-white font-semibold">${data.nationalTurnout}%</span></div>
-        <div>3区平均: <span class="text-white font-semibold">${data.districtTurnout}%</span></div>
+        <div>3区全体: <span class="text-white font-semibold">${data.districtTurnout}%</span></div>
       </div>
     </div>
   `;
