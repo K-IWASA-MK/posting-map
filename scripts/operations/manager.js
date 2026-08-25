@@ -1079,7 +1079,7 @@ function renderMainStageStocks(stocks) {
 }
 
 /**
- * 中央メインステージ用: 登録配布員名簿の描画
+ * 中央メインステージ用: 登録配布員名簿の描画 (1行3カラム 50px レイアウト)
  */
 function renderMainStageRoster(roster) {
   const contentEl = document.getElementById('main-stage-roster-content');
@@ -1093,16 +1093,24 @@ function renderMainStageRoster(roster) {
 
   let html = '<div class="space-y-1.5">';
   rosterList.forEach(r => {
+    let formattedDate = '--';
+    if (r.registeredAt) {
+      const match = String(r.registeredAt).trim().match(/(?:^\d{4}[\/-])?(\d{1,2}[\/-]\d{1,2}\s+\d{1,2}:\d{2})/);
+      formattedDate = match ? match[1].replace('-', '/') : String(r.registeredAt).substring(0, 16);
+    }
+
     html += `
-      <div class="p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] flex items-center justify-between transition-colors">
-        <div class="flex items-center gap-3">
-          <span class="w-8 h-8 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-bold text-sm text-brand flex-shrink-0">${r.id || ''}</span>
-          <div>
-            <div class="font-semibold text-lg text-white">${r.name || ''}</div>
-            <div class="text-sm text-[#94A3B8] font-normal mt-0.5">区分: 正式登録配布員</div>
-          </div>
+      <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
+        <div class="flex items-center gap-2.5 flex-shrink-0 w-[320px] min-w-0">
+          <span class="h-7 px-2 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-bold text-xs text-brand flex-shrink-0">${r.id || ''}</span>
+          <span class="font-semibold text-lg text-white truncate">${r.name || ''}</span>
         </div>
-        <span class="text-xs text-statusGreen font-medium px-2.5 py-1 rounded bg-statusGreen/10 border border-statusGreen/20 flex-shrink-0">有効</span>
+        <div class="flex items-center gap-2.5 text-sm text-[#94A3B8] flex-1 min-w-0">
+          <span class="text-xs text-[#94A3B8]">登録: <span class="font-mono text-white/90">${formattedDate}</span></span>
+        </div>
+        <div class="text-right flex-shrink-0">
+          <span class="text-xs text-statusGreen font-medium px-2.5 py-1 rounded bg-statusGreen/10 border border-statusGreen/20">有効</span>
+        </div>
       </div>
     `;
   });
