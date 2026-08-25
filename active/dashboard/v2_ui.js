@@ -538,11 +538,9 @@ function applyProDesign(sheet) {
 }
 
 /**
- * 名簿シートを「究極の視認性」に整形する
+ * 名簿シート・名簿の原本シートを「究極の視認性」に整形する
  */
-function formatRosterSheet() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName(CONFIG.get("SHEET_ROSTER"));
+function formatSingleRosterSheet(sheet) {
   if (!sheet) return;
 
   const maxRows = sheet.getMaxRows();
@@ -573,40 +571,60 @@ function formatRosterSheet() {
     .setVerticalAlignment("middle");
   sheet.setRowHeight(1, 50);
 
-  // データ行のデザイン（1000行分あらかじめ設定）
-  const lastRow = 1000;
-  const dataRange = sheet.getRange(2, 1, lastRow - 1, 4);
-  dataRange
-    .setFontSize(18)
-    .setFontWeight("bold")
-    .setHorizontalAlignment("center")
-    .setVerticalAlignment("middle")
-    .setBackground("#ffffff");
+  // データ行のデザイン（複数行ある場合にあらかじめ設定）
+  if (maxRows > 1) {
+    const dataRange = sheet.getRange(2, 1, maxRows - 1, 4);
+    dataRange
+      .setFontSize(18)
+      .setFontWeight("bold")
+      .setHorizontalAlignment("center")
+      .setVerticalAlignment("middle")
+      .setBackground("#ffffff");
+    sheet.setRowHeights(2, maxRows - 1, 85);
+  }
+}
 
-  // 行の高さ（全データ行）
-  sheet.setRowHeights(2, lastRow - 1, 85);
-
-  ss.toast("名簿シートをプロ仕様に整形しました！");
+function formatRosterSheet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(CONFIG.get("SHEET_ROSTER") || "名簿");
+  if (sheet) formatSingleRosterSheet(sheet);
+  const templateSheet = ss.getSheetByName("名簿の原本");
+  if (templateSheet) formatSingleRosterSheet(templateSheet);
+  if (typeof ss.toast === 'function') {
+    ss.toast("名簿関連シートをプロ仕様に整形しました！");
+  }
 }
 
 /**
- * 名簿シートを初期化（ID・名前・LINE_USER_ID・登録日時の4列構成にする）
+ * 名簿および名簿の原本シートを完全リセット・新4列SSOT構造で再構築
  */
 function setupRosterSheet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let sheet = ss.getSheetByName(CONFIG.get("SHEET_ROSTER"));
-  if (!sheet) {
-    sheet = ss.insertSheet(CONFIG.get("SHEET_ROSTER"));
+
+  // 1. 「名簿の原本」シートの再構築
+  let templateSheet = ss.getSheetByName("名簿の原本");
+  if (templateSheet) {
+    ss.deleteSheet(templateSheet);
   }
+  templateSheet = ss.insertSheet("名簿の原本");
+  templateSheet.getRange(1, 1, 1, 4).setValues([["ID", "名前", "LINE_USER_ID", "登録日時"]]);
+  templateSheet.setFrozenRows(1);
+  formatSingleRosterSheet(templateSheet);
 
-  // ★ 修正: 一旦全データをクリアして真っ新にする
-  sheet.clear();
-  sheet.getRange(1, 1, 1, 4).setValues([["ID", "名前", "LINE_USER_ID", "登録日時"]]);
-  sheet.setFrozenRows(1); // 1行目を固定
-  
-  formatRosterSheet(); // 整形も同時に行う
+  // 2. 「名簿」シートの再構築
+  const rosterSheetName = (typeof CONFIG !== 'undefined' && typeof CONFIG.get === 'function')
+    ? (CONFIG.get("SHEET_ROSTER") || "名簿")
+    : "名簿";
+  let rosterSheet = ss.getSheetByName(rosterSheetName);
+  if (rosterSheet) {
+    ss.deleteSheet(rosterSheet);
+  }
+  rosterSheet = ss.insertSheet(rosterSheetName);
+  rosterSheet.getRange(1, 1, 1, 4).setValues([["ID", "名前", "LINE_USER_ID", "登録日時"]]);
+  rosterSheet.setFrozenRows(1);
+  formatSingleRosterSheet(rosterSheet);
 
-  return "名簿シートを真っ新に初期化しました。";
+  return "名簿および名簿の原本を4列新SSOT構造で再構築しました。";
 }
 
 /**

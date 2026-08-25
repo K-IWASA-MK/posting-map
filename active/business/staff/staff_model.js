@@ -11,16 +11,16 @@ if (typeof Staff === 'undefined') {
     constructor(params) {
       this.id = params ? params.id : "";
       this.name = params ? params.name : "";
-      this.appName = (params && params.appName) || "LINE";
       this.lineUserId = (params && params.lineUserId) || "";
+      this.registeredAt = (params && params.registeredAt) || "";
     }
 
     toDict() {
       return {
         id: this.id,
         name: this.name,
-        appName: this.appName,
-        lineUserId: this.lineUserId
+        lineUserId: this.lineUserId,
+        registeredAt: this.registeredAt
       };
     }
   };

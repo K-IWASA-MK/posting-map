@@ -70,7 +70,7 @@ if (typeof StaffService === 'undefined') {
           return { success: false, message: "お名前 (displayName) が必要です。" };
         }
 
-        // 1. D列(LINE_USER_ID)での完全一致重複チェック
+        // 1. C列(LINE_USER_ID)での完全一致重複チェック
         const existingStaff = self.repository.findByLineUserId(cleanLineUserId);
         if (existingStaff) {
           if (typeof logTrace === 'function') {
@@ -80,7 +80,7 @@ if (typeof StaffService === 'undefined') {
         }
 
         // 2. 既存の同名スタッフチェック
-        const nameMatch = self.repository.findByNameAndApp(cleanName, "LINE");
+        const nameMatch = self.repository.findByName(cleanName);
         if (nameMatch) {
           if (!nameMatch.staff.lineUserId) {
             self.repository.updateLineUserIdAtRow(nameMatch.rowIndex, cleanLineUserId);
@@ -88,10 +88,9 @@ if (typeof StaffService === 'undefined') {
           return { success: true, id: nameMatch.staff.id, name: nameMatch.staff.name, message: "existing" };
         }
 
-        // 3. 新規登録
+        // 3. 新規登録（Backend側でD列登録日時を自動生成）
         const newStaff = self.repository.insertNewStaff(new Staff({
           name: cleanName,
-          appName: "LINE",
           lineUserId: cleanLineUserId
         }));
 

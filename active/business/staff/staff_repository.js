@@ -3,7 +3,7 @@
  * 
  * Target Domain: Staff Management
  * Owner Layer: Business Layer
- * Responsibility: 名簿スプレッドシート（A:ID, B:名前, C:アプリ名, D:LINE_USER_ID）に対するデータ操作
+ * Responsibility: 名簿スプレッドシート（A:ID, B:名前, C:LINE_USER_ID, D:登録日時）に対するデータ操作
  */
 
 if (typeof StaffRepository === 'undefined') {
@@ -40,50 +40,54 @@ if (typeof StaffRepository === 'undefined') {
       if (!sheet) return null;
 
       const lastRow = sheet.getLastRow();
-      if (lastRow < 1) return null;
+      if (lastRow < 2) return null;
 
       const values = sheet.getRange(1, 1, lastRow, 4).getValues();
       const cleanTargetId = String(lineUserId).trim();
 
       for (let i = 1; i < values.length; i++) {
-        const rowLineUserId = String(values[i][3] || "").trim();
-        if (rowLineUserId === cleanTargetId) {
+        const rowId = String(values[i][0] || "").trim();
+        const rowName = String(values[i][1] || "").trim();
+        const rowLineUserId = String(values[i][2] || "").trim();
+        const rowRegisteredAt = String(values[i][3] || "").trim();
+
+        if (rowLineUserId === cleanTargetId && rowId !== "") {
           return new Staff({
-            id: String(values[i][0] || "").trim(),
-            name: String(values[i][1] || "").trim(),
-            appName: String(values[i][2] || "").trim(),
-            lineUserId: rowLineUserId
+            id: rowId,
+            name: rowName,
+            lineUserId: rowLineUserId,
+            registeredAt: rowRegisteredAt
           });
         }
       }
       return null;
     }
 
-    findByNameAndApp(name, appName) {
+    findByName(name) {
       if (!name) return null;
       const sheet = this.getRosterSheet();
       if (!sheet) return null;
 
       const lastRow = sheet.getLastRow();
-      if (lastRow < 1) return null;
+      if (lastRow < 2) return null;
 
       const values = sheet.getRange(1, 1, lastRow, 4).getValues();
       const normName = typeof normalizeName === 'function' ? normalizeName(name) : String(name).trim();
-      const normApp = typeof normalizeName === 'function' ? normalizeName(appName || "LINE") : String(appName || "LINE").trim();
 
       for (let i = 1; i < values.length; i++) {
         const rowId = typeof normalizeName === 'function' ? normalizeName(values[i][0]) : String(values[i][0] || "").trim();
         const rowName = typeof normalizeName === 'function' ? normalizeName(values[i][1]) : String(values[i][1] || "").trim();
-        const rowAppName = typeof normalizeName === 'function' ? normalizeName(values[i][2]) : String(values[i][2] || "").trim();
+        const rowLineUserId = String(values[i][2] || "").trim();
+        const rowRegisteredAt = String(values[i][3] || "").trim();
 
-        if (rowName === normName && rowAppName === normApp && rowId !== "") {
+        if (rowName === normName && rowId !== "") {
           return {
             rowIndex: i + 1,
             staff: new Staff({
               id: String(values[i][0] || "").trim(),
               name: String(values[i][1] || "").trim(),
-              appName: String(values[i][2] || "").trim(),
-              lineUserId: String(values[i][3] || "").trim()
+              lineUserId: rowLineUserId,
+              registeredAt: rowRegisteredAt
             })
           };
         }
@@ -91,10 +95,14 @@ if (typeof StaffRepository === 'undefined') {
       return null;
     }
 
+    findByNameAndApp(name, appName) {
+      return this.findByName(name);
+    }
+
     updateLineUserIdAtRow(rowIndex, lineUserId) {
       const sheet = this.getRosterSheet();
-      if (!sheet || rowIndex < 1) return false;
-      sheet.getRange(rowIndex, 4).setValue(String(lineUserId).trim());
+      if (!sheet || rowIndex < 2) return false;
+      sheet.getRange(rowIndex, 3).setValue(String(lineUserId).trim());
       return true;
     }
 
@@ -117,7 +125,6 @@ if (typeof StaffRepository === 'undefined') {
       for (let i = 1; i < values.length; i++) {
         const valId = typeof normalizeName === 'function' ? normalizeName(values[i][0]) : String(values[i][0] || "").trim();
         const valName = typeof normalizeName === 'function' ? normalizeName(values[i][1]) : String(values[i][1] || "").trim();
-        const valAppName = typeof normalizeName === 'function' ? normalizeName(values[i][2]) : String(values[i][2] || "").trim();
 
         if (valId !== "") {
           const match = valId.match(/^([A-Za-z]*)(0*)(\d+)$/);
@@ -142,7 +149,7 @@ if (typeof StaffRepository === 'undefined') {
           }
         }
 
-        if (!foundEmptyRow && valId === "" && valName === "" && valAppName === "") {
+        if (!foundEmptyRow && valId === "" && valName === "") {
           targetRow = i + 1;
           foundEmptyRow = true;
         }
@@ -161,17 +168,28 @@ if (typeof StaffRepository === 'undefined') {
       }
 
       const cleanName = String(staff.name || "").trim();
-      const cleanAppName = String(staff.appName || "LINE").trim();
       const cleanLineUserId = String(staff.lineUserId || "").trim();
 
-      sheet.getRange(targetRow, 1, 1, 4).setValues([[newId, cleanName, cleanAppName, cleanLineUserId]]);
-      SpreadsheetApp.flush();
+      // Backend SSOT timestamp generation (JST: yyyy/MM/dd HH:mm:ss)
+      const now = new Date();
+      let registeredAt = "";
+      if (typeof Utilities !== 'undefined' && typeof Utilities.formatDate === 'function') {
+        registeredAt = Utilities.formatDate(now, "JST", "yyyy/MM/dd HH:mm:ss");
+      } else {
+        const pad = (n) => String(n).padStart(2, '0');
+        registeredAt = `${now.getFullYear()}/${pad(now.getMonth() + 1)}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      }
+
+      sheet.getRange(targetRow, 1, 1, 4).setValues([[newId, cleanName, cleanLineUserId, registeredAt]]);
+      if (typeof SpreadsheetApp !== 'undefined' && typeof SpreadsheetApp.flush === 'function') {
+        SpreadsheetApp.flush();
+      }
 
       return new Staff({
         id: newId,
         name: cleanName,
-        appName: cleanAppName,
-        lineUserId: cleanLineUserId
+        lineUserId: cleanLineUserId,
+        registeredAt: registeredAt
       });
     }
   };

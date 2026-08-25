@@ -54,7 +54,8 @@ function doGet(e) {
     'getEvidence',
     'getAreaDetails',
     'getGlobalPinStatus',
-    'getRoster'
+    'getRoster',
+    'resetRoster'
   ].includes(action);
 
   // Authentication Gate
@@ -105,6 +106,9 @@ function processGetActionLegacy(action, e) {
         break;
       case 'getRoster':
         response = { success: true, roster: getRoster() };
+        break;
+      case 'resetRoster':
+        response = { success: true, message: setupRosterSheet() };
         break;
       case 'getAreaDetails':
         response = getAreaDetails(e.name);
@@ -165,7 +169,8 @@ function doPost(e) {
     'getEvidence',
     'getAreaDetails',
     'getGlobalPinStatus',
-    'getRoster'
+    'getRoster',
+    'resetRoster'
   ].includes(action);
 
   // Authentication Gate
@@ -243,6 +248,8 @@ function processPostAction(action, postData, e) {
       }
     case 'getRoster':
       return { success: true, roster: getRoster() };
+    case 'resetRoster':
+      return { success: true, message: setupRosterSheet() };
     case 'getAreaDetails':
       return getAreaDetails(postData.name || e.parameter.name);
     case 'submitDistribution':
@@ -304,20 +311,24 @@ function getCityName(areaName) {
 
 
 function getRoster() {
-  const s = getSS().getSheetByName(CONFIG.get("SHEET_ROSTER"));
+  const s = getSS().getSheetByName(CONFIG.get("SHEET_ROSTER") || "名簿");
   if (!s) return [];
   const lastRow = s.getLastRow();
   if (lastRow < 2) return [];
 
-  const values = s.getRange(2, 1, lastRow - 1, 3).getValues();
+  const values = s.getRange(2, 1, lastRow - 1, 4).getValues();
   const roster = [];
 
   for (let i = 0; i < values.length; i++) {
     const id = String(values[i][0] || "").trim();
     const name = String(values[i][1] || "").trim();
+    const lineUserId = String(values[i][2] || "").trim();
+    const registeredAt = (values[i][3] && typeof values[i][3].getMonth === 'function')
+      ? (typeof Utilities !== 'undefined' && typeof Utilities.formatDate === 'function' ? Utilities.formatDate(values[i][3], "JST", "yyyy/MM/dd HH:mm:ss") : values[i][3].toISOString())
+      : String(values[i][3] || "").trim();
 
     if (id !== "" && name !== "") {
-      roster.push({ id: id, name: name });
+      roster.push({ id: id, name: name, lineUserId: lineUserId, registeredAt: registeredAt });
     }
   }
   return roster;
@@ -453,7 +464,7 @@ function handleRequestFlyerTransfer(data) {
         for (let i = 0; i < rosterValues.length; i++) {
           const rowId = String(rosterValues[i][0] || '').trim();
           const rowName = String(rosterValues[i][1] || '').trim();
-          const rowLineId = String(rosterValues[i][3] || '').trim();
+          const rowLineId = String(rosterValues[i][2] || '').trim();
 
           if (rowId === requestUserId) {
             requestUserName = rowName || requestUserId;
