@@ -1054,13 +1054,19 @@ function renderMainStageStocks(stocks) {
 
   let html = '<div class="space-y-1.5">';
   sortedStocks.forEach(s => {
+    const staffInfoHtml = (s.staffId && s.staffName)
+      ? `<span class="font-mono font-bold text-white text-sm">${s.staffId}</span><span class="font-medium text-white text-sm ml-1.5">${s.staffName}</span>`
+      : `<span class="font-medium text-white text-sm">${s.staffName || s.staffId || '未設定'}</span>`;
+
     html += `
       <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
-        <div>
-          <div class="font-semibold text-lg text-white">${s.location || '保管拠点'}</div>
-          <div class="text-sm text-[#94A3B8] font-normal mt-0.5">担当: ${s.staffName || s.staffId || '未設定'} ｜ 更新: ${s.updatedAt || '--'}</div>
+        <div class="font-semibold text-lg text-white flex-shrink-0 min-w-[120px]">${s.location || '保管拠点'}</div>
+        <div class="flex items-center gap-2 text-sm text-[#94A3B8] justify-center flex-1 min-w-0">
+          ${staffInfoHtml}
+          <span class="text-[#243044] text-xs">|</span>
+          <span class="text-textSub text-xs">更新: <span class="font-mono">${s.updatedAt || '--'}</span></span>
         </div>
-        <div class="text-right">
+        <div class="text-right flex-shrink-0">
           <span class="text-lg font-bold font-mono text-white">${(Number(s.count) || 0).toLocaleString()}</span>
           <span class="text-xs text-[#94A3B8] font-normal ml-0.5">枚</span>
         </div>
