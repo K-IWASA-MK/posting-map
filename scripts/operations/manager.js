@@ -1063,13 +1063,13 @@ function renderRightTopTurnout(selectedCity) {
           </div>
         </div>
 
-        ${historyHtml}
+        <div class="pt-2.5 mt-2.5 border-t border-borderNormal flex items-center justify-between text-xs text-textSub font-mono">
+          <div>全国: <span class="text-white font-semibold">${data.nationalTurnout}%</span></div>
+          <div>3区全体: <span class="text-white font-semibold">${data.districtTurnout}%</span></div>
+        </div>
       </div>
 
-      <div class="pt-2.5 border-t border-borderNormal flex items-center justify-between text-xs text-textSub font-mono">
-        <div>全国: <span class="text-white font-semibold">${data.nationalTurnout}%</span></div>
-        <div>3区全体: <span class="text-white font-semibold">${data.districtTurnout}%</span></div>
-      </div>
+      ${historyHtml}
     </div>
   `;
 }
