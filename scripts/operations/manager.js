@@ -1060,7 +1060,7 @@ function renderMainStageStocks(stocks) {
 
     html += `
       <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
-        <div class="font-semibold text-lg text-white flex-shrink-0 w-[140px] truncate">${s.location || '保管拠点'}</div>
+        <div class="font-semibold text-lg text-white flex-shrink-0 w-[320px] truncate">${s.location || '保管拠点'}</div>
         <div class="flex items-center gap-2.5 text-sm text-[#94A3B8] flex-1 min-w-0">
           ${staffBadgeHtml}
           <span class="font-medium text-white text-sm truncate max-w-[130px]">${s.staffName || (s.staffId ? '' : '未設定')}</span>
