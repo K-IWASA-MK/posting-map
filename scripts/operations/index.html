@@ -192,6 +192,10 @@
           <span class="w-5 text-base flex items-center justify-center flex-shrink-0">🤝</span>
           <span class="text-sm">受渡要請</span>
         </button>
+        <button id="nav-mail" onclick="switchView('mail')" class="nav-item w-full h-10 flex items-center gap-2.5 px-3 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-medium">
+          <span class="w-5 text-base flex items-center justify-center flex-shrink-0">✉️</span>
+          <span class="text-sm">活動メール</span>
+        </button>
       </nav>
     </div>
 
@@ -369,6 +373,24 @@
             </div>
           </div>
           <div id="main-stage-requests-content" class="flex-1 overflow-y-auto pt-1 space-y-1.5 pr-1">
+            <!-- 動的レンダリング -->
+          </div>
+        </div>
+
+        <!-- 6. 活動メール ビュー (mail) -->
+        <div id="main-view-mail" class="flex-1 flex flex-col min-h-0 hidden relative">
+          <div class="flex items-center justify-between pb-1 flex-shrink-0 px-1">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-[#0B1019] border border-borderNormal shadow-inner">
+              <span class="text-base">✉️</span>
+              <span class="font-bold text-sm text-white tracking-wide">党員活動メール（コピペ送信）</span>
+            </div>
+            <span class="text-xs text-textSub font-mono">「支部長が一人で頑張らなくても、みんなが動く。」</span>
+          </div>
+          <!-- 成功通知トースト (中央上部にフロート) -->
+          <div id="mail-copy-toast" class="absolute top-10 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl bg-[#064E3B] border border-[#10B981] text-[#34D399] font-medium text-xs shadow-2xl transition-all duration-200 opacity-0 pointer-events-none -translate-y-2 flex items-center gap-2">
+            ✓ コピーしました！メールを開いて貼り付けてください
+          </div>
+          <div id="main-stage-mail-content" class="flex-1 flex flex-col min-h-0 pt-1 overflow-hidden">
             <!-- 動的レンダリング -->
           </div>
         </div>

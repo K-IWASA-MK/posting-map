@@ -1494,7 +1494,7 @@ function renderMainStageRequests(requests) {
  * ※ NAV、統括BAR、NOW/STOCKパネル、Activity Streamは常時固定
  */
 function switchView(type) {
-  const views = ['areas', 'records', 'stocks', 'roster', 'requests'];
+  const views = ['areas', 'records', 'stocks', 'roster', 'requests', 'mail'];
   const targetView = views.includes(type) ? type : 'areas';
 
   views.forEach(v => {
@@ -1526,11 +1526,13 @@ function switchView(type) {
     renderMainStageRoster(DashboardState.roster);
   } else if (targetView === 'requests') {
     renderMainStageRequests(DashboardState.requests);
+  } else if (targetView === 'mail') {
+    renderMainStageMail(DashboardState.selectedMailTabIndex || 0);
   }
 }
 
 function updateNavHighlight(activeType) {
-  const navTypes = ['roster', 'stocks', 'requests', 'records', 'areas'];
+  const navTypes = ['mail', 'roster', 'stocks', 'requests', 'records', 'areas'];
   navTypes.forEach(t => {
     const el = document.getElementById(`nav-${t}`);
     if (el) {
@@ -1541,6 +1543,333 @@ function updateNavHighlight(activeType) {
       }
     }
   });
+}
+
+/**
+ * =========================================================================
+ * ✉️ 党員活動メール（5大テンプレート＆ワンクリックコピペ）
+ * =========================================================================
+ */
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function getMobilizationTemplates() {
+  const liffId = (typeof window !== 'undefined' && window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.line && window.PMS_CLIENT_CONFIG.line.liffId) || "2010941735-GRLuqPic";
+  const liffUrl = `https://liff.line.me/${liffId}`;
+  const districtName = (typeof window !== 'undefined' && window.PMS_CLIENT_CONFIG && (window.PMS_CLIENT_CONFIG.districtName || window.PMS_CLIENT_CONFIG.districtId)) || "三重3区";
+  const branchLabel = districtName.includes("区") || districtName.includes("支部") ? districtName : `${districtName}支部`;
+
+  return [
+    {
+      id: 0,
+      icon: "📱",
+      tabTitle: "① はじめての方へ",
+      role: "Hアプリ導入",
+      goalSummary: "このメールでお願いすること: 「まずは地図を眺めてもらう」",
+      targetState: "まだ何もしていない党員向け",
+      subject: `【${branchLabel}】新しいポスティングマップを使ってみてください！`,
+      body: `${branchLabel}の皆さん、お疲れさまです！
+
+「近所でポスティングしたいけど、どこを配ればいいんだろう？」
+
+そんな時に使えるスマホアプリを作りました。
+
+自分のいる場所から、まだ配られていない地域を確認できます。
+
+スマホでこちらを開いてください👇
+${liffUrl}
+
+使い方はとても簡単です。
+
+まずは一度、開いてみてください。
+
+「自分の家の近くはどうなっているかな？」
+
+そんな感じで、地図を眺めるだけでも大丈夫です。`
+    },
+    {
+      id: 1,
+      icon: "📦",
+      tabTitle: "② チラシ受取",
+      role: "最初の100枚を取りに来てもらう",
+      goalSummary: "このメールでお願いすること: 「100枚だけ取りに来てもらう」",
+      targetState: "アプリ導入前後の党員向け",
+      subject: `【${branchLabel}】近所で配れるチラシを用意しています！`,
+      body: `${branchLabel}の皆さん、お疲れさまです！
+
+ポスティングをやってみようかなと思っても、
+
+「チラシはどこにあるんだろう？」
+「何百枚も配る時間はないな……」
+
+と思って、そのままになっていませんか？
+
+今回、チラシをたくさん用意しました。
+
+まずは100枚くらいから持って帰ってください。
+
+散歩のついで。
+買い物のついで。
+仕事帰りでも大丈夫です。
+
+自分の家の近所なら、少しの時間でも配れます。
+
+チラシをお持ちでない方は、
+お時間のある時に私（支部長）まで取りに来てください。
+
+「100枚欲しい」
+「200枚くらい欲しい」
+
+という感じで、気軽に声をかけてもらえれば大丈夫です。
+
+まずは自分の近所から。
+
+一度、やってみませんか？`
+    },
+    {
+      id: 2,
+      icon: "🟠",
+      tabTitle: "③ 活動促進",
+      role: "今日10枚・20枚から実際に配る",
+      goalSummary: "このメールでお願いすること: 「今日10枚・20枚だけ実際に配ってみる」",
+      targetState: "チラシを持っている党員向け",
+      subject: `【${branchLabel}】今日は近所を少しだけ歩いてみませんか？`,
+      body: `${branchLabel}の皆さん、お疲れさまです！
+
+ポスティングマップを入れてみたけど、
+まだ使っていない方もいると思います。
+
+せっかくなので、今日は少しだけ使ってみませんか？
+
+10枚でも20枚でも大丈夫です。
+
+犬の散歩。
+買い物。
+子どもの送り迎え。
+仕事から帰ったあと。
+
+普段歩いている場所で配れます。
+
+「今日はこの辺だけ」
+
+そんな始め方で十分です。
+
+配った場所はHアプリから記録できます👇
+${liffUrl}
+
+一度やってみると、意外と簡単です。
+
+あなたの近所から、少しずつ始めてみてください。`
+    },
+    {
+      id: 3,
+      icon: "🗺️",
+      tabTitle: "④ 未配布地域",
+      role: "自分の近所を配る",
+      goalSummary: "このメールでお願いすること: 「マップで近所の未配布を見て配る」",
+      targetState: "活動経験ありの党員向け",
+      subject: `【${branchLabel}】あなたの近所、まだ配れる場所があります！`,
+      body: `${branchLabel}の皆さん、お疲れさまです！
+
+今、ポスティングマップを見ると、
+まだチラシが届いていない地域があります。
+
+「自分の近所はどうかな？」
+
+と思ったら、地図を開いてみてください👇
+${liffUrl}
+
+家の近くに、まだ配られていない場所が見つかるかもしれません。
+
+そこへ100枚だけ。
+
+全部を一人でやる必要はありません。
+
+誰かが少し配る。
+また誰かが少し配る。
+
+そんな形でも、地図は少しずつ変わっていきます。
+
+まずは自分の住んでいる地域を見てみてください。`
+    },
+    {
+      id: 4,
+      icon: "🔥",
+      tabTitle: "⑤ みんなで進める",
+      role: "橙色になっていく成果を共有",
+      goalSummary: "このメールでお願いすること: 「みんなで一緒に橙色を広げる」",
+      targetState: "MAPが動き始めた後の全党員向け",
+      subject: `【${branchLabel}】少しずつ地図が変わってきました！`,
+      body: `${branchLabel}の皆さん、お疲れさまです！
+
+ポスティングマップを見ていると、
+少しずつチラシが届いた地域が増えてきました。
+
+配ってくれた皆さん、ありがとうございます！
+
+まだ白い地域もあります。
+
+「ここなら自分が配れる」
+
+という場所があれば、ぜひ一度地図を開いてみてください👇
+${liffUrl}
+
+100枚でも構いません。
+
+自分の近所だけでも構いません。
+
+一人で全部やる活動ではありません。
+
+それぞれが少しずつ動けば、
+地図の景色も変わっていきます。
+
+次にオレンジになるのは、あなたの近所かもしれません。🟠`
+    }
+  ];
+}
+
+function renderMainStageMail(tabIndex = 0) {
+  DashboardState.selectedMailTabIndex = tabIndex;
+  const container = document.getElementById('main-stage-mail-content');
+  if (!container) return;
+
+  const templates = getMobilizationTemplates();
+  const validIndex = (tabIndex >= 0 && tabIndex < templates.length) ? tabIndex : 0;
+  const activeTpl = templates[validIndex];
+
+  // 5連タブセレクター
+  const tabsHtml = templates.map((t, idx) => {
+    const isActive = idx === validIndex;
+    return `
+      <button onclick="renderMainStageMail(${idx})" class="flex-1 py-1.5 px-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-all duration-150 ${
+        isActive
+          ? 'bg-brand/15 text-brand border border-brand/35 shadow-sm font-semibold'
+          : 'text-textSub bg-[#0B1019]/60 border border-borderNormal/60 hover:text-white hover:bg-white/5'
+      }">
+        <span class="text-sm flex-shrink-0">${t.icon}</span>
+        <span class="truncate">${t.tabTitle}</span>
+      </button>
+    `;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="flex flex-col h-full gap-2 pr-1 overflow-hidden">
+      <!-- 5大タブセレクター -->
+      <div class="flex items-center gap-1.5 flex-shrink-0">
+        ${tabsHtml}
+      </div>
+
+      <!-- このメールでお願いすること（行動目的バー） -->
+      <div class="flex items-center justify-between px-3 py-1 rounded-lg bg-[#0B1019] border border-borderNormal flex-shrink-0">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="text-xs font-bold text-brand flex-shrink-0">🎯 行動目的</span>
+          <span class="text-xs text-white font-medium truncate">${activeTpl.goalSummary}</span>
+        </div>
+        <span class="text-[11px] text-textSub font-mono flex-shrink-0 hidden sm:inline-block">${activeTpl.targetState}</span>
+      </div>
+
+      <!-- メインメール表示カード -->
+      <div class="flex-1 flex flex-col min-h-0 rounded-xl bg-[#131A26] border border-borderNormal p-3 gap-2 overflow-hidden">
+
+        <!-- 件名ブロック -->
+        <div class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg bg-[#0B1019] border border-borderNormal flex-shrink-0">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-[11px] font-bold text-textSub flex-shrink-0">件名:</span>
+            <span class="text-xs sm:text-sm font-medium text-white select-all truncate">${escapeHtml(activeTpl.subject)}</span>
+          </div>
+          <button onclick="copyMailSubject(${validIndex})" class="flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#243044]/60 hover:bg-[#33435C] text-white text-xs font-medium border border-borderNormal flex-shrink-0 transition-colors">
+            <span>📋</span>
+            <span>件名をコピー</span>
+          </button>
+        </div>
+
+        <!-- 本文コードブロック (<pre> 編集不可) -->
+        <div class="flex-1 min-h-0 relative flex flex-col rounded-lg bg-[#0B1019] border border-borderNormal overflow-hidden">
+          <div class="px-3 py-1 border-b border-borderNormal/60 bg-[#0B1019] flex items-center justify-between text-[11px] text-textSub flex-shrink-0">
+            <span>本文（編集不可・そのままコピー）</span>
+            <span class="text-[10px] font-mono text-textSub/70">※HアプリURL自動挿入済</span>
+          </div>
+          <pre id="mail-body-content" class="flex-1 p-3 text-xs sm:text-sm text-white/90 font-sans leading-relaxed whitespace-pre-wrap select-all overflow-y-auto hide-scrollbar">${escapeHtml(activeTpl.body)}</pre>
+        </div>
+
+        <!-- アクションフッター (大きな本文コピーボタン) -->
+        <div class="flex items-center justify-between pt-1 flex-shrink-0">
+          <div class="flex items-center gap-2 text-xs text-textSub">
+            <span class="w-1.5 h-1.5 rounded-full bg-statusGreen"></span>
+            <span>①【本文をコピー】 ➔ ②メールソフトに貼り付け ➔ ③送信</span>
+          </div>
+          <button onclick="copyMailBody(${validIndex})" class="flex items-center gap-2 px-5 py-2 rounded-xl bg-brand hover:bg-[#D45307] text-white text-xs sm:text-sm font-bold shadow-lg transition-all transform active:scale-98">
+            <span class="text-base">📋</span>
+            <span>本文をコピー</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  `;
+}
+
+function copyMailSubject(tabIndex) {
+  const templates = getMobilizationTemplates();
+  const tpl = templates[tabIndex] || templates[0];
+  copyTextToClipboard(tpl.subject, "✓ 件名をコピーしました！");
+}
+
+function copyMailBody(tabIndex) {
+  const templates = getMobilizationTemplates();
+  const tpl = templates[tabIndex] || templates[0];
+  copyTextToClipboard(tpl.body, "✓ 本文をコピーしました！メールを開いて貼り付けてください");
+}
+
+let mailToastTimer = null;
+function copyTextToClipboard(text, successMsg) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showMailToast(successMsg);
+    }).catch(() => {
+      fallbackCopyText(text);
+      showMailToast(successMsg);
+    });
+  } else {
+    fallbackCopyText(text);
+    showMailToast(successMsg);
+  }
+}
+
+function fallbackCopyText(text) {
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.style.position = "fixed";
+  textArea.style.left = "-999999px";
+  textArea.style.top = "-999999px";
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    document.execCommand('copy');
+  } catch (err) {}
+  document.body.removeChild(textArea);
+}
+
+function showMailToast(msg) {
+  const toastEl = document.getElementById('mail-copy-toast');
+  if (!toastEl) return;
+  toastEl.textContent = msg;
+  toastEl.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-2');
+  toastEl.classList.add('opacity-100', 'translate-y-0');
+
+  if (mailToastTimer) clearTimeout(mailToastTimer);
+  mailToastTimer = setTimeout(() => {
+    toastEl.classList.remove('opacity-100', 'translate-y-0');
+    toastEl.classList.add('opacity-0', 'pointer-events-none', '-translate-y-2');
+  }, 2500);
 }
 
 /**
