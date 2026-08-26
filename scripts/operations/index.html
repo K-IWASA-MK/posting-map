@@ -147,60 +147,60 @@
 <body class="bg-appBg text-textMain h-screen h-[100dvh] w-screen overflow-hidden flex antialiased">
 
   <!-- ==================== LEFT SIDEBAR (NAV & SYSTEM LINE) ==================== -->
-  <aside class="w-56 bg-containerBg border-r border-borderNormal p-3 flex flex-col justify-between flex-shrink-0 z-20 overflow-y-auto">
+  <aside class="w-56 bg-containerBg border-r border-borderNormal p-3 flex flex-col justify-between flex-shrink-0 z-20 overflow-hidden">
 
-    <!-- Top: Branding (公式ロゴ: 一回り大きい正円暗いグレーカード内に配置) -->
-    <div>
-      <div class="flex items-center justify-center pt-1 pb-1">
-        <div class="w-[136px] h-[136px] rounded-full bg-[#0B1019] border border-borderNormal flex items-center justify-center shadow-inner">
-          <div class="w-[114px] h-[114px] rounded-full overflow-hidden border border-white/10 bg-white flex items-center justify-center p-1 shadow-md">
+    <!-- Top: Branding (公式ロゴ) & Selectors & Nav -->
+    <div class="flex flex-col min-h-0 flex-1 overflow-hidden">
+      <div class="flex items-center justify-center pt-0.5 pb-0.5 flex-shrink-0">
+        <div class="w-[120px] h-[120px] rounded-full bg-[#0B1019] border border-borderNormal flex items-center justify-center shadow-inner">
+          <div class="w-[100px] h-[100px] rounded-full overflow-hidden border border-white/10 bg-white flex items-center justify-center p-1 shadow-md">
             <img src="/active/dashboard/assets/icon180-v2.png" alt="POSTING MAP" class="w-full h-full object-cover">
           </div>
         </div>
       </div>
 
-      <!-- 自治体セレクター (左ナビ内完結・インラインアコーディオン) -->
-      <div id="city-selector-container" class="mt-3">
-        <button id="city-selector-trigger" type="button" onclick="toggleCityDropdown()" aria-expanded="false" class="w-full h-10 bg-[#0B1019] text-white border border-borderNormal hover:border-brand/50 rounded-xl px-3 text-sm font-semibold flex items-center justify-between transition-colors shadow-inner cursor-pointer">
+      <!-- 自治体セレクター (左ナビ内完結) -->
+      <div id="city-selector-container" class="mt-2 flex-shrink-0">
+        <button id="city-selector-trigger" type="button" onclick="toggleCityDropdown()" aria-expanded="false" class="w-full h-9 bg-[#0B1019] text-white border border-borderNormal hover:border-brand/50 rounded-xl px-3 text-sm font-semibold flex items-center justify-between transition-colors shadow-inner cursor-pointer">
           <span id="city-selector-current" class="truncate font-semibold text-white">全域</span>
           <span id="city-selector-arrow" class="text-xs text-textSub transition-transform duration-200">▼</span>
         </button>
-        <div id="city-selector-list" class="hidden mt-1.5 p-1 rounded-xl bg-[#0B1019] border border-borderNormal max-h-48 overflow-y-auto space-y-0.5">
+        <div id="city-selector-list" class="hidden mt-1 p-1 rounded-xl bg-[#0B1019] border border-borderNormal max-h-36 overflow-y-auto space-y-0.5">
           <!-- populateCitySelector で動的生成 -->
         </div>
       </div>
 
-      <!-- Navigation Menu (枠線付きの1つのブロックに統合) -->
-      <nav class="space-y-1 mt-3 p-1.5 rounded-2xl bg-[#0B1019]/80 border border-borderNormal">
-        <button id="nav-areas" onclick="switchView('areas')" class="nav-item nav-item-active w-full h-10 flex items-center gap-2.5 px-3 rounded-xl border border-brand/35 text-brand font-semibold text-left">
+      <!-- Navigation Menu (メニュー枠内だけでスクロール) -->
+      <nav class="space-y-0.5 mt-2 p-1.5 rounded-2xl bg-[#0B1019]/80 border border-borderNormal flex-1 min-h-0 overflow-y-auto hide-scrollbar">
+        <button id="nav-areas" onclick="switchView('areas')" class="nav-item nav-item-active w-full h-9 flex items-center gap-2.5 px-3 rounded-xl border border-brand/35 text-brand font-semibold text-left">
           <span class="w-5 text-base flex items-center justify-center flex-shrink-0">🗺️</span>
           <span class="text-sm">配布エリア</span>
         </button>
-        <button id="nav-records" onclick="switchView('records')" class="nav-item w-full h-10 flex items-center gap-2.5 px-3 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-medium">
+        <button id="nav-records" onclick="switchView('records')" class="nav-item w-full h-9 flex items-center gap-2.5 px-3 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-medium">
           <span class="w-5 text-base flex items-center justify-center flex-shrink-0">📝</span>
           <span class="text-sm">配布実績</span>
         </button>
-        <button id="nav-stocks" onclick="switchView('stocks')" class="nav-item w-full h-10 flex items-center gap-2.5 px-3 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-medium">
+        <button id="nav-stocks" onclick="switchView('stocks')" class="nav-item w-full h-9 flex items-center gap-2.5 px-3 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-medium">
           <span class="w-5 text-base flex items-center justify-center flex-shrink-0">📦</span>
           <span class="text-sm">保有チラシ</span>
         </button>
-        <button id="nav-roster" onclick="switchView('roster')" class="nav-item w-full h-10 flex items-center gap-2.5 px-3 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-medium">
+        <button id="nav-roster" onclick="switchView('roster')" class="nav-item w-full h-9 flex items-center gap-2.5 px-3 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-medium">
           <span class="w-5 text-base flex items-center justify-center flex-shrink-0">📋</span>
           <span class="text-sm">名簿</span>
         </button>
-        <button id="nav-requests" onclick="switchView('requests')" class="nav-item w-full h-10 flex items-center gap-2.5 px-3 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-medium">
+        <button id="nav-requests" onclick="switchView('requests')" class="nav-item w-full h-9 flex items-center gap-2.5 px-3 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-medium">
           <span class="w-5 text-base flex items-center justify-center flex-shrink-0">🤝</span>
           <span class="text-sm">受渡要請</span>
         </button>
-        <button id="nav-mail" onclick="switchView('mail')" class="nav-item w-full h-10 flex items-center gap-2.5 px-3 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-medium">
+        <button id="nav-mail" onclick="switchView('mail')" class="nav-item w-full h-9 flex items-center gap-2.5 px-3 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-medium">
           <span class="w-5 text-base flex items-center justify-center flex-shrink-0">✉️</span>
           <span class="text-sm">活動メール</span>
         </button>
       </nav>
     </div>
 
-    <!-- Bottom: 常時監視ステータスライン -->
-    <div class="pt-2 border-t border-borderNormal">
+    <!-- Bottom: 常時監視ステータスライン (最下部固定) -->
+    <div class="pt-2 border-t border-borderNormal flex-shrink-0">
       <!-- Live Sync Status Line -->
       <div class="px-2.5 py-1.5 rounded-lg bg-[#0B1019]/60 border border-borderNormal/50 text-[11px]">
         <div class="flex items-center gap-1.5">
