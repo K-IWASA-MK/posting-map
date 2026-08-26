@@ -1797,10 +1797,67 @@ function copyMailSubject(tabIndex) {
   copyTextToClipboard(tpl.subject, "✓ 件名をコピーしました！");
 }
 
+function convertPlainTextToRichHtml(text) {
+  if (!text) return '';
+  const lines = text.split('\n');
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return lines.map(line => {
+    if (!line.trim()) return '<div><br></div>';
+    const escaped = escapeHtml(line);
+    const linked = escaped.replace(urlRegex, (url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`);
+    return `<div>${linked}</div>`;
+  }).join('');
+}
+
+function copyRichAndPlainText(plainText, htmlText, successMsg) {
+  let copied = false;
+  const listener = (e) => {
+    e.clipboardData.setData('text/plain', plainText);
+    e.clipboardData.setData('text/html', htmlText);
+    e.preventDefault();
+    copied = true;
+  };
+
+  try {
+    document.addEventListener('copy', listener);
+    document.execCommand('copy');
+  } catch (err) {
+    console.warn('execCommand copy failed:', err);
+  } finally {
+    document.removeEventListener('copy', listener);
+  }
+
+  if (copied) {
+    showMailToast(successMsg);
+    return;
+  }
+
+  if (navigator.clipboard && window.ClipboardItem && navigator.clipboard.write) {
+    try {
+      const plainBlob = new Blob([plainText], { type: 'text/plain' });
+      const htmlBlob = new Blob([htmlText], { type: 'text/html' });
+      const item = new ClipboardItem({
+        'text/plain': plainBlob,
+        'text/html': htmlBlob
+      });
+      navigator.clipboard.write([item]).then(() => {
+        showMailToast(successMsg);
+      }).catch(() => {
+        copyTextToClipboard(plainText, successMsg);
+      });
+    } catch (e) {
+      copyTextToClipboard(plainText, successMsg);
+    }
+  } else {
+    copyTextToClipboard(plainText, successMsg);
+  }
+}
+
 function copyMailBody(tabIndex) {
   const templates = getMobilizationTemplates();
   const tpl = templates[tabIndex] || templates[0];
-  copyTextToClipboard(tpl.body, "✓ 本文をコピーしました！メールを開いて貼り付けてください");
+  const richHtml = convertPlainTextToRichHtml(tpl.body);
+  copyRichAndPlainText(tpl.body, richHtml, "✓ 本文をコピーしました！メールを開いて貼り付けてください");
 }
 
 let mailToastTimer = null;
