@@ -1580,7 +1580,7 @@ function getMobilizationTemplates(districtName, liffUrl) {
       goalSummary: "このメールでお願いすること: 「まずは地図を開いて眺めてもらう」",
       targetState: "POSTING MAPをまだ利用していない党員向け",
       subject: `【${branchLabel}】ポスティングマップ導入のお知らせ`,
-      body: `${branchLabel}の皆さん、お疲れさまです。
+      body: `${branchLabel}の皆さん お疲れさまです
 
 このたび ${branchLabel}では
 ポスティング活動をより分かりやすく進めるため
