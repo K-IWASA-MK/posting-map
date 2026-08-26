@@ -367,33 +367,32 @@ if (typeof window !== 'undefined') {
 }
 
 /**
- * 左ナビ内インライン自治体セレクターの開閉トグル
+ * 左ナビ内インライン自治体セレクター / モバイルセレクターの開閉トグル
  */
-function toggleCityDropdown() {
-  const listEl = document.getElementById('city-selector-list');
-  const triggerEl = document.getElementById('city-selector-trigger');
-  const arrowEl = document.getElementById('city-selector-arrow');
+function toggleCityDropdown(event, isMobile) {
+  if (event) event.stopPropagation();
+  const suffix = isMobile ? 'mobile-city-selector' : 'city-selector';
+  const listEl = document.getElementById(`${suffix}-list`);
+  const triggerEl = document.getElementById(`${suffix}-trigger`);
   if (!listEl) return;
 
   const isHidden = listEl.classList.contains('hidden');
   if (isHidden) {
     listEl.classList.remove('hidden');
     if (triggerEl) triggerEl.setAttribute('aria-expanded', 'true');
-    if (arrowEl) arrowEl.textContent = '▲';
   } else {
     listEl.classList.add('hidden');
     if (triggerEl) triggerEl.setAttribute('aria-expanded', 'false');
-    if (arrowEl) arrowEl.textContent = '▼';
   }
 }
 
 function closeCityDropdown() {
-  const listEl = document.getElementById('city-selector-list');
-  const triggerEl = document.getElementById('city-selector-trigger');
-  const arrowEl = document.getElementById('city-selector-arrow');
-  if (listEl) listEl.classList.add('hidden');
-  if (triggerEl) triggerEl.setAttribute('aria-expanded', 'false');
-  if (arrowEl) arrowEl.textContent = '▼';
+  ['city-selector', 'mobile-city-selector'].forEach(suffix => {
+    const listEl = document.getElementById(`${suffix}-list`);
+    const triggerEl = document.getElementById(`${suffix}-trigger`);
+    if (listEl) listEl.classList.add('hidden');
+    if (triggerEl) triggerEl.setAttribute('aria-expanded', 'false');
+  });
 }
 
 /**
@@ -401,13 +400,18 @@ function closeCityDropdown() {
  */
 function selectCity(cityName) {
   DashboardState.selectedCity = cityName;
+  const labelText = cityName === 'ALL' ? '全域' : cityName;
 
   const currentLabelEl = document.getElementById('city-selector-current');
-  if (currentLabelEl) {
-    currentLabelEl.textContent = cityName === 'ALL' ? '全域' : cityName;
-  }
+  if (currentLabelEl) currentLabelEl.textContent = labelText;
 
-  // 選択後もリストを開いたまま維持（トリガー再タップ時のみ閉じる）
+  const mobileLabelEl = document.getElementById('mobile-city-selector-current');
+  if (mobileLabelEl) mobileLabelEl.textContent = labelText;
+
+  // モバイルドロップダウンは選択後に閉じる
+  const mobileList = document.getElementById('mobile-city-selector-list');
+  if (mobileList) mobileList.classList.add('hidden');
+
   updateCitySelectorHighlight(cityName);
   onCitySelected(cityName);
 }
@@ -416,62 +420,68 @@ function selectCity(cityName) {
  * 自治体リストアイテムのアクティブハイライト更新
  */
 function updateCitySelectorHighlight(selectedCity) {
-  const listEl = document.getElementById('city-selector-list');
-  if (!listEl) return;
+  ['city-selector-list', 'mobile-city-selector-list'].forEach(listId => {
+    const listEl = document.getElementById(listId);
+    if (!listEl) return;
 
-  const buttons = listEl.querySelectorAll('button[data-city-val]');
-  buttons.forEach(btn => {
-    const val = btn.getAttribute('data-city-val');
-    if (val === selectedCity) {
-      btn.className = 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-between bg-brand/15 text-brand border border-brand/30';
-      const checkSpan = btn.querySelector('.city-check');
-      if (checkSpan) checkSpan.textContent = '✓';
-    } else {
-      btn.className = 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center justify-between text-textSub hover:text-white hover:bg-white/5 border border-transparent';
-      const checkSpan = btn.querySelector('.city-check');
-      if (checkSpan) checkSpan.textContent = '';
-    }
+    const buttons = listEl.querySelectorAll('button[data-city-val]');
+    buttons.forEach(btn => {
+      const val = btn.getAttribute('data-city-val');
+      if (val === selectedCity) {
+        btn.className = 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-between bg-brand/15 text-brand border border-brand/30';
+        const checkSpan = btn.querySelector('.city-check');
+        if (checkSpan) checkSpan.textContent = '✓';
+      } else {
+        btn.className = 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center justify-between text-textSub hover:text-white hover:bg-white/5 border border-transparent';
+        const checkSpan = btn.querySelector('.city-check');
+        if (checkSpan) checkSpan.textContent = '';
+      }
+    });
   });
 }
 
 /**
- * SSOT自治体セレクターの動的生成（左ナビ内インラインリスト）
+ * SSOT自治体セレクターの動的生成（PC左ナビ ＆ モバイルヘッダー）
  */
 function populateCitySelector(cities) {
-  const listEl = document.getElementById('city-selector-list');
-  const currentLabelEl = document.getElementById('city-selector-current');
-  if (!listEl) return;
-
   const currentVal = DashboardState.selectedCity || 'ALL';
-  listEl.innerHTML = '';
+  const labelText = currentVal === 'ALL' ? '全域' : currentVal;
 
-  // 1. 全域プリセット (ALL)
-  const allBtn = document.createElement('button');
-  allBtn.type = 'button';
-  allBtn.setAttribute('data-city-val', 'ALL');
-  allBtn.onclick = () => selectCity('ALL');
-  allBtn.innerHTML = `<span>全域</span><span class="city-check text-[11px] font-bold">${currentVal === 'ALL' ? '✓' : ''}</span>`;
-  allBtn.className = currentVal === 'ALL'
-    ? 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-between bg-brand/15 text-brand border border-brand/30'
-    : 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center justify-between text-textSub hover:text-white hover:bg-white/5 border border-transparent';
-  listEl.appendChild(allBtn);
+  const currentLabelEl = document.getElementById('city-selector-current');
+  if (currentLabelEl) currentLabelEl.textContent = labelText;
 
-  // 2. SSOTから動的抽出された自治体リスト
-  cities.forEach(cityName => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.setAttribute('data-city-val', cityName);
-    btn.onclick = () => selectCity(cityName);
-    btn.innerHTML = `<span>${cityName}</span><span class="city-check text-[11px] font-bold">${currentVal === cityName ? '✓' : ''}</span>`;
-    btn.className = currentVal === cityName
+  const mobileLabelEl = document.getElementById('mobile-city-selector-current');
+  if (mobileLabelEl) mobileLabelEl.textContent = labelText;
+
+  ['city-selector-list', 'mobile-city-selector-list'].forEach(listId => {
+    const listEl = document.getElementById(listId);
+    if (!listEl) return;
+    listEl.innerHTML = '';
+
+    // 1. 全域プリセット (ALL)
+    const allBtn = document.createElement('button');
+    allBtn.type = 'button';
+    allBtn.setAttribute('data-city-val', 'ALL');
+    allBtn.onclick = (e) => { e.stopPropagation(); selectCity('ALL'); };
+    allBtn.innerHTML = `<span>全域</span><span class="city-check text-[11px] font-bold">${currentVal === 'ALL' ? '✓' : ''}</span>`;
+    allBtn.className = currentVal === 'ALL'
       ? 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-between bg-brand/15 text-brand border border-brand/30'
       : 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center justify-between text-textSub hover:text-white hover:bg-white/5 border border-transparent';
-    listEl.appendChild(btn);
-  });
+    listEl.appendChild(allBtn);
 
-  if (currentLabelEl) {
-    currentLabelEl.textContent = currentVal === 'ALL' ? '全域' : currentVal;
-  }
+    // 2. SSOTから動的抽出された自治体リスト
+    cities.forEach(cityName => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.setAttribute('data-city-val', cityName);
+      btn.onclick = (e) => { e.stopPropagation(); selectCity(cityName); };
+      btn.innerHTML = `<span>${cityName}</span><span class="city-check text-[11px] font-bold">${currentVal === cityName ? '✓' : ''}</span>`;
+      btn.className = currentVal === cityName
+        ? 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-between bg-brand/15 text-brand border border-brand/30'
+        : 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center justify-between text-textSub hover:text-white hover:bg-white/5 border border-transparent';
+      listEl.appendChild(btn);
+    });
+  });
 }
 
 /**
@@ -717,6 +727,14 @@ function renderCurrentView() {
   const completedEl = document.getElementById('fact-completed-areas');
   const districtLabelEl = document.getElementById('map-district-label');
 
+  // モバイル用事実要素
+  const mDoneAreasEl = document.getElementById('mobile-fact-done-areas');
+  const mTotalAreasEl = document.getElementById('mobile-fact-total-areas');
+  const mProgressBadgeEl = document.getElementById('mobile-fact-progress-badge');
+  const mUnallocatedEl = document.getElementById('mobile-fact-unallocated-areas');
+  const mInProgressEl = document.getElementById('mobile-fact-inprogress-areas');
+  const mCompletedEl = document.getElementById('mobile-fact-completed-areas');
+
   // --- マスター件数（Static Master 由来）---
   // 3状態: PENDING(--) / LOADED(実件数) / ERROR(ERR)
   const masterOk = DashboardState.masterLoadStatus === 'LOADED';
@@ -727,6 +745,9 @@ function renderCurrentView() {
     if (doneAreasEl) doneAreasEl.textContent = 'ERR';
     if (totalAreasEl) totalAreasEl.textContent = 'ERR';
     if (progressBadgeEl) progressBadgeEl.textContent = '--';
+    if (mDoneAreasEl) mDoneAreasEl.textContent = 'ERR';
+    if (mTotalAreasEl) mTotalAreasEl.textContent = 'ERR';
+    if (mProgressBadgeEl) mProgressBadgeEl.textContent = '--';
     // ★ return しない — Backend由来の描画は続行 ★
   } else {
     // 1. トップの事実数字（マスターピン件数 ＆ 実配布完了データ連動）
@@ -744,12 +765,25 @@ function renderCurrentView() {
     const unallocatedAreas = Math.max(0, totalAreas - doneAreas - progAreas);
     const progressPercent = totalAreas > 0 ? Math.round((doneAreas / totalAreas) * 100) : 0;
 
-    if (doneAreasEl) doneAreasEl.textContent = doneAreas.toLocaleString();
-    if (totalAreasEl) totalAreasEl.textContent = totalAreas.toLocaleString();
-    if (progressBadgeEl) progressBadgeEl.textContent = `${progressPercent}%`;
-    if (unallocatedEl) unallocatedEl.textContent = unallocatedAreas.toLocaleString();
-    if (inProgressEl) inProgressEl.textContent = progAreas.toLocaleString();
-    if (completedEl) completedEl.textContent = doneAreas.toLocaleString();
+    const doneStr = doneAreas.toLocaleString();
+    const totalStr = totalAreas.toLocaleString();
+    const progStr = `${progressPercent}%`;
+    const unallocStr = unallocatedAreas.toLocaleString();
+    const inProgStr = progAreas.toLocaleString();
+
+    if (doneAreasEl) doneAreasEl.textContent = doneStr;
+    if (totalAreasEl) totalAreasEl.textContent = totalStr;
+    if (progressBadgeEl) progressBadgeEl.textContent = progStr;
+    if (unallocatedEl) unallocatedEl.textContent = unallocStr;
+    if (inProgressEl) inProgressEl.textContent = inProgStr;
+    if (completedEl) completedEl.textContent = doneStr;
+
+    if (mDoneAreasEl) mDoneAreasEl.textContent = doneStr;
+    if (mTotalAreasEl) mTotalAreasEl.textContent = totalStr;
+    if (mProgressBadgeEl) mProgressBadgeEl.textContent = progStr;
+    if (mUnallocatedEl) mUnallocatedEl.textContent = unallocStr;
+    if (mInProgressEl) mInProgressEl.textContent = inProgStr;
+    if (mCompletedEl) mCompletedEl.textContent = doneStr;
 
     if (districtLabelEl) {
       const districtCode = DashboardState.summary?.districtName;
@@ -762,28 +796,30 @@ function renderCurrentView() {
 
   // 2. 配布実績枚数の描画 (Backend SSOT: ranking / 自治体選択時は liveRecords 連動)
   const totalRecordsEl = document.getElementById('fact-total-records');
-  if (totalRecordsEl) {
-    let totalDelivered = 0;
-    if (isAll) {
-      // 全域SSOT: ranking の合計
-      totalDelivered = (DashboardState.ranking || []).reduce((acc, item) => acc + (Number(item.count) || 0), 0);
-    } else {
-      // 自治体選択時: 該当自治体の配布実績
-      const matchedLive = (DashboardState.liveRecords || []).filter(r => (r.cityName && r.cityName.includes(selected)) || (selected && selected.includes(r.cityName)));
-      totalDelivered = matchedLive.reduce((acc, r) => acc + (Number(r.count) || 0), 0);
-    }
-    totalRecordsEl.textContent = totalDelivered.toLocaleString();
+  const mTotalRecordsEl = document.getElementById('mobile-fact-total-records');
+  let totalDelivered = 0;
+  if (isAll) {
+    // 全域SSOT: ranking の合計
+    totalDelivered = (DashboardState.ranking || []).reduce((acc, item) => acc + (Number(item.count) || 0), 0);
+  } else {
+    // 自治体選択時: 該当自治体の配布実績
+    const matchedLive = (DashboardState.liveRecords || []).filter(r => (r.cityName && r.cityName.includes(selected)) || (selected && selected.includes(r.cityName)));
+    totalDelivered = matchedLive.reduce((acc, r) => acc + (Number(r.count) || 0), 0);
   }
+  const deliveredStr = totalDelivered.toLocaleString();
+  if (totalRecordsEl) totalRecordsEl.textContent = deliveredStr;
+  if (mTotalRecordsEl) mTotalRecordsEl.textContent = deliveredStr;
 
   // 3. 保有チラシの描画 (Backend SSOT: stocks)
   renderStockFacts(DashboardState.stocks, selected);
 
   // 4. 名簿人数の描画 (Backend SSOT: roster)
   const totalRosterEl = document.getElementById('fact-total-roster');
-  if (totalRosterEl) {
-    const rosterCount = (DashboardState.roster || []).length;
-    totalRosterEl.textContent = rosterCount.toLocaleString();
-  }
+  const mTotalRosterEl = document.getElementById('mobile-fact-total-roster');
+  const rosterCount = (DashboardState.roster || []).length;
+  const rosterStr = rosterCount.toLocaleString();
+  if (totalRosterEl) totalRosterEl.textContent = rosterStr;
+  if (mTotalRosterEl) mTotalRosterEl.textContent = rosterStr;
 
   // 5. 最下部 LIVE 配布実績フィードの描画 (Backend SSOT)
   renderLiveFeed(DashboardState.liveRecords);
@@ -841,7 +877,10 @@ function renderStockFacts(stocks, selectedCity) {
   });
 
   const totalStocksEl = document.getElementById('fact-total-stocks');
-  if (totalStocksEl) totalStocksEl.textContent = totalStock.toLocaleString();
+  const mTotalStocksEl = document.getElementById('mobile-fact-total-stocks');
+  const stockStr = totalStock.toLocaleString();
+  if (totalStocksEl) totalStocksEl.textContent = stockStr;
+  if (mTotalStocksEl) mTotalStocksEl.textContent = stockStr;
 }
 
 /**
@@ -1302,16 +1341,22 @@ function renderMainStageRecords(ranking) {
     }
 
     html += `
-      <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
-        <div class="flex items-center gap-2.5 flex-shrink-0">
-          ${rankBadgeHtml}
-          <div class="flex items-center gap-1.5">
-            <span class="font-bold text-white text-lg font-mono">${item.staffId}</span>
-            ${item.name ? `<span class="text-sm text-[#94A3B8] font-normal">(${item.name})</span>` : ''}
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] gap-2 transition-colors">
+        <div class="flex items-center justify-between w-full sm:w-auto gap-2.5 flex-shrink-0">
+          <div class="flex items-center gap-2">
+            ${rankBadgeHtml}
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-white text-lg font-mono">${item.staffId}</span>
+              ${item.name ? `<span class="text-sm text-[#94A3B8] font-normal">(${item.name})</span>` : ''}
+            </div>
+          </div>
+          <div class="text-right sm:hidden flex-shrink-0">
+            <span class="text-lg font-mono font-bold text-white">${(Number(item.count) || 0).toLocaleString()}</span>
+            <span class="text-xs text-[#94A3B8] font-normal ml-0.5">枚 完了</span>
           </div>
         </div>
         ${recentFeedHtml}
-        <div class="text-right flex-shrink-0">
+        <div class="hidden sm:block text-right flex-shrink-0">
           <span class="text-lg font-mono font-bold text-white">${(Number(item.count) || 0).toLocaleString()}</span>
           <span class="text-xs text-[#94A3B8] font-normal ml-0.5">枚 完了</span>
         </div>
@@ -1364,15 +1409,21 @@ function renderMainStageStocks(stocks) {
       : '';
 
     html += `
-      <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
-        <div class="font-semibold text-lg text-white flex-shrink-0 w-[320px] truncate">${s.location || '保管拠点'}</div>
-        <div class="flex items-center gap-2.5 text-sm text-[#94A3B8] flex-1 min-w-0">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] gap-1.5 sm:gap-2 transition-colors">
+        <div class="flex items-center justify-between w-full sm:w-auto gap-2">
+          <div class="font-semibold text-base sm:text-lg text-white truncate min-w-0 sm:w-64 sm:flex-none">${s.location || '保管拠点'}</div>
+          <div class="text-right sm:hidden flex-shrink-0">
+            <span class="text-base sm:text-lg font-bold font-mono text-white">${(Number(s.count) || 0).toLocaleString()}</span>
+            <span class="text-xs text-[#94A3B8] font-normal ml-0.5">枚</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 text-xs sm:text-sm text-[#94A3B8] flex-1 min-w-0">
           ${staffBadgeHtml}
-          <span class="font-medium text-white text-sm truncate max-w-[130px]">${s.staffName || (s.staffId ? '' : '未設定')}</span>
+          <span class="font-medium text-white text-xs sm:text-sm truncate max-w-[130px]">${s.staffName || (s.staffId ? '' : '未設定')}</span>
           <span class="text-[#243044] text-xs">|</span>
           <span class="text-textSub text-xs">更新: <span class="font-mono">${s.updatedAt || '--'}</span></span>
         </div>
-        <div class="text-right flex-shrink-0">
+        <div class="hidden sm:block text-right flex-shrink-0">
           <span class="text-lg font-bold font-mono text-white">${(Number(s.count) || 0).toLocaleString()}</span>
           <span class="text-xs text-[#94A3B8] font-normal ml-0.5">枚</span>
         </div>
@@ -1405,12 +1456,12 @@ function renderMainStageRoster(roster) {
     }
 
     html += `
-      <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
-        <div class="flex items-center gap-2.5 flex-shrink-0 w-[320px] min-w-0">
+      <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] gap-2 transition-colors">
+        <div class="flex items-center gap-2.5 min-w-0 flex-1 sm:w-64 sm:flex-none">
           <span class="h-7 px-2 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-bold text-xs text-brand flex-shrink-0">${r.id || ''}</span>
-          <span class="font-semibold text-lg text-white truncate">${r.name || ''}</span>
+          <span class="font-semibold text-base sm:text-lg text-white truncate">${r.name || ''}</span>
         </div>
-        <div class="flex items-center gap-2.5 text-sm text-[#94A3B8] flex-1 min-w-0">
+        <div class="flex items-center gap-2 text-xs sm:text-sm text-[#94A3B8] flex-1 min-w-0">
           <span class="text-xs text-[#94A3B8]">登録: <span class="font-mono text-white/90">${formattedDate}</span></span>
         </div>
         <div class="text-right flex-shrink-0">
@@ -1452,22 +1503,22 @@ function renderMainStageRequests(requests) {
       : '';
 
     html += `
-      <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] gap-2 transition-colors">
         <!-- Column 1: IDと名前 (要請者 ➔ 保管者) -->
-        <div class="flex items-center gap-2 flex-shrink-0 w-[320px] min-w-0">
+        <div class="flex items-center gap-2 min-w-0 w-full sm:w-72 sm:flex-none">
           <div class="flex items-center gap-1.5 min-w-0 flex-1">
             ${requesterBadge}
-            <span class="font-semibold text-white truncate text-base">${req.requesterName || ''}</span>
+            <span class="font-semibold text-white truncate text-sm sm:text-base">${req.requesterName || ''}</span>
           </div>
           <span class="text-xs text-[#94A3B8] flex-shrink-0">➔</span>
           <div class="flex items-center gap-1.5 min-w-0 flex-1">
             ${holderBadge}
-            <span class="font-semibold text-white truncate text-base">${req.holderName || ''}</span>
+            <span class="font-semibold text-white truncate text-sm sm:text-base">${req.holderName || ''}</span>
           </div>
         </div>
 
         <!-- Column 2: 連絡方法・連絡先 -->
-        <div class="flex items-center gap-2 text-sm text-[#94A3B8] flex-1 min-w-0 ml-12">
+        <div class="flex items-center gap-2 text-xs sm:text-sm text-[#94A3B8] flex-1 min-w-0 ml-0 sm:ml-6">
           <span class="text-xs text-[#94A3B8] truncate">
             連絡先: ${req.contactMethod ? `<span class="text-[#94A3B8]/80">[${req.contactMethod}]</span> ` : ''}<span class="text-white/90 font-mono">${req.contactValue || '--'}</span>
           </span>
@@ -1534,12 +1585,23 @@ function switchView(type) {
 function updateNavHighlight(activeType) {
   const navTypes = ['mail', 'roster', 'stocks', 'requests', 'records', 'areas'];
   navTypes.forEach(t => {
+    // Desktop Sidebar
     const el = document.getElementById(`nav-${t}`);
     if (el) {
       if (t === activeType) {
         el.className = 'nav-item nav-item-active w-full h-10 flex items-center gap-2.5 px-3 rounded-xl border border-brand/35 text-brand font-semibold text-left';
       } else {
         el.className = 'nav-item w-full h-10 flex items-center gap-2.5 px-3 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-medium';
+      }
+    }
+
+    // Mobile Bottom Navigation
+    const mEl = document.getElementById(`mobile-nav-${t}`);
+    if (mEl) {
+      if (t === activeType) {
+        mEl.className = 'mobile-nav-item mobile-nav-active flex flex-col items-center justify-center flex-1 py-1 text-brand font-bold text-[10px] transition-colors cursor-pointer';
+      } else {
+        mEl.className = 'mobile-nav-item flex flex-col items-center justify-center flex-1 py-1 text-textSub font-medium text-[10px] hover:text-white transition-colors cursor-pointer';
       }
     }
   });
@@ -1854,12 +1916,19 @@ function setSyncStatus(isLive) {
   const text = document.getElementById('live-status-text');
   const clock = document.getElementById('sync-clock');
 
+  const mDot = document.getElementById('mobile-live-dot');
+  const mClock = document.getElementById('mobile-sync-clock');
+
   if (dot) dot.className = isLive ? 'w-2 h-2 rounded-full bg-statusGreen' : 'w-2 h-2 rounded-full bg-statusYellow';
+  if (mDot) mDot.className = isLive ? 'w-2 h-2 rounded-full bg-statusGreen' : 'w-2 h-2 rounded-full bg-statusYellow';
   if (text) text.textContent = isLive ? '現場データ同期' : '再接続待機中';
-  if (clock) {
-    const now = new Date();
-    clock.textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-  }
+
+  const now = new Date();
+  const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+  const shortTimeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+  if (clock) clock.textContent = timeStr;
+  if (mClock) mClock.textContent = shortTimeStr;
 }
 
 /**
