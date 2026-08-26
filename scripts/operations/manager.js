@@ -1575,22 +1575,29 @@ function getMobilizationTemplates(districtName, liffUrl) {
     {
       id: 0,
       icon: "📱",
-      tabTitle: "① はじめての方へ",
-      role: "Hアプリ導入",
-      goalSummary: "このメールでお願いすること: 「まずは地図を眺めてもらう」",
-      targetState: "まだ何もしていない党員向け",
+      tabTitle: "① 導入紹介",
+      role: "POSTING MAPの導入紹介",
+      goalSummary: "このメールでお願いすること: 「まずは地図を開いて眺めてもらう」",
+      targetState: "POSTING MAPをまだ利用していない党員向け",
       subject: `【${branchLabel}】ポスティングマップ導入のお知らせ`,
       body: `${branchLabel}の皆さん、お疲れさまです。
 
-この度、ポスティングマップというアプリケーションを導入しました。
+このたび ${branchLabel}では
+ポスティング活動をより分かりやすく進めるため
+『POSTING MAP』を導入しました
 
-ポスティングをする際に、スマートフォンから配布エリアの状況を確認できるアプリケーションです。
+POSTING MAPでは
+スマートフォンから配布エリアを確認したり
+配布した場所を記録したりすることができます
 
-ポスティングマップはこちらからご覧いただけます。
+まずは一度 地図を開いて
+お住まいの地域を眺めてみてください
 
-よろしくお願いいたします。
+【POSTING MAP】
+${url}
 
-${url}`
+※ 新しいアプリのダウンロードや登録は不要です
+  LINEからそのまま開いてご利用いただけます`
     },
     {
       id: 1,
