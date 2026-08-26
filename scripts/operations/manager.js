@@ -1766,15 +1766,6 @@ function renderMainStageMail(tabIndex = 0) {
         ${tabsHtml}
       </div>
 
-      <!-- このメールでお願いすること（行動目的バー） -->
-      <div class="flex items-center justify-between px-3 py-1 rounded-lg bg-[#0B1019] border border-borderNormal flex-shrink-0">
-        <div class="flex items-center gap-2 min-w-0">
-          <span class="text-xs font-bold text-brand flex-shrink-0">🎯 行動目的</span>
-          <span class="text-xs text-white font-medium truncate">${activeTpl.goalSummary}</span>
-        </div>
-        <span class="text-[11px] text-textSub font-mono flex-shrink-0 hidden sm:inline-block">${activeTpl.targetState}</span>
-      </div>
-
       <!-- メインメール表示カード -->
       <div class="flex-1 flex flex-col min-h-0 rounded-xl bg-[#131A26] border border-borderNormal p-3 gap-2 overflow-hidden">
 
