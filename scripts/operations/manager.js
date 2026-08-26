@@ -1735,7 +1735,7 @@ function copyMailSubject(tabIndex) {
   const templates = DashboardState.currentMailTemplates || [];
   const tpl = templates[tabIndex] || templates[0];
   if (!tpl) return;
-  copyTextToClipboard(tpl.subject, "✓ 件名をコピーしました！");
+  copyTextToClipboard(tpl.subject, "✓ 件名をコピーしました");
 }
 
 function convertPlainTextToRichHtml(text) {
@@ -1799,7 +1799,7 @@ function copyMailBody(tabIndex) {
   const tpl = templates[tabIndex] || templates[0];
   if (!tpl) return;
   const richHtml = convertPlainTextToRichHtml(tpl.body);
-  copyRichAndPlainText(tpl.body, richHtml, "✓ 本文をコピーしました！メールを開いて貼り付けてください");
+  copyRichAndPlainText(tpl.body, richHtml, "✓ 本文をコピーしました");
 }
 
 let mailToastTimer = null;
@@ -1843,7 +1843,7 @@ function showMailToast(msg) {
   mailToastTimer = setTimeout(() => {
     toastEl.classList.remove('opacity-100', 'translate-y-0');
     toastEl.classList.add('opacity-0', 'pointer-events-none', '-translate-y-2');
-  }, 2500);
+  }, 1800);
 }
 
 /**
