@@ -331,7 +331,7 @@ async function runDashboardQualityGate() {
     const staticMasterOccurrences = grepStaticMasterHApp.split('\n').filter(Boolean);
     const isStaticMasterIsolated = (
       staticMasterOccurrences.length === 1 &&
-      staticMasterOccurrences[0].includes('active/dashboard/config.js:19')
+      staticMasterOccurrences[0].startsWith('active/dashboard/config.js:')
     );
 
     const phase6Pass = (!hAppException && isStaticMasterIsolated);

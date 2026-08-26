@@ -9,6 +9,8 @@
  * 新地区デプロイ時はこのファイルと data/*.csv を差し替える。
  */
 window.PMS_CLIENT_CONFIG = {
+  districtId: "MIE-03",
+  districtName: "三重3区",
   status: "ACTIVE_DEVELOPMENT",
   
   spreadsheetId: "1xQUvlCaUO103rjSGmdcFQQFkukodG4Dg9mS_teWT7uA",

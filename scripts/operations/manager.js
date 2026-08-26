@@ -1560,11 +1560,16 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
-function getMobilizationTemplates() {
-  const liffId = (typeof window !== 'undefined' && window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.line && window.PMS_CLIENT_CONFIG.line.liffId) || "2010941735-GRLuqPic";
-  const liffUrl = `https://liff.line.me/${liffId}`;
-  const districtName = (typeof window !== 'undefined' && window.PMS_CLIENT_CONFIG && (window.PMS_CLIENT_CONFIG.districtName || window.PMS_CLIENT_CONFIG.districtId)) || "三重3区";
-  const branchLabel = districtName.includes("区") || districtName.includes("支部") ? districtName : `${districtName}支部`;
+function getMobilizationTemplates(districtName, liffUrl) {
+  if (typeof districtName !== 'string' || !districtName.trim()) {
+    throw new Error('[District SSOT Error] districtName is required and cannot be empty.');
+  }
+  if (typeof liffUrl !== 'string' || !liffUrl.trim()) {
+    throw new Error('[LIFF SSOT Error] liffUrl is required and cannot be empty.');
+  }
+
+  const branchLabel = districtName.trim();
+  const url = liffUrl.trim();
 
   return [
     {
@@ -1585,7 +1590,7 @@ function getMobilizationTemplates() {
 
 よろしくお願いいたします。
 
-${liffUrl}`
+${url}`
     },
     {
       id: 1,
@@ -1655,7 +1660,7 @@ ${liffUrl}`
 そんな始め方で十分です。
 
 配った場所はHアプリから記録できます👇
-${liffUrl}
+${url}
 
 一度やってみると、意外と簡単です。
 
@@ -1677,7 +1682,7 @@ ${liffUrl}
 「自分の近所はどうかな？」
 
 と思ったら、地図を開いてみてください👇
-${liffUrl}
+${url}
 
 家の近くに、まだ配られていない場所が見つかるかもしれません。
 
@@ -1712,7 +1717,7 @@ ${liffUrl}
 「ここなら自分が配れる」
 
 という場所があれば、ぜひ一度地図を開いてみてください👇
-${liffUrl}
+${url}
 
 100枚でも構いません。
 
@@ -1733,7 +1738,45 @@ function renderMainStageMail(tabIndex = 0) {
   const container = document.getElementById('main-stage-mail-content');
   if (!container) return;
 
-  const templates = getMobilizationTemplates();
+  const districtName = (typeof window !== 'undefined' && window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.districtName);
+  const liffId = (typeof window !== 'undefined' && window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.line && window.PMS_CLIENT_CONFIG.line.liffId);
+
+  if (!districtName || typeof districtName !== 'string' || !districtName.trim()) {
+    container.innerHTML = `
+      <div class="flex-1 flex flex-col items-center justify-center p-8 rounded-xl bg-[#131A26] border border-statusRed/50 text-center gap-3">
+        <span class="text-3xl">⚠️</span>
+        <div class="font-bold text-statusRed text-base">【地区設定エラー】PMS_CLIENT_CONFIG.districtName が未設定です</div>
+        <p class="text-xs text-textSub">config.js の districtName を確認してください。</p>
+      </div>
+    `;
+    DashboardState.currentMailTemplates = [];
+    return;
+  }
+
+  if (!liffId || typeof liffId !== 'string' || !liffId.trim()) {
+    container.innerHTML = `
+      <div class="flex-1 flex flex-col items-center justify-center p-8 rounded-xl bg-[#131A26] border border-statusRed/50 text-center gap-3">
+        <span class="text-3xl">⚠️</span>
+        <div class="font-bold text-statusRed text-base">【LINE LIFF設定エラー】PMS_CLIENT_CONFIG.line.liffId が未設定です</div>
+        <p class="text-xs text-textSub">config.js の line.liffId を確認してください。</p>
+      </div>
+    `;
+    DashboardState.currentMailTemplates = [];
+    return;
+  }
+
+  const liffUrl = `https://liff.line.me/${liffId.trim()}`;
+
+  let templates;
+  try {
+    templates = getMobilizationTemplates(districtName.trim(), liffUrl);
+    DashboardState.currentMailTemplates = templates;
+  } catch (err) {
+    container.innerHTML = `<div class="p-6 text-center text-statusRed font-bold">${escapeHtml(err.message)}</div>`;
+    DashboardState.currentMailTemplates = [];
+    return;
+  }
+
   const validIndex = (tabIndex >= 0 && tabIndex < templates.length) ? tabIndex : 0;
   const activeTpl = templates[validIndex];
 
@@ -1792,8 +1835,9 @@ function renderMainStageMail(tabIndex = 0) {
 }
 
 function copyMailSubject(tabIndex) {
-  const templates = getMobilizationTemplates();
+  const templates = DashboardState.currentMailTemplates || [];
   const tpl = templates[tabIndex] || templates[0];
+  if (!tpl) return;
   copyTextToClipboard(tpl.subject, "✓ 件名をコピーしました！");
 }
 
@@ -1854,8 +1898,9 @@ function copyRichAndPlainText(plainText, htmlText, successMsg) {
 }
 
 function copyMailBody(tabIndex) {
-  const templates = getMobilizationTemplates();
+  const templates = DashboardState.currentMailTemplates || [];
   const tpl = templates[tabIndex] || templates[0];
+  if (!tpl) return;
   const richHtml = convertPlainTextToRichHtml(tpl.body);
   copyRichAndPlainText(tpl.body, richHtml, "✓ 本文をコピーしました！メールを開いて貼り付けてください");
 }
