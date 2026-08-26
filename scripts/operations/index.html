@@ -150,7 +150,7 @@
   <aside class="w-56 bg-containerBg border-r border-borderNormal p-3 flex flex-col justify-between flex-shrink-0 z-20 overflow-hidden">
 
     <!-- Top: Branding (公式ロゴ: 一回り大きい正円暗いグレーカード内に配置) -->
-    <div class="flex flex-col min-h-0 flex-1 overflow-hidden">
+    <div class="flex flex-col min-h-0 overflow-hidden">
       <div class="flex items-center justify-center pt-1 pb-1 flex-shrink-0">
         <div class="w-[136px] h-[136px] rounded-full bg-[#0B1019] border border-borderNormal flex items-center justify-center shadow-inner">
           <div class="w-[114px] h-[114px] rounded-full overflow-hidden border border-white/10 bg-white flex items-center justify-center p-1 shadow-md">
@@ -170,8 +170,8 @@
         </div>
       </div>
 
-      <!-- Navigation Menu (メニュー枠内だけでスクロール) -->
-      <nav class="space-y-1 mt-3 p-1.5 rounded-2xl bg-[#0B1019]/80 border border-borderNormal flex-1 min-h-0 overflow-y-auto hide-scrollbar">
+      <!-- Navigation Menu (コンテンツ自動フィット ＋ 拡張時内部スクロール) -->
+      <nav class="space-y-1 mt-3 p-1.5 rounded-2xl bg-[#0B1019]/80 border border-borderNormal overflow-y-auto max-h-[calc(100vh-280px)] hide-scrollbar">
         <button id="nav-areas" onclick="switchView('areas')" class="nav-item nav-item-active w-full h-10 flex items-center gap-2.5 px-3 rounded-xl border border-brand/35 text-brand font-semibold text-left">
           <span class="w-5 text-base flex items-center justify-center flex-shrink-0">🗺️</span>
           <span class="text-sm">配布エリア</span>
