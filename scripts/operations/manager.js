@@ -1774,25 +1774,16 @@ function renderMainStageMail(tabIndex = 0) {
           </button>
         </div>
 
-        <!-- 本文コードブロック (<pre> 編集不可) -->
+        <!-- 本文ブロック（件名と同じUIヘッダー ＋ 本文領域） -->
         <div class="flex-1 min-h-0 relative flex flex-col rounded-lg bg-[#0B1019] border border-borderNormal overflow-hidden">
-          <div class="px-3 py-1 border-b border-borderNormal/60 bg-[#0B1019] flex items-center justify-between text-[11px] text-textSub flex-shrink-0">
-            <span>本文（編集不可・そのままコピー）</span>
-            <span class="text-[10px] font-mono text-textSub/70">※HアプリURL自動挿入済</span>
+          <div class="px-3 py-1.5 border-b border-borderNormal/60 bg-[#0B1019] flex items-center justify-between flex-shrink-0">
+            <span class="text-[11px] font-bold text-textSub">本文:</span>
+            <button onclick="copyMailBody(${validIndex})" class="flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#243044]/60 hover:bg-[#33435C] text-white text-xs font-medium border border-borderNormal flex-shrink-0 transition-colors">
+              <span>📋</span>
+              <span>本文をコピー</span>
+            </button>
           </div>
-          <pre id="mail-body-content" class="flex-1 p-3 text-xs sm:text-sm text-white/90 font-sans leading-relaxed whitespace-pre-wrap select-all overflow-y-auto hide-scrollbar">${escapeHtml(activeTpl.body)}</pre>
-        </div>
-
-        <!-- アクションフッター (大きな本文コピーボタン) -->
-        <div class="flex items-center justify-between pt-1 flex-shrink-0">
-          <div class="flex items-center gap-2 text-xs text-textSub">
-            <span class="w-1.5 h-1.5 rounded-full bg-statusGreen"></span>
-            <span>①【本文をコピー】 ➔ ②メールソフトに貼り付け ➔ ③送信</span>
-          </div>
-          <button onclick="copyMailBody(${validIndex})" class="flex items-center gap-2 px-5 py-2 rounded-xl bg-brand hover:bg-[#D45307] text-white text-xs sm:text-sm font-bold shadow-lg transition-all transform active:scale-98">
-            <span class="text-base">📋</span>
-            <span>本文をコピー</span>
-          </button>
+          <pre id="mail-body-content" class="flex-1 p-3 text-xs sm:text-sm text-white/90 font-sans leading-relaxed whitespace-pre-wrap select-all overflow-y-auto">${escapeHtml(activeTpl.body)}</pre>
         </div>
 
       </div>
