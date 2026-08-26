@@ -1677,25 +1677,25 @@ function renderMainStageMail(tabIndex = 0) {
   const validIndex = (tabIndex >= 0 && tabIndex < templates.length) ? tabIndex : 0;
   const activeTpl = templates[validIndex];
 
-  // 5連タブセレクター
+  // 2連タブセレクター（文字幅フィット・セグメントUI）
   const tabsHtml = templates.map((t, idx) => {
     const isActive = idx === validIndex;
     return `
-      <button onclick="renderMainStageMail(${idx})" class="flex-1 py-1.5 px-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-all duration-150 ${
+      <button onclick="renderMainStageMail(${idx})" class="px-3.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all duration-150 cursor-pointer ${
         isActive
           ? 'bg-brand/15 text-brand border border-brand/35 shadow-sm font-semibold'
           : 'text-textSub bg-[#0B1019]/60 border border-borderNormal/60 hover:text-white hover:bg-white/5'
       }">
         <span class="text-sm flex-shrink-0">${t.icon}</span>
-        <span class="truncate">${t.tabTitle}</span>
+        <span>${t.tabTitle}</span>
       </button>
     `;
   }).join('');
 
   container.innerHTML = `
     <div class="flex flex-col h-full gap-2 pr-1 overflow-hidden">
-      <!-- 5大タブセレクター -->
-      <div class="flex items-center gap-1.5 flex-shrink-0">
+      <!-- タブセレクター (文字幅フィット・コンパクト左寄せ) -->
+      <div class="flex items-center gap-2 flex-shrink-0">
         ${tabsHtml}
       </div>
 
