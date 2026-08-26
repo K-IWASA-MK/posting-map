@@ -327,10 +327,20 @@
 
         <!-- 2. 配布実績 ビュー (records) -->
         <div id="main-view-records" class="flex-1 flex flex-col min-h-0 hidden">
-          <div class="flex items-center justify-center pb-1 flex-shrink-0">
+          <div class="relative flex items-center justify-center pb-1 flex-shrink-0">
             <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-lg bg-[#0B1019] border border-borderNormal shadow-inner">
               <span class="text-base">🏆</span>
               <span class="font-bold text-sm text-white tracking-wide">配布実績 ランキング一覧</span>
+            </div>
+            <div class="absolute right-0 top-0 flex items-center gap-2">
+              <button onclick="downloadRecordsReportPdf()" class="h-8 px-3 rounded-lg bg-[#0B1019] border border-borderNormal hover:border-brand/40 text-xs font-bold text-white flex items-center gap-1.5 transition-colors cursor-pointer" title="A4帳票をPDF出力 / 印刷">
+                <span>📄</span>
+                <span>帳票出力 (PDF)</span>
+              </button>
+              <button onclick="downloadRecordsCsv()" class="h-8 px-3 rounded-lg bg-[#0B1019] border border-borderNormal hover:border-brand/40 text-xs font-bold text-white flex items-center gap-1.5 transition-colors cursor-pointer" title="配布実績データをCSVダウンロード">
+                <span>📊</span>
+                <span>CSV出力</span>
+              </button>
             </div>
           </div>
           <div id="main-stage-records-content" class="flex-1 overflow-y-auto pt-1 space-y-1.5 pr-1">
