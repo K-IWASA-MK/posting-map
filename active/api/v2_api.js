@@ -56,8 +56,7 @@ function doGet(e) {
     'getGlobalPinStatus',
     'getRoster',
     'resetRoster',
-    'getTransferRequests',
-    'stripeWebhook'
+    'getTransferRequests'
   ].includes(action);
 
   // Authentication Gate
@@ -143,16 +142,13 @@ function processGetActionLegacy(action, e) {
  */
 function doPost(e) {
   isWebAppCall = true;
-  let postData = {};
+  let params = (e && e.parameter) ? Object.assign({}, e.parameter) : {};
+  let postData = null;
   if (e && e.postData && e.postData.contents) {
     try {
       postData = JSON.parse(e.postData.contents);
-    } catch (err) {
-      // JSON parse error handling logic could go here if needed.
-    }
+    } catch (errP) {}
   }
-
-  let params = (e && e.parameter) ? Object.assign({}, e.parameter) : {};
   if (params.json) {
     try {
       const parsedJson = typeof params.json === 'string' ? JSON.parse(params.json) : params.json;
@@ -176,8 +172,7 @@ function doPost(e) {
     'getGlobalPinStatus',
     'getRoster',
     'resetRoster',
-    'getTransferRequests',
-    'stripeWebhook'
+    'getTransferRequests'
   ].includes(action);
 
   // Authentication Gate
@@ -239,8 +234,6 @@ function processPostAction(action, postData, e) {
       return { success: true, mapsApiKey: PropertiesService.getScriptProperties().getProperty('GOOGLE_MAPS_API_KEY') || "" };
     case 'getTier1':
       return typeof Tier1Service !== 'undefined' ? Tier1Service.getInstance().getTier1() : { success: false };
-    case 'stripeWebhook':
-      return handleStripeWebhook(postData, e);
 
     case 'getEvidence':
       try {
@@ -319,52 +312,6 @@ function processPostAction(action, postData, e) {
 // =============================
 // ② データ取得ロジック
 // =============================
-
-/**
- * Stripe Webhook: Cloud Run Gatewayからの内部転送処理
- */
-function handleStripeWebhook(payload, e) {
-  if (!payload || !payload.gateway || !payload.stripeEvent) {
-    return { success: false, error: "Invalid gateway payload structure" };
-  }
-  
-  const gateway = payload.gateway;
-  const stripeEvent = payload.stripeEvent;
-  const gatewayRequestId = gateway.gatewayRequestId || "N/A";
-  
-  const props = PropertiesService.getScriptProperties();
-  const internalToken = props.getProperty("INTERNAL_GATEWAY_TOKEN");
-  
-  if (!internalToken || typeof internalToken !== 'string' || internalToken.trim() === '') {
-    Logger.log("INTERNAL_GATEWAY_TOKEN not configured.");
-    return { success: false, error: "Configuration Error" };
-  }
-  
-  // 内部トークン認証 (絶対にログに出力しない)
-  if (gateway.token !== internalToken) {
-    return { success: false, error: "Unauthorized Gateway Access" };
-  }
-  
-  if (!stripeEvent.id) {
-    return { success: false, error: "Missing event.id in stripeEvent" };
-  }
-
-  // 1. Extract Subscription ID if applicable
-  const eventType = stripeEvent.type;
-  const eventObj = stripeEvent.data.object;
-  
-  let trueSub = null;
-  if (eventType.startsWith("customer.subscription.")) {
-    trueSub = eventObj;
-  }
-
-  // 2. Update Contract State
-  if (typeof updateContractState === 'function') {
-    return updateContractState(stripeEvent, trueSub, gatewayRequestId);
-  }
-  
-  return { success: false, error: "Contract layer not initialized" };
-}
 
 
 
