@@ -475,7 +475,7 @@ function populateCitySelector(cities) {
       btn.type = 'button';
       btn.setAttribute('data-city-val', cityName);
       btn.onclick = (e) => { e.stopPropagation(); selectCity(cityName); };
-      btn.innerHTML = `<span>${cityName}</span><span class="city-check text-[11px] font-bold">${currentVal === cityName ? '✓' : ''}</span>`;
+      btn.innerHTML = `<span>${escapeHtml(cityName)}</span><span class="city-check text-[11px] font-bold">${currentVal === cityName ? '✓' : ''}</span>`;
       btn.className = currentVal === cityName
         ? 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-between bg-brand/15 text-brand border border-brand/30'
         : 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center justify-between text-textSub hover:text-white hover:bg-white/5 border border-transparent';
@@ -911,9 +911,9 @@ function renderLiveFeed(liveRecords) {
     html += `
       <div class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-[#0B1019] border border-borderNormal text-[11px] text-white flex-shrink-0 ${isFirstNew ? 'live-card-new' : ''}">
         <span class="w-1.5 h-1.5 rounded-full bg-statusGreen flex-shrink-0"></span>
-        <span class="font-mono text-textSub text-[10px] whitespace-nowrap">${rec.time || '--:--'}</span>
-        <span class="font-mono font-bold text-brand text-[11px] flex-shrink-0">${rec.staffId || '--'}</span>
-        <span class="font-medium text-white truncate max-w-[155px] text-[11px]">${areaText}</span>
+        <span class="font-mono text-textSub text-[10px] whitespace-nowrap">${escapeHtml(rec.time || '--:--')}</span>
+        <span class="font-mono font-bold text-brand text-[11px] flex-shrink-0">${escapeHtml(rec.staffId || '--')}</span>
+        <span class="font-medium text-white truncate max-w-[155px] text-[11px]">${escapeHtml(areaText)}</span>
         <span class="font-mono font-bold text-white text-[11px] flex-shrink-0">${countStr}<span class="text-[9px] font-normal text-textSub ml-0.5">枚</span></span>
       </div>
     `;
@@ -1155,8 +1155,9 @@ function renderRightBottomAreaStats(selectedPin) {
   if (isCompleted) {
     // 最新配布実績から該当ピンの実績を逆引き
     const liveRec = (DashboardState.liveRecords || []).find(r => r.rowId === selectedPin.rowId) || {};
-    const staffId = liveRec.staffId || 'S001';
-    const staffName = staffId === 'S001' ? 'K. IWASA' : (staffId === 'S002' ? 'なお' : '');
+    const staffId = liveRec.staffId || '--';
+    const rosterStaff = (DashboardState.roster || []).find(rs => rs.id === staffId);
+    const staffName = rosterStaff ? rosterStaff.name : '';
     const doneTime = liveRec.time || '08/23 09:36';
     const doneCount = liveRec.count || Math.round(households * 0.85);
 
@@ -1172,7 +1173,7 @@ function renderRightBottomAreaStats(selectedPin) {
           </div>
           <div class="flex justify-between items-center">
             <span class="text-textSub">担当:</span>
-            <span class="text-white">${staffId} ${staffName}</span>
+            <span class="text-white">${escapeHtml(staffId)}${staffName ? ' ' + escapeHtml(staffName) : ''}</span>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-textSub">完了日時:</span>
@@ -1306,8 +1307,8 @@ function renderMainStageRecords(ranking) {
         return `
           <div class="flex items-center gap-2 px-2.5 py-0.5 rounded bg-[#0B1019] border border-borderNormal text-xs text-white flex-shrink-0">
             <span class="w-1.5 h-1.5 rounded-full bg-statusGreen flex-shrink-0"></span>
-            <span class="font-mono text-textSub text-[11px] whitespace-nowrap">${rec.time || '--:--'}</span>
-            <span class="font-medium text-white truncate max-w-[130px] text-xs">${areaName}</span>
+            <span class="font-mono text-textSub text-[11px] whitespace-nowrap">${escapeHtml(rec.time || '--:--')}</span>
+            <span class="font-medium text-white truncate max-w-[130px] text-xs">${escapeHtml(areaName)}</span>
             <span class="font-mono font-bold text-white text-xs flex-shrink-0">${countStr}<span class="text-[10px] font-normal text-textSub ml-0.5">枚</span></span>
             <span class="text-[#243044] text-xs flex-shrink-0">|</span>
             <span class="text-[11px] font-mono flex items-center gap-1 flex-shrink-0 text-textSub">
@@ -1346,8 +1347,8 @@ function renderMainStageRecords(ranking) {
           <div class="flex items-center gap-2">
             ${rankBadgeHtml}
             <div class="flex items-center gap-1.5">
-              <span class="font-bold text-white text-lg font-mono">${item.staffId}</span>
-              ${item.name ? `<span class="text-sm text-[#94A3B8] font-normal">(${item.name})</span>` : ''}
+              <span class="font-bold text-white text-lg font-mono">${escapeHtml(item.staffId || '--')}</span>
+              ${item.name ? `<span class="text-sm text-[#94A3B8] font-normal">(${escapeHtml(item.name)})</span>` : ''}
             </div>
           </div>
           <div class="text-right sm:hidden flex-shrink-0">
@@ -1405,13 +1406,13 @@ function renderMainStageStocks(stocks) {
   let html = '<div class="space-y-1.5">';
   sortedStocks.forEach(s => {
     const staffBadgeHtml = s.staffId
-      ? `<span class="h-7 px-2 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-bold text-xs text-brand flex-shrink-0">${s.staffId}</span>`
+      ? `<span class="h-7 px-2 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-bold text-xs text-brand flex-shrink-0">${escapeHtml(s.staffId)}</span>`
       : '';
 
     html += `
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] gap-1.5 sm:gap-2 transition-colors">
         <div class="flex items-center justify-between w-full sm:w-auto gap-2">
-          <div class="font-semibold text-base sm:text-lg text-white truncate min-w-0 sm:w-64 sm:flex-none">${s.location || '保管拠点'}</div>
+          <div class="font-semibold text-base sm:text-lg text-white truncate min-w-0 sm:w-64 sm:flex-none">${escapeHtml(s.location || '保管拠点')}</div>
           <div class="text-right sm:hidden flex-shrink-0">
             <span class="text-base sm:text-lg font-bold font-mono text-white">${(Number(s.count) || 0).toLocaleString()}</span>
             <span class="text-xs text-[#94A3B8] font-normal ml-0.5">枚</span>
@@ -1419,9 +1420,9 @@ function renderMainStageStocks(stocks) {
         </div>
         <div class="flex items-center gap-2 text-xs sm:text-sm text-[#94A3B8] flex-1 min-w-0">
           ${staffBadgeHtml}
-          <span class="font-medium text-white text-xs sm:text-sm truncate max-w-[130px]">${s.staffName || (s.staffId ? '' : '未設定')}</span>
+          <span class="font-medium text-white text-xs sm:text-sm truncate max-w-[130px]">${escapeHtml(s.staffName || (s.staffId ? '' : '未設定'))}</span>
           <span class="text-[#243044] text-xs">|</span>
-          <span class="text-textSub text-xs">更新: <span class="font-mono">${s.updatedAt || '--'}</span></span>
+          <span class="text-textSub text-xs">更新: <span class="font-mono">${escapeHtml(s.updatedAt || '--')}</span></span>
         </div>
         <div class="hidden sm:block text-right flex-shrink-0">
           <span class="text-lg font-bold font-mono text-white">${(Number(s.count) || 0).toLocaleString()}</span>
@@ -1458,11 +1459,11 @@ function renderMainStageRoster(roster) {
     html += `
       <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] gap-2 transition-colors">
         <div class="flex items-center gap-2.5 min-w-0 flex-1 sm:w-64 sm:flex-none">
-          <span class="h-7 px-2 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-bold text-xs text-brand flex-shrink-0">${r.id || ''}</span>
-          <span class="font-semibold text-base sm:text-lg text-white truncate">${r.name || ''}</span>
+          <span class="h-7 px-2 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-bold text-xs text-brand flex-shrink-0">${escapeHtml(r.id || '')}</span>
+          <span class="font-semibold text-base sm:text-lg text-white truncate">${escapeHtml(r.name || '')}</span>
         </div>
         <div class="flex items-center gap-2 text-xs sm:text-sm text-[#94A3B8] flex-1 min-w-0">
-          <span class="text-xs text-[#94A3B8]">登録: <span class="font-mono text-white/90">${formattedDate}</span></span>
+          <span class="text-xs text-[#94A3B8]">登録: <span class="font-mono text-white/90">${escapeHtml(formattedDate)}</span></span>
         </div>
         <div class="text-right flex-shrink-0">
           <span class="text-xs text-[#94A3B8] font-medium px-2.5 py-1 rounded bg-[#94A3B8]/10 border border-[#94A3B8]/20">有効</span>
@@ -1496,10 +1497,10 @@ function renderMainStageRequests(requests) {
     }
 
     const requesterBadge = req.requesterId
-      ? `<span class="h-7 px-1.5 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-bold text-xs text-brand flex-shrink-0">${req.requesterId}</span>`
+      ? `<span class="h-7 px-1.5 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-bold text-xs text-brand flex-shrink-0">${escapeHtml(req.requesterId)}</span>`
       : '';
     const holderBadge = req.holderId
-      ? `<span class="h-7 px-1.5 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-bold text-xs text-brand flex-shrink-0">${req.holderId}</span>`
+      ? `<span class="h-7 px-1.5 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-bold text-xs text-brand flex-shrink-0">${escapeHtml(req.holderId)}</span>`
       : '';
 
     html += `
@@ -1508,25 +1509,25 @@ function renderMainStageRequests(requests) {
         <div class="flex items-center gap-2 min-w-0 w-full sm:w-72 sm:flex-none">
           <div class="flex items-center gap-1.5 min-w-0 flex-1">
             ${requesterBadge}
-            <span class="font-semibold text-white truncate text-sm sm:text-base">${req.requesterName || ''}</span>
+            <span class="font-semibold text-white truncate text-sm sm:text-base">${escapeHtml(req.requesterName || '')}</span>
           </div>
           <span class="text-xs text-[#94A3B8] flex-shrink-0">➔</span>
           <div class="flex items-center gap-1.5 min-w-0 flex-1">
             ${holderBadge}
-            <span class="font-semibold text-white truncate text-sm sm:text-base">${req.holderName || ''}</span>
+            <span class="font-semibold text-white truncate text-sm sm:text-base">${escapeHtml(req.holderName || '')}</span>
           </div>
         </div>
 
         <!-- Column 2: 連絡方法・連絡先 -->
         <div class="flex items-center gap-2 text-xs sm:text-sm text-[#94A3B8] flex-1 min-w-0 ml-0 sm:ml-6">
           <span class="text-xs text-[#94A3B8] truncate">
-            連絡先: ${req.contactMethod ? `<span class="text-[#94A3B8]/80">[${req.contactMethod}]</span> ` : ''}<span class="text-white/90 font-mono">${req.contactValue || '--'}</span>
+            連絡先: ${req.contactMethod ? `<span class="text-[#94A3B8]/80">[${escapeHtml(req.contactMethod)}]</span> ` : ''}<span class="text-white/90 font-mono">${escapeHtml(req.contactValue || '--')}</span>
           </span>
         </div>
 
         <!-- Column 3: 日時 -->
         <div class="text-right flex-shrink-0">
-          <span class="font-mono text-xs text-[#94A3B8]">${formattedDate}</span>
+          <span class="font-mono text-xs text-[#94A3B8]">${escapeHtml(formattedDate)}</span>
         </div>
       </div>
     `;
