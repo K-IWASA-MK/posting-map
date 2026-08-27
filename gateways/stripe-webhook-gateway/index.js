@@ -14,7 +14,59 @@ if (!endpointSecret || !INTERNAL_GATEWAY_TOKEN || !GAS_WEBAPP_URL || !process.en
 
 // In-memory idempotency cache (Note: Resets on Cloud Run instance restart.
 // Full persistent idempotency is handled by GAS).
-const seenEvents = new Set();
+const EVENT_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const EVENT_CACHE_MAX_SIZE = 10000;
+const seenEvents = new Map();
+
+/**
+ * 有効期限切れ (TTL超過) および上限件数超過エントリの削除
+ * JavaScript Map は挿入順を保持するため、先頭から順に走査・削除 (FIFO)
+ * @param {number} now 
+ */
+function pruneSeenEvents(now = Date.now()) {
+  // 1. TTL 超過エントリを古い順に削除
+  for (const [eventId, seenAt] of seenEvents) {
+    if (now - seenAt >= EVENT_CACHE_TTL_MS) {
+      seenEvents.delete(eventId);
+    } else {
+      break; // 挿入順のため、以降のエントリはこれより新しい
+    }
+  }
+
+  // 2. 最大件数超過時、最古のエントリから削除 (FIFO)
+  while (seenEvents.size > EVENT_CACHE_MAX_SIZE) {
+    const oldestEventId = seenEvents.keys().next().value;
+    if (oldestEventId === undefined) {
+      break;
+    }
+    seenEvents.delete(oldestEventId);
+  }
+}
+
+/**
+ * Event ID の重複チェック & キャッシュ登録
+ * 重複時は Map の順序を崩さないよう更新・再挿入を行わない
+ * @param {string} eventId 
+ * @returns {boolean} 重複している場合は true、新規の場合は false
+ */
+function isDuplicateEvent(eventId) {
+  const now = Date.now();
+  const seenAt = seenEvents.get(eventId);
+
+  // 重複ヒット時: TTL 内なら true を返し、順序を維持（delete/set しない）
+  if (seenAt !== undefined) {
+    if (now - seenAt < EVENT_CACHE_TTL_MS) {
+      return true;
+    }
+    // TTL 超過していた場合は古いエントリを削除して再登録へ
+    seenEvents.delete(eventId);
+  }
+
+  // 新規登録時のみ set を行う (FIFO の最古順を正確に保つ)
+  seenEvents.set(eventId, now);
+  pruneSeenEvents(now);
+  return false;
+}
 
 /**
  * GAS 302 リダイレクト先 URL の厳格なバリデーション (SSRF / Open Redirect 防御)
@@ -70,11 +122,10 @@ app.post('/webhook', express.raw({type: 'application/json'}), async (req, res) =
 
   const eventId = event.id;
   
-  if (seenEvents.has(eventId)) {
+  if (isDuplicateEvent(eventId)) {
     console.log(`[${gatewayRequestId}] Ignored: Idempotency cache hit for ${eventId}`);
     return res.status(200).json({ received: true });
   }
-  seenEvents.add(eventId);
   
   console.log(`[${gatewayRequestId}] Received valid Stripe event: ${eventId}`);
 
