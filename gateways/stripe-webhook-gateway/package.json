@@ -1,0 +1,19 @@
+{
+  "name": "stripe-webhook-gateway",
+  "version": "1.0.0",
+  "description": "Cloud Run Gateway for POSTING MAP Stripe Webhooks",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "stripe": "^13.0.0",
+    "axios": "^1.4.0",
+    "uuid": "^9.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
