@@ -12,7 +12,19 @@ GCPコンソールの「Security > Secret Manager」にて以下のシークレ�
 1. `STRIPE_WEBHOOK_SECRET` (Stripe Dashboardから取得したWebhook署名シークレット)
 2. `INTERNAL_GATEWAY_TOKEN` (任意の安全なランダム文字列)
 3. `GAS_WEBAPP_URL` (POSTING MAPのGASデプロイURL `https://script.google.com/macros/s/.../exec`)
-※ GatewayがSecretへアクセスできるよう、Cloud Runのサービスアカウントに `Secret Manager Secret Accessor` ロールを付与してください。
+### 1.5. 専用 Service Account の作成と権限付与（最小権限の原則）
+Gateway の実行専用 Service Account を作成し、Secret Manager 読み取り権限のみを付与します。
+
+```bash
+# 1. 専用 SA の作成
+gcloud iam service-accounts create stripe-gateway-sa \
+  --display-name="Stripe Webhook Gateway Service Account"
+
+# 2. Secret Manager 読み取り権限のみ付与
+gcloud projects add-iam-policy-binding [PROJECT_ID] \
+  --member="serviceAccount:stripe-gateway-sa@[PROJECT_ID].iam.gserviceaccount.com" \
+  --role="roles/secretmanager.secretAccessor"
+```
 
 ### 2. Cloud Run へのデプロイ
 `gcloud` コマンドが使用可能な環境で以下を実行します。
@@ -23,7 +35,8 @@ gcloud run deploy stripe-webhook-gateway \
   --source . \
   --region asia-northeast1 \
   --allow-unauthenticated \
-  --set-secrets=STRIPE_WEBHOOK_SECRET=STRIPE_WEBHOOK_SECRET:latest,INTERNAL_GATEWAY_TOKEN=INTERNAL_GATEWAY_TOKEN:latest,GAS_WEBAPP_URL=GAS_WEBAPP_URL:latest
+  --service-account="stripe-gateway-sa@[PROJECT_ID].iam.gserviceaccount.com" \
+  --set-secrets=STRIPE_WEBHOOK_SECRET=STRIPE_WEBHOOK_SECRET:latest,INTERNAL_GATEWAY_TOKEN=INTERNAL_GATEWAY_TOKEN:latest,GAS_WEBAPP_URL=GAS_WEBAPP_URL:latest,STRIPE_SECRET_KEY=STRIPE_SECRET_KEY:latest
 ```
 
 ※ `.env` ファイル等を用いて環境変数として渡すことも可能ですが、本番環境ではSecret Managerの使用を推奨します。
