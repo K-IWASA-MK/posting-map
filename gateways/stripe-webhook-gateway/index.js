@@ -16,6 +16,44 @@ if (!endpointSecret || !INTERNAL_GATEWAY_TOKEN || !GAS_WEBAPP_URL || !process.en
 // Full persistent idempotency is handled by GAS).
 const seenEvents = new Set();
 
+/**
+ * GAS 302 リダイレクト先 URL の厳格なバリデーション (SSRF / Open Redirect 防御)
+ * @param {string} redirectUrl 
+ * @returns {URL|null} 有効な場合はパースされた URL オブジェクト、無効な場合は null
+ */
+function validateGasRedirectUrl(redirectUrl) {
+  if (!redirectUrl || typeof redirectUrl !== 'string') {
+    return null;
+  }
+  try {
+    const parsed = new URL(redirectUrl);
+    
+    // 1. HTTPS プロトコルのみ許可
+    if (parsed.protocol !== 'https:') {
+      return null;
+    }
+    
+    // 2. ホスト名の完全一致検証 (script.googleusercontent.com)
+    if (parsed.hostname !== 'script.googleusercontent.com') {
+      return null;
+    }
+    
+    // 3. ポート番号検証 (デフォルト 443 のみ)
+    if (parsed.port !== '' && parsed.port !== '443') {
+      return null;
+    }
+    
+    // 4. ユーザー情報 (userinfo) の禁止
+    if (parsed.username !== '' || parsed.password !== '') {
+      return null;
+    }
+    
+    return parsed;
+  } catch (err) {
+    return null;
+  }
+}
+
 // 1. Receive Raw Body for Signature Verification
 app.post('/webhook', express.raw({type: 'application/json'}), async (req, res) => {
   const sig = req.headers['stripe-signature'];
@@ -74,11 +112,21 @@ app.post('/webhook', express.raw({type: 'application/json'}), async (req, res) =
         console.error(`[${gatewayRequestId}] 302 response missing Location header`);
         return res.status(500).json({ error: 'Missing Location header in GAS 302 redirect' });
       }
-      console.log(`[${gatewayRequestId}] Handling 302 redirect to: ${redirectUrl}`);
+
+      // SSRF / Open Redirect 防御: URL を検証
+      const parsedRedirectUrl = validateGasRedirectUrl(redirectUrl);
+      if (!parsedRedirectUrl) {
+        console.error(`[${gatewayRequestId}] Invalid or disallowed redirect URL from GAS`);
+        return res.status(500).json({ error: 'Invalid redirect URL from GAS' });
+      }
+
+      console.log(`[${gatewayRequestId}] Handling 302 redirect to: ${parsedRedirectUrl.origin}${parsedRedirectUrl.pathname}`);
       
       try {
-        const finalResponse = await axios.get(redirectUrl, {
-          timeout: 15000 // 15 seconds timeout
+        const finalResponse = await axios.get(parsedRedirectUrl.toString(), {
+          timeout: 15000, // 15 seconds timeout
+          maxRedirects: 0, // 多段リダイレクトを遮断
+          validateStatus: status => status === 200
         });
         console.log(`[${gatewayRequestId}] GAS Response: ${JSON.stringify(finalResponse.data)}`);
         
