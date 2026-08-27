@@ -70,6 +70,10 @@ app.post('/webhook', express.raw({type: 'application/json'}), async (req, res) =
 
     if (response.status === 302) {
       const redirectUrl = response.headers.location;
+      if (!redirectUrl) {
+        console.error(`[${gatewayRequestId}] 302 response missing Location header`);
+        return res.status(500).json({ error: 'Missing Location header in GAS 302 redirect' });
+      }
       console.log(`[${gatewayRequestId}] Handling 302 redirect to: ${redirectUrl}`);
       
       try {
@@ -91,11 +95,8 @@ app.post('/webhook', express.raw({type: 'application/json'}), async (req, res) =
       }
       
     } else {
-      console.log(`[${gatewayRequestId}] No redirect from GAS? Status: ${response.status}`);
-      const bodyStr = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
-      console.log(`[${gatewayRequestId}] GAS Response body: ${bodyStr ? bodyStr.substring(0,200) : ''}`);
-      require('fs').writeFileSync('gas_error.html', bodyStr);
-      return res.status(200).json({ received: true });
+      console.error(`[${gatewayRequestId}] Unexpected response status from GAS: ${response.status}`);
+      return res.status(500).json({ error: 'Unexpected response from GAS' });
     }
 
   } catch (error) {

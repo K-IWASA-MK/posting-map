@@ -333,9 +333,9 @@ function handleStripeWebhook(payload, e) {
   const gatewayRequestId = gateway.gatewayRequestId || "N/A";
   
   const props = PropertiesService.getScriptProperties();
-  const internalToken = props.getProperty("INTERNAL_GATEWAY_TOKEN") || "test-token-123";
+  const internalToken = props.getProperty("INTERNAL_GATEWAY_TOKEN");
   
-  if (!internalToken) {
+  if (!internalToken || typeof internalToken !== 'string' || internalToken.trim() === '') {
     Logger.log("INTERNAL_GATEWAY_TOKEN not configured.");
     return { success: false, error: "Configuration Error" };
   }
@@ -792,4 +792,3 @@ function setPinInProgress(data) {
     return { success: false, message: e.toString() };
   }
 }
-// force push to remove temp_set_token
