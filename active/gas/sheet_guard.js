@@ -38,7 +38,8 @@ function getProtectedSheetSet() {
     "初めての方「使い方ガイド」",
     "📖 らくらくマニュアル",
     "らくらくマニュアル",
-    "📄 活動報告書"
+    "📄 活動報告書",
+    "契約管理"
   ];
   staticProtected.forEach(name => protectedSheetCache.add(name));
 

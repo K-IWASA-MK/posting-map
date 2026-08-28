@@ -337,6 +337,12 @@ function checkEndOfMonthAndReset() {
 
   // 1日になった日付（午前0時〜1時頃）に実行された場合のみ処理
   if (now.getDate() === 1) {
+    // 【POSTING MAP Stripe Integration】
+    // 月末経過直後の毎月1日に、前月未払いのユーザーをSUSPENDEDへ変更する
+    if (typeof checkMonthlyPaymentStatus === 'function') {
+      checkMonthlyPaymentStatus();
+    }
+
     const props = PropertiesService.getScriptProperties();
     const disableRollover = props.getProperty("DISABLE_ROLLOVER") === "true";
 
