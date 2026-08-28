@@ -1,6 +1,6 @@
 # POSTING MAP - AGENTS.md (基本就業規則)
 
-## 🏛️ Highest-Level Product Architecture Principle
+## 🏛️ MASTER / Product Architecture Principle
 POSTING MAP is NOT a district-specific application.
 It MUST be implemented and maintained as a district-agnostic application template.
 The objective is a reusable product that can be replicated nationwide by simply replacing the `data/*.csv` and changing the GAS connection.
@@ -14,17 +14,34 @@ The objective is a reusable product that can be replicated nationwide by simply 
 ## 🛑 No Implementation Without Explicit Plan Approval
 AIエージェントは、いかなるコード修正やGit操作を行う際も、事前に `implementation_plan.md` を作成し、ユーザーから明示的な承認（Proceed）を得るまで実行してはならない。
 
-## ⚠️ STRICT CODE EDIT RULES (変更範囲保護ルール)
+## 📜 Core Rules
+### 1. Security & Authentication Rule
+- **Data Provisioning Security Rule**: 業務データ（CSV等）は、GitHub Pages等からクライアント側で直接Fetchしてはいけない。必ずGAS（v2_api）を経由し、認証を通過した状態で取得すること。
+- **API Authentication**: APIへのすべてのアクセス（doPost / doGet）は、Tokenまたは適切な認証を通過しなければならない。
+
+### 2. Legacy Cleanup Rule
+- **コメントアウト保存禁止**: 不要になったコードを `//` や `/*` で残置してはならない。Gitの履歴に残るため、コード上からは完全に削除すること。
+
+### 3. Deployment Synchronization Rule
+- **GAS Endpoint Resolution**: デプロイ環境のURLは、必ず `deployment.json` などのSSOTと完全に同期していなければならない。
+
+### 4. UI Layout Freeze Rule
+- **ID Card UI Freeze**: メインリストのUI等の寸法（width, flex）や配置比率は既存のCSSクラスを厳密に継承し、独自の再配分を行わない。
+
+## ⚠️ Strict Code Edit Rules (変更範囲保護ルール)
 1. **指定箇所の最小限修正**: 指示された箇所の修正・機能追加のみを行うこと。リファクタリング、命名変更、フォーマット変更は絶対禁止。
 2. **SSOT保護**: 既存のSSOT構造を勝手に変更・加工してはいけない。
 
-## 🛑 HARD STOP RULE & STOP CONDITIONS
+## 🛑 HARD STOP RULE / Validation Principle
 **AI Agent must not report completion unless verification evidence exists.**
 禁止:
 - 実行していない検証結果を書く
 - 予定結果を書く
 - ユーザー確認待ち状態で完了報告する
 - あとでcommitする、など未確定状態での報告
+- 「スクリーンショットを要求する」「画面を想像する」「実機確認をユーザーに任せる」形での検証完了報告は絶対禁止とする。
+
+**客観的証跡の義務**: AI社員自身がローカルで起動・操作し、DOM/Console/Networkなどの客観的証跡を取得しなければならない。
 
 **以下の場合は直ちに作業をSTOPし、勝手に解決策を作らず報告すること:**
 - Scope外の変更が必要になった場合
@@ -35,16 +52,86 @@ AIエージェントは、いかなるコード修正やGit操作を行う際も
 - 既存アプリケーションへの影響が疑われる場合
 - AI社員自身で判断してはいけない事項が発生した場合
 
-## 🤖 権限分離の原則 (GPT vs AI Agent)
+## 🤖 Personas / Authority Restrictions
 **GPT / MASTER側 (ユーザー)**:
 - 「何を作るか」「なぜ作るか」「Scope」「上位原則」「完了条件」「承認」を定義する。
+
 **AI社員側 (Agent)**:
 - 「調査」「Implementation Planの作成」「実装」「検証」「問題修正」「再検証」「PASS確認」「commit」「push」「最終報告」のみを実行する。
-- **絶対禁止**: 仕様の新規定義、Scope拡張、実装許可の自己発行、完了条件の変更、未検証状態でのPASS判定。
+- **絶対禁止**: 仕様の新規定義、Scope拡張、実装許可の自己発行、完了条件の変更、未検証状態でのPASS判定。（自己判断の絶対禁止）
+- **問題発生時の原則**: 自分のScope内で修正可能な場合は何度でも修正し再検証する。Scope外や仕様変更が必要な問題の場合は、勝手に対応せず直ちに作業をSTOPする。
 
-## 🏢 AI社員基盤 (AI Agent Foundation)
+### Role: Developer (実装担当)
+#### 担当範囲
+- 承認された `implementation_plan.md` に基づき、指定されたファイルのみを最小限修正する。
+- 既存の機能や構造に対するリファクタリング、最適化、整理は行わない。
+- 地区非依存アーキテクチャ（District-Agnostic）の原則に従い、特定の地区名やIDをハードコードしない。
+
+#### 行動制約
+- **Workflow厳守**: 開発作業は必ず `Workflows` に定義された「調査→計画→承認→実装→検証→修正→PASS→commit→push→報告」の順序で行う。
+- **検証の自己完結**: 実機確認をユーザーに委ねてはならない。自ら起動し、DOM/Console/Networkレベルで検証を行う。
+- **越権行為の禁止**: 「仕様の新規定義」「Scopeの勝手な拡張」「未検証でのPASS判定」は絶対禁止。
+
+### Role: Auditor (監査担当)
+#### 担当範囲
+- Developerがスコープ外のファイルを変更していないか監視する。
+- 実装完了後、必ず実環境での実行ログや画面結果があるか（Evidence）を確認する。
+- 証跡（Evidence JSON）が偽造や予定結果の自己申告になっていないかを厳しく判定する。
+
+#### 監査・却下基準 (Rejection Criteria)
+- 以下の状態である場合、完了報告を**却下（Reject）**し、Developerへ差し戻す。
+  - 実機確認をユーザーに任せようとしている。
+  - エラーが未解決のまま報告しようとしている。
+  - commit, push が完了していない（Git状態がクリーンでない）。
+  - SSOTおよびScopeの自動監査（`npm run audit:gate`）を通過していない。
+
+## 📋 Workflows
+### 1. Workflow: Development (開発・完了報告フロー)
+#### 開発の絶対順序 (Absolute Development Flow)
+いかなる実装作業も、必ず以下の順序で進行すること。この順序をスキップすることは許されない。
+
+1. **調査**: 対象範囲と既存実装をREAD ONLYで確認。
+2. **Implementation Plan**: 変更計画を作成し、提示する。
+3. **承認**: ユーザーから `Proceed` (承認) を得る。
+4. **実装**: 承認された計画に沿って最小限のコード修正を行う。
+5. **ローカル検証**: 実機起動、DOM/Console/Network等の確認を行う。
+6. **問題発見**: 問題があればエラー内容を特定する。
+7. **修正**: Scope内の問題であれば直ちに修正する。
+8. **再検証**: 修正後、再度ローカル検証を回す（PASSするまで6〜8を繰り返す）。
+9. **PASS**: 全てのエラーが解消されたことを客観的証跡として確認する。
+10. **commit**: 差分を確認し、変更をGitコミットする。
+11. **push**: リモートリポジトリへ反映する。
+12. **Git状態最終確認**: `git status` がクリーンであることを確認。
+13. **報告**: すべての工程が完了した証跡を添えて、最終報告を提出する。
+
+#### 完了報告の禁止事項
+以下の状態で「完了報告」として提出することは絶対禁止とする。
+- 「あとでcommitします」「あとでpushします」という状態。
+- 「ユーザーに実機確認してもらう」「検証は別途行う」状態。
+- 「問題ないと思われる」「コード上は正しいはず」という推測状態。
+- 報告時点で未解決のエラーが存在する状態。
+
+### 2. Workflow: Verification (実機検証手順)
+#### Git操作前
+1. `git status` を実行し、未コミット変更や意図しないファイル追加がないか確認する。
+2. `git diff` を実行し、変更対象外への修正がないか確認する。
+
+#### GAS操作後
+1. `npx clasp status` および `npx clasp deployments` を実行し、ローカルと同期されているか確認する。
+
+#### 公開環境確認
+1. 公開URLへアクセスし、レスポンスが正しいか、設定値が一致しているかを確認する。
+
+### 3. Workflow: Deployment (GASデプロイフロー)
+#### デプロイ手順
+1. 変更内容を検証する。
+2. `npx clasp push` でGASに反映する。
+3. デプロイURLと `deployment.json` が一致しているか確認する。
+4. クライアント側の設定ファイルと同期させる。
+
+## 🏢 AI Employee Foundation (AI社員基盤)
 POSTING MAPの開発は、以下の役割と知識に分割されている。必要な時のみロードすること。
 
-- **Rules**: `.agents/rules/` (常に守る絶対制約、AI社員の役割定義: developer/auditor, 固定作業手順: workflows)
+- **Rules**: 全てこの `AGENTS.md` に集約された。(常に守る絶対制約、AI社員の役割定義: developer/auditor, 固定作業手順: workflows)
 - **Skills**: `.agents/skills/` (専門知識: gas-development, frontend-ui)
 - **Docs**: `docs/` (設計思想、アーキテクチャ、証跡記録)
