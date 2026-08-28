@@ -32,6 +32,34 @@ AIエージェントは、いかなるコード修正やGit操作を行う際も
 1. **指定箇所の最小限修正**: 指示された箇所の修正・機能追加のみを行うこと。リファクタリング、命名変更、フォーマット変更は絶対禁止。
 2. **SSOT保護**: 既存のSSOT構造を勝手に変更・加工してはいけない。
 
+## 🚀 AI Employee Execution Protocol & Verification Gates
+AI社員の作業は、必ず以下の「絶対実行順序」と「Verification Gate」に従う。この順序の省略・逆転・自己判断による短縮は絶対禁止とする。
+
+### 8-Stage Execution Protocol
+1. **Plan**: READ ONLY調査、Scope確定、Implementation Plan作成、完了条件・Verification Plan定義。
+2. **Approve**: MASTER(User)から明示的な `Proceed` を取得。取得前の実装、Commit/Push/Deployは絶対禁止。
+3. **Implement**: 承認されたScopeのみ変更。Scope外変更、仕様の自己定義は禁止。
+4. **Verify**: V1〜V3検証を実施し、客観的Evidenceを取得する。
+   - **V1 Static Verification**: `git diff`, `git diff --check`, Scope確認, 構文/Lint, Dead Code確認。
+   - **V2 Runtime Verification**: 実際の環境/実機でのUI, Console, Network, API, 状態遷移, エラー等の確認。（静的確認のみでのPASS禁止）
+   - **V3 Regression Verification**: 既存機能への副作用がないことの確認。
+5. **Commit Gate**: V1〜V3検証のPASS、Evidence取得、Scope監査（Staged Diff）が完了した場合のみCommitを許可。
+6. **Push Gate**: Commit存在確認、Scope確認、必要な自動監査（Governance Gate等）を通過した場合のみPushを許可。
+7. **Crisp Deployment Gate**: Push完了後、独立工程として実際の稼働環境へのデプロイを実施。
+8. **V4 Deployment Verification**: 実際のデプロイ先での再検証（Runtime起動、対象機能、UI、Console、Network、Regression）。このV4をPASSした後にのみ、最終的なGit確認（HEAD一致、working tree clean）と完了報告（Completion Report）を行える。
+
+### Verification Evidence Requirement
+すべてのVerification（V1〜V4）において、以下の5項目を記録し証明しなければならない。
+- **Test**: 何を確認するか
+- **Expected**: 期待される結果
+- **Actual**: 実際の実行結果
+- **Evidence**: 取得した証跡（Consoleログ、Networkレスポンス、DOM要素など）
+- **Judgment**: PASS / FAIL
+
+### PASSの厳格な定義
+**PASS** とは「対象条件を実際に実行し、期待結果とActual結果を比較し、客観的Evidenceによって成功を確認した状態」のみを指す。
+「問題なさそう」「おそらく動く」「ユーザーが確認すれば分かる」「後で確認する」等の**推測によるPASS判定は絶対禁止**とする。
+
 ## 🛑 HARD STOP RULE / Validation Principle
 **AI Agent must not report completion unless verification evidence exists.**
 禁止:
@@ -43,14 +71,17 @@ AIエージェントは、いかなるコード修正やGit操作を行う際も
 
 **客観的証跡の義務**: AI社員自身がローカルで起動・操作し、DOM/Console/Networkなどの客観的証跡を取得しなければならない。
 
-**以下の場合は直ちに作業をSTOPし、勝手に解決策を作らず報告すること:**
+**以下の場合は直ちに作業をSTOPし、勝手に解決策を作らず報告すること（Commit/Push/Deploy絶対禁止）:**
+- 検証不能、実環境確認不能、必要Evidence取得不能な場合
+- Console Error、Network/API Error、UI異常、Runtime異常が残存する場合
+- Regression影響を否定できない場合
 - Scope外の変更が必要になった場合
-- 仕様が不明確な場合
-- 承認が必要な場合
-- 検証不能、PASS不能な場合
-- Git状態が不明、commit/push不能な場合
+- Git状態が不明、Deployment結果・本番環境状態が不明な場合
+- 仕様変更や権限越権が必要な場合、承認が必要な場合
+- ユーザーへ実機検証を委任する必要がある場合
+- AI自身が推測でPASS判定しようとする状態
 - 既存アプリケーションへの影響が疑われる場合
-- AI社員自身で判断してはいけない事項が発生した場合
+- その他、AI社員自身で判断してはいけない事項が発生した場合
 
 ## 🤖 Personas / Authority Restrictions
 **GPT / MASTER側 (ユーザー)**:
@@ -86,6 +117,9 @@ AIエージェントは、いかなるコード修正やGit操作を行う際も
   - SSOTおよびScopeの自動監査（`npm run audit:gate`）を通過していない。
 
 ## 📋 Workflows
+以下の詳細Workflowは、最上位ルールである「8-Stage Execution Protocol」の具体的な作業手順である。
+13-step Workflowはプロトコルの「Plan 〜 Push」フェーズを詳細化したものであり、この後段に独立工程として「Crisp Deployment」「V4 Deployment Verification」「Git Final Check」「Completion Report」が接続される上位・下位の構造を持つ。
+
 ### 1. Workflow: Development (開発・完了報告フロー)
 #### 開発の絶対順序 (Absolute Development Flow)
 いかなる実装作業も、必ず以下の順序で進行すること。この順序をスキップすることは許されない。
