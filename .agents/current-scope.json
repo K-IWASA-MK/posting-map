@@ -7,6 +7,7 @@
   ".agents/skills/frontend-ui/SKILL.md",
   ".agents/workflows/verification/workflow.md",
   ".agents/workflows/completion-report/workflow.md",
+  ".agents/workflows/development/workflow.md",
   ".agents/workflows/deployment/workflow.md",
   ".agents/rules/architecture-rule.md",
   ".agents/rules/change-scope-enforcement.md",
