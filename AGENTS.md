@@ -45,8 +45,12 @@ AI社員の作業は、必ず以下の「絶対実行順序」と「Verification
    - **V3 Regression Verification**: 既存機能への副作用がないことの確認。
 5. **Commit Gate**: V1〜V3検証のPASS、Evidence取得、Scope監査（Staged Diff）が完了した場合のみCommitを許可。
 6. **Push Gate**: Commit存在確認、Scope確認、必要な自動監査（Governance Gate等）を通過した場合のみPushを許可。
-7. **Crisp Deployment Gate**: Push完了後、独立工程として実際の稼働環境へのデプロイを実施。
-8. **V4 Deployment Verification**: 実際のデプロイ先での再検証（Runtime起動、対象機能、UI、Console、Network、Regression）。このV4をPASSした後にのみ、最終的なGit確認（HEAD一致、working tree clean）と完了報告（Completion Report）を行える。
+7. **Crisp Deployment Gate**: Push完了後、実稼働環境への反映が必要な変更（Deployment対象変更）である場合、独立工程として実際の稼働環境へのデプロイを実施する。実環境への反映を必要としない変更は「Deployment対象外」と明示的に判定・記録すること。対象外であることを根拠なく推測してはならない。
+8. **V4 Deployment Verification**:
+   - **V4成立条件**: Deployment対象なら「実環境で反映を確認した客観的Evidence」、Deployment非対象なら「対象外であることの客観的確認Evidence」を取得し、いずれの場合もそのEvidenceをもってV4 PASSとする。
+   - **重要**: `git status`、`git log`、`Script is already up to date.` 等のGit/Crisp実行結果だけでは、V4 Deployment VerificationのEvidenceとして扱わない。
+   - **Evidence不足の場合**: PASSせず即時HARD STOPし、MASTERへ報告すること。Evidence不足を補うための実装・修正をAIが勝手に開始してはならない。
+   - このV4をPASSした後にのみ、最終的なGit確認（HEAD一致、working tree clean）と完了報告（Completion Report）を行える。
 
 ### Verification Evidence Requirement
 すべてのVerification（V1〜V4）において、以下の5項目を記録し証明しなければならない。
