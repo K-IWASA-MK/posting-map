@@ -1,9 +1,20 @@
 [
-  "active/api/v2_api.js",
-  "active/business/staff/staff_model.js",
-  "active/business/staff/staff_repository.js",
-  "active/business/staff/staff_service.js",
-  "active/dashboard/v2_ui.js",
-  "scripts/operations/index.html",
-  "scripts/operations/manager.js"
+  "AGENTS.md",
+  ".agents/rules/core-rules.md",
+  ".agents/agents/developer/agent.md",
+  ".agents/agents/auditor/agent.md",
+  ".agents/skills/gas-development/SKILL.md",
+  ".agents/skills/frontend-ui/SKILL.md",
+  ".agents/workflows/verification/workflow.md",
+  ".agents/workflows/completion-report/workflow.md",
+  ".agents/workflows/deployment/workflow.md",
+  ".agents/rules/architecture-rule.md",
+  ".agents/rules/change-scope-enforcement.md",
+  ".agents/rules/data-rule.md",
+  ".agents/rules/deployment-rule.md",
+  ".agents/rules/legacy-cleanup-rule.md",
+  ".agents/rules/report-governance-rule.md",
+  ".agents/rules/security-rule.md",
+  ".agents/rules/ui-rule.md",
+  ".agents/rules/verify-first.md"
 ]
