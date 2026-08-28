@@ -45,8 +45,6 @@ AIエージェントは、いかなるコード修正やGit操作を行う際も
 ## 🏢 AI社員基盤 (AI Agent Foundation)
 POSTING MAPの開発は、以下の役割と知識に分割されている。必要な時のみロードすること。
 
-- **Rules**: `.agents/rules/core-rules.md` (常に守る絶対制約)
-- **Agents**: `.agents/agents/` (AI社員の役割定義: developer, auditor)
+- **Rules**: `.agents/rules/` (常に守る絶対制約、AI社員の役割定義: developer/auditor, 固定作業手順: workflows)
 - **Skills**: `.agents/skills/` (専門知識: gas-development, frontend-ui)
-- **Workflows**: `.agents/workflows/` (固定作業手順: verification, completion-report, deployment)
 - **Docs**: `docs/` (設計思想、アーキテクチャ、証跡記録)
