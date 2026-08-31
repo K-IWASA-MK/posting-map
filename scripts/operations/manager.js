@@ -1756,14 +1756,14 @@ function renderMainStageMail(tabIndex = 0) {
   }).join('');
 
   container.innerHTML = `
-    <div class="flex flex-col h-full gap-2 pr-1 overflow-hidden">
+    <div class="flex flex-col h-auto lg:h-full gap-2 pr-1 overflow-visible lg:overflow-hidden">
       <!-- タブセレクター (文字幅フィット・コンパクト左寄せ) -->
       <div class="flex items-center gap-2 flex-shrink-0">
         ${tabsHtml}
       </div>
 
       <!-- メインメール表示カード -->
-      <div class="flex-1 flex flex-col min-h-0 rounded-xl bg-[#131A26] border border-borderNormal p-3 gap-2 overflow-hidden">
+      <div class="flex-none h-auto lg:flex-1 flex flex-col lg:min-h-0 rounded-xl bg-[#131A26] border border-borderNormal p-3 gap-2 overflow-visible lg:overflow-hidden">
 
         <!-- 件名ブロック -->
         <div class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg bg-[#0B1019] border border-borderNormal flex-shrink-0">
@@ -1778,7 +1778,7 @@ function renderMainStageMail(tabIndex = 0) {
         </div>
 
         <!-- 本文ブロック（件名と同じUIヘッダー ＋ 本文領域） -->
-        <div class="flex-1 min-h-0 relative flex flex-col rounded-lg bg-[#0B1019] border border-borderNormal overflow-hidden">
+        <div class="flex-none h-auto lg:flex-1 lg:min-h-0 relative flex flex-col rounded-lg bg-[#0B1019] border border-borderNormal overflow-hidden">
           <div class="px-3 py-1.5 border-b border-borderNormal/60 bg-[#0B1019] flex items-center justify-between flex-shrink-0">
             <span class="text-[11px] font-bold text-textSub">本文:</span>
             <button onclick="copyMailBody(${validIndex})" class="flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#243044]/60 hover:bg-[#33435C] text-white text-xs font-medium border border-borderNormal flex-shrink-0 transition-colors">
@@ -1786,7 +1786,7 @@ function renderMainStageMail(tabIndex = 0) {
               <span>本文をコピー</span>
             </button>
           </div>
-          <pre id="mail-body-content" class="flex-1 p-3 text-xs sm:text-sm text-white/90 font-sans leading-relaxed whitespace-pre-wrap select-all overflow-y-auto overflow-x-hidden min-h-0 lg:overflow-x-auto" style="-webkit-overflow-scrolling: touch;">${escapeHtml(activeTpl.body)}</pre>
+          <pre id="mail-body-content" class="flex-none h-auto lg:flex-1 lg:min-h-0 p-3 text-xs sm:text-sm text-white/90 font-sans leading-relaxed whitespace-pre-wrap break-words select-all overflow-visible lg:overflow-y-auto lg:overflow-x-auto">${escapeHtml(activeTpl.body)}</pre>
         </div>
 
       </div>
