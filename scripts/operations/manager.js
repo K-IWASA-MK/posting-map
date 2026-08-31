@@ -1305,7 +1305,7 @@ function renderMainStageRecords(ranking) {
         const gpsStatus = rec.gpsStatus === "OK" ? "OK" : "NO";
         const photoStatus = rec.photoStatus === "OK" ? "OK" : "NO";
         return `
-          <div class="flex items-center gap-2 px-2.5 py-0.5 rounded bg-[#0B1019] border border-borderNormal text-xs text-white flex-shrink-0">
+          <div class="flex items-center gap-2 px-2.5 py-0.5 rounded bg-[#0B1019] border border-borderNormal text-xs text-white min-w-0 lg:flex-shrink-0">
             <span class="w-1.5 h-1.5 rounded-full bg-statusGreen flex-shrink-0"></span>
             <span class="font-mono text-textSub text-[11px] whitespace-nowrap">${escapeHtml(rec.time || '--:--')}</span>
             <span class="font-medium text-white truncate max-w-[130px] text-xs">${escapeHtml(areaName)}</span>
@@ -1333,16 +1333,16 @@ function renderMainStageRecords(ranking) {
         const pageIndicator = `
           <span class="font-mono text-xs text-textSub whitespace-nowrap ml-1">${validPage + 1}/${totalPages}</span>
         `;
-        recentFeedHtml = `<div class="flex items-center gap-1.5 mx-2 overflow-hidden justify-center flex-1 min-w-0">${prevBtn}${itemsHtml}${nextBtn}${pageIndicator}</div>`;
+        recentFeedHtml = `<div class="flex items-center gap-1.5 mx-2 overflow-hidden justify-center flex-1 min-w-0 w-full lg:w-auto">${prevBtn}${itemsHtml}${nextBtn}${pageIndicator}</div>`;
       } else {
-        recentFeedHtml = `<div class="flex items-center gap-1.5 mx-2 overflow-hidden justify-center flex-1 min-w-0">${itemsHtml}</div>`;
+        recentFeedHtml = `<div class="flex items-center gap-1.5 mx-2 overflow-hidden justify-center flex-1 min-w-0 w-full lg:w-auto">${itemsHtml}</div>`;
       }
     } else {
       recentFeedHtml = `<div class="flex-1"></div>`;
     }
 
     html += `
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] gap-2 transition-colors">
+      <div class="flex flex-col sm:flex-row items-stretch lg:items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] gap-2 transition-colors">
         <div class="flex items-center justify-between w-full sm:w-auto gap-2.5 flex-shrink-0">
           <div class="flex items-center gap-2">
             ${rankBadgeHtml}
