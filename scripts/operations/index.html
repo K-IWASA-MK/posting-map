@@ -18,6 +18,22 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/active/dashboard/config.js"></script>
   <script>
+    // タッチ機能を持つデバイスのみを対象とする
+    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+      document.addEventListener('touchmove', function(e) {
+        // ピンチ操作（2本指以上）の場合
+        if (e.touches && e.touches.length > 1) {
+          // MAP実コンテナ内部のイベントには介入しない
+          if (e.target.closest('#map')) {
+            return;
+          }
+          // MAP以外の領域でのページズームを禁止
+          e.preventDefault();
+        }
+      }, { passive: false });
+    }
+  </script>
+  <script>
     tailwind.config = {
       theme: {
         extend: {
@@ -63,6 +79,20 @@
       background-color: #0B1019;
       color: #E6ECF3;
       font-family: 'Outfit', 'Noto Sans JP', sans-serif;
+    }
+
+    /* ========================================================
+       モバイル端末専用の操作制御 (PC表示には一切影響を与えない)
+       ======================================================== */
+    @media (max-width: 1023px) and (hover: none) and (pointer: coarse) {
+      html, body {
+        overflow-x: hidden;
+        touch-action: pan-y;
+      }
+      /* MAP領域はLeafletの独自ジェスチャー操作を完全保護 */
+      #map {
+        touch-action: none !important;
+      }
     }
 
     /* Custom Scrollbar */
