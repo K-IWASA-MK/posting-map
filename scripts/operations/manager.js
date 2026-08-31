@@ -1786,7 +1786,7 @@ function renderMainStageMail(tabIndex = 0) {
               <span>本文をコピー</span>
             </button>
           </div>
-          <pre id="mail-body-content" class="flex-1 p-3 text-xs sm:text-sm text-white/90 font-sans leading-relaxed whitespace-pre-wrap select-all overflow-y-auto">${escapeHtml(activeTpl.body)}</pre>
+          <pre id="mail-body-content" class="flex-1 p-3 text-xs sm:text-sm text-white/90 font-sans leading-relaxed whitespace-pre-wrap select-all overflow-y-auto overflow-x-hidden min-h-0 lg:overflow-x-auto" style="-webkit-overflow-scrolling: touch;">${escapeHtml(activeTpl.body)}</pre>
         </div>
 
       </div>
