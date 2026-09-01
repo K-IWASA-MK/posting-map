@@ -33,5 +33,9 @@
   "scripts/sandbox/test_settings_height.js",
   "scripts/sandbox/test_settings_height2.js",
   "scripts/sandbox/test_webkit.js",
-  "scripts/sandbox/verify_liff_integration.js"
+  "scripts/sandbox/verify_liff_integration.js",
+  "package.json",
+  "package-lock.json",
+  "tests/e2e/server.js",
+  "tests/e2e/run_regression.js"
 ]
