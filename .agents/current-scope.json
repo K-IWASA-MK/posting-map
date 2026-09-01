@@ -17,5 +17,21 @@
   ".agents/rules/report-governance-rule.md",
   ".agents/rules/security-rule.md",
   ".agents/rules/ui-rule.md",
-  ".agents/rules/verify-first.md"
+  ".agents/rules/verify-first.md",
+  "active/gas/v2_deployment_foundation.js",
+  "scratch/verify_overlay_button.mjs",
+  "scripts/sandbox/analyze_diagnostic.py",
+  "scripts/sandbox/analyze_screenshot.py",
+  "scripts/sandbox/replace_config.py",
+  "scripts/sandbox/test_debug.js",
+  "scripts/sandbox/test_layout_metrics.js",
+  "scripts/sandbox/test_live.js",
+  "scripts/sandbox/test_overlay.js",
+  "scripts/sandbox/test_overlay2.js",
+  "scripts/sandbox/test_repro.js",
+  "scripts/sandbox/test_screenshot.js",
+  "scripts/sandbox/test_settings_height.js",
+  "scripts/sandbox/test_settings_height2.js",
+  "scripts/sandbox/test_webkit.js",
+  "scripts/sandbox/verify_liff_integration.js"
 ]
