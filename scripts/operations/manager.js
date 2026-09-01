@@ -1337,9 +1337,21 @@ function renderMainStageRecords(ranking) {
         const pageIndicator = `
           <span class="font-mono text-xs text-textSub whitespace-nowrap ml-1">${validPage + 1}/${totalPages}</span>
         `;
-        recentFeedHtml = `<div class="flex items-center gap-1.5 mx-2 overflow-hidden justify-center flex-1 min-w-0 w-full lg:w-auto">${prevBtn}${itemsHtml}${nextBtn}${pageIndicator}</div>`;
+        recentFeedHtml = `
+          <div class="flex items-center mx-2 overflow-hidden flex-1 min-w-0 w-full lg:w-auto">
+            <div class="flex-1 flex justify-end min-w-0 gap-1.5">${prevBtn}</div>
+            <div class="flex-shrink-0 flex items-center mx-1.5">${itemsHtml}</div>
+            <div class="flex-1 flex justify-start items-center gap-1.5 min-w-0">${nextBtn}${pageIndicator}</div>
+          </div>
+        `;
       } else {
-        recentFeedHtml = `<div class="flex items-center gap-1.5 mx-2 overflow-hidden justify-center flex-1 min-w-0 w-full lg:w-auto">${itemsHtml}</div>`;
+        recentFeedHtml = `
+          <div class="flex items-center mx-2 overflow-hidden flex-1 min-w-0 w-full lg:w-auto">
+            <div class="flex-1 flex justify-end min-w-0 gap-1.5"></div>
+            <div class="flex-shrink-0 flex items-center mx-1.5">${itemsHtml}</div>
+            <div class="flex-1 flex justify-start items-center gap-1.5 min-w-0"></div>
+          </div>
+        `;
       }
     } else {
       recentFeedHtml = `<div class="flex-1"></div>`;
