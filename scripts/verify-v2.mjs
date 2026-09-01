@@ -29,6 +29,14 @@ async function runVerification() {
     // Wait for the app to initialize
     await page.waitForTimeout(5000);
 
+    console.log('Clicking mail tab...');
+    await page.evaluate(() => {
+      const mailTab = document.getElementById('nav-mail');
+      if (mailTab) mailTab.click();
+    });
+    
+    await page.waitForTimeout(2000);
+
     const screenshotPath = '/Users/katsujiiwasa/.gemini/antigravity-ide/brain/1c439a69-baf3-4df1-837e-90453333a7f1/scratch/verification-result.png';
     await page.screenshot({ path: screenshotPath, fullPage: true });
     console.log(`Screenshot saved to ${screenshotPath}`);

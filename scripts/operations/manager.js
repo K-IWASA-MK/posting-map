@@ -1714,15 +1714,15 @@ function renderMainStageMail(tabIndex = 0) {
   const container = document.getElementById('main-stage-mail-content');
   if (!container) return;
 
-  const districtName = (typeof window !== 'undefined' && window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.districtName);
+  const districtName = DashboardState.summary?.districtName;
   const liffId = (typeof window !== 'undefined' && window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.line && window.PMS_CLIENT_CONFIG.line.liffId);
 
   if (!districtName || typeof districtName !== 'string' || !districtName.trim()) {
     container.innerHTML = `
       <div class="flex-1 flex flex-col items-center justify-center p-8 rounded-xl bg-[#131A26] border border-statusRed/50 text-center gap-3">
         <span class="text-3xl">⚠️</span>
-        <div class="font-bold text-statusRed text-base">【地区設定エラー】PMS_CLIENT_CONFIG.districtName が未設定です</div>
-        <p class="text-xs text-textSub">config.js の districtName を確認してください。</p>
+        <div class="font-bold text-statusRed text-base">【地区設定エラー】地区名が取得できませんでした</div>
+        <p class="text-xs text-textSub">アプリからの初期データ取得に失敗しています。</p>
       </div>
     `;
     DashboardState.currentMailTemplates = [];
@@ -1960,13 +1960,7 @@ function setSyncStatus(isLive) {
  */
 function generateRecordsReportPdfHtml(state) {
   const s = state || {};
-  const branchLabel = (
-    s.branchLabel ||
-    s.deploymentConfig?.branchLabel ||
-    (typeof window !== 'undefined' && window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.districtName) ||
-    s.summary?.districtName ||
-    '支部'
-  ).trim();
+  const branchLabel = (s.summary?.districtName || '支部').trim();
 
   // 出力日時
   const now = new Date();
@@ -2550,13 +2544,7 @@ function formatCsvField(val) {
  */
 function generateRecordsCsv(state) {
   const s = state || {};
-  const branchLabel = (
-    s.branchLabel ||
-    s.deploymentConfig?.branchLabel ||
-    (typeof window !== 'undefined' && window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.districtName) ||
-    s.summary?.districtName ||
-    '支部'
-  ).trim();
+  const branchLabel = (s.summary?.districtName || '支部').trim();
 
   // 出力日時
   const now = new Date();
@@ -2691,13 +2679,7 @@ function downloadRecordsCsv() {
   const hh = String(now.getHours()).padStart(2, '0');
   const min = String(now.getMinutes()).padStart(2, '0');
 
-  const branchLabel = (
-    DashboardState.branchLabel ||
-    DashboardState.deploymentConfig?.branchLabel ||
-    (typeof window !== 'undefined' && window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.districtName) ||
-    DashboardState.summary?.districtName ||
-    '支部'
-  ).trim();
+  const branchLabel = (DashboardState.summary?.districtName || '支部').trim();
 
   const fileName = `${branchLabel}_配布実績_${yyyy}${mm}${dd}_${hh}${min}.csv`;
 
