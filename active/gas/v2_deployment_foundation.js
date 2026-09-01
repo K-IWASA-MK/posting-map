@@ -355,17 +355,17 @@ function verifyDistrictDeployment(e) {
       const newSsFile = templateFile.makeCopy(`${districtId} v1`);
       const newSsId = newSsFile.getId();
 
-      // Move to 03_BRANCH folder in Drive (1EQQqWbtyF7iMd7Fk-WnUwWiAGB4MdIdN or target mie03 folder)
+      // Move to 03_BRANCH folder in Drive
       try {
         const branchRootFolder = DriveApp.getFolderById("1EQQqWbtyF7iMd7Fk-WnUwWiAGB4MdIdN");
-        let mieFolder;
-        const mieFolders = branchRootFolder.getFoldersByName(districtId);
-        if (mieFolders.hasNext()) {
-          mieFolder = mieFolders.next();
+        let districtFolder;
+        const districtFolders = branchRootFolder.getFoldersByName(districtId);
+        if (districtFolders.hasNext()) {
+          districtFolder = districtFolders.next();
         } else {
-          mieFolder = branchRootFolder.createFolder(districtId);
+          districtFolder = branchRootFolder.createFolder(districtId);
         }
-        newSsFile.moveTo(mieFolder);
+        newSsFile.moveTo(districtFolder);
       } catch (e) {
         Logger.log("Folder move warning: " + e.message);
       }
@@ -714,16 +714,6 @@ function verifyDistrictDeployment(e) {
   if (params.auditPostalOrder === "true" || params.auditPostalOrder === true) {
     try {
       const ss = getSS();
-      const miegunSheet = ss.getSheetByName("三重郡");
-      let miegunRows = [];
-      if (miegunSheet && miegunSheet.getLastRow() >= 2) {
-        const vals = miegunSheet.getRange(2, 1, miegunSheet.getLastRow() - 1, 2).getValues();
-        miegunRows = vals.map((r, idx) => ({
-          row: idx + 2,
-          address: r[0],
-          mapFormula: r[1]
-        }));
-      }
 
       // 抽出結果（extractDistrictAddresses）の郵便番号順序チェック
       const items = extractDistrictAddresses(ss.getName());
@@ -745,23 +735,10 @@ function verifyDistrictDeployment(e) {
         }
       }
 
-      // 抽出結果のうち、特定の市町村（三重郡など）に関する監査
-      // （※三重郡がシートとして存在する場合のみ監査する）
-      const miegunExtracted = items.filter(item => item.city === "三重郡" || (item.city && item.city.startsWith("三重郡")));
-      const miegunPostalList = miegunExtracted.map((item, idx) => ({
-        index: idx + 1,
-        postalCode: item.postalCode,
-        address: item.address
-      }));
-
       return {
         success: true,
         isExtractedAscending: isExtractedAscending,
-        nonAscendingPairs: nonAscendingPairs,
-        miegunSheetRowsCount: miegunRows.length,
-        miegunSheetRows: miegunRows,
-        miegunExtractedCount: miegunPostalList.length,
-        miegunExtractedPostalList: miegunPostalList
+        nonAscendingPairs: nonAscendingPairs
       };
     } catch (err) {
       return {

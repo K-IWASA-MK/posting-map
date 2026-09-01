@@ -50,7 +50,7 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`========================================================`);
   console.log(`🚀 POSTING MAP Local Server Running:`);
-  console.log(`   👉 Dashboard: http://localhost:${PORT}/active/dashboard/index.html?client=MIE-03`);
-  console.log(`   👉 Root URL:  http://localhost:${PORT}/?client=MIE-03`);
+  console.log(`   👉 Dashboard: http://localhost:${PORT}/active/dashboard/index.html`);
+  console.log(`   👉 Root URL:  http://localhost:${PORT}/`);
   console.log(`========================================================`);
 });

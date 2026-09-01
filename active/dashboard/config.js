@@ -15,9 +15,7 @@ window.PMS_CLIENT_CONFIG = {
   },
   staticMaster: {
     addressCsvFilename: "address_master.csv",
-    boundariesGeojsonFilename: "area_master.geojson",
-    mapDefaultCenter: [35.0641, 136.6200],
-    mapDefaultZoom: 11
+    boundariesGeojsonFilename: "boundaries.geojson"
   },
   line: {
     liffId: "2010941735-GRLuqPic"

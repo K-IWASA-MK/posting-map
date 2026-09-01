@@ -24,7 +24,7 @@ async function runVerification() {
 
   try {
     console.log('Navigating to dashboard...');
-    await page.goto('http://localhost:3000/active/dashboard/?client=MIE-03', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:3000/active/dashboard/', { waitUntil: 'networkidle' });
     
     // Wait for the app to initialize
     await page.waitForTimeout(5000);

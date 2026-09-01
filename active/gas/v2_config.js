@@ -83,20 +83,18 @@ function deepMerge(base, override) {
   return result;
 }
 
-function getConfig(tenantId = "DEFAULT") {
+function getConfig() {
   const store = loadConfigStore();
-  return deepMerge(
-    store.DEFAULT,
-    store[tenantId] || {}
-  );
+  // 地区固有の設定合成(tenantId)を廃止。常にDEFAULT(システム共通)を返す。
+  return store.DEFAULT || {};
 }
 
 // ==========================================
 // GLOBAL ACCESSOR (OS CONFIG)
 // ==========================================
 const CONFIG = {
-  get: function(path, tenantId = "DEFAULT") {
-    const cfg = getConfig(tenantId);
+  get: function(path) {
+    const cfg = getConfig();
     return path.split(".").reduce((obj, key) => obj?.[key], cfg);
   },
   

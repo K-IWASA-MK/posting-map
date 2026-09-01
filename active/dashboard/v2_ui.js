@@ -67,7 +67,7 @@ function setLineTokenHFromUI() {
   const ui = SpreadsheetApp.getUi();
   const response = ui.prompt(
     "LINE配布員用(H)トークン設定",
-    "LINE Developersで取得した『MIE-2/H』の「チャネルアクセストークン（長期）」を貼り付けてください。\n\n※すでに設定済みの場合は上書きされます。\n※空欄のままOKを押すと設定が削除されます。",
+    "LINE Developersで取得した「配布員アプリ用」の「チャネルアクセストークン（長期）」を貼り付けてください。\n\n※すでに設定済みの場合は上書きされます。\n※空欄のままOKを押すと設定が削除されます。",
     ui.ButtonSet.OK_CANCEL
   );
 
@@ -90,7 +90,7 @@ function setLineTokenKFromUI() {
   const ui = SpreadsheetApp.getUi();
   const response = ui.prompt(
     "LINE管理者用(K)トークン設定",
-    "LINE Developersで取得した『MIE-2/K』の「チャネルアクセストークン（長期）」を貼り付けてください。\n\n※すでに設定済みの場合は上書きされます。\n※空欄のままOKを押すと設定が削除されます。",
+    "LINE Developersで取得した「管理者アプリ用」の「チャネルアクセストークン（長期）」を貼り付けてください。\n\n※すでに設定済みの場合は上書きされます。\n※空欄のままOKを押すと設定が削除されます。",
     ui.ButtonSet.OK_CANCEL
   );
 
@@ -112,7 +112,7 @@ function setLineTokenKFromUI() {
 function createRichMenuForHApp() {
   const ui = SpreadsheetApp.getUi();
   const props = PropertiesService.getScriptProperties();
-  const token = props.getProperty("LINE_CHANNEL_ACCESS_TOKEN"); // MIE-2/H のトークン
+  const token = props.getProperty("LINE_CHANNEL_ACCESS_TOKEN"); // 配布員アプリ用のトークン
   const liffId = PropertiesService.getScriptProperties().getProperty("LIFF_ID");
   if (!liffId) {
     throw new Error("LIFF_ID is not configured in Script Properties.");
@@ -775,9 +775,9 @@ function diagnoseProtections() {
  */
 function setupGoogleDriveFolders() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const ssName = ss.getName(); // 例: "MIE-02"
+  const ssName = ss.getName(); // 例: 対象地区名
   const folderNameSuffix = "四日市支部"; // 顧客名
-  const targetFolderName = `${ssName}_${folderNameSuffix}`; // 例: "MIE-02_四日市支部"
+  const targetFolderName = `${ssName}_${folderNameSuffix}`; // 例: "地区名_四日市支部"
   
   // 1. 親フォルダ「POSTING_MAP_SYSTEM」を探す、なければ作成
   let systemFolder;

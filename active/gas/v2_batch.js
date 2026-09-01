@@ -89,7 +89,7 @@ function forceStartBatch() {
   tempSheet.clear();
   tempSheet.getRange(1, 1, 1, 3).setValues([["postal_code", "city_name", "full_address"]]);
 
-  // MIE03_SHEET_GENERATION_RULE.md に準拠: municipality_master.csv (SSOT) の priority 順にソート
+  // SHEET_GENERATION_RULE に準拠: municipality_master.csv (SSOT) の priority 順にソート
   const cityOrderPriority = getMunicipalityOrder();
 
   addresses.sort((a, b) => {
@@ -478,7 +478,7 @@ function sortAllAreaSheetTabs() {
     const sheets = ss.getSheets();
     const systemSheetNames = ["原本", "名簿", "初めての方「使い方ガイド」", "__SYSTEM_CACHE__", "保有チラシ枚数", "管理者ID", "受渡要請履歴", "📄 活動報告書", "📖 らくらくマニュアル"];
 
-    // MIE03_SHEET_GENERATION_RULE.md に準拠: municipality_master.csv (SSOT) の priority 順に整列
+    // SHEET_GENERATION_RULE に準拠: municipality_master.csv (SSOT) の priority 順に整列
     const cityOrderPriority = getMunicipalityOrder();
 
     const areaSheets = [];
