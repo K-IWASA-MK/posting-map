@@ -11,24 +11,19 @@ function aggregateTotalVolumes() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const guideSheet = ss.getSheetByName(CONFIG.get("SHEET_GUIDE"));
 
-  const logs = [];
-  
-  let totalUnitsDone = 0;
-  let grandTotalVolume = 0;
+  // 1. 配布実績サマリーの動的取得 (SSOT)
+  const summary = (typeof SystemSummaryService !== 'undefined')
+    ? SystemSummaryService.getInstance().getSystemSummary()
+    : { total: 0, done: 0, percent: 0 };
 
-  logs.forEach(log => {
-    if (log.actionType === "distribute") {
-      totalUnitsDone++;
-      grandTotalVolume += log.count;
-    }
-  });
+  const totalPoints = summary.total || 0;
+  const totalUnitsDone = summary.done || 0;
+  const progressPercent = totalPoints > 0 ? (totalUnitsDone / totalPoints) * 100 : 0;
 
-  // 進捗率の計算（分母はCONFIG.get("DENOMINATOR_UNITS")を利用、もしくは別途マスタから取得）
-  const denominator = CONFIG.get("DENOMINATOR_UNITS") || 1000; // 安全のためフォールバック
-  const progressPercent = (totalUnitsDone / denominator) * 100;
-
-  // ランキング取得
-  const rankingList = getRankingDataCore().slice(0, 10);
+  // 2. ランキングと総配布枚数の取得
+  const rankingList = getRankingDataCore();
+  const top10Ranking = rankingList.slice(0, 10);
+  const grandTotalVolume = rankingList.reduce((sum, entry) => sum + (entry.count || 0), 0);
 
   if (guideSheet) {
     // 1. 全体進捗表示 (H5セル) - パーセントのみ
@@ -47,7 +42,7 @@ function aggregateTotalVolumes() {
     guideSheet.getRange("M10:O20").clearContent();
     guideSheet.getRange("M9").setValue("🏆 配布枚数ランキング");
 
-    rankingList.forEach((entry, index) => {
+    top10Ranking.forEach((entry, index) => {
       const row = 10 + index;
       guideSheet.getRange(row, 13).setValue(`${index + 1}位`);
       guideSheet.getRange(row, 14).setValue(entry.name);

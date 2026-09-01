@@ -44,6 +44,7 @@
   "active/dashboard/render.js",
   "active/dashboard/v2_ui.js",
   "active/gas/v2_config.js",
+  "active/gas/v2_stats.js",
   "scripts/test_browser_h_app.mjs",
   "tests/dashboard_verification_gate.mjs"
 ]
