@@ -46,5 +46,18 @@
   "active/gas/v2_config.js",
   "active/gas/v2_stats.js",
   "scripts/test_browser_h_app.mjs",
-  "tests/dashboard_verification_gate.mjs"
+  "tests/dashboard_verification_gate.mjs",
+  "docs/audit/temp/app.headers",
+  "docs/audit/temp/app.js",
+  "docs/audit/temp/client-loader.headers",
+  "docs/audit/temp/client-loader.js",
+  "docs/audit/temp/config.headers",
+  "docs/audit/temp/config.js",
+  "docs/audit/temp/index.headers",
+  "docs/audit/temp/index.html",
+  "docs/audit/temp/render.headers",
+  "docs/audit/temp/render.js",
+  "docs/audit/proof.txt",
+  "docs/audit/sm6a_before.txt",
+  "docs/DEVELOPMENT_GUIDE.md"
 ]
