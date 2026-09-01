@@ -908,19 +908,23 @@ function renderLiveFeed(liveRecords) {
       : (rec.townName || rec.cityName || `エリア #${rec.rowId}`);
     const countStr = Number(rec.count || 0).toLocaleString();
 
+    const displayClass = idx === 0 
+      ? 'flex flex-1 lg:flex-initial min-w-0 overflow-hidden lg:overflow-visible lg:flex-shrink-0' 
+      : 'hidden lg:flex lg:flex-shrink-0';
+
     html += `
-      <div class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-[#0B1019] border border-borderNormal text-[11px] text-white min-w-0 lg:flex-shrink-0 ${isFirstNew ? 'live-card-new' : ''}">
+      <div class="items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-[#0B1019] border border-borderNormal text-[11px] text-white ${displayClass} ${isFirstNew ? 'live-card-new' : ''}">
         <span class="w-1.5 h-1.5 rounded-full bg-statusGreen flex-shrink-0"></span>
-        <span class="font-mono text-textSub text-[10px] whitespace-nowrap">${escapeHtml(rec.time || '--:--')}</span>
+        <span class="font-mono text-textSub text-[10px] whitespace-nowrap flex-shrink-0">${escapeHtml(rec.time || '--:--')}</span>
         <span class="font-mono font-bold text-brand text-[11px] flex-shrink-0">${escapeHtml(rec.staffId || '--')}</span>
-        <span class="font-medium text-white truncate min-w-0 max-w-[155px] text-[11px]">${escapeHtml(areaText)}</span>
+        <span class="font-medium text-white truncate min-w-0 flex-1 lg:flex-initial lg:max-w-[155px] text-[11px]">${escapeHtml(areaText)}</span>
         <span class="font-mono font-bold text-white text-[11px] flex-shrink-0">${countStr}<span class="text-[9px] font-normal text-textSub ml-0.5">枚</span></span>
       </div>
     `;
 
     // カード間の矢印デリミタ（最後の要素以外）
     if (idx < latest4.length - 1) {
-      html += `<span class="text-[#243044] text-[11px] flex-shrink-0">➔</span>`;
+      html += `<span class="hidden lg:inline-block text-[#243044] text-[11px] flex-shrink-0">➔</span>`;
     }
   });
 
