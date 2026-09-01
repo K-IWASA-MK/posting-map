@@ -37,5 +37,13 @@
   "package.json",
   "package-lock.json",
   "tests/e2e/server.js",
-  "tests/e2e/run_regression.js"
+  "tests/e2e/run_regression.js",
+  "active/business/area/address_master_service.js",
+  "active/business/gps/gps_service.js",
+  "active/business/system/system_summary_service.js",
+  "active/dashboard/render.js",
+  "active/dashboard/v2_ui.js",
+  "active/gas/v2_config.js",
+  "scripts/test_browser_h_app.mjs",
+  "tests/dashboard_verification_gate.mjs"
 ]

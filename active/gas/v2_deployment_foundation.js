@@ -350,7 +350,7 @@ function verifyDistrictDeployment(e) {
       const TEMPLATE_SS_ID = "14rblnvJH5hkXHU9-9lhZlDaUi-FenuQQ5DWnTP7TbW4";
       const PARENT_FOLDER_ID = "1FyM4wCIqWJovbcsMZ6h9JKFQxhgwciGb"; // 04_STORAGE
       
-      // 1. Copy template Spreadsheet with file title: {districtId} v1 (e.g. MIE-03 v1)
+      // 1. Copy template Spreadsheet with file title: {districtId} v1
       const templateFile = DriveApp.getFileById(TEMPLATE_SS_ID);
       const newSsFile = templateFile.makeCopy(`${districtId} v1`);
       const newSsId = newSsFile.getId();
@@ -1031,7 +1031,7 @@ function verifyDistrictDeployment(e) {
   // Populate extracted district data into spreadsheet using extractDistrictAddresses & exact sheet Gid
   if (params.populateData === "true" || params.populateData === true) {
     try {
-      const targetSsId = params.spreadsheetId || "1xQUvlCaUO103rjSGmdcFQQFkukodG4Dg9mS_teWT7uA";
+      const targetSsId = params.spreadsheetId || (typeof getSS === 'function' && getSS() ? getSS().getId() : (typeof SpreadsheetApp !== 'undefined' && SpreadsheetApp.getActiveSpreadsheet() ? SpreadsheetApp.getActiveSpreadsheet().getId() : ""));
       const targetGid = params.gid || "1893108169";
       const ss = SpreadsheetApp.openById(targetSsId);
       

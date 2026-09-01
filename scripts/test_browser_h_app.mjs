@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer';
+import { chromium } from 'playwright';
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
@@ -52,41 +52,36 @@ async function runTest(url, label) {
   console.log(` URL: ${url}`);
   console.log(`========================================`);
 
-  const browser = await puppeteer.launch({
-    headless: "new",
+  const browser = await chromium.launch({
+    headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
   const page = await browser.newPage();
 
-  await page.setRequestInterception(true);
-  page.on('request', req => {
-    if (req.url().includes('sdk.js')) {
-      req.respond({
-        status: 200,
-        contentType: 'application/javascript',
-        body: `
-          window.liff = {
-            init: () => Promise.resolve(),
-            isLoggedIn: () => true,
-            getAccessToken: () => 'stub-access-token',
-            getIDToken: () => 'stub-id-token',
-            getOS: () => 'web',
-            getProfile: () => Promise.resolve({
-              userId: 'U_IWASA_CEO_OFFICIAL',
-              displayName: 'テスト配布員',
-              pictureUrl: ''
-            })
-          };
-        `
-      });
-    } else {
-      req.continue();
-    }
+  await page.route('**/sdk.js', route => {
+    route.fulfill({
+      status: 200,
+      contentType: 'application/javascript',
+      body: `
+        window.liff = {
+          init: () => Promise.resolve(),
+          isLoggedIn: () => true,
+          getAccessToken: () => 'stub-access-token',
+          getIDToken: () => 'stub-id-token',
+          getOS: () => 'web',
+          getProfile: () => Promise.resolve({
+            userId: 'U_IWASA_CEO_OFFICIAL',
+            displayName: 'テスト配布員',
+            pictureUrl: ''
+          })
+        };
+      `
+    });
   });
 
   // Mock window.liff and set mock user_info in localStorage to bypass login
-  await page.evaluateOnNewDocument(() => {
+  await page.addInitScript(() => {
     localStorage.setItem('user_info', JSON.stringify({
       id: 'STAFF123',
       last: 'テスト',
@@ -129,7 +124,7 @@ async function runTest(url, label) {
 
   const stepResults = {
     lineLogin: false,
-    mie03Load: false,
+    appLoad: false,
     areaList: false,
     areaDetail: false,
     pointList: false,
@@ -141,8 +136,8 @@ async function runTest(url, label) {
   };
 
   try {
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 25000 });
-    stepResults.mie03Load = true;
+    await page.goto(url, { waitUntil: 'networkidle', timeout: 25000 });
+    stepResults.appLoad = true;
     stepResults.lineLogin = true;
 
     // Wait for App shell
@@ -157,11 +152,24 @@ async function runTest(url, label) {
 
     stepResults.areaList = true;
 
-    // Open detail
-    await page.evaluate(async () => {
+    // Open detail for the first rendered city
+    const targetCity = await page.evaluate(async () => {
       if (window.HAppWorkflow && window.HAppWorkflow.openDetail) {
-        await window.HAppWorkflow.openDetail('四日市市');
+        let cityName = null;
+        const firstCityCard = document.querySelector('#area-list [data-city-name], #area-list .area-card-item, #area-list button');
+        if (firstCityCard) {
+          cityName = firstCityCard.getAttribute('data-city-name') || firstCityCard.textContent.trim().split(/\s+/)[0];
+        }
+        if (!cityName && window.AddressMasterService) {
+          const cities = await window.AddressMasterService.getInstance().getCities();
+          if (cities && cities.length > 0) cityName = cities[0].name;
+        }
+        if (cityName) {
+          await window.HAppWorkflow.openDetail(cityName);
+          return cityName;
+        }
       }
+      return null;
     });
     await new Promise(r => setTimeout(r, 2000));
 
@@ -184,32 +192,32 @@ async function runTest(url, label) {
       await new Promise(r => setTimeout(r, 1000));
 
       // Trigger Distribution Start
-      await page.evaluate(async () => {
+      await page.evaluate(async (city) => {
         if (window.HAppWorkflow && window.HAppWorkflow.startDistribution) {
-          await window.HAppWorkflow.startDistribution('四日市市', 101);
+          await window.HAppWorkflow.startDistribution(city || 'エリア', 101);
         }
-      });
+      }, targetCity);
       stepResults.startDistribution = true;
       stepResults.gps = true;
       stepResults.camera = true;
       await new Promise(r => setTimeout(r, 1000));
 
       // Test Numpad
-      await page.evaluate(() => {
+      await page.evaluate((city) => {
         if (window.HAppWorkflow && window.HAppWorkflow.openNumpad) {
-          window.HAppWorkflow.openNumpad('四日市市', 101, 25);
+          window.HAppWorkflow.openNumpad(city || 'エリア', 101, 25);
           window.HAppWorkflow.pressNum('OK');
         }
-      });
+      }, targetCity);
       stepResults.numpad = true;
       await new Promise(r => setTimeout(r, 1000));
 
       // Test Submit Execution
-      await page.evaluate(async () => {
+      await page.evaluate(async (city) => {
         if (window.HAppWorkflow && window.HAppWorkflow.executeCommitDistribution) {
-          await window.HAppWorkflow.executeCommitDistribution('四日市市', 101);
+          await window.HAppWorkflow.executeCommitDistribution(city || 'エリア', 101);
         }
-      });
+      }, targetCity);
       stepResults.submit = true;
       await new Promise(r => setTimeout(r, 2000));
     }
@@ -232,10 +240,10 @@ async function main() {
   const server = await startLocalServer();
   
   // 1. Local Server Verification
-  const localRes = await runTest(`http://localhost:${PORT}/app/index.html?client=MIE-03`, 'LOCAL SERVER');
+  const localRes = await runTest(`http://localhost:${PORT}/app/index.html`, 'LOCAL SERVER');
 
   // 2. GitHub Pages Verification
-  const ghRes = await runTest('https://area-management.github.io/posting-map-system/?client=MIE-03', 'GITHUB PAGES');
+  const ghRes = await runTest('https://area-management.github.io/posting-map-system/', 'GITHUB PAGES');
 
   server.close();
 }

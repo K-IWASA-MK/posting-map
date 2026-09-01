@@ -20,19 +20,31 @@
         let totalPoints = 0;
         let districtName = "";
 
-        // SSOT: CONFIG から総件数を動的に取得（フォールバック: 858）
-        if (typeof CONFIG !== 'undefined' && CONFIG.get) {
-          totalPoints = Number(CONFIG.get("DENOMINATOR_UNITS")) || 858;
-        } else {
-          totalPoints = 858;
-        }
-
-        // SSOT: Spreadsheetファイル名および配布実績シートからデータを取得
+        // SSOT: Spreadsheetファイル名および実在シートから動的に総件数・完了数を取得
         try {
           if (typeof getSS === 'function') {
             const ss = getSS();
             if (ss) {
               districtName = ss.getName();
+
+              const excludeSheets = [
+                "名簿", "原本", "保有チラシ枚数", "受渡要請履歴", "管理者ID",
+                "__SYSTEM_CACHE__", "📥 集計用マスターデータ", "郵便番号", "区割り",
+                "初めての方「使い方ガイド」", "📖 らくらくマニュアル", "らくらくマニュアル", "📄 活動報告書",
+                "__TEMP_ADDRESSES__", "TraceLog", "配布実績", "PinStatus", "契約管理"
+              ];
+
+              const sheets = ss.getSheets();
+              sheets.forEach(sheet => {
+                const sName = sheet.getName();
+                if (excludeSheets.includes(sName) || sheet.isSheetHidden()) return;
+                if (sName.includes("MASTER") || sName.includes("DATABASE") || sName.includes("EXPORT")) return;
+                const lastRow = sheet.getLastRow();
+                if (lastRow >= 2) {
+                  totalPoints += (lastRow - 1);
+                }
+              });
+
               const distSheet = ss.getSheetByName("配布実績");
               if (distSheet) {
                 const lastRow = distSheet.getLastRow();
@@ -66,7 +78,8 @@
       } catch (err) {
         return {
           success: false,
-          total: 858,
+          districtName: "",
+          total: 0,
           done: 0,
           percent: 0,
           online: true,

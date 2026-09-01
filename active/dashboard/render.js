@@ -554,7 +554,7 @@ window.initMainMap = function() {
   const mapEl = document.getElementById("main-map");
   if (!mapEl || !window.google || !window.google.maps) return;
 
-  // 既存Mapインスタンスが同一DOM要素にバインド済みの場合はMap生成・858 Marker生成・Listener登録のすべてをスキップ
+  // 既存Mapインスタンスが同一DOM要素にバインド済みの場合はMap生成・Marker生成・Listener登録のすべてをスキップ
   if (window.mainMapInstance && window.mainMapInstance.getDiv() === mapEl) {
     return;
   }
@@ -640,9 +640,21 @@ window.initMainMap = function() {
     }
   ];
 
+  // 優先順位: 1. currentMapState?.center, 2. 読み込み済み masterPins から算出, 3. 中立的フォールバック
+  let initialCenter = window.currentMapState?.center;
+  if (!initialCenter && Array.isArray(window.masterPins) && window.masterPins.length > 0) {
+    const firstValid = window.masterPins.find(p => typeof p.latitude === 'number' && typeof p.longitude === 'number' && isFinite(p.latitude) && isFinite(p.longitude));
+    if (firstValid) {
+      initialCenter = { lat: firstValid.latitude, lng: firstValid.longitude };
+    }
+  }
+  if (!initialCenter) {
+    initialCenter = { lat: 36.5, lng: 138.0 }; // 中立的フォールバック
+  }
+
   const map = new google.maps.Map(mapEl, {
-    center: window.currentMapState?.center || { lat: 35.05, lng: 136.65 },
-    zoom: window.currentMapState?.zoom || 11,
+    center: initialCenter,
+    zoom: window.currentMapState?.zoom || (window.currentMapState?.center ? 11 : 8),
     disableDefaultUI: true,
     zoomControl: false,
     clickableIcons: false,
@@ -877,6 +889,19 @@ window.initMainMap = function() {
     if (window.masterMarkers.length > 0) return;
 
     window.masterPins = pins;
+
+    // 初回表示時かつ currentMapState が未確定の場合、pins のバウンディングボックスまたは先頭ピンで自動フィット
+    if (!window.currentMapState && pins.length > 0) {
+      const validCoords = pins.filter(p => typeof p.latitude === 'number' && typeof p.longitude === 'number' && isFinite(p.latitude) && isFinite(p.longitude));
+      if (validCoords.length === 1) {
+        map.setCenter({ lat: validCoords[0].latitude, lng: validCoords[0].longitude });
+        map.setZoom(13);
+      } else if (validCoords.length > 1) {
+        const bounds = new google.maps.LatLngBounds();
+        validCoords.forEach(p => bounds.extend({ lat: p.latitude, lng: p.longitude }));
+        map.fitBounds(bounds);
+      }
+    }
 
     pins.forEach(row => {
       if (typeof row.latitude === 'number' && typeof row.longitude === 'number') {

@@ -38,7 +38,6 @@ const DEFAULT_STORE = {
     // 動作設定
     CHUNK_SIZE: 10,
     ROW_HEIGHT_STAFF: 60,
-    DENOMINATOR_UNITS: 858,
     DEFAULTS: {},
 
     // 参照データソース基盤 (REFERENCE_FILES)

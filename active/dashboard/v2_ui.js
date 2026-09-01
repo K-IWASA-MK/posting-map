@@ -775,9 +775,8 @@ function diagnoseProtections() {
  */
 function setupGoogleDriveFolders() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const ssName = ss.getName(); // 例: 対象地区名
-  const folderNameSuffix = "四日市支部"; // 顧客名
-  const targetFolderName = `${ssName}_${folderNameSuffix}`; // 例: "地区名_四日市支部"
+  const ssName = ss.getName(); // 地区名SSOT
+  const targetFolderName = ssName;
   
   // 1. 親フォルダ「POSTING_MAP_SYSTEM」を探す、なければ作成
   let systemFolder;
@@ -805,7 +804,7 @@ function setupGoogleDriveFolders() {
     activeClientsFolder = systemFolder.createFolder("01_ACTIVE_CLIENTS");
   }
   
-  // 3. 顧客個別フォルダ「MIE-02_四日市支部」を作成
+  // 3. 顧客個別フォルダ「${ssName}」を作成
   let clientFolder;
   const clientFolders = activeClientsFolder.getFoldersByName(targetFolderName);
   if (clientFolders.hasNext()) {
@@ -814,7 +813,7 @@ function setupGoogleDriveFolders() {
     clientFolder = activeClientsFolder.createFolder(targetFolderName);
   }
   
-  // 4. 写真格納用フォルダ「MIE-02_STORAGE」を作成
+  // 4. 写真格納用フォルダ「${ssName}_STORAGE」を作成
   let storageFolder;
   const storageFolderName = `${ssName}_STORAGE`;
   const storageFolders = clientFolder.getFoldersByName(storageFolderName);

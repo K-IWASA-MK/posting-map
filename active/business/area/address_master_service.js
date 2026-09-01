@@ -59,7 +59,7 @@
     }
 
     /**
-     * 1. 全858件のメモリキャッシュ配列をそのまま返す
+     * 1. 全件のメモリキャッシュ配列をそのまま返す
      */
     async getAll(csvUrl = DEFAULT_CSV_PATH) {
       return await this.loadMaster(csvUrl);

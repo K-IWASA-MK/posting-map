@@ -31,9 +31,9 @@ if (typeof GPSService === 'undefined') {
       try {
         console.log("[GPSService] Start processing GPS/Photo record update for staff:", data ? data.staffName : "Unknown");
 
-        // rowId strict validation
+        // rowId strict validation (integer >= 1)
         const rowIdNum = Number(data.rowId);
-        if (!Number.isInteger(rowIdNum) || rowIdNum < 1 || rowIdNum > 858 || String(data.rowId).trim() === "") {
+        if (!Number.isInteger(rowIdNum) || rowIdNum < 1 || String(data.rowId).trim() === "") {
            return { success: false, message: "Invalid rowId" };
         }
 
