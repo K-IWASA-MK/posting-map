@@ -1305,7 +1305,7 @@ function renderMainStageRecords(ranking) {
         const gpsStatus = rec.gpsStatus === "OK" ? "OK" : "NO";
         const photoStatus = rec.photoStatus === "OK" ? "OK" : "NO";
         return `
-          <div class="flex items-center gap-2 px-2.5 py-0.5 rounded bg-[#0B1019] border border-borderNormal text-xs text-white min-w-0 lg:flex-shrink-0">
+          <div class="flex flex-wrap lg:flex-nowrap items-center gap-2 px-2.5 py-1 lg:py-0.5 rounded bg-[#0B1019] border border-borderNormal text-xs text-white min-w-0 lg:flex-shrink-0">
             <span class="w-1.5 h-1.5 rounded-full bg-statusGreen flex-shrink-0"></span>
             <span class="font-mono text-textSub text-[11px] whitespace-nowrap">${escapeHtml(rec.time || '--:--')}</span>
             <span class="font-medium text-white truncate max-w-[130px] text-xs">${escapeHtml(areaName)}</span>
