@@ -1,10 +1,10 @@
 /**
  * POSTING MAP - Address Master Service (SSOT CSV Data Provider)
- * 責任: 住所マスター CSV (MIE03_ADDRESS_MASTER_858.csv) の読込、パース、各種クエリ API 提供
+ * 責任: 住所マスター CSV (address_master.csv) の読込、パース、各種クエリ API 提供
  * ガバナンス: UI変更なし、既存GAS変更なし、スプレッドシート変更なし
  */
 (function(global) {
-  const DEFAULT_CSV_PATH = '../../data/MIE03_ADDRESS_MASTER_858.csv';
+  const DEFAULT_CSV_PATH = '../../data/address_master.csv';
 
   class AddressMasterService {
     constructor() {

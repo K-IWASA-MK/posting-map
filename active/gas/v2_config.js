@@ -19,7 +19,6 @@ const DEFAULT_STORE = {
     },
 
     // ファイル名設定
-    DISTRICT_CSV: "三重県選挙区区割り",
     TARGET_GOAL: 300000,
 
     // シート名設定
@@ -40,32 +39,13 @@ const DEFAULT_STORE = {
     CHUNK_SIZE: 10,
     ROW_HEIGHT_STAFF: 60,
     DENOMINATOR_UNITS: 858,
-    DEFAULTS: {
-      DEFAULT_PREFECTURE: "三重県",
-      DEFAULT_DISTRICT: "三重第3区"
-    },
+    DEFAULTS: {},
 
     // 参照データソース基盤 (REFERENCE_FILES)
-    REFERENCE_FILES: {
-      DISTRICT_CSV_FILE_ID: "1LGeZIaxidgKihq5iirYp-KXygJlBQ5Wm", // 三重県選挙区区割り.csv
-      MUNICIPALITY_CSV_FILE_ID: ""
-    },
+    REFERENCE_FILES: {},
 
-    DISTRICT_CSV_FILE_ID: "1LGeZIaxidgKihq5iirYp-KXygJlBQ5Wm",
-    DEFAULT_TENANT_ID: "MIE-03",
-    DEFAULT_BRANCH_ID: "MIE-03",
-    DEFAULT_BRANCH_NAME: "三重第3支部",
-    
     // Phase 15: Strategic Engine Map
-    DISTRICT_MAP: {
-      "MIE-03": [
-        // Placeholder blocks. Will be managed via PropertiesService in Production.
-      ]
-    }
-  },
-  "MIE-03": {
-    // Override example for tenant
-    MODE: "production"
+    DISTRICT_MAP: {}
   }
 };
 

@@ -1,15 +1,49 @@
 # POSTING MAP - AGENTS.md (基本就業規則)
 
-## 🏛️ MASTER / Product Architecture Principle
-POSTING MAP is NOT a district-specific application.
-It MUST be implemented and maintained as a district-agnostic application template.
-The objective is a reusable product that can be replicated nationwide by simply replacing the `data/*.csv` and changing the GAS connection.
+## 🏛️ MASTER / COPY-READY ARCHITECTURE ABSOLUTE RULE
 
-### Absolute Rules (最高位絶対禁止事項)
-- **No District Dependency**: Application code MUST NOT depend on a specific district, hard-code names, or counts.
-- **No Reference Instance Leak**: `MIE-03` or any other district-specific value MUST NOT become an application-level dependency.
-- **Static Master CSV is SSOT**: District-specific information MUST come from external configuration and/or the Static Master CSV.
-- **Dashboard Data Source Rule**: Dashboard MUST consume data from Backend SSOT dynamically. 状態を推測してはいけない。
+このフォルダーは「地区別完全独立アプリ」のコピー元テンプレートである。
+以下の絶対原則を満たさない限り、COPY-READYとは判定しない。
+
+### 1. コピー原則
+このアプリは、
+> 「アプリ本体を丸ごとコピーし、`data/` だけを差し替えれば、その地区の完全独立したアプリとして成立する」
+ことを絶対条件とする。
+コピー時に変更・差し替えが許されるのは `data/` のみ。
+
+### 2. コード＝空箱
+`active/`、`scripts/` 等のアプリ本体コードには、特定地区の情報を存在させてはならない。
+禁止対象：地区ID、地区名、都道府県名、市区町村名、住所、地区固有のエリア情報、地区固有のDrive ID、地区固有のSpreadsheet ID、地区固有のURL、地区固有のテストデータ、特定地区を前提としたフォールバック、特定地区を前提とした条件分岐
+
+### 3. 地区固有データの責務
+地区固有情報は `data/` のみに存在する。コード側で地区固有情報をハードコードしてはならない。地区による違いは、コード変更ではなく `data/` の内容によって決定される。
+**スプレッドシートのファイル名（例: MIE-03）こそが、地区を特定する唯一のSSOTである。**
+
+### 4. 設定ファイルによる地区差し替え禁止
+`data/` 以外の設定ファイルを地区ごとに差し替えることで別地区アプリを成立させる設計は禁止する。
+「設定値を別地区用に書き換える」「地区IDだけ変更する」「地区名だけ変更する」等をCOPY-READYとは認めない。
+
+### 5. 独立性
+各地区アプリは完全独立する。このフォルダー内で、他地区との接続・共有・連携を前提とした設計を行わない。
+
+### 6. 新規仕組みの追加禁止
+地区非依存化のために、安易に新しいConfigシステム、データローダー、地区管理機構、ルーティング機構、共有基盤等を新設してはならない。
+まず既存のデータソース・既存処理・既存設定機構を監査し、既存構造を利用して地区依存を除去する。
+
+### 7. 管理者ダッシュボード
+管理者ダッシュボードは、このコピー元アプリの地区独立化とは別責務である。地区独立化を理由として、管理者ダッシュボードを勝手に変更・再設計してはならない。
+
+### 8. 実装前ゲート
+地区依存コードを変更する場合、実装前に必ず以下を確認する。
+1. 地区固有情報であること
+2. 現在のデータソース
+3. 既存の取得経路
+4. 削除後のデータ取得方法
+5. `data/` だけの差し替えで成立すること
+
+### 9. 最終判定
+アプリ本体を丸ごとコピー ↓ `data/` のみ差し替え ↓ コード変更 0 ↓ 設定変更 0 ↓ 地区固有アプリとして正常動作
+これが成立することを最終条件とする。
 
 ## 🛑 No Implementation Without Explicit Plan Approval
 AIエージェントは、いかなるコード修正やGit操作を行う際も、事前に `implementation_plan.md` を作成し、ユーザーから明示的な承認（Proceed）を得るまで実行してはならない。

@@ -32,16 +32,7 @@ function refreshAreaSummaryCache() {
   const ss = getSS();
   const orderedCities = (typeof getMunicipalityOrder === 'function')
     ? getMunicipalityOrder()
-    : [
-        "四日市市",
-        "桑名市",
-        "いなべ市",
-        "桑名郡木曽岬町",
-        "員弁郡東員町",
-        "三重郡菰野町",
-        "三重郡朝日町",
-        "三重郡川越町"
-      ];
+    : [];
 
   const cityMap = {};
   orderedCities.forEach(cName => {
@@ -184,7 +175,7 @@ function createSystemCacheSheet() {
     "__TEMP_ADDRESSES__"
   ];
 
-  // 1. MIE03_MUNICIPALITY_ORDER.csv (SSOT) から自治体順を取得
+  // 1. municipality_master.csv (SSOT) から自治体順を取得
   const orderedCities = getMunicipalityOrder();
 
   // 2. 自治体の優先順に従ってシートを順次回収

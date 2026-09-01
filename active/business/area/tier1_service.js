@@ -63,16 +63,7 @@
         if (typeof getMunicipalityOrder === 'function') {
           orderedCities = getMunicipalityOrder();
         } else {
-          orderedCities = [
-            "四日市市",
-            "桑名市",
-            "いなべ市",
-            "桑名郡木曽岬町",
-            "員弁郡東員町",
-            "三重郡菰野町",
-            "三重郡朝日町",
-            "三重郡川越町"
-          ];
+          orderedCities = [];
         }
 
         // 順序リストに含まれない自治体がもしあれば末尾に追加

@@ -1,16 +1,11 @@
 /**
- * POSTING MAP Client Configuration
- * Client: MIE-03 (三重県第3区)
- * 
- * 地区インスタンス定義ファイル
- * 
- * Application Code は地区を知らない。
- * 地区固有情報はすべてこのファイルに集約する。
- * 新地区デプロイ時はこのファイルと data/*.csv を差し替える。
+ * POSTING MAP - Frontend Configuration
+ * アプリのフロントエンド側（Dashboard, 配布員アプリ）で共通して読み込まれる設定ファイル。
+ * 地区固有のビジネス情報は保持せず、インフラ設定と汎用データファイル名のみを持つ。
+ * 新地区デプロイ時はこのファイル内の GAS URL 等と data/*.csv を差し替える。
  */
 window.PMS_CLIENT_CONFIG = {
-  districtId: "MIE-03",
-  districtName: "三重3区",
+  version: "1.0.1",
   status: "ACTIVE_DEVELOPMENT",
   
   spreadsheetId: "1xQUvlCaUO103rjSGmdcFQQFkukodG4Dg9mS_teWT7uA",
@@ -19,8 +14,8 @@ window.PMS_CLIENT_CONFIG = {
     gasWebAppUrl: "https://script.google.com/macros/s/AKfycbyjNwgZ_6CCv258lqKMrCXJYi0wDR23ZCyyzOQIV1R_WcCF5TQxYXOzZWWSJd_vMyu_/exec"
   },
   staticMaster: {
-    addressCsvFilename: "MIE03_ADDRESS_MASTER_858.csv",
-    boundariesGeojsonFilename: "MIE03_BOUNDARIES.geojson",
+    addressCsvFilename: "address_master.csv",
+    boundariesGeojsonFilename: "area_master.geojson",
     mapDefaultCenter: [35.0641, 136.6200],
     mapDefaultZoom: 11
   },

@@ -36,15 +36,14 @@ function forceStartBatch() {
   });
   SpreadsheetApp.flush();
 
-  // 1. extractDistrictAddresses() を直接呼び出して確定住所データを抽出
+  // 1. extractDistrictAddresses() を呼び出して確定住所データを抽出
   ss.toast("確定住所マスターデータを抽出中...", "準備中", 5);
-  const targetDistrict = "三重第3区";
-  const targetPrefecture = "三重県";
-  const addresses = extractDistrictAddresses(targetDistrict, targetPrefecture);
+  const targetDistrict = ss.getName();
+  const addresses = extractDistrictAddresses(targetDistrict);
 
   // 【Step 1 強化版 監査ログ】
   Logger.log("=== 【Step 1 抽出監査ログ】 ===");
-  Logger.log("対象地区: " + targetDistrict + " (" + targetPrefecture + ")");
+  Logger.log("対象地区: " + targetDistrict);
   Logger.log("総抽出件数: " + (addresses ? addresses.length : 0) + "件");
 
   if (addresses && addresses.length > 0) {
@@ -90,7 +89,7 @@ function forceStartBatch() {
   tempSheet.clear();
   tempSheet.getRange(1, 1, 1, 3).setValues([["postal_code", "city_name", "full_address"]]);
 
-  // MIE03_SHEET_GENERATION_RULE.md に準拠: MIE03_MUNICIPALITY_ORDER.csv (SSOT) の priority 順にソート
+  // MIE03_SHEET_GENERATION_RULE.md に準拠: municipality_master.csv (SSOT) の priority 順にソート
   const cityOrderPriority = getMunicipalityOrder();
 
   addresses.sort((a, b) => {
@@ -479,7 +478,7 @@ function sortAllAreaSheetTabs() {
     const sheets = ss.getSheets();
     const systemSheetNames = ["原本", "名簿", "初めての方「使い方ガイド」", "__SYSTEM_CACHE__", "保有チラシ枚数", "管理者ID", "受渡要請履歴", "📄 活動報告書", "📖 らくらくマニュアル"];
 
-    // MIE03_SHEET_GENERATION_RULE.md に準拠: MIE03_MUNICIPALITY_ORDER.csv (SSOT) の priority 順に整列
+    // MIE03_SHEET_GENERATION_RULE.md に準拠: municipality_master.csv (SSOT) の priority 順に整列
     const cityOrderPriority = getMunicipalityOrder();
 
     const areaSheets = [];

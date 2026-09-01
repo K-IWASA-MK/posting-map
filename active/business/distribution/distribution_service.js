@@ -46,7 +46,7 @@ if (typeof DistributionService === 'undefined') {
             timestamp: Date.now(),
             tenantId: data.tenantId || defaultTenant,
             branchId: data.branchId || defaultBranch,
-            prefectureId: data.prefectureId || "MIE",
+            prefectureId: data.prefectureId || "",
             blockId: data.blockId || data.areaName,
             userId: data.userId || data.staffId,
             actionType: actType,

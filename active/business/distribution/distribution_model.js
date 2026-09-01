@@ -13,7 +13,7 @@ if (typeof DistributionEvent === 'undefined') {
       this.timestamp = (params && params.timestamp) || Date.now();
       this.tenantId = params ? params.tenantId : "";
       this.branchId = params ? params.branchId : "";
-      this.prefectureId = (params && params.prefectureId) || "MIE";
+      this.prefectureId = (params && params.prefectureId) || "";
       this.blockId = params ? params.blockId : "";
       this.userId = params ? params.userId : "";
       this.actionType = params ? params.actionType : "distribute";

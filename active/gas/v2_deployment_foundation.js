@@ -466,7 +466,7 @@ function verifyDistrictDeployment(e) {
         isHidden: s.isSheetHidden()
       }));
 
-      const items = extractDistrictAddresses("三重第3区", "三重県");
+      const items = extractDistrictAddresses(ss.getName());
       const top20Extracted = items.slice(0, 20).map((item, idx) => ({
         index: idx + 1,
         city: item.city,
@@ -726,7 +726,7 @@ function verifyDistrictDeployment(e) {
       }
 
       // 抽出結果（extractDistrictAddresses）の郵便番号順序チェック
-      const items = extractDistrictAddresses("三重第3区", "三重県");
+      const items = extractDistrictAddresses(ss.getName());
       let isExtractedAscending = true;
       const nonAscendingPairs = [];
 
@@ -745,8 +745,9 @@ function verifyDistrictDeployment(e) {
         }
       }
 
-      // 「三重郡」に属するアイテムのみの順序抽出
-      const miegunExtracted = items.filter(item => item.city === "三重郡" || item.city.startsWith("三重郡"));
+      // 抽出結果のうち、特定の市町村（三重郡など）に関する監査
+      // （※三重郡がシートとして存在する場合のみ監査する）
+      const miegunExtracted = items.filter(item => item.city === "三重郡" || (item.city && item.city.startsWith("三重郡")));
       const miegunPostalList = miegunExtracted.map((item, idx) => ({
         index: idx + 1,
         postalCode: item.postalCode,
@@ -771,7 +772,7 @@ function verifyDistrictDeployment(e) {
   }
   if (params.testExtractBreakdown === "true" || params.testExtractBreakdown === true) {
     try {
-      const items = extractDistrictAddresses("三重第3区", "三重県");
+      const items = extractDistrictAddresses();
       const breakdown = {};
       items.forEach(item => {
         const c = item.city;
@@ -1013,17 +1014,17 @@ function verifyDistrictDeployment(e) {
         PropertiesService.getScriptProperties().deleteProperty("CONFIG_STORE");
       }
 
-      const targetDistrict = params.districtName || "三重第3区";
-      const targetPrefecture = params.prefecture || "三重県";
+      const targetDistrict = params.districtName || getSS().getName();
+      const targetPrefecture = params.prefecture || "";
       
-      const districtFileId = CONFIG.get("DISTRICT_CSV_FILE_ID") || "1LGeZIaxidgKihq5iirYp-KXygJlBQ5Wm";
+      const districtFileId = CONFIG.get("DISTRICT_CSV_FILE_ID") || "";
 
-      let districtFileName = "三重県選挙区区割り.csv";
+      let districtFileName = "address_master.csv";
       try {
         if (districtFileId) districtFileName = DriveApp.getFileById(districtFileId).getName();
       } catch (eName) {}
 
-      const addresses = extractDistrictAddresses(targetDistrict, targetPrefecture);
+      const addresses = extractDistrictAddresses(targetDistrict);
       const totalCount = addresses ? addresses.length : 0;
       
       const top5 = addresses && totalCount > 0 ? addresses.slice(0, 5) : [];
@@ -1069,12 +1070,12 @@ function verifyDistrictDeployment(e) {
       if (!sheet) sheet = sheets[0];
       
       // Execute genuine extractDistrictAddresses logic
-      const targetDistrict = params.districtName || "三重第3区";
-      const targetPref = params.prefecture || "三重県";
+      const targetDistrict = params.districtName || ss.getName();
+      const targetPref = params.prefecture || "";
       
       let items = [];
       try {
-        items = extractDistrictAddresses(targetDistrict, targetPref);
+        items = extractDistrictAddresses(targetDistrict);
       } catch (e) {
         Logger.log("extractDistrictAddresses fallback: " + e.toString());
       }
@@ -1093,7 +1094,7 @@ function verifyDistrictDeployment(e) {
             item.address || "",
             item.townKana || "",
             "VERIFIED",
-            "MIE-03"
+            targetDistrict
           ]);
         });
       }
