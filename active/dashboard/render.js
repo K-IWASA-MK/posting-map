@@ -513,7 +513,7 @@ function renderStorageList(stocks) {
     return `
       <div class="premium-glass p-6 space-y-2">
         <div class="flex justify-between items-center border-b border-white/10 pb-3">
-          <span class="text-base font-black text-white tracking-wider">🏢 ${loc}</span>
+          <span class="text-base font-black text-white tracking-wider">🏢 ${escapeHtml(loc)}</span>
           <span style="background: rgba(37,99,235,0.1); color: #2563eb;" class="text-[10px] font-black px-2 py-0.5 rounded-full font-mono">${staffCount}名保管</span>
         </div>
         <div class="space-y-1">

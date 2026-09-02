@@ -62,10 +62,7 @@ function doGet(e) {
     'getDeliveryStats',
     'getEvidence',
     'getAreaDetails',
-    'getGlobalPinStatus',
-    'getRoster',
-    'resetRoster',
-    'getTransferRequests'
+    'getGlobalPinStatus'
   ].includes(action);
 
   // Authentication Gate
@@ -196,27 +193,12 @@ function doPost(e) {
     'getDeliveryStats',
     'getEvidence',
     'getAreaDetails',
-    'getGlobalPinStatus',
-    'getRoster',
-    'resetRoster',
-    'getTransferRequests'
+    'getGlobalPinStatus'
   ].includes(action);
 
   // Authentication Gate
   if (!isReadOnlyAction) {
-    let auth;
-    if (postData && typeof postData.liffToken === 'string' && (postData.liffToken.startsWith('TEST_SSOT_') || postData.liffToken === 'valid-liff-token')) {
-      auth = {
-        success: true,
-        user: {
-          lineUserId: postData.lineUserId || 'U_TEST_SSOT_STAFF',
-          displayName: postData.lastName || postData.displayName || 'テストスタッフ',
-          pictureUrl: ''
-        }
-      };
-    } else {
-      auth = authenticateRequest(postData || {});
-    }
+    const auth = authenticateRequest(postData || {});
     if (!auth.success) {
       return ContentService.createTextOutput(JSON.stringify(auth))
         .setMimeType(ContentService.MimeType.JSON);
@@ -300,14 +282,13 @@ function processPostAction(action, postData, e) {
     case 'registerStaff':
       let rLastName = postData.lastName || postData.displayName || (e && e.parameter ? e.parameter.lastName : "");
       let rFirstName = postData.firstName || (e && e.parameter ? e.parameter.firstName : "LINE");
-      let rLineUserId = postData.lineUserId || (e && e.parameter ? e.parameter.lineUserId : "");
-      if ((!rLastName || !rLineUserId) && e && e.parameter && e.parameter.json) {
+      let rLineUserId = (postData && postData.user && postData.user.lineUserId) ? postData.user.lineUserId : "";
+      if (!rLastName && e && e.parameter && e.parameter.json) {
         try {
           const pj = typeof e.parameter.json === 'string' ? JSON.parse(e.parameter.json) : e.parameter.json;
           if (pj.lastName) rLastName = pj.lastName;
           if (pj.displayName && !rLastName) rLastName = pj.displayName;
           if (pj.firstName) rFirstName = pj.firstName;
-          if (pj.lineUserId) rLineUserId = pj.lineUserId;
         } catch (errPj) {}
       }
       return registerStaff(rLastName, rFirstName, rLineUserId);
