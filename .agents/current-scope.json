@@ -44,6 +44,7 @@
   "active/dashboard/components/area.js",
   "active/dashboard/index.html",
   "active/dashboard/render.js",
+  "active/api/v2_api.js",
   "active/dashboard/v2_ui.js",
   "active/gas/v2_config.js",
   "active/gas/v2_stats.js",
