@@ -41,6 +41,8 @@
   "active/business/area/address_master_service.js",
   "active/business/gps/gps_service.js",
   "active/business/system/system_summary_service.js",
+  "active/dashboard/components/area.js",
+  "active/dashboard/index.html",
   "active/dashboard/render.js",
   "active/dashboard/v2_ui.js",
   "active/gas/v2_config.js",
