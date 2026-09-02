@@ -41,15 +41,6 @@ function doGet(e) {
 
   const action = params.action || "";
 
-  // Check Contract Status for all actions
-  if (typeof evaluateContractAccess === 'function' && !evaluateContractAccess()) {
-    return ContentService.createTextOutput(JSON.stringify({
-      success: false,
-      error: "ACCOUNT_SUSPENDED",
-      message: "Your POSTING MAP account is currently suspended due to unpaid status."
-    })).setMimeType(ContentService.MimeType.JSON);
-  }
-
   // Read-only actions that do not require liffToken
   const isReadOnlyAction = [
     'getSystemSummary',
@@ -162,24 +153,6 @@ function doPost(e) {
     } catch (errJson) {}
   }
   const action = (postData && postData.action) || params.action || (e && e.parameter && e.parameter.action) || "";
-
-  // Handle Stripe Webhook immediately before any auth or suspension checks
-  if (action === 'stripeWebhook') {
-    const res = typeof handleStripeWebhookContractUpdate === 'function' 
-      ? handleStripeWebhookContractUpdate(postData) 
-      : { success: false, error: "Contract management not loaded" };
-    return ContentService.createTextOutput(JSON.stringify(res))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-
-  // Check Contract Status for all other actions
-  if (typeof evaluateContractAccess === 'function' && !evaluateContractAccess()) {
-    return ContentService.createTextOutput(JSON.stringify({
-      success: false,
-      error: "ACCOUNT_SUSPENDED",
-      message: "Your POSTING MAP account is currently suspended due to unpaid status."
-    })).setMimeType(ContentService.MimeType.JSON);
-  }
 
   // Read-only actions that do not require liffToken
   const isReadOnlyAction = [
