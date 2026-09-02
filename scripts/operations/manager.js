@@ -1309,10 +1309,10 @@ function renderMainStageRecords(ranking) {
         const gpsStatus = rec.gpsStatus === "OK" ? "OK" : "NO";
         const photoStatus = rec.photoStatus === "OK" ? "OK" : "NO";
         return `
-          <div class="flex flex-wrap lg:flex-nowrap items-center gap-2 px-2.5 py-1 lg:py-0.5 rounded bg-[#0B1019] border border-borderNormal text-xs text-white min-w-0 lg:flex-shrink-0">
+          <div class="flex items-center gap-1.5 lg:gap-2 px-2.5 py-0.5 rounded bg-[#0B1019] border border-borderNormal text-xs text-white flex-nowrap whitespace-nowrap flex-shrink-0">
             <span class="w-1.5 h-1.5 rounded-full bg-statusGreen flex-shrink-0"></span>
-            <span class="font-mono text-textSub text-[11px] whitespace-nowrap">${escapeHtml(rec.time || '--:--')}</span>
-            <span class="font-medium text-white truncate max-w-[130px] text-xs">${escapeHtml(areaName)}</span>
+            <span class="font-mono text-textSub text-[11px] whitespace-nowrap flex-shrink-0">${escapeHtml(rec.time || '--:--')}</span>
+            <span class="font-medium text-white truncate max-w-[110px] lg:max-w-[130px] text-xs">${escapeHtml(areaName)}</span>
             <span class="font-mono font-bold text-white text-xs flex-shrink-0">${countStr}<span class="text-[10px] font-normal text-textSub ml-0.5">枚</span></span>
             <span class="text-[#243044] text-xs flex-shrink-0">|</span>
             <span class="text-[11px] font-mono flex items-center gap-1 flex-shrink-0 text-textSub">
@@ -1325,57 +1325,54 @@ function renderMainStageRecords(ranking) {
         `;
       }).join('');
 
-      if (totalPages > 1) {
-        const hasPrev = validPage > 0;
-        const hasNext = validPage < totalPages - 1;
-        const prevBtn = `
-          <button type="button" onclick="changeStaffFeedPage('${item.staffId}', -1, event)" ${!hasPrev ? 'disabled' : ''} class="w-6 h-6 flex items-center justify-center rounded text-sm font-bold font-mono transition-colors ${hasPrev ? 'text-white hover:bg-white/10 cursor-pointer' : 'text-white/20 cursor-not-allowed'}">‹</button>
-        `;
-        const nextBtn = `
-          <button type="button" onclick="changeStaffFeedPage('${item.staffId}', 1, event)" ${!hasNext ? 'disabled' : ''} class="w-6 h-6 flex items-center justify-center rounded text-sm font-bold font-mono transition-colors ${hasNext ? 'text-white hover:bg-white/10 cursor-pointer' : 'text-white/20 cursor-not-allowed'}">›</button>
-        `;
-        const pageIndicator = `
-          <span class="font-mono text-xs text-textSub whitespace-nowrap ml-1">${validPage + 1}/${totalPages}</span>
-        `;
-        recentFeedHtml = `
-          <div class="flex items-center mx-2 overflow-hidden flex-1 min-w-0 w-full lg:w-auto">
-            <div class="flex-1 flex justify-end min-w-0 gap-1.5">${prevBtn}</div>
-            <div class="flex-shrink-0 flex items-center mx-1.5">${itemsHtml}</div>
-            <div class="flex-1 flex justify-start items-center gap-1.5 min-w-0">${nextBtn}${pageIndicator}</div>
-          </div>
-        `;
-      } else {
-        recentFeedHtml = `
-          <div class="flex items-center mx-2 overflow-hidden flex-1 min-w-0 w-full lg:w-auto">
-            <div class="flex-1 flex justify-end min-w-0 gap-1.5"></div>
-            <div class="flex-shrink-0 flex items-center mx-1.5">${itemsHtml}</div>
-            <div class="flex-1 flex justify-start items-center gap-1.5 min-w-0"></div>
-          </div>
-        `;
-      }
+      const hasPrev = totalPages > 1 && validPage > 0;
+      const hasNext = totalPages > 1 && validPage < totalPages - 1;
+
+      const prevBtn = totalPages > 1
+        ? `<button type="button" onclick="changeStaffFeedPage('${item.staffId}', -1, event)" ${!hasPrev ? 'disabled' : ''} class="w-6 h-6 flex items-center justify-center rounded text-sm font-bold font-mono transition-colors ${hasPrev ? 'text-white hover:bg-white/10 cursor-pointer' : 'text-white/20 cursor-not-allowed'}">‹</button>`
+        : `<span class="w-6 h-6 inline-block"></span>`;
+
+      const nextBtnAndIndicator = totalPages > 1
+        ? `<div class="flex items-center gap-1 min-w-[56px] justify-start flex-shrink-0">
+             <button type="button" onclick="changeStaffFeedPage('${item.staffId}', 1, event)" ${!hasNext ? 'disabled' : ''} class="w-6 h-6 flex items-center justify-center rounded text-sm font-bold font-mono transition-colors ${hasNext ? 'text-white hover:bg-white/10 cursor-pointer' : 'text-white/20 cursor-not-allowed'}">›</button>
+             <span class="font-mono text-xs text-textSub whitespace-nowrap">${validPage + 1}/${totalPages}</span>
+           </div>`
+        : `<div class="w-14 flex-shrink-0"></div>`;
+
+      recentFeedHtml = `
+        <div class="flex items-center justify-start flex-1 min-w-0 px-2 gap-1.5 overflow-hidden">
+          <div style="width: 28px; min-width: 28px;" class="flex items-center justify-center flex-shrink-0">${prevBtn}</div>
+          <div class="flex-shrink-0 flex items-center">${itemsHtml}</div>
+          <div style="width: 72px; min-width: 72px;" class="flex items-center justify-start flex-shrink-0">${nextBtnAndIndicator}</div>
+        </div>
+      `;
     } else {
-      recentFeedHtml = `<div class="flex-1"></div>`;
+      recentFeedHtml = `
+        <div class="flex items-center justify-start flex-1 min-w-0 px-2 gap-1.5 text-xs text-textSub/50">
+          <div style="width: 28px; min-width: 28px;" class="flex-shrink-0"></div>
+          <span class="font-mono">（配布履歴なし）</span>
+        </div>
+      `;
     }
 
     html += `
-      <div class="flex flex-col sm:flex-row items-stretch lg:items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] gap-2 transition-colors">
-        <div class="flex items-center justify-between w-full sm:w-auto gap-2.5 flex-shrink-0">
-          <div class="flex items-center gap-2">
-            ${rankBadgeHtml}
-            <div class="flex items-center gap-1.5">
-              <span class="font-bold text-white text-lg font-mono">${escapeHtml(item.staffId || '--')}</span>
-              ${item.name ? `<span class="text-sm text-[#94A3B8] font-normal">(${escapeHtml(item.name)})</span>` : ''}
-            </div>
-          </div>
-          <div class="text-right sm:hidden flex-shrink-0">
-            <span class="text-lg font-mono font-bold text-white">${(Number(item.count) || 0).toLocaleString()}</span>
-            <span class="text-xs text-[#94A3B8] font-normal ml-0.5">枚 完了</span>
+      <div class="flex flex-row items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] gap-2 transition-colors">
+        <!-- カラム1: スタッフ情報 (固定幅 210px・truncateで押し広げ防止) -->
+        <div style="width: 210px; min-width: 210px; max-width: 210px;" class="flex items-center justify-start flex-shrink-0 gap-2 min-w-0">
+          ${rankBadgeHtml}
+          <div class="flex items-center gap-1.5 min-w-0 truncate">
+            <span class="font-bold text-white text-base lg:text-lg font-mono flex-shrink-0">${escapeHtml(item.staffId || '--')}</span>
+            ${item.name ? `<span class="text-xs lg:text-sm text-[#94A3B8] font-normal truncate" title="${escapeHtml(item.name)}">(${escapeHtml(item.name)})</span>` : ''}
           </div>
         </div>
+
+        <!-- カラム2: 配布履歴フィード (左寄せ固定幅スペーサーでバッジX座標を完全固定) -->
         ${recentFeedHtml}
-        <div class="hidden sm:block text-right flex-shrink-0">
-          <span class="text-lg font-mono font-bold text-white">${(Number(item.count) || 0).toLocaleString()}</span>
-          <span class="text-xs text-[#94A3B8] font-normal ml-0.5">枚 完了</span>
+
+        <!-- カラム3: 完了枚数 (固定幅 110px・右寄せ) -->
+        <div style="width: 110px; min-width: 110px; max-width: 110px;" class="flex items-center justify-end flex-shrink-0 text-right">
+          <span class="text-base lg:text-lg font-mono font-bold text-white">${(Number(item.count) || 0).toLocaleString()}</span>
+          <span class="text-xs text-[#94A3B8] font-normal ml-1 flex-shrink-0">枚 完了</span>
         </div>
       </div>
     `;
