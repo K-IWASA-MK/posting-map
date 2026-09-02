@@ -64,5 +64,6 @@
   "docs/audit/temp/render.js",
   "docs/audit/proof.txt",
   "docs/audit/sm6a_before.txt",
-  "docs/DEVELOPMENT_GUIDE.md"
+  "docs/DEVELOPMENT_GUIDE.md",
+  "scripts/operations/manager.js"
 ]
