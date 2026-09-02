@@ -23,8 +23,7 @@ window.onunhandledrejection = function(event) {
   logDebug(`UNHANDLED PROMISE: ${event.reason}`);
 };
 
-let allPoints = [], roster = [], rankingData = [];
-let _summaryPromise = null; // ⑤ getSystemSummary並列プリフェッチ用
+let allPoints = [], rankingData = [];
 let _rankingFetched = false;  // ランキング遅延取得済みフラグ
 let _stockFetched = false;    // 在庫一覧取得済みフラグ
 let _stockData = [];          // 在庫一覧キャッシュデータ
@@ -242,7 +241,7 @@ window.setPinInProgress = function(rowId, action) {
 
 async function startApp(profile = null, registrationPromise = null) {
   try {
-    // Gen 2 独立並列リクエスト: ヘッダー専用 System Summary の即時並列発注
+    // ヘッダー専用 System Summary の即時並列発注
     fetchSystemSummary();
 
     // 1. 初回ユーザーの場合、何よりも先に登録処理の完了を待つ
@@ -853,7 +852,7 @@ async function submitMissionComplete(areaName, rowId) {
       // 4. enqueueSync() 完了
       console.log(`[SUBMIT_TRACE] [${(performance.now() - t0).toFixed(2)}ms] [T4] enqueueSync COMPLETED`);
 
-      // 5. CEO Phase 4-B: GAS保存成功(キュー消滅)を待機 (bc78c47の正常動作を復元)
+      // 5. GAS保存成功(キュー消滅)を待機
       let pollCount = 0;
       while (true) {
         pollCount++;
@@ -900,7 +899,7 @@ async function submitMissionComplete(areaName, rowId) {
     console.error(`[SUBMIT_TRACE] [${(performance.now() - t0).toFixed(2)}ms] [T_ERR] catch ERROR:`, err);
     p.syncStatus = 'pending';
 
-    // エラー時のみ元の表示と操作可能状態に復帰 (bc78c47の正常動作を復元)
+    // エラー時のみ元の表示と操作可能状態に復帰
     if (submitBtn) {
       submitBtn.disabled = false;
       submitBtn.style.opacity = '1';
@@ -1382,7 +1381,6 @@ function navigateToAreaTab() {
 
 
 /**
- * Sprint G2-1: System Summary Foundation
  * updateStats(summaryData) - 表示専用関数 (SystemSummaryService 参照)
  */
 function updateStats(summaryData = null) {
@@ -1431,8 +1429,7 @@ async function fetchSystemSummary(forceRefresh = false) {
 }
 
 /**
- * Sprint G2-2: Tier 1 API Foundation (Generation 2)
- * fetchTier1() - Tier 1 市町村サマリー取得 (Gen 2 段階移行用)
+ * fetchTier1() - Tier 1 市町村サマリー取得
  */
 let tier1Cache = null;
 
@@ -1443,8 +1440,6 @@ async function fetchTier1() {
     if (cities && cities.length > 0) {
       tier1Cache = cities;
 
-      // Tier 1 再取得時は Tier 2 キャッシュを破棄
-      tier2CacheMap = {};
 
       if (typeof updateStorageLocationDropdown === 'function') {
         updateStorageLocationDropdown(tier1Cache);
@@ -1517,8 +1512,6 @@ async function safeInitApp() {
 
         let userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
 
-        // ⑤ getSystemSummaryを軽量並列プリフェッチ開始
-        _summaryPromise = callApiPost('getSystemSummary');
 
         // 【通常起動】既にユーザー登録・LINE連携キャッシュがある場合は、同期通信を待たずに即時起動
         if (userInfo.id && userInfo.lineUserId) {
