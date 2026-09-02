@@ -64,7 +64,6 @@ function openPointDetailModal(rowId) {
           address: `${csvRow.city_name} ${csvRow.town_name}`,
           cityName: csvRow.city_name,
           townName: csvRow.town_name,
-          name: csvRow.town_name, // legacy compatibility
           lat: csvRow.latitude,
           latitude: csvRow.latitude,
           lng: csvRow.longitude,
@@ -98,8 +97,6 @@ function openPointDetailModal(rowId) {
   if (!p) {
     return;
   }
-
-  if (!p) return;
 
   window.currentPointDetailRowId = rowId;
   const modalContent = $('detail-modal-content');
@@ -195,32 +192,10 @@ window.cancelMissionComplete = function(rowId) {
 
 // Render single point detail modal contents
 function renderDetailModalContent(p) {
-  const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
-  const myId = userInfo.id || '';
-  const myName = `${userInfo.last || ''} ${userInfo.first || ''}`.trim();
-
-  // 他人の完了実績か判定
-  const isOtherStaff = p.isDone && (
-    (p.staffId && p.staffId !== myId) ||
-    (!p.staffId && p.staffName && p.staffName !== myName)
-  );
-
-  // 配布完了時は編集ロック
-  const isLocked = p.isDone;
-
-
   const areaName = window.currentCityDetailAreaName || '';
 
   // 「大字」除去 + 余分な空白整理
   const cleanAddr = (p.address || '').replace(/大字/g, '').replace(/\s+/g, ' ').trim();
-  // 住所の文字数に応じてフォントサイズを自動調整（折り返し・はみ出し防止）
-  let addrFontSizeClass = 'text-lg';
-  if (cleanAddr.length > 16) {
-    addrFontSizeClass = 'text-sm';
-  } else if (cleanAddr.length > 10) {
-    addrFontSizeClass = 'text-base';
-  }
-
   return `
     <div style="display: flex; flex-direction: column; gap: 12px; width: 100%; box-sizing: border-box;">
       <!-- 1行目: 住所バッジ（中央寄せ） -->
@@ -518,7 +493,7 @@ function renderStorageList(stocks) {
             <span class="text-base font-black text-[#22c55e] font-mono">${(s.count || 0).toLocaleString()}枚</span>
             <button type="button"
               ontouchstart="this.style.transform='scale(0.92)'; this.style.opacity='0.7';"
-              ontouchend="this.style.transform='scale(1)'; this.style.opacity='1'; event.preventDefault(); var r=this.closest('.stock-row'); if(window.openTransferRequestDialog){window.openTransferRequestDialog(r.dataset.name,r.dataset.id,r.dataset.loc,parseFloat(r.dataset.count)||0,r.dataset.storageId||'');}else{alert('[DEBUG]関数未定義');}"
+              ontouchend="this.style.transform='scale(1)'; this.style.opacity='1'; event.preventDefault(); var r=this.closest('.stock-row'); if(window.openTransferRequestDialog){window.openTransferRequestDialog(r.dataset.name,r.dataset.id,r.dataset.loc,parseFloat(r.dataset.count)||0,r.dataset.storageId||'');}"
               ontouchcancel="this.style.transform='scale(1)'; this.style.opacity='1';"
               onclick="var r=this.closest('.stock-row'); if(window.openTransferRequestDialog){window.openTransferRequestDialog(r.dataset.name,r.dataset.id,r.dataset.loc,parseFloat(r.dataset.count)||0,r.dataset.storageId||'');}"
               style="background: rgba(6,199,85,0.1); border-color: rgba(6,199,85,0.3); color: #06C755; gap: 6px; transition: transform 0.15s ease, opacity 0.15s ease; touch-action: manipulation;"
