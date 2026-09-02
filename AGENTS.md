@@ -75,7 +75,9 @@ AI社員の作業は、必ず以下の「絶対実行順序」と「Verification
    - **V1 Static Verification**: `git diff`, `git diff --check`, Scope確認, 構文/Lint, Dead Code確認。
    - **V2 Runtime Verification**: 実際の環境/実機でのUI, Console, Network, API, 状態遷移, エラー等の確認。（静的確認のみでのPASS禁止）
    - **V3 Regression Verification**: 既存機能への副作用がないことの確認。
-5. **Commit Gate**: V1〜V3検証のPASS、Evidence取得、Scope監査（Staged Diff）が完了した場合のみCommitを許可。
+   - **Auditor Subagent Verification**: 独立検品サブエージェント（`.agents/agents/auditor/agent.md`）へ検品依頼パッケージを渡し、3観点でのPASS判定を取得する。
+   - **Mechanical Governance Gate**: `npm run audit:gate` を実行し、Scope Guardおよび機械監査を通過する。
+5. **Commit Gate**: V1〜V3検証のPASS、Auditor SubagentのPASS、Mechanical Governance Gateの通過、Scope監査（Staged Diff）がすべて完了した場合のみCommitを許可。
 6. **Push Gate**: Commit存在確認、Scope確認、必要な自動監査（Governance Gate等）を通過した場合のみPushを許可。
 7. **Crisp Deployment Gate**: Push完了後、実稼働環境への反映が必要な変更（Deployment対象変更）である場合、独立工程として実際の稼働環境へのデプロイを実施する。実環境への反映を必要としない変更は「Deployment対象外」と明示的に判定・記録すること。対象外であることを根拠なく推測してはならない。
 8. **V4 Deployment Verification**:
@@ -139,17 +141,23 @@ AI社員の作業は、必ず以下の「絶対実行順序」と「Verification
 - **検証の自己完結**: 実機確認をユーザーに委ねてはならない。自ら起動し、DOM/Console/Networkレベルで検証を行う。
 - **越権行為の禁止**: 「仕様の新規定義」「Scopeの勝手な拡張」「未検証でのPASS判定」は絶対禁止。
 
-### Role: Auditor (監査担当)
+### Role: Auditor (監査担当 / 独立検品サブエージェント)
+#### 実体と権限
+- **実体定義（SSOT）**: [`.agents/agents/auditor/agent.md`](.agents/agents/auditor/agent.md) に集約。
+- **物理的 READ ONLY の強制**: 利用ツールは `view_file`, `grep_search`, `list_dir` に限定。ファイル編集権限（`write`系）およびOSコマンド実行権限（`run_command`）を完全剥奪し、非破壊な検品に徹する。
+- **Handover Package（受領仕様）**: Developerから「①タスク/Scope、②変更ファイル一覧、③差分、④客観的Evidence」を受領して独立査読する。
+
 #### 担当範囲
-- Developerがスコープ外のファイルを変更していないか監視する。
-- 実装完了後、必ず実環境での実行ログや画面結果があるか（Evidence）を確認する。
-- 証跡（Evidence JSON）が偽造や予定結果の自己申告になっていないかを厳しく判定する。
+- 最上位絶対原則（地区非依存・コピー原則）の遵守を監視（`active/` への地区固有情報・ハードコードの混入検知）。
+- スコープ厳守および余計な差分（リファクタリング、フォーマット変更、コメント残置）の排除。
+- 客観的Evidenceの真偽確認（推測PASSの排除、No Evidence No PASS）。
 
 #### 監査・却下基準 (Rejection Criteria)
-- 以下の状態である場合、完了報告を**却下（Reject）**し、Developerへ差し戻す。
-  - 実機確認をユーザーに任せようとしている。
+- 以下の状態である場合、コミットおよび完了報告を**却下（Reject）**し、Developerへ差し戻す（自分では直さない）。
+  - 地区固有情報や地区分岐のハードコードが存在する。
+  - 許可Scope外の変更、不要なリファクタリング、コメントアウト残置が存在する。
+  - 実機確認をユーザーに任せようとしている、または客観的Evidenceが不足・推測である。
   - エラーが未解決のまま報告しようとしている。
-  - commit, push が完了していない（Git状態がクリーンでない）。
   - SSOTおよびScopeの自動監査（`npm run audit:gate`）を通過していない。
 
 ## 📋 Workflows
@@ -169,6 +177,8 @@ AI社員の作業は、必ず以下の「絶対実行順序」と「Verification
 7. **修正**: Scope内の問題であれば直ちに修正する。
 8. **再検証**: 修正後、再度ローカル検証を回す（PASSするまで6〜8を繰り返す）。
 9. **PASS**: 全てのエラーが解消されたことを客観的証跡として確認する。
+   - 9.1 **Auditor検品**: 独立サブエージェント `auditor` に検品依頼パッケージを渡し、3観点でのPASSを取得する。
+   - 9.2 **Mechanical Gate**: `npm run audit:gate` を実行し、機械的Scope/ガバナンスチェックのPASSを確認する。
 10. **commit**: 差分を確認し、変更をGitコミットする。
 11. **push**: リモートリポジトリへ反映する。
 12. **Git状態最終確認**: `git status` がクリーンであることを確認。
