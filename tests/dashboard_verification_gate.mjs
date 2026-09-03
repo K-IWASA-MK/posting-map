@@ -129,8 +129,8 @@ async function runDashboardQualityGate() {
       }
     });
 
-    await page1.goto('http://localhost:8080/scripts/operations/index.html', { waitUntil: 'networkidle' });
-    await page1.waitForFunction(() => window.DashboardState && window.DashboardState.masterLoadStatus === 'LOADED', { timeout: 10000 });
+    await page1.goto('http://localhost:8080/scripts/operations/index.html', { waitUntil: 'load' });
+    await page1.waitForFunction(() => window.DashboardState && window.DashboardState.masterLoadStatus === 'LOADED' && window.DashboardState.summary, { timeout: 15000 });
 
     const state1 = await page1.evaluate(() => {
       return {
@@ -198,7 +198,7 @@ async function runDashboardQualityGate() {
     await setupAuthenticatedPage(page3);
     await page3.route('**/*.csv', route => route.abort());
 
-    await page3.goto('http://localhost:8080/scripts/operations/index.html', { waitUntil: 'networkidle' });
+    await page3.goto('http://localhost:8080/scripts/operations/index.html', { waitUntil: 'load' });
     await page3.waitForFunction(() => window.DashboardState && (window.DashboardState.ranking?.length > 0 || window.DashboardState.stocks?.length > 0), { timeout: 15000 }).catch(() => {});
 
     const state3 = await page3.evaluate(() => {

@@ -1733,7 +1733,7 @@ function renderMainStageMobile() {
   function updateDisplay() {
     const pct = isExpired ? 0 : Math.round((remainingSec / 30) * 100);
     container.innerHTML = `
-      <div class="flex-1 flex flex-col lg:flex-row items-center justify-center gap-6 p-4 max-w-4xl mx-auto w-full">
+      <div class="flex flex-col lg:flex-row lg:items-stretch justify-center gap-6 p-4 max-w-4xl mx-auto w-full my-auto">
         <div class="w-full max-w-sm flex flex-col items-center p-6 rounded-2xl bg-[#0B1019] border border-borderNormal shadow-2xl">
           <div class="text-xs font-bold text-textSub uppercase tracking-wider mb-3 flex items-center gap-1.5">
             <span class="w-2 h-2 rounded-full ${isExpired ? 'bg-statusRed' : 'bg-statusGreen animate-pulse'}"></span>
@@ -1770,8 +1770,8 @@ function renderMainStageMobile() {
           </button>
         </div>
 
-        <div class="flex-1 max-w-md flex flex-col gap-4">
-          <div class="p-5 rounded-2xl bg-[#0B1019] border border-borderNormal space-y-4">
+        <div class="flex-1 max-w-md flex flex-col justify-between">
+          <div class="p-5 rounded-2xl bg-[#0B1019] border border-borderNormal flex-1 flex flex-col justify-between mb-3.5">
             <h3 class="text-sm font-bold text-white flex items-center gap-2">
               <span>📱</span>
               <span>外出先スマートフォン連携手順</span>
@@ -1804,7 +1804,7 @@ function renderMainStageMobile() {
             </div>
           </div>
 
-          <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between text-xs">
+          <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between text-xs flex-shrink-0">
             <div class="flex items-center gap-2">
               <span class="text-statusGreen text-base">🛡️</span>
               <span class="text-textSub">端末セキュリティ</span>
