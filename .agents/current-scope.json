@@ -68,5 +68,7 @@
   "scripts/operations/manager.js",
   "active/dashboard/app.js",
   "scripts/operations/index.html",
-  "active/business/area/tier1_service.js"
+  "active/business/area/tier1_service.js",
+  "mie-03/dashboard/index.html",
+  "mie-03/dashboard/manager.js"
 ]
