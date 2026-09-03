@@ -1772,7 +1772,7 @@ function renderMainStageMobile() {
 
         <div class="flex-1 max-w-md flex flex-col justify-between">
           <div class="p-5 rounded-2xl bg-[#0B1019] border border-borderNormal flex-1 flex flex-col justify-between mb-3.5">
-            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <h3 class="text-sm font-bold text-white flex items-center justify-center gap-2">
               <span>📱</span>
               <span>外出先スマートフォン連携手順</span>
             </h3>
