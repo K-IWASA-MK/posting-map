@@ -239,7 +239,31 @@ window.setPinInProgress = function(rowId, action) {
   return pinActionPromiseChain;
 };
 
-async function startApp(profile = null, registrationPromise = null) {
+let appStartupTriggered = false;
+let mainAppVisible = false;
+
+function showMainApp() {
+  if (mainAppVisible) return;
+
+  const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+  if (!userInfo.id) return;
+
+  mainAppVisible = true;
+  switchPage('settings');
+  $('app').classList.remove('hidden');
+  $('app').classList.remove('opacity-0');
+
+  const loadingEl = $('loading');
+  if (loadingEl) {
+    loadingEl.classList.add('opacity-0');
+    setTimeout(() => loadingEl.classList.add('hidden'), 400);
+  }
+}
+
+async function startApp() {
+  if (appStartupTriggered) return;
+  appStartupTriggered = true;
+
   try {
     fetchSystemSummary();
 
@@ -248,16 +272,7 @@ async function startApp(profile = null, registrationPromise = null) {
       logDebug("[loadData] Background error: " + (err ? err.message : err));
     });
 
-    // 3. ID画面へ即時に切り替える
-    switchPage('settings');
-    $('app').classList.remove('hidden');
-    $('app').classList.remove('opacity-0');
-
-    const loadingEl = $('loading');
-    if (loadingEl) {
-      loadingEl.classList.add('opacity-0');
-      setTimeout(() => loadingEl.classList.add('hidden'), 400);
-    }
+    showMainApp();
   } catch (err) {
     console.error("Startup error:", err);
     logDebug("Startup error: " + err.message);
@@ -351,6 +366,7 @@ function triggerBackgroundRegistration(profile) {
         renderSettings();
       }
       updateBottomNavVisibility();
+      showMainApp();
     } else {
       throw new Error("GAS registration returned success=false");
     }
@@ -1484,16 +1500,7 @@ async function safeInitApp() {
     throw new Error("LIFF ID missing in client configuration.");
   }
 
-  let userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
-  let hasPreRendered = false;
-  if (userInfo.id) {
-    hasPreRendered = true;
-    startApp({
-      displayName: userInfo.last || '',
-      userId: userInfo.lineUserId || '',
-      pictureUrl: userInfo.picture || ''
-    }, null);
-  }
+  startApp();
 
   if (typeof liff !== 'undefined') {
     try {
@@ -1514,17 +1521,9 @@ async function safeInitApp() {
         logDebug("LOGIN OK");
         sessionStorage.removeItem('liff_initializing');
 
-        userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+        let userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
 
         if (userInfo.id) {
-          if (!hasPreRendered) {
-            startApp({
-              displayName: userInfo.last || '',
-              userId: userInfo.lineUserId || '',
-              pictureUrl: userInfo.picture || ''
-            }, null);
-          }
-
           liff.getProfile().then(profile => {
             logDebug("Background profile refresh OK");
             userInfo.lineUserId = profile.userId;
@@ -1539,16 +1538,13 @@ async function safeInitApp() {
           });
 
         } else {
-          // 【初回ログイン/キャッシュ未確立時】同期的にgetProfileを取得して登録へ進む
           try {
-            // LINE内部トークン処理完了のための安全ウェイト（300ms）
             await new Promise(r => setTimeout(r, 300));
 
             logDebug("PROFILE START");
             const profile = await liff.getProfile();
             logDebug("PROFILE OK");
 
-            // トークン確立後に OAuth パラメータを安全に消去
             try {
               const cleanUrl = window.location.origin + window.location.pathname + window.location.search.replace(/[\?&](code|liff\.state)=[^&]*/g, '');
               window.history.replaceState({}, document.title, cleanUrl);
@@ -1560,11 +1556,7 @@ async function safeInitApp() {
             setLoadingProgress(65, 'PROFILE LOADED');
             console.log(profile);
 
-            // 初回登録をバックグラウンド(非同期)で実行
-            const regPromise = triggerBackgroundRegistration(profile);
-
-            logDebug("START APP");
-            startApp(profile, regPromise);
+            triggerBackgroundRegistration(profile);
           } catch (err) {
             console.error("LIFF PROFILE ERROR", err);
             logDebug("LIFF PROFILE ERROR: " + err.message);
