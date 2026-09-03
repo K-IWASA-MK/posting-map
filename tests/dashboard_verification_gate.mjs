@@ -104,7 +104,8 @@ async function runDashboardQualityGate() {
       }
       await route.continue();
     });
-    await pageLock.goto('http://localhost:8080/scripts/operations/index.html', { waitUntil: 'networkidle' });
+    const DASHBOARD_URL = 'http://localhost:8080/mie-03/dashboard/index.html';
+    await pageLock.goto(DASHBOARD_URL, { waitUntil: 'load' });
     const isLockScreenActive = await pageLock.evaluate(() => {
       const lockEl = document.getElementById('device-lock-screen');
       const mainEl = document.querySelector('main');
@@ -129,7 +130,7 @@ async function runDashboardQualityGate() {
       }
     });
 
-    await page1.goto('http://localhost:8080/scripts/operations/index.html', { waitUntil: 'load' });
+    await page1.goto(DASHBOARD_URL, { waitUntil: 'load' });
     await page1.waitForFunction(() => window.DashboardState && window.DashboardState.masterLoadStatus === 'LOADED' && window.DashboardState.summary, { timeout: 15000 });
 
     const state1 = await page1.evaluate(() => {
@@ -179,7 +180,7 @@ async function runDashboardQualityGate() {
     await setupAuthenticatedPage(page2);
     let reloadSuccessCount = 0;
     for (let i = 1; i <= 7; i++) {
-      await page2.goto('http://localhost:8080/scripts/operations/index.html', { waitUntil: 'load' });
+      await page2.goto(DASHBOARD_URL, { waitUntil: 'load' });
       await page2.waitForFunction(() => window.DashboardState && window.DashboardState.masterLoadStatus === 'LOADED', { timeout: 10000 });
       const status = await page2.evaluate(() => window.DashboardState?.masterLoadStatus);
       if (status === 'LOADED') {
@@ -198,7 +199,7 @@ async function runDashboardQualityGate() {
     await setupAuthenticatedPage(page3);
     await page3.route('**/*.csv', route => route.abort());
 
-    await page3.goto('http://localhost:8080/scripts/operations/index.html', { waitUntil: 'load' });
+    await page3.goto(DASHBOARD_URL, { waitUntil: 'load' });
     await page3.waitForFunction(() => window.DashboardState && (window.DashboardState.ranking?.length > 0 || window.DashboardState.stocks?.length > 0), { timeout: 15000 }).catch(() => {});
 
     const state3 = await page3.evaluate(() => {
@@ -230,7 +231,7 @@ async function runDashboardQualityGate() {
     console.log("\n▶ [PHASE 4] cities SSOT & ノイズ除外 & 選択時展開維持確認 実行中...");
     const page4 = await browser.newPage();
     await setupAuthenticatedPage(page4);
-    await page4.goto('http://localhost:8080/scripts/operations/index.html', { waitUntil: 'load' });
+    await page4.goto(DASHBOARD_URL, { waitUntil: 'load' });
     await page4.waitForFunction(() => window.DashboardState && window.DashboardState.cities.length > 0, { timeout: 10000 });
 
     const citiesCheck = await page4.evaluate(() => {
@@ -330,7 +331,7 @@ async function runDashboardQualityGate() {
     console.log("\n▶ [PHASE 5] fitBounds & 異常座標防御試験 実行中...");
     const page5 = await browser.newPage();
     await setupAuthenticatedPage(page5);
-    await page5.goto('http://localhost:8080/scripts/operations/index.html', { waitUntil: 'load' });
+    await page5.goto(DASHBOARD_URL, { waitUntil: 'load' });
     await page5.waitForFunction(() => window.DashboardState && window.DashboardState.masterLoadStatus === 'LOADED', { timeout: 10000 });
 
     const fitBoundsCheck = await page5.evaluate(() => {
