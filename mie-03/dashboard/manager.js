@@ -190,7 +190,7 @@ async function initDashboard() {
   
   await loadAddressMaster();
 
-  await loadBoundariesGeoJson();
+  loadBoundariesGeoJson();
 
   await loadElectionTurnoutData();
 
