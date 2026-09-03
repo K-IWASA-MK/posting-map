@@ -139,6 +139,58 @@ function getAreaStatusConfig(isCompleted, isInProgress) {
   return AREA_STATUS_CONFIG.UNALLOCATED;
 }
 
+function getOrCreateDeviceKey() {
+  const STORAGE_KEY = 'PMS_COCKPIT_DEVICE_KEY';
+  let key = '';
+  try {
+    key = localStorage.getItem(STORAGE_KEY) || '';
+  } catch (e) {}
+
+  if (!key) {
+    if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+      const bytes = new Uint8Array(32);
+      crypto.getRandomValues(bytes);
+      key = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+    } else {
+      key = 'DEV_' + Math.random().toString(36).substring(2, 15) + '_' + Date.now().toString(36);
+    }
+    try {
+      localStorage.setItem(STORAGE_KEY, key);
+    } catch (e) {}
+  }
+  return key;
+}
+
+async function verifyOrRegisterDevice() {
+  try {
+    const res = await callApiPost('registerOrValidateDevice');
+    if (res && res.success && res.authorized) {
+      if (res.deviceId) {
+        DashboardState.currentDeviceId = res.deviceId;
+      }
+      return true;
+    }
+    return false;
+  } catch (err) {
+    console.error('[Device Auth Error]', err);
+    return false;
+  }
+}
+
+function showDeviceLockScreen() {
+  const lockEl = document.getElementById('device-lock-screen');
+  if (lockEl) {
+    lockEl.classList.remove('hidden');
+    lockEl.classList.add('flex');
+  }
+  const mainEl = document.querySelector('main');
+  if (mainEl) mainEl.style.display = 'none';
+  const headerEl = document.querySelector('header');
+  if (headerEl) headerEl.style.display = 'none';
+  const navEl = document.querySelector('nav');
+  if (navEl) navEl.style.display = 'none';
+}
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initDashboard);
 } else {
@@ -146,6 +198,12 @@ if (document.readyState === 'loading') {
 }
 
 async function initDashboard() {
+  const isAuthOk = await verifyOrRegisterDevice();
+  if (!isAuthOk) {
+    showDeviceLockScreen();
+    return;
+  }
+
   initMap();
   updateNavHighlight('areas');
   
@@ -203,7 +261,8 @@ async function fetchStaticDataFile(filename) {
  */
 async function callApiPost(action, payload = {}) {
   const url = `${getApiUrl()}?_t=${Date.now()}`;
-  const body = JSON.stringify({ action, ...payload });
+  const deviceKey = getOrCreateDeviceKey();
+  const body = JSON.stringify({ action, deviceKey, ...payload });
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 25000);

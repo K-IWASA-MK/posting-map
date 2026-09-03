@@ -176,6 +176,22 @@
 </head>
 <body class="bg-appBg text-textMain h-screen h-[100dvh] w-screen overflow-hidden flex flex-col lg:flex-row antialiased">
 
+  <!-- ==================== DEVICE ACCESS LOCK SCREEN ==================== -->
+  <div id="device-lock-screen" class="hidden fixed inset-0 z-50 bg-[#0B1019] flex-col items-center justify-center p-6 text-center select-none">
+    <div class="w-16 h-16 rounded-2xl bg-statusRed/10 border border-statusRed/30 flex items-center justify-center text-3xl mb-4 shadow-lg shadow-statusRed/10 animate-pulse">
+      🛡️
+    </div>
+    <h2 class="text-xl font-bold text-white mb-2">端末アクセスが拒否されました</h2>
+    <p class="text-sm text-textSub max-w-md mb-6 leading-relaxed">
+      この端末は本支部の許可端末として登録されていません。<br>
+      契約端末台数の上限に達しているか、アクセス権限がありません。<br>
+      支部長の管理端末（PC-01）または管理者へお問い合わせください。
+    </p>
+    <div class="px-4 py-2 rounded-xl bg-cardBg border border-borderNormal text-xs font-mono text-textSub/70">
+      STATUS: 403 UNAUTHORIZED / DEVICE_LIMIT_EXCEEDED
+    </div>
+  </div>
+
   <!-- ==================== MOBILE TOP HEADER (lg:hidden) ==================== -->
   <header class="lg:hidden h-12 bg-containerBg border-b border-borderNormal px-3 flex items-center justify-between flex-shrink-0 z-30">
     <div class="flex items-center gap-2">

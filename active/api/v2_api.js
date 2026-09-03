@@ -61,7 +61,11 @@ function doGet(e) {
     'getTransferRequests'
   ].includes(action);
 
-  if (isDashboardAction) {
+  if (action === 'registerOrValidateDevice') {
+    const regResult = registerOrValidateDevice(params);
+    return ContentService.createTextOutput(JSON.stringify(regResult))
+      .setMimeType(ContentService.MimeType.JSON);
+  } else if (isDashboardAction) {
     const dashAuth = authenticateDashboardRequest(params);
     if (!dashAuth.success) {
       return ContentService.createTextOutput(JSON.stringify(dashAuth))
@@ -184,7 +188,11 @@ function doPost(e) {
     'getTransferRequests'
   ].includes(action);
 
-  if (isDashboardAction) {
+  if (action === 'registerOrValidateDevice') {
+    const regResult = registerOrValidateDevice(postData || params || {});
+    return ContentService.createTextOutput(JSON.stringify(regResult))
+      .setMimeType(ContentService.MimeType.JSON);
+  } else if (isDashboardAction) {
     const dashAuth = authenticateDashboardRequest(postData || params || {});
     if (!dashAuth.success) {
       return ContentService.createTextOutput(JSON.stringify(dashAuth))
@@ -741,6 +749,179 @@ function setPinInProgress(data) {
   }
 }
 
+function computeDeviceSha256(deviceKey) {
+  if (!deviceKey || typeof deviceKey !== 'string' || !deviceKey.trim()) return '';
+  try {
+    const rawDigest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, deviceKey.trim(), Utilities.Charset.UTF_8);
+    let hexHash = '';
+    for (let i = 0; i < rawDigest.length; i++) {
+      let byte = rawDigest[i];
+      if (byte < 0) byte += 256;
+      let hex = byte.toString(16);
+      if (hex.length === 1) hex = '0' + hex;
+      hexHash += hex;
+    }
+    return hexHash;
+  } catch (e) {
+    return '';
+  }
+}
+
+function getOrCreateDeviceManagementSheet(ss) {
+  const sheetName = (typeof CONFIG !== 'undefined' && typeof CONFIG.get === 'function' && CONFIG.get("SHEET_DEVICE_MANAGEMENT")) || "端末管理";
+  let sheet = ss.getSheetByName(sheetName);
+  if (!sheet) {
+    sheet = ss.insertSheet(sheetName);
+    const headers = [["branchName", "contractedDeviceCount", "pc01Hash", "pc02Hash", "mobileHash", "registeredAt", "updatedAt", "auditLog"]];
+    sheet.getRange(1, 1, 1, headers[0].length).setValues(headers);
+    const branchName = ss.getName();
+    const nowStr = Utilities.formatDate(new Date(), "JST", "yyyy/MM/dd HH:mm:ss");
+    sheet.appendRow([branchName, 1, "", "", "", nowStr, nowStr, "Sheet initialized"]);
+  }
+  return sheet;
+}
+
+function syncPropertiesDeviceHashes(hashes) {
+  try {
+    const cleanList = (hashes || []).map(h => String(h || '').trim()).filter(Boolean);
+    PropertiesService.getScriptProperties().setProperty('COCKPIT_DEVICE_HASHES', cleanList.join(','));
+  } catch (e) {}
+}
+
+function registerOrValidateDevice(payload) {
+  const deviceKey = payload && (payload.deviceKey || payload.cockpitDeviceKey || payload.token);
+  if (!deviceKey || typeof deviceKey !== 'string' || !deviceKey.trim()) {
+    return {
+      success: false,
+      authorized: false,
+      code: "MISSING_DEVICE_KEY",
+      message: "端末キーが必要です。"
+    };
+  }
+
+  const clientHash = computeDeviceSha256(deviceKey);
+  if (!clientHash) {
+    return {
+      success: false,
+      authorized: false,
+      code: "INVALID_DEVICE_KEY",
+      message: "無効な端末キーです。"
+    };
+  }
+
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+  } catch (e) {
+    return {
+      success: false,
+      authorized: false,
+      code: "LOCK_TIMEOUT",
+      message: "システムが混雑しています。再度お試しください。"
+    };
+  }
+
+  try {
+    const ss = getSS();
+    const sheet = getOrCreateDeviceManagementSheet(ss);
+    const lastRow = sheet.getLastRow();
+    if (lastRow < 2) {
+      const branchName = ss.getName();
+      const nowStr = Utilities.formatDate(new Date(), "JST", "yyyy/MM/dd HH:mm:ss");
+      sheet.appendRow([branchName, 1, "", "", "", nowStr, nowStr, "Default row initialized"]);
+    }
+
+    const rowValues = sheet.getRange(2, 1, 1, 8).getValues()[0];
+    const branchName = rowValues[0] || ss.getName();
+    const contractedCount = parseInt(rowValues[1], 10) || 1;
+    let pc01Hash = String(rowValues[2] || '').trim();
+    let pc02Hash = String(rowValues[3] || '').trim();
+    let mobileHash = String(rowValues[4] || '').trim();
+
+    if (clientHash === pc01Hash) {
+      syncPropertiesDeviceHashes([pc01Hash, pc02Hash, mobileHash]);
+      return {
+        success: true,
+        authorized: true,
+        deviceId: "PC-01",
+        branchName: branchName,
+        contractedDeviceCount: contractedCount
+      };
+    }
+    if (clientHash === pc02Hash) {
+      syncPropertiesDeviceHashes([pc01Hash, pc02Hash, mobileHash]);
+      return {
+        success: true,
+        authorized: true,
+        deviceId: "PC-02",
+        branchName: branchName,
+        contractedDeviceCount: contractedCount
+      };
+    }
+    if (clientHash === mobileHash) {
+      syncPropertiesDeviceHashes([pc01Hash, pc02Hash, mobileHash]);
+      return {
+        success: true,
+        authorized: true,
+        deviceId: "MOBILE-01",
+        branchName: branchName,
+        contractedDeviceCount: contractedCount
+      };
+    }
+
+    const nowStr = Utilities.formatDate(new Date(), "JST", "yyyy/MM/dd HH:mm:ss");
+
+    if (!pc01Hash && contractedCount >= 1) {
+      pc01Hash = clientHash;
+      sheet.getRange(2, 3).setValue(pc01Hash);
+      sheet.getRange(2, 7).setValue(nowStr);
+      sheet.getRange(2, 8).setValue("PC-01 auto-registered (" + nowStr + ")");
+      syncPropertiesDeviceHashes([pc01Hash, pc02Hash, mobileHash]);
+      return {
+        success: true,
+        authorized: true,
+        registered: true,
+        deviceId: "PC-01",
+        branchName: branchName,
+        contractedDeviceCount: contractedCount
+      };
+    }
+
+    if (pc01Hash && !pc02Hash && contractedCount >= 2) {
+      pc02Hash = clientHash;
+      sheet.getRange(2, 4).setValue(pc02Hash);
+      sheet.getRange(2, 7).setValue(nowStr);
+      sheet.getRange(2, 8).setValue("PC-02 auto-registered (" + nowStr + ")");
+      syncPropertiesDeviceHashes([pc01Hash, pc02Hash, mobileHash]);
+      return {
+        success: true,
+        authorized: true,
+        registered: true,
+        deviceId: "PC-02",
+        branchName: branchName,
+        contractedDeviceCount: contractedCount
+      };
+    }
+
+    return {
+      success: false,
+      authorized: false,
+      code: "DEVICE_LIMIT_EXCEEDED",
+      message: "端末契約上限に達しています。この端末は許可されていません。",
+      contractedDeviceCount: contractedCount
+    };
+  } catch (err) {
+    return {
+      success: false,
+      authorized: false,
+      code: "SERVER_ERROR",
+      message: err.toString()
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 function authenticateDashboardRequest(payload) {
   const deviceKey = payload && (payload.deviceKey || payload.cockpitDeviceKey || payload.token);
   if (!deviceKey || typeof deviceKey !== 'string' || !deviceKey.trim()) {
@@ -751,17 +932,8 @@ function authenticateDashboardRequest(payload) {
     };
   }
 
-  let clientHash = '';
-  try {
-    const rawDigest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, deviceKey.trim(), Utilities.Charset.UTF_8);
-    for (let i = 0; i < rawDigest.length; i++) {
-      let byte = rawDigest[i];
-      if (byte < 0) byte += 256;
-      let hex = byte.toString(16);
-      if (hex.length === 1) hex = '0' + hex;
-      clientHash += hex;
-    }
-  } catch (err) {
+  const clientHash = computeDeviceSha256(deviceKey);
+  if (!clientHash) {
     return {
       success: false,
       code: "UNAUTHORIZED",
@@ -770,7 +942,24 @@ function authenticateDashboardRequest(payload) {
   }
 
   const props = PropertiesService.getScriptProperties();
-  const registeredHashesRaw = props.getProperty('COCKPIT_DEVICE_HASHES') || props.getProperty('COCKPIT_DEVICE_TOKEN_HASH') || '';
+  let registeredHashesRaw = props.getProperty('COCKPIT_DEVICE_HASHES') || props.getProperty('COCKPIT_DEVICE_TOKEN_HASH') || '';
+
+  if (!registeredHashesRaw) {
+    try {
+      const ss = getSS();
+      const sheetName = (typeof CONFIG !== 'undefined' && typeof CONFIG.get === 'function' && CONFIG.get("SHEET_DEVICE_MANAGEMENT")) || "端末管理";
+      const sheet = ss.getSheetByName(sheetName);
+      if (sheet && sheet.getLastRow() >= 2) {
+        const rowValues = sheet.getRange(2, 3, 1, 3).getValues()[0];
+        const loadedHashes = [rowValues[0], rowValues[1], rowValues[2]].map(h => String(h || '').trim()).filter(Boolean);
+        if (loadedHashes.length > 0) {
+          registeredHashesRaw = loadedHashes.join(',');
+          props.setProperty('COCKPIT_DEVICE_HASHES', registeredHashesRaw);
+        }
+      }
+    } catch (e) {}
+  }
+
   if (!registeredHashesRaw) {
     return {
       success: false,
