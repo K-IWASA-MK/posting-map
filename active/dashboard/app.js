@@ -241,15 +241,8 @@ window.setPinInProgress = function(rowId, action) {
 
 async function startApp(profile = null, registrationPromise = null) {
   try {
-    // ヘッダー専用 System Summary の即時並列発注
     fetchSystemSummary();
 
-    // 1. 初回ユーザーの場合、何よりも先に登録処理の完了を待つ
-    if (registrationPromise) {
-      await registrationPromise;
-    }
-
-    // 2. バックグラウンドデータの取得は非同期実行（エラーログキャッチ）
     loadData(false).catch(err => {
       console.warn("Background load error:", err);
       logDebug("[loadData] Background error: " + (err ? err.message : err));
@@ -1488,50 +1481,53 @@ async function safeInitApp() {
     throw new Error("LIFF ID missing in client configuration.");
   }
 
+  let userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+  let hasPreRendered = false;
+  if (userInfo.id) {
+    hasPreRendered = true;
+    startApp({
+      displayName: userInfo.last || '',
+      userId: userInfo.lineUserId || '',
+      pictureUrl: userInfo.picture || ''
+    }, null);
+  }
+
   if (typeof liff !== 'undefined') {
     try {
-      logDebug("LIFF INIT START"); // ① LIFF初期化開始
-      // ① LINE JS Bridge 接続待ち（最適化済み）
+      logDebug("LIFF INIT START");
       await new Promise(r => setTimeout(r, 50));
 
-      // ⏳ 5秒でタイムアウトする安全装置
       const liffInitPromise = liff.init({ liffId: liffId });
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("LINEログインの応答がタイムアウトしました(5秒)")), 5000)
       );
 
       await Promise.race([liffInitPromise, timeoutPromise]);
-      logDebug("LIFF INIT OK"); // ② LIFF初期化成功
+      logDebug("LIFF INIT OK");
       setLoadingProgress(35, 'AUTHENTICATED');
 
-      logDebug("LOGIN CHECK"); // ③ login判定
+      logDebug("LOGIN CHECK");
       if (liff.isLoggedIn()) {
         logDebug("LOGIN OK");
-        sessionStorage.removeItem('liff_initializing'); // ✅ ログイン確認後にフラグを削除（ここが正しいタイミング）
+        sessionStorage.removeItem('liff_initializing');
 
-        let userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+        userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
 
+        if (userInfo.id) {
+          if (!hasPreRendered) {
+            startApp({
+              displayName: userInfo.last || '',
+              userId: userInfo.lineUserId || '',
+              pictureUrl: userInfo.picture || ''
+            }, null);
+          }
 
-        // 【通常起動】既にユーザー登録・LINE連携キャッシュがある場合は、同期通信を待たずに即時起動
-        if (userInfo.id && userInfo.lineUserId) {
-          logDebug("Fast startup using cached user info.");
-          const cachedProfile = {
-            displayName: userInfo.last,
-            userId: userInfo.lineUserId,
-            pictureUrl: userInfo.picture || ''
-          };
-
-          // 0.1秒で即時にID表示・メイン画面可視化
-          startApp(cachedProfile, null);
-
-          // バックグラウンドで静かにgetProfileを走らせ、LINE公式の最新データに追従
           liff.getProfile().then(profile => {
             logDebug("Background profile refresh OK");
             userInfo.lineUserId = profile.userId;
             userInfo.picture = profile.pictureUrl;
             localStorage.setItem('user_info', JSON.stringify(userInfo));
 
-            // 最新の名前・アバター写真をIDカードにリアルタイム反映（再描画）
             if (typeof renderSettings === 'function') {
               renderSettings();
             }
