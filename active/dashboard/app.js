@@ -389,20 +389,16 @@ window.retryRegistration = () => {
 async function loadData(skipSync = false) {
   logDebug("[loadData] START (Background)");
 
-  // ★ fetchTier1() を getSystemSummary より前の【最冒頭】で発注・待機
   const tier1Promise = fetchTier1();
-  await tier1Promise;
 
   try {
     if (!skipSync) {
       setSyncStatus(navigator.onLine ? 'online' : 'offline');
     }
 
-    logDebug("[loadData] Fetching getSystemSummary in background...");
-    const summaryPromise = callApiPost('getSystemSummary');
-
-    const data = await summaryPromise;
-    logDebug("[loadData] getSystemSummary fetched successfully.");
+    logDebug("[loadData] Awaiting fetchSystemSummary in background...");
+    const data = await fetchSystemSummary();
+    logDebug("[loadData] fetchSystemSummary resolved.");
 
     if (data && data.success) {
       logDebug("[loadData] System Summary received: total=" + data.total + ", done=" + data.done + ", percent=" + data.percent);
@@ -434,6 +430,8 @@ async function loadData(skipSync = false) {
     logDebug(`[loadData] Background ERROR: ${err.message}`);
     // バックグラウンドロードの失敗は画面をブロッキングしてフリーズさせず、ログ出力のみに留めます。
   }
+
+  await tier1Promise;
 }
 
 // ランキングデータのバックグラウンド先読み関数
