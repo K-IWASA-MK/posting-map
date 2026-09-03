@@ -56,8 +56,18 @@ function doGet(e) {
     'getGlobalPinStatus'
   ].includes(action);
 
-  // Authentication Gate
-  if (!isReadOnlyAction) {
+  const isDashboardAction = [
+    'getRoster',
+    'getTransferRequests'
+  ].includes(action);
+
+  if (isDashboardAction) {
+    const dashAuth = authenticateDashboardRequest(params);
+    if (!dashAuth.success) {
+      return ContentService.createTextOutput(JSON.stringify(dashAuth))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  } else if (!isReadOnlyAction) {
     const auth = authenticateRequest(params);
     if (!auth.success) {
       return ContentService.createTextOutput(JSON.stringify(auth))
@@ -169,8 +179,18 @@ function doPost(e) {
     'getGlobalPinStatus'
   ].includes(action);
 
-  // Authentication Gate
-  if (!isReadOnlyAction) {
+  const isDashboardAction = [
+    'getRoster',
+    'getTransferRequests'
+  ].includes(action);
+
+  if (isDashboardAction) {
+    const dashAuth = authenticateDashboardRequest(postData || params || {});
+    if (!dashAuth.success) {
+      return ContentService.createTextOutput(JSON.stringify(dashAuth))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  } else if (!isReadOnlyAction) {
     const auth = authenticateRequest(postData || {});
     if (!auth.success) {
       return ContentService.createTextOutput(JSON.stringify(auth))
@@ -719,4 +739,54 @@ function setPinInProgress(data) {
   } catch (e) {
     return { success: false, message: e.toString() };
   }
+}
+
+function authenticateDashboardRequest(payload) {
+  const deviceKey = payload && (payload.deviceKey || payload.cockpitDeviceKey || payload.token);
+  if (!deviceKey || typeof deviceKey !== 'string' || !deviceKey.trim()) {
+    return {
+      success: false,
+      code: "UNAUTHORIZED",
+      message: "Unauthorized: Dashboard terminal authorization required"
+    };
+  }
+
+  let clientHash = '';
+  try {
+    const rawDigest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, deviceKey.trim(), Utilities.Charset.UTF_8);
+    for (let i = 0; i < rawDigest.length; i++) {
+      let byte = rawDigest[i];
+      if (byte < 0) byte += 256;
+      let hex = byte.toString(16);
+      if (hex.length === 1) hex = '0' + hex;
+      clientHash += hex;
+    }
+  } catch (err) {
+    return {
+      success: false,
+      code: "UNAUTHORIZED",
+      message: "Unauthorized: Dashboard terminal authorization required"
+    };
+  }
+
+  const props = PropertiesService.getScriptProperties();
+  const registeredHashesRaw = props.getProperty('COCKPIT_DEVICE_HASHES') || props.getProperty('COCKPIT_DEVICE_TOKEN_HASH') || '';
+  if (!registeredHashesRaw) {
+    return {
+      success: false,
+      code: "UNAUTHORIZED",
+      message: "Unauthorized: Dashboard terminal authorization required"
+    };
+  }
+
+  const registeredList = registeredHashesRaw.split(',').map(h => h.trim()).filter(Boolean);
+  if (registeredList.includes(clientHash)) {
+    return { success: true, authorized: true };
+  }
+
+  return {
+    success: false,
+    code: "UNAUTHORIZED",
+    message: "Unauthorized: Dashboard terminal authorization required"
+  };
 }
