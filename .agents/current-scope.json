@@ -67,5 +67,6 @@
   "docs/DEVELOPMENT_GUIDE.md",
   "scripts/operations/manager.js",
   "active/dashboard/app.js",
-  "scripts/operations/index.html"
+  "scripts/operations/index.html",
+  "active/business/area/tier1_service.js"
 ]
