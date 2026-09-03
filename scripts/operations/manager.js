@@ -1559,7 +1559,7 @@ function renderMainStageRequests(requests) {
  * ※ NAV、統括BAR、NOW/STOCKパネル、Activity Streamは常時固定
  */
 function switchView(type) {
-  const views = ['areas', 'records', 'stocks', 'roster', 'requests', 'mail'];
+  const views = ['areas', 'records', 'stocks', 'roster', 'requests', 'mail', 'mobile'];
   const targetView = views.includes(type) ? type : 'areas';
 
   views.forEach(v => {
@@ -1593,11 +1593,13 @@ function switchView(type) {
     renderMainStageRequests(DashboardState.requests);
   } else if (targetView === 'mail') {
     renderMainStageMail(DashboardState.selectedMailTabIndex || 0);
+  } else if (targetView === 'mobile') {
+    renderMainStageMobile();
   }
 }
 
 function updateNavHighlight(activeType) {
-  const navTypes = ['mail', 'roster', 'stocks', 'requests', 'records', 'areas'];
+  const navTypes = ['mail', 'roster', 'stocks', 'requests', 'records', 'areas', 'mobile'];
   navTypes.forEach(t => {
     // Desktop Sidebar
     const el = document.getElementById(`nav-${t}`);
@@ -1621,6 +1623,135 @@ function updateNavHighlight(activeType) {
   });
 }
 
+let _mobilePairingTimer = null;
+
+function renderMainStageMobile() {
+  const container = document.getElementById('main-stage-mobile-content');
+  if (!container) return;
+
+  if (_mobilePairingTimer) {
+    clearInterval(_mobilePairingTimer);
+    _mobilePairingTimer = null;
+  }
+
+  function generatePairingData() {
+    const baseUrl = window.location.origin + window.location.pathname;
+    const pairKey = 'PAIR_' + Math.random().toString(36).substring(2, 10).toUpperCase() + '_' + Date.now().toString(36).toUpperCase();
+    const targetUrl = `${baseUrl}?pair=${pairKey}`;
+    const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(targetUrl)}`;
+    return { targetUrl, qrImgUrl, pairKey };
+  }
+
+  let remainingSec = 30;
+  let currentPairing = generatePairingData();
+
+  function updateDisplay() {
+    const pct = Math.round((remainingSec / 30) * 100);
+    container.innerHTML = `
+      <div class="flex-1 flex flex-col lg:flex-row items-center justify-center gap-6 p-4 max-w-4xl mx-auto w-full">
+        <div class="w-full max-w-sm flex flex-col items-center p-6 rounded-2xl bg-[#0B1019] border border-borderNormal shadow-2xl">
+          <div class="text-xs font-bold text-textSub uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-statusGreen animate-pulse"></span>
+            ワンタイム接続QRコード
+          </div>
+
+          <div class="p-3 bg-white rounded-xl shadow-inner mb-4">
+            <img src="${currentPairing.qrImgUrl}" alt="Pairing QR" class="w-[200px] h-[200px] object-contain block">
+          </div>
+
+          <div class="w-full space-y-2 text-center">
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-textSub">有効期限</span>
+              <span id="qr-timer-text" class="font-bold ${remainingSec <= 5 ? 'text-statusRed animate-pulse' : 'text-brand'}">残り ${remainingSec} 秒</span>
+            </div>
+            <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+              <div id="qr-timer-bar" class="h-full bg-brand transition-all duration-1000 ease-linear rounded-full" style="width: ${pct}%;"></div>
+            </div>
+            <p class="text-[11px] text-textSub/70 pt-1">セキュリティ保護のため30秒で自動更新されます</p>
+          </div>
+
+          <button onclick="window.regenerateMobileQR()" class="mt-4 px-4 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-borderNormal text-xs text-textSub hover:text-white transition-colors cursor-pointer flex items-center gap-1.5">
+            <span>🔄</span>
+            <span>今すぐ更新</span>
+          </button>
+        </div>
+
+        <div class="flex-1 max-w-md flex flex-col gap-4">
+          <div class="p-5 rounded-2xl bg-[#0B1019] border border-borderNormal space-y-4">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <span>📱</span>
+              <span>外出先スマートフォン連携手順</span>
+            </h3>
+
+            <div class="space-y-3 text-xs text-textSub">
+              <div class="flex items-start gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/5">
+                <span class="w-5 h-5 rounded-full bg-brand/20 text-brand font-bold flex items-center justify-center flex-shrink-0 text-[11px]">1</span>
+                <div>
+                  <div class="font-semibold text-white">標準カメラで読み取り</div>
+                  <div class="text-[11px] text-textSub/80 mt-0.5">お手元のスマートフォンのカメラアプリを起動し、左のQRコードをスキャンします。</div>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/5">
+                <span class="w-5 h-5 rounded-full bg-brand/20 text-brand font-bold flex items-center justify-center flex-shrink-0 text-[11px]">2</span>
+                <div>
+                  <div class="font-semibold text-white">ブラウザで自動認証</div>
+                  <div class="text-[11px] text-textSub/80 mt-0.5">SafariまたはChromeが起動し、自動的に端末認証が完了してダッシュボードが開きます。</div>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/5">
+                <span class="w-5 h-5 rounded-full bg-brand/20 text-brand font-bold flex items-center justify-center flex-shrink-0 text-[11px]">3</span>
+                <div>
+                  <div class="font-semibold text-white">ホーム画面に追加で快適利用</div>
+                  <div class="text-[11px] text-textSub/80 mt-0.5">ブラウザの「ホーム画面に追加」を行うと、アプリ感覚で外出先からいつでも即座に閲覧できます。</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <span class="text-statusGreen text-base">🛡️</span>
+              <span class="text-textSub">端末セキュリティ</span>
+            </div>
+            <span class="font-mono text-[11px] text-textSub/80">1PC・1スマホ専用保護</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  window.regenerateMobileQR = () => {
+    remainingSec = 30;
+    currentPairing = generatePairingData();
+    updateDisplay();
+  };
+
+  updateDisplay();
+
+  _mobilePairingTimer = setInterval(() => {
+    remainingSec--;
+    if (remainingSec <= 0) {
+      window.regenerateMobileQR();
+    } else {
+      const timerText = document.getElementById('qr-timer-text');
+      const timerBar = document.getElementById('qr-timer-bar');
+      if (timerText) {
+        timerText.textContent = `残り ${remainingSec} 秒`;
+        if (remainingSec <= 5) {
+          timerText.className = 'font-bold text-statusRed animate-pulse';
+        } else {
+          timerText.className = 'font-bold text-brand';
+        }
+      }
+      if (timerBar) {
+        const pct = Math.round((remainingSec / 30) * 100);
+        timerBar.style.width = `${pct}%`;
+      }
+    }
+  }, 1000);
+}
 /**
  * =========================================================================
  * ✉️ 党員活動メール（5大テンプレート＆ワンクリックコピペ）

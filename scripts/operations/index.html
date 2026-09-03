@@ -251,6 +251,10 @@
           <span class="w-5 text-base flex items-center justify-center flex-shrink-0">✉️</span>
           <span class="text-sm">活動メール</span>
         </button>
+        <button id="nav-mobile" onclick="switchView('mobile')" class="nav-item w-full h-10 flex items-center gap-2.5 px-3 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-medium">
+          <span class="w-5 text-base flex items-center justify-center flex-shrink-0">📱</span>
+          <span class="text-sm">スマホ連携</span>
+        </button>
       </nav>
     </div>
 
@@ -507,6 +511,16 @@
           <div id="main-stage-mail-content" class="flex-1 flex flex-col min-h-0 pt-1 overflow-y-auto overflow-x-hidden lg:overflow-hidden">
             <!-- 動的レンダリング -->
           </div>
+        </div>
+
+        <div id="main-view-mobile" class="flex-1 flex flex-col min-h-0 hidden relative">
+          <div class="flex items-center justify-between pb-1 flex-shrink-0 px-1">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-[#0B1019] border border-borderNormal shadow-inner">
+              <span class="text-base">📱</span>
+              <span class="font-bold text-sm text-white tracking-wide">外出先スマホ連携</span>
+            </div>
+          </div>
+          <div id="main-stage-mobile-content" class="flex-1 flex flex-col min-h-0 pt-1 overflow-y-auto overflow-x-hidden"></div>
         </div>
 
       </div>
