@@ -198,6 +198,19 @@ if (document.readyState === 'loading') {
 }
 
 async function initDashboard() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const pairKey = urlParams.get('pair');
+  if (pairKey) {
+    try {
+      const pairRes = await callApiPost('pairMobileDevice', { pairKey: pairKey });
+      if (pairRes && pairRes.success) {
+        history.replaceState(null, '', window.location.pathname);
+      }
+    } catch (e) {
+      console.error('[Mobile Pairing Error]', e);
+    }
+  }
+
   const isAuthOk = await verifyOrRegisterDevice();
   if (!isAuthOk) {
     showDeviceLockScreen();
@@ -260,7 +273,7 @@ async function fetchStaticDataFile(filename) {
  * 現場アプリと完全同一の POST 通信関数 (active/dashboard/app.js 準拠)
  */
 async function callApiPost(action, payload = {}) {
-  const url = `${getApiUrl()}?_t=${Date.now()}`;
+  const url = `${getApiUrl()}?action=${encodeURIComponent(action)}&_t=${Date.now()}`;
   const deviceKey = getOrCreateDeviceKey();
   const body = JSON.stringify({ action, deviceKey, ...payload });
 
@@ -1698,6 +1711,9 @@ function renderMainStageMobile() {
     const pairKey = 'PAIR_' + Math.random().toString(36).substring(2, 10).toUpperCase() + '_' + Date.now().toString(36).toUpperCase();
     const targetUrl = `${baseUrl}?pair=${pairKey}`;
     const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(targetUrl)}`;
+    callApiPost('issueMobilePairingToken', { pairKey: pairKey }).catch(e => {
+      console.warn('[Mobile Pairing Token Error]', e);
+    });
     return { targetUrl, qrImgUrl, pairKey };
   }
 

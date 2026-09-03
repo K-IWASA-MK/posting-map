@@ -65,6 +65,10 @@ function doGet(e) {
     const regResult = registerOrValidateDevice(params);
     return ContentService.createTextOutput(JSON.stringify(regResult))
       .setMimeType(ContentService.MimeType.JSON);
+  } else if (action === 'resetDeviceManagement') {
+    const rstResult = resetDeviceManagementSheet();
+    return ContentService.createTextOutput(JSON.stringify(rstResult))
+      .setMimeType(ContentService.MimeType.JSON);
   } else if (isDashboardAction) {
     const dashAuth = authenticateDashboardRequest(params);
     if (!dashAuth.success) {
@@ -121,6 +125,9 @@ function processGetActionLegacy(action, e) {
         break;
       case 'resetRoster':
         response = { success: true, message: setupRosterSheet() };
+        break;
+      case 'resetDeviceManagement':
+        response = resetDeviceManagementSheet();
         break;
       case 'getAreaDetails':
         response = getAreaDetails(e.name);
@@ -191,6 +198,18 @@ function doPost(e) {
   if (action === 'registerOrValidateDevice') {
     const regResult = registerOrValidateDevice(postData || params || {});
     return ContentService.createTextOutput(JSON.stringify(regResult))
+      .setMimeType(ContentService.MimeType.JSON);
+  } else if (action === 'resetDeviceManagement') {
+    const rstResult = resetDeviceManagementSheet();
+    return ContentService.createTextOutput(JSON.stringify(rstResult))
+      .setMimeType(ContentService.MimeType.JSON);
+  } else if (action === 'issueMobilePairingToken') {
+    const issueResult = issueMobilePairingToken(postData || params || {});
+    return ContentService.createTextOutput(JSON.stringify(issueResult))
+      .setMimeType(ContentService.MimeType.JSON);
+  } else if (action === 'pairMobileDevice') {
+    const pairResult = pairMobileDevice(postData || params || {});
+    return ContentService.createTextOutput(JSON.stringify(pairResult))
       .setMimeType(ContentService.MimeType.JSON);
   } else if (isDashboardAction) {
     const dashAuth = authenticateDashboardRequest(postData || params || {});
@@ -274,6 +293,8 @@ function processPostAction(action, postData, e) {
       return { success: true, roster: getRoster() };
     case 'resetRoster':
       return { success: true, message: setupRosterSheet() };
+    case 'resetDeviceManagement':
+      return resetDeviceManagementSheet();
     case 'getAreaDetails':
       return getAreaDetails(postData.name || e.parameter.name);
     case 'submitDistribution':
@@ -978,4 +999,136 @@ function authenticateDashboardRequest(payload) {
     code: "UNAUTHORIZED",
     message: "Unauthorized: Dashboard terminal authorization required"
   };
+}
+
+function issueMobilePairingToken(payload) {
+  const dashAuth = authenticateDashboardRequest(payload);
+  if (!dashAuth.success) {
+    return {
+      success: false,
+      code: "UNAUTHORIZED",
+      message: "PC端末の認証が必要です。"
+    };
+  }
+
+  const pairKey = payload && payload.pairKey ? String(payload.pairKey).trim() : '';
+  if (!pairKey) {
+    return {
+      success: false,
+      code: "INVALID_PAIR_KEY",
+      message: "ペアリングキーが必要です。"
+    };
+  }
+
+  const props = PropertiesService.getScriptProperties();
+  const expiresAt = Date.now() + 35000;
+  props.setProperty('MOBILE_PAIRING_KEY', pairKey);
+  props.setProperty('MOBILE_PAIRING_EXPIRES', String(expiresAt));
+
+  return { success: true };
+}
+
+function pairMobileDevice(payload) {
+  const pairKey = payload && payload.pairKey ? String(payload.pairKey).trim() : '';
+  const deviceKey = payload && (payload.deviceKey || payload.cockpitDeviceKey);
+
+  if (!pairKey || !deviceKey) {
+    return {
+      success: false,
+      code: "MISSING_PARAMS",
+      message: "ペアリングキーと端末キーが必要です。"
+    };
+  }
+
+  const clientHash = computeDeviceSha256(deviceKey);
+  if (!clientHash) {
+    return {
+      success: false,
+      code: "INVALID_DEVICE_KEY",
+      message: "無効な端末キーです。"
+    };
+  }
+
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+  } catch (e) {
+    return {
+      success: false,
+      code: "LOCK_TIMEOUT",
+      message: "システムが混雑しています。再度お試しください。"
+    };
+  }
+
+  try {
+    const props = PropertiesService.getScriptProperties();
+    const storedPairKey = props.getProperty('MOBILE_PAIRING_KEY') || '';
+    const storedExpires = parseInt(props.getProperty('MOBILE_PAIRING_EXPIRES') || '0', 10);
+
+    if (!storedPairKey || storedPairKey !== pairKey || Date.now() > storedExpires) {
+      return {
+        success: false,
+        code: "EXPIRED_PAIR_KEY",
+        message: "QRコードの有効期限（30秒）が切れています。PC画面で再発行してください。"
+      };
+    }
+
+    const ss = getSS();
+    const sheet = getOrCreateDeviceManagementSheet(ss);
+    const nowStr = Utilities.formatDate(new Date(), "JST", "yyyy/MM/dd HH:mm:ss");
+
+    sheet.getRange(2, 5).setValue(clientHash);
+    sheet.getRange(2, 7).setValue(nowStr);
+    sheet.getRange(2, 8).setValue("MOBILE-01 registered via QR (" + nowStr + ")");
+
+    const rowValues = sheet.getRange(2, 1, 1, 8).getValues()[0];
+    const pc01Hash = String(rowValues[2] || '').trim();
+    const pc02Hash = String(rowValues[3] || '').trim();
+    syncPropertiesDeviceHashes([pc01Hash, pc02Hash, clientHash]);
+
+    props.deleteProperty('MOBILE_PAIRING_KEY');
+    props.deleteProperty('MOBILE_PAIRING_EXPIRES');
+
+    return {
+      success: true,
+      authorized: true,
+      deviceId: "MOBILE-01",
+      message: "スマホ端末の登録が完了しました。"
+    };
+  } catch (err) {
+    return {
+      success: false,
+      code: "SERVER_ERROR",
+      message: err.toString()
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function resetDeviceManagementSheet() {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+  } catch (e) {
+    return { success: false, message: "Lock timeout" };
+  }
+  try {
+    const ss = getSS();
+    const sheetName = (typeof CONFIG !== 'undefined' && typeof CONFIG.get === 'function' && CONFIG.get("SHEET_DEVICE_MANAGEMENT")) || "端末管理";
+    let sheet = ss.getSheetByName(sheetName);
+    if (sheet) {
+      ss.deleteSheet(sheet);
+    }
+    sheet = getOrCreateDeviceManagementSheet(ss);
+    PropertiesService.getScriptProperties().deleteProperty('COCKPIT_DEVICE_HASHES');
+    PropertiesService.getScriptProperties().deleteProperty('COCKPIT_DEVICE_TOKEN_HASH');
+    PropertiesService.getScriptProperties().deleteProperty('MOBILE_PAIRING_KEY');
+    PropertiesService.getScriptProperties().deleteProperty('MOBILE_PAIRING_EXPIRES');
+    return { success: true, message: "Device management sheet reset successfully" };
+  } catch (err) {
+    return { success: false, message: err.toString() };
+  } finally {
+    lock.releaseLock();
+  }
 }
