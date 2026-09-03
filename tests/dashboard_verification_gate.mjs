@@ -58,12 +58,66 @@ async function runDashboardQualityGate() {
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
+  async function setupAuthenticatedPage(page) {
+    await page.route('**/exec*', async (route, request) => {
+      if (request.method() === 'POST') {
+        const postData = request.postData() || '';
+        if (postData.includes('registerOrValidateDevice') || request.url().includes('action=registerOrValidateDevice')) {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json; charset=utf-8',
+            body: JSON.stringify({
+              success: true,
+              authorized: true,
+              registered: true,
+              deviceId: "PC-01",
+              branchName: "MIE-03",
+              contractedDeviceCount: 1
+            })
+          });
+          return;
+        }
+      }
+      await route.continue();
+    });
+  }
+
   try {
+    console.log("\n▶ [SECURITY GATE] 未登録端末アクセス遮断・画面ロック試験 実行中...");
+    const pageLock = await browser.newPage();
+    await pageLock.route('**/exec*', async (route, request) => {
+      if (request.method() === 'POST') {
+        const postData = request.postData() || '';
+        if (postData.includes('registerOrValidateDevice') || request.url().includes('action=registerOrValidateDevice')) {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json; charset=utf-8',
+            body: JSON.stringify({
+              success: false,
+              authorized: false,
+              code: "DEVICE_LIMIT_EXCEEDED",
+              message: "端末契約上限に達しています。この端末は許可されていません。"
+            })
+          });
+          return;
+        }
+      }
+      await route.continue();
+    });
+    await pageLock.goto('http://localhost:8080/scripts/operations/index.html', { waitUntil: 'networkidle' });
+    const isLockScreenActive = await pageLock.evaluate(() => {
+      const lockEl = document.getElementById('device-lock-screen');
+      const mainEl = document.querySelector('main');
+      return lockEl && !lockEl.classList.contains('hidden') && (!mainEl || mainEl.style.display === 'none');
+    });
+    await pageLock.close();
+    console.log(`[SECURITY GATE] 未登録端末遮断・ロック画面表示: ${isLockScreenActive ? '✅ PASS (遮断成功)' : '❌ FAIL'}`);
     // -------------------------------------------------------------
     // PHASE 1: 実機Dashboard通常動作
     // -------------------------------------------------------------
     console.log("\n▶ [PHASE 1] 実機Dashboard通常動作の検証中...");
     const page1 = await browser.newPage();
+    await setupAuthenticatedPage(page1);
     const appErrors1 = [];
 
     page1.on('pageerror', err => {
@@ -122,9 +176,10 @@ async function runDashboardQualityGate() {
     // -------------------------------------------------------------
     console.log("\n▶ [PHASE 2] 連続リロード試験 (7回) 実行中...");
     const page2 = await browser.newPage();
+    await setupAuthenticatedPage(page2);
     let reloadSuccessCount = 0;
     for (let i = 1; i <= 7; i++) {
-      await page2.goto('http://localhost:8080/scripts/operations/index.html', { waitUntil: 'networkidle' });
+      await page2.goto('http://localhost:8080/scripts/operations/index.html', { waitUntil: 'load' });
       await page2.waitForFunction(() => window.DashboardState && window.DashboardState.masterLoadStatus === 'LOADED', { timeout: 10000 });
       const status = await page2.evaluate(() => window.DashboardState?.masterLoadStatus);
       if (status === 'LOADED') {
@@ -140,6 +195,7 @@ async function runDashboardQualityGate() {
     // -------------------------------------------------------------
     console.log("\n▶ [PHASE 3] Master ERROR 障害・部分劣化試験 実行中...");
     const page3 = await browser.newPage();
+    await setupAuthenticatedPage(page3);
     await page3.route('**/*.csv', route => route.abort());
 
     await page3.goto('http://localhost:8080/scripts/operations/index.html', { waitUntil: 'networkidle' });
@@ -173,7 +229,8 @@ async function runDashboardQualityGate() {
     // -------------------------------------------------------------
     console.log("\n▶ [PHASE 4] cities SSOT & ノイズ除外 & 選択時展開維持確認 実行中...");
     const page4 = await browser.newPage();
-    await page4.goto('http://localhost:8080/scripts/operations/index.html', { waitUntil: 'networkidle' });
+    await setupAuthenticatedPage(page4);
+    await page4.goto('http://localhost:8080/scripts/operations/index.html', { waitUntil: 'load' });
     await page4.waitForFunction(() => window.DashboardState && window.DashboardState.cities.length > 0, { timeout: 10000 });
 
     const citiesCheck = await page4.evaluate(() => {
@@ -234,9 +291,22 @@ async function runDashboardQualityGate() {
 
     const hasOriginalNoise = citiesCheck.stateCities.some(c => c.includes('原本') || c.includes('テンプレート'));
     const hasValidCities = citiesCheck.stateCities.length > 0;
+
+    const hasYokkaichi = citiesCheck.stateCities.includes('四日市市');
+    const hasKuwana = citiesCheck.stateCities.includes('桑名市');
+    const hasInabe = citiesCheck.stateCities.includes('いなべ市');
+    const hasNormalCities = hasYokkaichi && hasKuwana && hasInabe;
+
+    const hasDeviceMgmt = citiesCheck.stateCities.some(c => c.includes('端末管理'));
+    const hasContractMgmt = citiesCheck.stateCities.some(c => c.includes('契約管理'));
+    const hasConflict = citiesCheck.stateCities.some(c => c.includes('conflict'));
+    const noManagementNoise = !hasDeviceMgmt && !hasContractMgmt && !hasConflict;
+
     const phase4Pass = (
       !hasOriginalNoise &&
       hasValidCities &&
+      hasNormalCities &&
+      noManagementNoise &&
       citiesCheck.renderedItems.includes('ALL') &&
       citiesCheck.initialClosed &&
       citiesCheck.openedAfterFirstClick &&
@@ -247,6 +317,8 @@ async function runDashboardQualityGate() {
 
     results.phase4.pass = phase4Pass;
     results.phase4.details.push(`自治体数: ${citiesCheck.stateCities.length}`);
+    results.phase4.details.push(`正規自治体表示確認 (四日市市: ${hasYokkaichi ? 'PASS' : 'FAIL'}, 桑名市: ${hasKuwana ? 'PASS' : 'FAIL'}, いなべ市: ${hasInabe ? 'PASS' : 'FAIL'})`);
+    results.phase4.details.push(`管理シート非混入確認 (端末管理: ${hasDeviceMgmt ? 'FAIL (混入)' : 'PASS (除外)'}, 契約管理: ${hasContractMgmt ? 'FAIL (混入)' : 'PASS (除外)'}, conflict: ${hasConflict ? 'FAIL (混入)' : 'PASS (除外)'})`);
     results.phase4.details.push(`ノイズ除外('原本'): ${hasOriginalNoise ? 'FAIL (混入)' : 'PASS (除外済)'}`);
     results.phase4.details.push(`選択時展開維持 (開いたまま連続切替): ${citiesCheck.firstCityWorksAndStaysOpen && citiesCheck.secondCityWorksAndStaysOpen ? 'PASS' : 'FAIL'}`);
     results.phase4.details.push(`トリガー再タップで閉じる: ${citiesCheck.closedAfterTriggerReclick ? 'PASS' : 'FAIL'}`);
@@ -257,7 +329,8 @@ async function runDashboardQualityGate() {
     // -------------------------------------------------------------
     console.log("\n▶ [PHASE 5] fitBounds & 異常座標防御試験 実行中...");
     const page5 = await browser.newPage();
-    await page5.goto('http://localhost:8080/scripts/operations/index.html', { waitUntil: 'networkidle' });
+    await setupAuthenticatedPage(page5);
+    await page5.goto('http://localhost:8080/scripts/operations/index.html', { waitUntil: 'load' });
     await page5.waitForFunction(() => window.DashboardState && window.DashboardState.masterLoadStatus === 'LOADED', { timeout: 10000 });
 
     const fitBoundsCheck = await page5.evaluate(() => {

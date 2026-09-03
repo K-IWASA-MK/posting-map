@@ -351,6 +351,11 @@ async function loadAddressMaster() {
     DashboardState.masterPins = pins;
     console.log(`[SSOT Master Pins Loaded] Total: ${pins.length} items`);
 
+    const masterCities = Array.from(new Set(pins.map(p => p.cityName).filter(Boolean)));
+    if (masterCities.length > 0) {
+      DashboardState.cities = masterCities;
+      populateCitySelector(masterCities);
+    }
     // マップにピンを描画
     renderPinsOnMap(DashboardState.map, DashboardState.markersLayer, pins);
 
@@ -631,12 +636,16 @@ async function syncDashboardData() {
     }
 
     // 2. 自治体サマリーデータ
-    // 自治体一覧: Backend getTier1 が唯一の正（SSOT）
     if (isTier1Ok && Array.isArray(tier1Res.cities)) {
-      DashboardState.cities = tier1Res.cities
+      const validBackendCities = tier1Res.cities
         .map(c => typeof c === 'string' ? c : (c.name || ''))
-        .filter(name => name && !name.includes('原本') && !name.includes('テンプレート'));
-      populateCitySelector(DashboardState.cities);
+        .filter(name => name && !name.includes('原本') && !name.includes('テンプレート') && !name.includes('端末管理') && !name.includes('契約管理') && !name.includes('conflict'));
+      if (validBackendCities.length > 0) {
+        DashboardState.cities = validBackendCities;
+        populateCitySelector(DashboardState.cities);
+      } else if (DashboardState.cities && DashboardState.cities.length > 0) {
+        populateCitySelector(DashboardState.cities);
+      }
     }
 
     // 3. 保有チラシデータ
