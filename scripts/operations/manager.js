@@ -1643,36 +1643,46 @@ function renderMainStageMobile() {
   }
 
   let remainingSec = 30;
+  let isExpired = false;
   let currentPairing = generatePairingData();
 
   function updateDisplay() {
-    const pct = Math.round((remainingSec / 30) * 100);
+    const pct = isExpired ? 0 : Math.round((remainingSec / 30) * 100);
     container.innerHTML = `
       <div class="flex-1 flex flex-col lg:flex-row items-center justify-center gap-6 p-4 max-w-4xl mx-auto w-full">
         <div class="w-full max-w-sm flex flex-col items-center p-6 rounded-2xl bg-[#0B1019] border border-borderNormal shadow-2xl">
           <div class="text-xs font-bold text-textSub uppercase tracking-wider mb-3 flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-statusGreen animate-pulse"></span>
-            ワンタイム接続QRコード
+            <span class="w-2 h-2 rounded-full ${isExpired ? 'bg-statusRed' : 'bg-statusGreen animate-pulse'}"></span>
+            ${isExpired ? '接続QRコード (有効期限切れ)' : 'ワンタイム接続QRコード'}
           </div>
 
-          <div class="p-3 bg-white rounded-xl shadow-inner mb-4">
-            <img src="${currentPairing.qrImgUrl}" alt="Pairing QR" class="w-[200px] h-[200px] object-contain block">
+          <div class="relative p-3 bg-white rounded-xl shadow-inner mb-4 overflow-hidden">
+            <img src="${currentPairing.qrImgUrl}" alt="Pairing QR" class="w-[200px] h-[200px] object-contain block ${isExpired ? 'opacity-20 filter blur-xs' : ''}">
+            ${isExpired ? `
+              <div class="absolute inset-0 flex flex-col items-center justify-center p-2 text-center bg-black/60 rounded-xl backdrop-blur-xs">
+                <span class="text-2xl mb-1">⏱️</span>
+                <span class="text-xs font-bold text-white">有効期限切れ</span>
+                <span class="text-[10px] text-white/70 mt-0.5">下のボタンで再発行してください</span>
+              </div>
+            ` : ''}
           </div>
 
           <div class="w-full space-y-2 text-center">
             <div class="flex items-center justify-between text-xs font-mono">
               <span class="text-textSub">有効期限</span>
-              <span id="qr-timer-text" class="font-bold ${remainingSec <= 5 ? 'text-statusRed animate-pulse' : 'text-brand'}">残り ${remainingSec} 秒</span>
+              <span id="qr-timer-text" class="font-bold ${isExpired ? 'text-statusRed' : remainingSec <= 5 ? 'text-statusRed animate-pulse' : 'text-brand'}">
+                ${isExpired ? '期限切れ' : `残り ${remainingSec} 秒`}
+              </span>
             </div>
             <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-              <div id="qr-timer-bar" class="h-full bg-brand transition-all duration-1000 ease-linear rounded-full" style="width: ${pct}%;"></div>
+              <div id="qr-timer-bar" class="h-full ${isExpired ? 'bg-statusRed' : 'bg-brand'} transition-all duration-1000 ease-linear rounded-full" style="width: ${pct}%;"></div>
             </div>
-            <p class="text-[11px] text-textSub/70 pt-1">セキュリティ保護のため30秒で自動更新されます</p>
+            <p class="text-[11px] text-textSub/70 pt-1">${isExpired ? 'QRコードの有効期限（30秒）が切れました' : 'セキュリティ保護のため30秒で有効期限が切れます'}</p>
           </div>
 
-          <button onclick="window.regenerateMobileQR()" class="mt-4 px-4 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-borderNormal text-xs text-textSub hover:text-white transition-colors cursor-pointer flex items-center gap-1.5">
+          <button onclick="window.regenerateMobileQR()" class="mt-4 px-5 py-2 rounded-xl ${isExpired ? 'bg-brand text-black font-bold shadow-lg shadow-brand/20 hover:brightness-110' : 'bg-white/5 hover:bg-white/10 border border-borderNormal text-textSub hover:text-white'} text-xs transition-all cursor-pointer flex items-center gap-1.5">
             <span>🔄</span>
-            <span>今すぐ更新</span>
+            <span>${isExpired ? 'QRコードを再発行する' : '今すぐ更新'}</span>
           </button>
         </div>
 
@@ -1722,35 +1732,47 @@ function renderMainStageMobile() {
     `;
   }
 
+  function startTimer() {
+    if (_mobilePairingTimer) {
+      clearInterval(_mobilePairingTimer);
+      _mobilePairingTimer = null;
+    }
+    _mobilePairingTimer = setInterval(() => {
+      remainingSec--;
+      if (remainingSec <= 0) {
+        clearInterval(_mobilePairingTimer);
+        _mobilePairingTimer = null;
+        isExpired = true;
+        updateDisplay();
+      } else {
+        const timerText = document.getElementById('qr-timer-text');
+        const timerBar = document.getElementById('qr-timer-bar');
+        if (timerText) {
+          timerText.textContent = `残り ${remainingSec} 秒`;
+          if (remainingSec <= 5) {
+            timerText.className = 'font-bold text-statusRed animate-pulse';
+          } else {
+            timerText.className = 'font-bold text-brand';
+          }
+        }
+        if (timerBar) {
+          const pct = Math.round((remainingSec / 30) * 100);
+          timerBar.style.width = `${pct}%`;
+        }
+      }
+    }, 1000);
+  }
+
   window.regenerateMobileQR = () => {
     remainingSec = 30;
+    isExpired = false;
     currentPairing = generatePairingData();
     updateDisplay();
+    startTimer();
   };
 
   updateDisplay();
-
-  _mobilePairingTimer = setInterval(() => {
-    remainingSec--;
-    if (remainingSec <= 0) {
-      window.regenerateMobileQR();
-    } else {
-      const timerText = document.getElementById('qr-timer-text');
-      const timerBar = document.getElementById('qr-timer-bar');
-      if (timerText) {
-        timerText.textContent = `残り ${remainingSec} 秒`;
-        if (remainingSec <= 5) {
-          timerText.className = 'font-bold text-statusRed animate-pulse';
-        } else {
-          timerText.className = 'font-bold text-brand';
-        }
-      }
-      if (timerBar) {
-        const pct = Math.round((remainingSec / 30) * 100);
-        timerBar.style.width = `${pct}%`;
-      }
-    }
-  }, 1000);
+  startTimer();
 }
 /**
  * =========================================================================
