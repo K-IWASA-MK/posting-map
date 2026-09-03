@@ -295,6 +295,12 @@ function setSyncStatus(state) {
   }
 }
 
+function updateBottomNavVisibility() {
+  const nav = $('bottom-nav');
+  const hasUser = !!localStorage.getItem('user_info');
+  if (nav) nav.style.display = hasUser ? '' : 'none';
+}
+
 let isRegistering = false;
 let registrationError = false;
 function triggerBackgroundRegistration(profile) {
@@ -341,10 +347,10 @@ function triggerBackgroundRegistration(profile) {
         updatedIdEl.onclick = null;
       }
 
-      // 非同期登録成功に伴い、設定画面（IDカード）を即座に再描画してローダーから移行
       if (typeof renderSettings === 'function') {
         renderSettings();
       }
+      updateBottomNavVisibility();
     } else {
       throw new Error("GAS registration returned success=false");
     }
@@ -1240,10 +1246,7 @@ window.updateStorageLocationDropdown = function updateStorageLocationDropdown(ov
     }
   }
 
-  // 3. ナビゲーションの表示制御
-  const nav = $('bottom-nav');
-  const hasUser = !!localStorage.getItem('user_info');
-  if (nav) nav.style.display = hasUser ? '' : 'none';
+  updateBottomNavVisibility();
 
   const contentEl = $('content');
   if (contentEl) {
