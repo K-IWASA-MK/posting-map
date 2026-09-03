@@ -66,5 +66,6 @@
   "docs/audit/sm6a_before.txt",
   "docs/DEVELOPMENT_GUIDE.md",
   "scripts/operations/manager.js",
-  "active/dashboard/app.js"
+  "active/dashboard/app.js",
+  "scripts/operations/index.html"
 ]
