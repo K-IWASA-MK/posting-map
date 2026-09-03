@@ -133,6 +133,9 @@ async function verifyOrRegisterDevice() {
       if (res.deviceId) {
         DashboardState.currentDeviceId = res.deviceId;
       }
+      if (res.contractId) {
+        DashboardState.currentContractId = res.contractId;
+      }
       return true;
     }
     return false;
@@ -1607,7 +1610,7 @@ function renderMainStageMobile() {
               <span class="text-statusGreen text-base">🛡️</span>
               <span class="text-textSub">端末セキュリティ</span>
             </div>
-            <span class="font-mono text-[11px] text-textSub/80">1PC・1スマホ専用保護</span>
+            <span class="font-mono text-[11px] text-textSub/80">${DashboardState.currentContractId ? `${DashboardState.currentContractId} (${DashboardState.currentDeviceId || 'PC'}) 専用ペアリング` : '1契約（PC+スマホ）専用保護'}</span>
           </div>
         </div>
       </div>

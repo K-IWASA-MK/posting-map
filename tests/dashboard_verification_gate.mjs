@@ -15,16 +15,202 @@
  */
 
 import { chromium } from 'playwright';
-import { execSync } from 'child_process';
+import { execSync, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
+import http from 'http';
+
+function setupGasDeviceAuthSandbox() {
+  const mockProps = {};
+  class MockRange {
+    constructor(sheet, r, c, nr, nc) {
+      this.sheet = sheet;
+      this.r = r;
+      this.c = c;
+      this.nr = nr || 1;
+      this.nc = nc || 1;
+    }
+    getValues() {
+      const result = [];
+      for (let i = 0; i < this.nr; i++) {
+        const row = [];
+        const rowData = this.sheet.grid[this.r - 1 + i] || [];
+        for (let j = 0; j < this.nc; j++) {
+          row.push(rowData[this.c - 1 + j] !== undefined ? rowData[this.c - 1 + j] : '');
+        }
+        result.push(row);
+      }
+      return result;
+    }
+    setValues(values) {
+      for (let i = 0; i < values.length; i++) {
+        const rowIndex = this.r - 1 + i;
+        if (!this.sheet.grid[rowIndex]) this.sheet.grid[rowIndex] = [];
+        for (let j = 0; j < values[i].length; j++) {
+          this.sheet.grid[rowIndex][this.c - 1 + j] = values[i][j];
+        }
+      }
+    }
+    getValue() {
+      const rowData = this.sheet.grid[this.r - 1] || [];
+      return rowData[this.c - 1] !== undefined ? rowData[this.c - 1] : '';
+    }
+    setValue(val) {
+      const rowIndex = this.r - 1;
+      if (!this.sheet.grid[rowIndex]) this.sheet.grid[rowIndex] = [];
+      this.sheet.grid[rowIndex][this.c - 1] = val;
+    }
+  }
+
+  class MockSheet {
+    constructor(name) {
+      this.name = name;
+      this.grid = [];
+    }
+    getName() { return this.name; }
+    getLastRow() { return this.grid.length; }
+    getLastColumn() {
+      let max = 0;
+      this.grid.forEach(r => { if (r && r.length > max) max = r.length; });
+      return max;
+    }
+    getRange(r, c, nr, nc) {
+      return new MockRange(this, r, c, nr, nc);
+    }
+    appendRow(row) {
+      this.grid.push([...row]);
+    }
+    clear() {
+      this.grid = [];
+    }
+  }
+
+  const mockSheets = {};
+  const mockSpreadsheet = {
+    getName: () => "MIE-03",
+    getSheetByName: (name) => mockSheets[name] || null,
+    insertSheet: (name) => {
+      const s = new MockSheet(name);
+      mockSheets[name] = s;
+      return s;
+    },
+    deleteSheet: (s) => {
+      delete mockSheets[s.getName()];
+    }
+  };
+
+  const Utilities = {
+    computeDigest: (algo, text, charset) => {
+      const h = crypto.createHash('sha256').update(text, 'utf8').digest();
+      const signedBytes = [];
+      for (let i = 0; i < h.length; i++) {
+        let b = h[i];
+        if (b > 127) b -= 256;
+        signedBytes.push(b);
+      }
+      return signedBytes;
+    },
+    DigestAlgorithm: { SHA_256: 'SHA_256' },
+    Charset: { UTF_8: 'UTF_8' },
+    formatDate: (d, tz, fmt) => new Date().toISOString().replace('T', ' ').substring(0, 19)
+  };
+
+  const LockService = {
+    getScriptLock: () => ({
+      waitLock: () => {},
+      releaseLock: () => {}
+    })
+  };
+
+  const PropertiesService = {
+    getScriptProperties: () => ({
+      getProperty: (k) => mockProps[k] || '',
+      setProperty: (k, v) => { mockProps[k] = String(v); },
+      deleteProperty: (k) => { delete mockProps[k]; }
+    })
+  };
+
+  const CONFIG = {
+    get: (k) => "端末管理"
+  };
+
+  const getSS = () => mockSpreadsheet;
+
+  const v2ApiContent = fs.readFileSync(path.resolve(process.cwd(), 'active/api/v2_api.js'), 'utf8');
+
+  const fnNames = [
+    'computeDeviceSha256',
+    'getOrCreateDeviceManagementSheet',
+    'syncPropertiesDeviceHashes',
+    'getContractedPlanCountFromSheet',
+    'registerOrValidateDevice',
+    'authenticateDashboardRequest',
+    'issueMobilePairingToken',
+    'pairMobileDevice',
+    'resetDeviceManagementSheet'
+  ];
+
+  const evalScope = {
+    crypto,
+    Utilities,
+    LockService,
+    PropertiesService,
+    CONFIG,
+    getSS,
+    mockProps,
+    mockSheets,
+    mockSpreadsheet
+  };
+
+  const evalCode = `
+    ${v2ApiContent}
+    return {
+      computeDeviceSha256,
+      getOrCreateDeviceManagementSheet,
+      syncPropertiesDeviceHashes,
+      getContractedPlanCountFromSheet,
+      registerOrValidateDevice,
+      authenticateDashboardRequest,
+      issueMobilePairingToken,
+      pairMobileDevice,
+      resetDeviceManagementSheet
+    };
+  `;
+
+  const fn = new Function(
+    'Utilities', 'LockService', 'PropertiesService', 'CONFIG', 'getSS',
+    evalCode
+  );
+
+  const engine = fn(Utilities, LockService, PropertiesService, CONFIG, getSS);
+  return { engine, mockProps, mockSheets, mockSpreadsheet };
+}
+
+async function ensureServerRunning() {
+  return new Promise((resolve) => {
+    const req = http.get('http://localhost:8080/mie-03/dashboard/index.html', (res) => {
+      resolve(null);
+    });
+    req.on('error', () => {
+      console.log('Starting background local server on port 8080...');
+      const child = spawn('node', ['scripts/serve.mjs'], {
+        cwd: process.cwd(),
+        stdio: 'ignore',
+        detached: false
+      });
+      setTimeout(() => resolve(child), 1200);
+    });
+  });
+}
 
 async function runDashboardQualityGate() {
   console.log("===============================================================");
-  console.log("🏛️ POSTING MAP DASHBOARD QUALITY GATE (6 PHASES)");
+  console.log("🏛️ POSTING MAP DASHBOARD QUALITY GATE (7 PHASES INCL. N-CONTRACT)");
   console.log("===============================================================\n");
 
   const results = {
+    phase0: { name: "Phase 0: N契約エンジン検証 (1契約=PC+MOBILE / 上書き防止 / REVOKE分離)", pass: false, details: [] },
     phase1: { name: "Phase 1: 実機Dashboard通常動作 (District-Agnostic)", pass: false, details: [] },
     phase2: { name: "Phase 2: 連続リロード安定性", pass: false, details: [] },
     phase3: { name: "Phase 3: Master ERROR 障害・部分劣化試験", pass: false, details: [] },
@@ -33,6 +219,107 @@ async function runDashboardQualityGate() {
     phase6: { name: "Phase 6: Hアプリ非干渉 & アーキテクチャ分離監査", pass: false, details: [] },
   };
 
+  console.log("▶ [PHASE 0] N契約端末管理・認可エンジン全項目検証中...");
+  try {
+    const { engine, mockSheets, mockSpreadsheet } = setupGasDeviceAuthSandbox();
+    let p0AllPass = true;
+    const addP0 = (testName, pass, detail) => {
+      results.phase0.details.push(`${pass ? 'PASS' : 'FAIL'}: ${testName} (${detail})`);
+      if (!pass) p0AllPass = false;
+    };
+
+    engine.resetDeviceManagementSheet();
+    const sheet = engine.getOrCreateDeviceManagementSheet(mockSpreadsheet);
+
+    const PC_KEY_1 = "DEV_PC_01_TEST_KEY_AAAA";
+    const MOB_KEY_1 = "DEV_MOB_01_TEST_KEY_BBBB";
+    const PC_KEY_2 = "DEV_PC_02_TEST_KEY_CCCC";
+    const MOB_KEY_2 = "DEV_MOB_02_TEST_KEY_DDDD";
+    const PC_KEY_3 = "DEV_PC_03_TEST_KEY_EEEE";
+    const MOB_KEY_3 = "DEV_MOB_03_TEST_KEY_FFFF";
+    const PC_KEY_4 = "DEV_PC_04_TEST_KEY_GGGG";
+
+    const regPc1 = engine.registerOrValidateDevice({ deviceKey: PC_KEY_1 });
+    addP0("1.1 契約1 PC-01 自動登録", regPc1.success && regPc1.deviceId === "PC-01" && regPc1.contractId === "CONTRACT-01", `deviceId=${regPc1.deviceId}, contractId=${regPc1.contractId}`);
+
+    const pairToken1 = engine.issueMobilePairingToken({ deviceKey: PC_KEY_1, pairKey: "PAIR_01" });
+    addP0("1.2 契約1 QR発行 (PC-01所属特定)", pairToken1.success && pairToken1.contractId === "CONTRACT-01" && pairToken1.mobileDeviceId === "MOBILE-01", `contractId=${pairToken1.contractId}, targetMob=${pairToken1.mobileDeviceId}`);
+
+    const pairRes1 = engine.pairMobileDevice({ pairKey: "PAIR_01", deviceKey: MOB_KEY_1 });
+    addP0("1.3 契約1 MOBILE-01 ペアリング登録", pairRes1.success && pairRes1.deviceId === "MOBILE-01" && pairRes1.contractId === "CONTRACT-01", `deviceId=${pairRes1.deviceId}`);
+
+    const regPc2Block = engine.registerOrValidateDevice({ deviceKey: PC_KEY_2 });
+    addP0("1.4 契約1 契約枠外(2台目PC)遮断", !regPc2Block.authorized && regPc2Block.code === "DEVICE_LIMIT_EXCEEDED", `code=${regPc2Block.code}`);
+
+    sheet.getRange(2, 10).setValue(2);
+    const regPc2 = engine.registerOrValidateDevice({ deviceKey: PC_KEY_2 });
+    addP0("2.1 契約2 PC-02 自動登録", regPc2.success && regPc2.deviceId === "PC-02" && regPc2.contractId === "CONTRACT-02", `deviceId=${regPc2.deviceId}, contractId=${regPc2.contractId}`);
+
+    const pairToken2 = engine.issueMobilePairingToken({ deviceKey: PC_KEY_2, pairKey: "PAIR_02" });
+    addP0("2.2 契約2 QR発行 (PC-02所属特定)", pairToken2.success && pairToken2.contractId === "CONTRACT-02" && pairToken2.mobileDeviceId === "MOBILE-02", `contractId=${pairToken2.contractId}`);
+
+    const pairRes2 = engine.pairMobileDevice({ pairKey: "PAIR_02", deviceKey: MOB_KEY_2 });
+    addP0("2.3 契約2 MOBILE-02 ペアリング登録", pairRes2.success && pairRes2.deviceId === "MOBILE-02" && pairRes2.contractId === "CONTRACT-02", `deviceId=${pairRes2.deviceId}`);
+
+    const validateMob1 = engine.registerOrValidateDevice({ deviceKey: MOB_KEY_1 });
+    addP0("2.4 MOBILE-01 非上書き保持確認", validateMob1.authorized && validateMob1.deviceId === "MOBILE-01", `deviceId=${validateMob1.deviceId}`);
+
+    const regPc3Block = engine.registerOrValidateDevice({ deviceKey: PC_KEY_3 });
+    addP0("2.5 契約2 契約枠外(3台目PC)遮断", !regPc3Block.authorized && regPc3Block.code === "DEVICE_LIMIT_EXCEEDED", `code=${regPc3Block.code}`);
+
+    sheet.getRange(2, 10).setValue(3);
+    const regPc3 = engine.registerOrValidateDevice({ deviceKey: PC_KEY_3 });
+    addP0("3.1 契約3 PC-03 自動登録", regPc3.success && regPc3.deviceId === "PC-03" && regPc3.contractId === "CONTRACT-03", `deviceId=${regPc3.deviceId}, contractId=${regPc3.contractId}`);
+
+    const pairToken3 = engine.issueMobilePairingToken({ deviceKey: PC_KEY_3, pairKey: "PAIR_03" });
+    addP0("3.2 契約3 QR発行 (PC-03所属特定)", pairToken3.success && pairToken3.contractId === "CONTRACT-03" && pairToken3.mobileDeviceId === "MOBILE-03", `contractId=${pairToken3.contractId}`);
+
+    const pairRes3 = engine.pairMobileDevice({ pairKey: "PAIR_03", deviceKey: MOB_KEY_3 });
+    addP0("3.3 契約3 MOBILE-03 ペアリング登録", pairRes3.success && pairRes3.deviceId === "MOBILE-03" && pairRes3.contractId === "CONTRACT-03", `deviceId=${pairRes3.deviceId}`);
+
+    const valMob1After = engine.registerOrValidateDevice({ deviceKey: MOB_KEY_1 });
+    const valMob2After = engine.registerOrValidateDevice({ deviceKey: MOB_KEY_2 });
+    addP0("3.4 全契約MOBILE端末保持確認", valMob1After.authorized && valMob2After.authorized, `mob1=${valMob1After.authorized}, mob2=${valMob2After.authorized}`);
+
+    const regPc4Block = engine.registerOrValidateDevice({ deviceKey: PC_KEY_4 });
+    addP0("3.5 契約3 契約枠外(4台目PC)遮断", !regPc4Block.authorized && regPc4Block.code === "DEVICE_LIMIT_EXCEEDED", `code=${regPc4Block.code}`);
+
+    const numRows = sheet.getLastRow() - 1;
+    const allRows = sheet.getRange(2, 1, numRows, 10).getValues();
+    for (let i = 0; i < allRows.length; i++) {
+      if (allRows[i][0] === "CONTRACT-02") {
+        sheet.getRange(i + 2, 2).setValue("REVOKED");
+        break;
+      }
+    }
+    engine.syncPropertiesDeviceHashes(mockSpreadsheet, sheet);
+
+    const pc2Revoked = engine.registerOrValidateDevice({ deviceKey: PC_KEY_2 });
+    const mob2Revoked = engine.registerOrValidateDevice({ deviceKey: MOB_KEY_2 });
+    const pc1StillActive = engine.registerOrValidateDevice({ deviceKey: PC_KEY_1 });
+    const pc3StillActive = engine.registerOrValidateDevice({ deviceKey: PC_KEY_3 });
+
+    addP0("4.1 REVOKED契約(PC-02) 遮断確認", !pc2Revoked.authorized && pc2Revoked.code === "DEVICE_REVOKED", `code=${pc2Revoked.code}`);
+    addP0("4.2 REVOKED契約(MOBILE-02) 遮断確認", !mob2Revoked.authorized && mob2Revoked.code === "DEVICE_REVOKED", `code=${mob2Revoked.code}`);
+    addP0("4.3 他契約(CONTRACT-01, CONTRACT-03) 継続許可確認", pc1StillActive.authorized && pc3StillActive.authorized, `pc1=${pc1StillActive.authorized}, pc3=${pc3StillActive.authorized}`);
+
+    const apiAuthPass = engine.authenticateDashboardRequest({ deviceKey: PC_KEY_1 });
+    const apiAuthBlocked = engine.authenticateDashboardRequest({ deviceKey: PC_KEY_2 });
+    const apiAuthUnknown = engine.authenticateDashboardRequest({ deviceKey: "UNKNOWN_UNREGISTERED_KEY" });
+
+    addP0("5.1 業務API認可 (ACTIVE端末=PASS)", apiAuthPass.success && apiAuthPass.authorized, `authorized=${apiAuthPass.authorized}`);
+    addP0("5.2 業務API認可 (REVOKED端末=BLOCK)", !apiAuthBlocked.success, `success=${apiAuthBlocked.success}`);
+    addP0("5.3 業務API認可 (未登録端末=BLOCK)", !apiAuthUnknown.success, `success=${apiAuthUnknown.success}`);
+
+    results.phase0.pass = p0AllPass;
+    console.log(`[Phase 0] N契約エンジン検証結果: ${p0AllPass ? '✅ ALL PASS' : '❌ FAIL'}`);
+  } catch (err) {
+    console.error('[Phase 0 Error]', err);
+    results.phase0.pass = false;
+    results.phase0.details.push(`Exception: ${err.message}`);
+  }
+
+  const spawnedServer = await ensureServerRunning();
   // 1. config.js から動的に静的マスター定義を取得し、期待件数を算出（地区非依存化）
   const configPath = path.resolve(process.cwd(), 'active/dashboard/config.js');
   let expectedCsvPinsCount = 0;
@@ -71,8 +358,9 @@ async function runDashboardQualityGate() {
               authorized: true,
               registered: true,
               deviceId: "PC-01",
+              contractId: "CONTRACT-01",
               branchName: "MIE-03",
-              contractedDeviceCount: 1
+              contractedPlanCount: 1
             })
           });
           return;
@@ -409,6 +697,9 @@ async function runDashboardQualityGate() {
     console.error("Quality Gate Error:", err);
   } finally {
     await browser.close();
+    if (spawnedServer) {
+      try { spawnedServer.kill(); } catch (e) {}
+    }
   }
 
   // -------------------------------------------------------------
