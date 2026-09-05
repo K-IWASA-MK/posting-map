@@ -548,14 +548,8 @@ async function syncDashboardData() {
       DashboardState.summary = summaryRes;
     }
 
-    if (isTier1Ok && Array.isArray(tier1Res.cities)) {
-      const validBackendCities = tier1Res.cities
-        .map(c => typeof c === 'string' ? c : (c.name || ''))
-        .filter(name => name && !name.includes('原本') && !name.includes('テンプレート') && !name.includes('端末管理') && !name.includes('契約管理') && !name.includes('conflict'));
-      if (validBackendCities.length > 0) {
-        DashboardState.cities = validBackendCities;
-        populateCitySelector(DashboardState.cities);
-      } else if (DashboardState.cities && DashboardState.cities.length > 0) {
+    if (isTier1Ok) {
+      if (DashboardState.cities && DashboardState.cities.length > 0) {
         populateCitySelector(DashboardState.cities);
       }
     }
