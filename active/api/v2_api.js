@@ -460,10 +460,20 @@ function getDeliveryStats() {
 // =============================
 
 function getFlyerStock() {
+  const ss = getSS();
+  const sheetName = (typeof CONFIG !== 'undefined' && CONFIG.get) ? (CONFIG.get("SHEET_STORAGE") || "保有チラシ枚数") : "保有チラシ枚数";
+  if (!ss || !ss.getSheetByName(sheetName)) {
+    return [];
+  }
   return FlyerService.getInstance().getFlyerStock();
 }
 
 function updateFlyerStock(location, count, staffName, staffId) {
+  const ss = getSS();
+  const sheetName = (typeof CONFIG !== 'undefined' && CONFIG.get) ? (CONFIG.get("SHEET_STORAGE") || "保有チラシ枚数") : "保有チラシ枚数";
+  if (!ss || !ss.getSheetByName(sheetName)) {
+    return { success: false, code: "SHEET_NOT_READY", message: "「保有チラシ枚数」シートが準備されていません（整理期間中）" };
+  }
   return FlyerService.getInstance().updateFlyerStock(location, count, staffName, staffId);
 }
 
@@ -526,16 +536,17 @@ function handleRequestFlyerTransfer(data) {
     // 2. 「受渡要請履歴」シートへ保存（履歴保存専用：A〜G列の7項目）
     let sheetName = "受渡要請履歴";
     let s = ss.getSheetByName(sheetName);
-    const expectedHeaders = [["日時", "要請者", "要請者ID", "保管者", "保管者ID", "連絡方法", "連絡先"]];
     if (!s) {
-      s = ss.insertSheet(sheetName);
-      s.getRange(1, 1, 1, 7).setValues(expectedHeaders);
-    } else {
-      // 既存シートのヘッダーA1:G1を正規化し、H列（状態）以降の不要ヘッダー/旧データを撤去（A〜G列の既存データは完全保持）
-      s.getRange(1, 1, 1, 7).setValues(expectedHeaders);
-      if (s.getLastColumn() >= 8) {
-        s.getRange(1, 8, s.getLastRow(), s.getLastColumn() - 7).clearContent();
-      }
+      return {
+        success: false,
+        code: "SHEET_NOT_READY",
+        message: "「受渡要請履歴」シートが準備されていません。"
+      };
+    }
+    const expectedHeaders = [["日時", "要請者", "要請者ID", "保管者", "保管者ID", "連絡方法", "連絡先"]];
+    s.getRange(1, 1, 1, 7).setValues(expectedHeaders);
+    if (s.getLastColumn() >= 8) {
+      s.getRange(1, 8, s.getLastRow(), s.getLastColumn() - 7).clearContent();
     }
 
     const now = new Date();
@@ -734,7 +745,7 @@ function setPinInProgress(data) {
     const ss = getSS();
     let pinSheet = ss.getSheetByName("PinStatus");
     if (!pinSheet) {
-      pinSheet = ss.insertSheet("PinStatus");
+      return { success: false, code: "SHEET_NOT_READY", message: "PinStatus sheet unavailable" };
     }
 
     const lock = LockService.getScriptLock();
