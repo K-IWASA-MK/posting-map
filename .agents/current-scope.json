@@ -70,5 +70,11 @@
   "scripts/operations/index.html",
   "active/business/area/tier1_service.js",
   "mie-03/dashboard/index.html",
-  "mie-03/dashboard/manager.js"
+  "mie-03/dashboard/manager.js",
+  "docs/manuals",
+  "docs/manuals/",
+  "docs/manuals/POSTING MAP ご利用ガイド.md",
+  "docs/manuals/POSTING MAP ご利用ガイド.pdf",
+  "scripts/build_template_guide.mjs",
+  "scripts/generate_pdf.mjs"
 ]
