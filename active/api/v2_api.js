@@ -281,29 +281,6 @@ function doPost(e) {
     const pairResult = DeviceManagementService.getInstance().pairMobile(postData || params || {});
     return ContentService.createTextOutput(JSON.stringify(pairResult))
       .setMimeType(ContentService.MimeType.JSON);
-  } else if (action === 'setProvisioningToken') {
-    const dashAuth = DeviceManagementService.getInstance().authenticateDashboard(postData || params || {});
-    if (!dashAuth.success || dashAuth.deviceId !== 'PC-01') {
-      return ContentService.createTextOutput(JSON.stringify({
-        success: false,
-        code: "FORBIDDEN",
-        message: "Only authorized PC-01 terminal can set provisioning token."
-      })).setMimeType(ContentService.MimeType.JSON);
-    }
-    const newToken = (postData && postData.newToken) || (params && params.newToken);
-    if (!newToken || typeof newToken !== 'string' || !newToken.trim()) {
-      return ContentService.createTextOutput(JSON.stringify({
-        success: false,
-        code: "INVALID_ARGUMENT",
-        message: "newToken is required."
-      })).setMimeType(ContentService.MimeType.JSON);
-    }
-    const newHash = computeSha256(newToken.trim()).toLowerCase();
-    PropertiesService.getScriptProperties().setProperty('PROVISIONING_TOKEN_HASH', newHash);
-    return ContentService.createTextOutput(JSON.stringify({
-      success: true,
-      message: "PROVISIONING_TOKEN_HASH configured successfully."
-    })).setMimeType(ContentService.MimeType.JSON);
   } else if (action === 'provisionDistrict') {
     const token = (postData && (postData.provisioningToken || (postData.options && postData.options.provisioningToken)))
                || (params && (params.provisioningToken || (params.options && params.options.provisioningToken)));
