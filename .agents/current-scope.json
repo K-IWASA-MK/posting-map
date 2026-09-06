@@ -76,5 +76,14 @@
   "docs/manuals/POSTING MAP ご利用ガイド.md",
   "docs/manuals/POSTING MAP ご利用ガイド.pdf",
   "scripts/build_template_guide.mjs",
-  "scripts/generate_pdf.mjs"
+  "scripts/generate_pdf.mjs",
+  "active/business/system/monthly_sheet_resolver.js",
+  "active/business/distribution/distribution_repository.js",
+  "active/business/distribution/distribution_service.js",
+  "active/business/flyer/flyer_repository.js",
+  "active/business/gps/gps_repository.js",
+  "active/business/staff/staff_repository.js",
+  "active/gas/sheet_guard.js",
+  "active/gas/v2_map.js",
+  "active/infrastructure/spreadsheet/spreadsheet_adapter.js"
 ]
