@@ -90,5 +90,9 @@
   "active/business/staff/staff_service.js",
   "active/business/device/device_management_service.js",
   "active/business/pin/pin_status_service.js",
-  "active/business/transfer/transfer_service.js"
+  "active/business/transfer/transfer_service.js",
+  "index.html",
+  "active/dashboard/config.js",
+  "scripts/sync-deployment-config.mjs",
+  "scripts/validate-gas-endpoint-ssot.mjs"
 ]
