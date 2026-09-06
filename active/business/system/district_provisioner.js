@@ -52,23 +52,37 @@
      * @param {Array<Object>} addresses - CSVからパースしたエリア配列 [{ rowId, cityName, townName }, ...]
      * @return {Object} 結果オブジェクト { success: true, count: number, month: string }
      */
-    provisionNewDistrict(addresses) {
+    provisionNewDistrict(addresses, options) {
       const ss = this.getSS();
       const lock = LockService.getScriptLock();
       lock.waitLock(30000);
 
       try {
-        // STEP 1 & 2: 原本5種の生成
+        if (typeof DeviceManagementService !== 'undefined' && DeviceManagementService.getInstance) {
+          DeviceManagementService.getInstance().getOrCreateSheet();
+        }
+
+        const sysInfoResult = this.createOrSyncSystemInfo(ss, options);
+
         this.createMasterSheets(ss, addresses);
 
-        // STEP 3: 原本5種から当月5種を生成
         const monthResult = this.rolloverMonthlySheets();
 
         SpreadsheetApp.flush();
 
+        const allSheets = [
+          "SYSTEM_INFO",
+          "端末管理",
+          ...Object.values(this.masterNames),
+          ...monthResult.created
+        ];
+
         return {
           success: true,
-          message: `District master and monthly sheets provisioned successfully.`,
+          message: "All 12 district sheets provisioned successfully.",
+          districtName: sysInfoResult.districtName,
+          sheets: allSheets,
+          totalSheetsCount: allSheets.length,
           count: Array.isArray(addresses) ? addresses.length : 0,
           month: monthResult.month
         };
@@ -77,6 +91,89 @@
       }
     }
 
+    createOrSyncSystemInfo(ss, options) {
+      const opts = options || {};
+      const sheetName = "SYSTEM_INFO";
+      let sheet = ss.getSheetByName(sheetName);
+      if (!sheet) {
+        sheet = ss.insertSheet(sheetName);
+      }
+
+      const districtName = ss.getName();
+
+      let contractedCount = 2;
+      let deviceSummary = "PC-01, PC-02 / MOBILE-01, MOBILE-02";
+      if (typeof DeviceManagementService !== 'undefined' && DeviceManagementService.getInstance) {
+        const devStatus = DeviceManagementService.getInstance().getDeviceStatus();
+        if (devStatus && devStatus.contractedPlanCount) {
+          contractedCount = devStatus.contractedPlanCount;
+        }
+        if (devStatus && Array.isArray(devStatus.rows) && devStatus.rows.length > 0) {
+          const pcs = devStatus.rows.map(r => r.pcDeviceId).filter(Boolean);
+          const mobs = devStatus.rows.map(r => r.mobileDeviceId).filter(Boolean);
+          if (pcs.length > 0 || mobs.length > 0) {
+            deviceSummary = `${pcs.join(', ')} / ${mobs.join(', ')}`;
+          }
+        }
+      }
+
+      const baseUrl = opts.baseUrl || "https://postingmap.jp";
+      const hAppUrl = `${baseUrl}/`;
+      const dashboardUrl = `${baseUrl}/active/manager/`;
+
+      let liffUrl = opts.productionLiffUrl || "";
+      let liffId = opts.liffId || "";
+      if (!liffId && liffUrl) {
+        try {
+          const parsed = new URL(liffUrl);
+          liffId = parsed.pathname.split('/').filter(Boolean)[0] || "";
+        } catch (e) {}
+      }
+      if (!liffId && typeof PropertiesService !== 'undefined') {
+        try {
+          const props = PropertiesService.getScriptProperties();
+          liffId = props.getProperty("LINE_LIFF_ID") || props.getProperty("LIFF_ID") || "";
+          if (liffId && !liffUrl) {
+            liffUrl = `https://liff.line.me/${liffId}`;
+          }
+        } catch (e) {}
+      }
+
+      const headers = [["項目", "内容"]];
+      const rows = [
+        ["地区コード", districtName],
+        ["地区名", districtName],
+        ["HアプリURL", hAppUrl],
+        ["Dashboard URL", dashboardUrl],
+        ["LIFFアプリ名", `POSTING MAP ${districtName}`],
+        ["LIFF ID", liffId],
+        ["LIFF URL", liffUrl],
+        ["Endpoint URL", hAppUrl],
+        ["Dashboard契約数", contractedCount],
+        ["Dashboard端末", deviceSummary],
+        ["状態", "ACTIVE"]
+      ];
+
+      const currentLr = sheet.getLastRow();
+      if (currentLr >= 2) {
+        sheet.getRange(2, 1, currentLr - 1, 2).clearContent();
+      }
+
+      sheet.getRange(1, 1, 1, 2).setValues(headers);
+      sheet.getRange("A1:B1").setBackground("#1e293b").setFontColor("#ffffff").setFontWeight("bold");
+      sheet.getRange(2, 1, rows.length, 2).setValues(rows);
+      sheet.getRange(`A2:A${rows.length + 1}`).setFontWeight("bold");
+      sheet.setFrozenRows(1);
+
+      return {
+        success: true,
+        sheet: sheetName,
+        districtName: districtName,
+        contractedCount: contractedCount,
+        deviceSummary: deviceSummary,
+        rowCount: rows.length
+      };
+    }
     /**
      * 原本5種の生成・初期化
      */

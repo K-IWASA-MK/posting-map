@@ -79,6 +79,16 @@ function doGet(e) {
     const statusResult = DeviceManagementService.getInstance().getDeviceStatus();
     return ContentService.createTextOutput(JSON.stringify(statusResult))
       .setMimeType(ContentService.MimeType.JSON);
+  } else if (action === 'syncSystemInfo') {
+    let result;
+    if (typeof DistrictProvisioner !== 'undefined' && DistrictProvisioner.getInstance) {
+      const ss = DistrictProvisioner.getInstance().getSS();
+      result = DistrictProvisioner.getInstance().createOrSyncSystemInfo(ss, params);
+    } else {
+      result = { success: false, message: 'DistrictProvisioner not available' };
+    }
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
   } else if (isDashboardAction) {
     const dashAuth = DeviceManagementService.getInstance().authenticateDashboard(params);
     if (!dashAuth.success) {
@@ -226,9 +236,21 @@ function doPost(e) {
       .setMimeType(ContentService.MimeType.JSON);
   } else if (action === 'provisionDistrict') {
     const addresses = (postData && postData.addresses) || (params && params.addresses);
+    const options = (postData && postData.options) || (params && params.options) || {};
     let result;
     if (typeof DistrictProvisioner !== 'undefined' && DistrictProvisioner.getInstance) {
-      result = DistrictProvisioner.getInstance().provisionNewDistrict(addresses);
+      result = DistrictProvisioner.getInstance().provisionNewDistrict(addresses, options);
+    } else {
+      result = { success: false, message: 'DistrictProvisioner not available' };
+    }
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  } else if (action === 'syncSystemInfo') {
+    const options = (postData && postData.options) || (params && params.options) || {};
+    let result;
+    if (typeof DistrictProvisioner !== 'undefined' && DistrictProvisioner.getInstance) {
+      const ss = DistrictProvisioner.getInstance().getSS();
+      result = DistrictProvisioner.getInstance().createOrSyncSystemInfo(ss, options);
     } else {
       result = { success: false, message: 'DistrictProvisioner not available' };
     }

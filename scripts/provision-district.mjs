@@ -63,10 +63,22 @@ async function main() {
 
   console.log(`🌐 Target GAS WebApp URL: ${webAppUrl}`);
 
-  // 3. Post to GAS WebApp
+  const productionLiffUrl = deployment?.resources?.productionLiffUrl || '';
+  let liffId = '';
+  if (productionLiffUrl) {
+    try {
+      liffId = new URL(productionLiffUrl).pathname.split('/').filter(Boolean)[0] || '';
+    } catch (e) {}
+  }
+
   const payload = {
     action: 'provisionDistrict',
-    addresses: addresses
+    addresses: addresses,
+    options: {
+      productionLiffUrl: productionLiffUrl,
+      liffId: liffId,
+      baseUrl: 'https://postingmap.jp'
+    }
   };
 
   console.log('⏳ Sending provisionDistrict request to GAS...');
@@ -94,7 +106,11 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`🎉 Successfully provisioned district! Count: ${result.count}, Month: ${result.month}`);
+  console.log(`🎉 Successfully provisioned district: ${result.districtName || 'N/A'} (Address Count: ${result.count}, Month: ${result.month})`);
+  if (Array.isArray(result.sheets)) {
+    console.log(`📋 Total Sheets Created (${result.sheets.length}):`);
+    result.sheets.forEach((s, idx) => console.log(`   ${idx + 1}. ${s}`));
+  }
 }
 
 main().catch(err => {
