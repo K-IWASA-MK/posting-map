@@ -32,11 +32,10 @@
       const liffUrl = opts.productionLiffUrl || this.getConfigProperty('PRODUCTION_LIFF_URL') || this.getConfigProperty('LINE_LIFF_URL') || '';
       let liffId = opts.liffId || this.getConfigProperty('LINE_LIFF_ID') || this.getConfigProperty('LIFF_ID') || '';
       if (!liffId && liffUrl) {
-        try {
-          const parsed = new URL(liffUrl);
-          const parts = parsed.pathname.split('/').filter(Boolean);
-          liffId = parts[0] || '';
-        } catch (e) {}
+        const match = String(liffUrl).match(/liff\.line\.me\/([^/?#]+)/i);
+        if (match && match[1]) {
+          liffId = match[1];
+        }
       }
       return { url: liffUrl, id: liffId };
     }

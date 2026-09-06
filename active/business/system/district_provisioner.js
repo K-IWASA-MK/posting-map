@@ -135,10 +135,10 @@
       let liffUrl = opts.productionLiffUrl || "";
       let liffId = opts.liffId || "";
       if (!liffId && liffUrl) {
-        try {
-          const parsed = new URL(liffUrl);
-          liffId = parsed.pathname.split('/').filter(Boolean)[0] || "";
-        } catch (e) {}
+        const match = String(liffUrl).match(/liff\.line\.me\/([^/?#]+)/i);
+        if (match && match[1]) {
+          liffId = match[1];
+        }
       }
       if (!liffId && typeof PropertiesService !== 'undefined') {
         try {
