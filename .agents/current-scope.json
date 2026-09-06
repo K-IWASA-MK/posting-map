@@ -85,5 +85,10 @@
   "active/business/staff/staff_repository.js",
   "active/gas/sheet_guard.js",
   "active/gas/v2_map.js",
-  "active/infrastructure/spreadsheet/spreadsheet_adapter.js"
+  "active/infrastructure/spreadsheet/spreadsheet_adapter.js",
+  ".claspignore",
+  "active/business/staff/staff_service.js",
+  "active/business/device/device_management_service.js",
+  "active/business/pin/pin_status_service.js",
+  "active/business/transfer/transfer_service.js"
 ]
