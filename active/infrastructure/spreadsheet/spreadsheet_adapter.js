@@ -69,9 +69,7 @@ class SpreadsheetBatchWriter {
     if (rows.length === 0) return;
     const ss = this.getSpreadsheet();
     let sheet = ss.getSheetByName(sheetName);
-    if (!sheet) {
-      sheet = ss.insertSheet(sheetName);
-    }
+    if (!sheet) return;
     const lastRow = sheet.getLastRow();
     sheet.getRange(lastRow + 1, 1, rows.length, rows[0].length).setValues(rows);
   }

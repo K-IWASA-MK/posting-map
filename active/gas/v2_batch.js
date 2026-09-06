@@ -576,8 +576,10 @@ function setupPhotoCleanupTrigger() {
  */
 function cleanupPinStatusDaily() {
   try {
-    const ss = getSS();
-    const pinSheet = ss.getSheetByName("PinStatus");
+    let pinSheet = null;
+    if (typeof MonthlySheetResolver !== 'undefined' && MonthlySheetResolver.getInstance) {
+      pinSheet = MonthlySheetResolver.getInstance().getCurrentSheet("pin");
+    }
     if (!pinSheet) {
       console.log("cleanupPinStatusDaily: PinStatus sheet does not exist. Nothing to clear.");
       return;

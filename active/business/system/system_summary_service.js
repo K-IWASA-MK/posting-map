@@ -27,25 +27,9 @@
             if (ss) {
               districtName = ss.getName();
 
-              const excludeSheets = [
-                "名簿", "原本", "保有チラシ枚数", "受渡要請履歴", "管理者ID",
-                "__SYSTEM_CACHE__", "📥 集計用マスターデータ", "郵便番号", "区割り",
-                "初めての方「使い方ガイド」", "📖 らくらくマニュアル", "らくらくマニュアル", "📄 活動報告書",
-                "__TEMP_ADDRESSES__", "TraceLog", "配布実績", "PinStatus", "契約管理"
-              ];
-
-              const sheets = ss.getSheets();
-              sheets.forEach(sheet => {
-                const sName = sheet.getName();
-                if (excludeSheets.includes(sName) || sheet.isSheetHidden()) return;
-                if (sName.includes("MASTER") || sName.includes("DATABASE") || sName.includes("EXPORT")) return;
-                const lastRow = sheet.getLastRow();
-                if (lastRow >= 2) {
-                  totalPoints += (lastRow - 1);
-                }
-              });
-
-              const distSheet = ss.getSheetByName("配布実績");
+              const distSheet = (typeof MonthlySheetResolver !== 'undefined' && MonthlySheetResolver.getInstance)
+                ? MonthlySheetResolver.getInstance().getCurrentSheet("distribution")
+                : null;
               if (distSheet) {
                 const lastRow = distSheet.getLastRow();
                 if (lastRow > 0) {

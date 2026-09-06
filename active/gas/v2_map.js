@@ -102,7 +102,10 @@ function refreshAreaSummaryCache() {
 
     // エリアシート未展開時の配布実績シート集計
     if (totalDone === 0) {
-      const distSheet = ss.getSheetByName("配布実績");
+      let distSheet = null;
+      if (typeof MonthlySheetResolver !== 'undefined' && MonthlySheetResolver.getInstance) {
+        distSheet = MonthlySheetResolver.getInstance().getCurrentSheet("distribution");
+      }
       if (distSheet) {
         const lr = distSheet.getLastRow();
         if (lr > 0) {
@@ -150,88 +153,9 @@ function refreshAreaSummaryCache() {
   return result;
 }
 
-/**
- * 集計用シャドウシート (__SYSTEM_CACHE__) を生成/更新する
- * エリアシートが増えた時などに呼び出す
- */
 function createSystemCacheSheet() {
-  const ss = getSS();
-  let sheet = ss.getSheetByName(CONFIG.get("SHEET_SYSTEM_CACHE"));
-  
-  if (!sheet) {
-    sheet = ss.insertSheet(CONFIG.get("SHEET_SYSTEM_CACHE"));
-    sheet.hideSheet();
-  }
-  
-  sheet.clear();
-  sheet.getRange(1, 1, 1, 6).setValues([["エリア名", "完了数", "合計数", "代表住所", "市町村カナ", "町域カナ"]]);
-
-  const exclude = [
-    CONFIG.get("SHEET_GUIDE"), CONFIG.get("SHEET_ROSTER"), CONFIG.get("SHEET_TEMPLATE"),
-    CONFIG.get("SHEET_POSTAL"), CONFIG.get("SHEET_DISTRICT"), CONFIG.get("SHEET_MASTER_EXPORT"),
-    CONFIG.get("SHEET_REPORT"), CONFIG.get("SHEET_MANUAL"), CONFIG.get("SHEET_SYSTEM_CACHE"),
-    CONFIG.get("SHEET_STORAGE"), CONFIG.get("SHEET_ADMIN"), CONFIG.get("SHEET_HANDOVER_HISTORY"),
-    "受渡要請履歴",
-    "__TEMP_ADDRESSES__"
-  ];
-
-  // 1. municipality_master.csv (SSOT) から自治体順を取得
-  const orderedCities = getMunicipalityOrder();
-
-  // 2. 自治体の優先順に従ってシートを順次回収
-  const orderedAreaSheets = [];
-  orderedCities.forEach(cityName => {
-    // 連番なし (例: "四日市市")
-    const s1 = ss.getSheetByName(cityName);
-    if (s1 && !s1.isSheetHidden() && !exclude.includes(s1.getName())) {
-      orderedAreaSheets.push(s1);
-    }
-    // 連番あり (例: "四日市市(2)", "四日市市(3)"...)
-    for (let idx = 2; idx <= 100; idx++) {
-      const sN = ss.getSheetByName(`${cityName}(${idx})`);
-      if (sN && !sN.isSheetHidden() && !exclude.includes(sN.getName())) {
-        orderedAreaSheets.push(sN);
-      }
-    }
-  });
-
-  // 上記順序で漏れたエリアシートがあれば末尾に追加回収
-  const existingSheets = ss.getSheets();
-  existingSheets.forEach(s => {
-    const sName = s.getName();
-    if (!s.isSheetHidden() && !exclude.includes(sName) && !orderedAreaSheets.some(item => item.getName() === sName)) {
-      orderedAreaSheets.push(s);
-    }
-  });
-
-  if (orderedAreaSheets.length === 0) {
-    SpreadsheetApp.flush();
-    return;
-  }
-
-  const rows = orderedAreaSheets.map(s => {
-    const name = s.getName();
-    const lastRow = s.getLastRow();
-    let repAddress = "";
-    
-    if (lastRow >= 2) {
-      repAddress = s.getRange(2, 1).getValue() || "";
-    }
-    
-    const escapedName = name.replace(/'/g, "''");
-
-    return [
-      name,
-      0,
-      `=COUNTA('${escapedName}'!A2:A)`, // マスター件数数式
-      repAddress,
-      "",
-      ""
-    ];
-  });
-
-  sheet.getRange(2, 1, rows.length, 6).setValues(rows);
-  SpreadsheetApp.flush();
+  // Legacy __SYSTEM_CACHE__ sheet generation decommissioned in monthly architecture
+  return;
 }
 
 /**

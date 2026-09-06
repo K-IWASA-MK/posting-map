@@ -20,18 +20,10 @@ if (typeof StaffRepository === 'undefined') {
     }
 
     getRosterSheet() {
-      let ss = null;
-      if (typeof SpreadsheetAdapter !== 'undefined' && typeof SpreadsheetAdapter.getSS === 'function') {
-        ss = SpreadsheetAdapter.getSS();
-      } else if (typeof getSS === 'function') {
-        ss = getSS();
+      if (typeof MonthlySheetResolver !== 'undefined' && MonthlySheetResolver.getInstance) {
+        return MonthlySheetResolver.getInstance().getCurrentSheet("staff");
       }
-      if (!ss) return null;
-
-      const sheetName = (typeof CONFIG !== 'undefined' && typeof CONFIG.get === 'function')
-        ? (CONFIG.get("SHEET_ROSTER") || '名簿')
-        : '名簿';
-      return ss.getSheetByName(sheetName);
+      return null;
     }
 
     findByLineUserId(lineUserId) {

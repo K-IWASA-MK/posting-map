@@ -248,10 +248,9 @@ function setupTransferSheets() {
   let msg = "";
 
   // 1. 保有チラシ枚数
-  let storageSheetName = "保有チラシ枚数";
-  if (typeof CONFIG !== 'undefined' && CONFIG.get("SHEET_STORAGE")) {
-    storageSheetName = CONFIG.get("SHEET_STORAGE");
-  }
+  let storageSheetName = (typeof MonthlySheetResolver !== 'undefined' && MonthlySheetResolver.getInstance)
+    ? MonthlySheetResolver.getInstance().getSheetName("flyer")
+    : "保有チラシ枚数";
   let storageSheet = ss.getSheetByName(storageSheetName);
   if (!storageSheet) {
     storageSheet = ss.insertSheet(storageSheetName);
@@ -264,7 +263,9 @@ function setupTransferSheets() {
   }
 
   // 2. 受渡要請履歴
-  let transferSheetName = "受渡要請履歴";
+  let transferSheetName = (typeof MonthlySheetResolver !== 'undefined' && MonthlySheetResolver.getInstance)
+    ? MonthlySheetResolver.getInstance().getSheetName("transfer")
+    : "受渡要請履歴";
   let transferSheet = ss.getSheetByName(transferSheetName);
   if (!transferSheet) {
     transferSheet = ss.insertSheet(transferSheetName);
@@ -586,7 +587,9 @@ function formatSingleRosterSheet(sheet) {
 
 function formatRosterSheet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName(CONFIG.get("SHEET_ROSTER") || "名簿");
+  const sheet = (typeof MonthlySheetResolver !== 'undefined' && MonthlySheetResolver.getInstance)
+    ? MonthlySheetResolver.getInstance().getCurrentSheet("staff")
+    : null;
   if (sheet) formatSingleRosterSheet(sheet);
   const templateSheet = ss.getSheetByName("名簿の原本");
   if (templateSheet) formatSingleRosterSheet(templateSheet);
@@ -611,10 +614,11 @@ function setupRosterSheet() {
   templateSheet.setFrozenRows(1);
   formatSingleRosterSheet(templateSheet);
 
-  // 2. 「名簿」シートの再構築
-  const rosterSheetName = (typeof CONFIG !== 'undefined' && typeof CONFIG.get === 'function')
-    ? (CONFIG.get("SHEET_ROSTER") || "名簿")
-    : "名簿";
+  // 2. 「名簿」シートの再構築 (当月名簿)
+  const rosterSheetName = (typeof MonthlySheetResolver !== 'undefined' && MonthlySheetResolver.getInstance)
+    ? MonthlySheetResolver.getInstance().getSheetName("staff")
+    : null;
+  if (!rosterSheetName) return "MonthlySheetResolver not available";
   let rosterSheet = ss.getSheetByName(rosterSheetName);
   if (rosterSheet) {
     ss.deleteSheet(rosterSheet);

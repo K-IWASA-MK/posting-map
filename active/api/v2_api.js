@@ -8,6 +8,13 @@
 // ① 基本設定
 // =============================
 
+function getMonthlySheet(type) {
+  if (typeof MonthlySheetResolver !== 'undefined' && MonthlySheetResolver.getInstance) {
+    return MonthlySheetResolver.getInstance().getCurrentSheet(type);
+  }
+  return null;
+}
+
 
 
 
@@ -266,8 +273,7 @@ function processPostAction(action, postData, e) {
 
     case 'getEvidence':
       try {
-        const ss = getSS();
-        const rosterSheet = ss.getSheetByName(CONFIG.get("SHEET_ROSTER") || '名簿');
+        const rosterSheet = getMonthlySheet('staff');
         const rosterLastRow = rosterSheet ? rosterSheet.getLastRow() : 0;
         return {
           success: true,
@@ -357,7 +363,7 @@ function getCityName(areaName) {
 
 
 function getRoster() {
-  const s = getSS().getSheetByName(CONFIG.get("SHEET_ROSTER") || "名簿");
+  const s = getMonthlySheet('staff');
   if (!s) return [];
   const lastRow = s.getLastRow();
   if (lastRow < 2) return [];
@@ -460,18 +466,16 @@ function getDeliveryStats() {
 // =============================
 
 function getFlyerStock() {
-  const ss = getSS();
-  const sheetName = (typeof CONFIG !== 'undefined' && CONFIG.get) ? (CONFIG.get("SHEET_STORAGE") || "保有チラシ枚数") : "保有チラシ枚数";
-  if (!ss || !ss.getSheetByName(sheetName)) {
+  const s = getMonthlySheet('flyer');
+  if (!s) {
     return [];
   }
   return FlyerService.getInstance().getFlyerStock();
 }
 
 function updateFlyerStock(location, count, staffName, staffId) {
-  const ss = getSS();
-  const sheetName = (typeof CONFIG !== 'undefined' && CONFIG.get) ? (CONFIG.get("SHEET_STORAGE") || "保有チラシ枚数") : "保有チラシ枚数";
-  if (!ss || !ss.getSheetByName(sheetName)) {
+  const s = getMonthlySheet('flyer');
+  if (!s) {
     return { success: false, code: "SHEET_NOT_READY", message: "「保有チラシ枚数」シートが準備されていません（整理期間中）" };
   }
   return FlyerService.getInstance().updateFlyerStock(location, count, staffName, staffId);
@@ -504,10 +508,7 @@ function handleRequestFlyerTransfer(data) {
     const ss = getSS();
 
     // 1. 「名簿」シート (SSOT) から要請者名および保管者情報を解決
-    const rosterSheetName = (typeof CONFIG !== 'undefined' && typeof CONFIG.get === 'function')
-      ? (CONFIG.get("SHEET_ROSTER") || '名簿')
-      : '名簿';
-    const rosterSheet = ss.getSheetByName(rosterSheetName);
+    const rosterSheet = getMonthlySheet('staff');
 
     let requestUserName = requestUserId;
     let holderName = holderUserId;
@@ -534,8 +535,7 @@ function handleRequestFlyerTransfer(data) {
     }
 
     // 2. 「受渡要請履歴」シートへ保存（履歴保存専用：A〜G列の7項目）
-    let sheetName = "受渡要請履歴";
-    let s = ss.getSheetByName(sheetName);
+    let s = getMonthlySheet('transfer');
     if (!s) {
       return {
         success: false,
@@ -620,9 +620,7 @@ function sendLinePushMessage(toUserId, messageText) {
 
 // 受渡要請履歴の取得 API（A〜G列の7項目）
 function getTransferRequests() {
-  const ss = getSS();
-  const sheetName = "受渡要請履歴";
-  const s = ss.getSheetByName(sheetName);
+  const s = getMonthlySheet('transfer');
   if (!s) return [];
   const lastRow = s.getLastRow();
   if (lastRow < 2) return [];
@@ -649,9 +647,7 @@ function resolveTransferRequest(data) {
   try { lock.waitLock(10000); } catch(e) { return { success: false, message: "Lock timeout" }; }
 
   try {
-    const ss = getSS();
-    const sheetName = "受渡要請履歴";
-    const s = ss.getSheetByName(sheetName);
+    const s = getMonthlySheet('transfer');
     if (!s) return { success: false, message: "Sheet not found" };
 
     // SEC-003: 1. rowNumber検証
@@ -707,8 +703,7 @@ function resolveTransferRequest(data) {
 
 function getGlobalPinStatus() {
   try {
-    const ss = getSS();
-    let pinSheet = ss.getSheetByName("PinStatus");
+    let pinSheet = getMonthlySheet('pin');
     let inProgress = [];
     if (pinSheet) {
       const lr = pinSheet.getLastRow();
@@ -719,7 +714,7 @@ function getGlobalPinStatus() {
     }
 
     let completed = [];
-    const distSheet = ss.getSheetByName("配布実績");
+    const distSheet = getMonthlySheet('distribution');
     if (distSheet) {
       const lr = distSheet.getLastRow();
       if (lr > 0) {
@@ -742,8 +737,7 @@ function setPinInProgress(data) {
     const rowId = parseInt(data.rowId, 10);
     if (isNaN(rowId)) return { success: false, message: 'Invalid rowId' };
 
-    const ss = getSS();
-    let pinSheet = ss.getSheetByName("PinStatus");
+    let pinSheet = getMonthlySheet('pin');
     if (!pinSheet) {
       return { success: false, code: "SHEET_NOT_READY", message: "PinStatus sheet unavailable" };
     }

@@ -48,11 +48,16 @@ if (typeof GPSRepository === 'undefined') {
       }
     }
 
+    getDistributionSheet() {
+      if (typeof MonthlySheetResolver !== 'undefined' && MonthlySheetResolver.getInstance) {
+        return MonthlySheetResolver.getInstance().getCurrentSheet("distribution");
+      }
+      return null;
+    }
+
     checkExistingStatus(rowIdNum) {
       try {
-        if (typeof getSS !== 'function') return null;
-        const ss = getSS();
-        const sheet = ss.getSheetByName("配布実績");
+        const sheet = this.getDistributionSheet();
         if (!sheet) return null;
 
         const finder = sheet.getRange("A:A").createTextFinder(String(rowIdNum)).matchEntireCell(true);
@@ -129,41 +134,39 @@ if (typeof GPSRepository === 'undefined') {
         ss = getSS();
       }
 
-      if (ss) {
-        try {
-          const sheet = ss.getSheetByName("配布実績");
-          if (sheet) {
-            if (!targetRow) {
-               const finder = sheet.getRange("A:A").createTextFinder(String(rowIdNum)).matchEntireCell(true);
-               const cell = finder.findNext();
-               if (cell) targetRow = cell.getRow();
-            }
-            if (targetRow) {
-              if (isComplete) {
-                sheet.getRange(targetRow, 4, 1, 12).setValues([[
-                  completedAt,
-                  countVal,
-                  data.staffId || "",
-                  data.staffName || "",
-                  finalGpsStatus,
-                  photoStatus,
-                  latNum,
-                  lngNum,
-                  gpsTimestamp,
-                  pFileId,
-                  pUrl,
-                  pTimestamp
-                ]]);
-              } else {
-                sheet.getRange(targetRow, 4, 1, 12).setValues([["", "", "", "", "", "", "", "", "", "", "", ""]]); // Revert D to O
-              }
-              updateSuccess = true;
-            }
+      try {
+        const sheet = this.getDistributionSheet();
+        if (sheet) {
+          if (!targetRow) {
+            const finder = sheet.getRange("A:A").createTextFinder(String(rowIdNum)).matchEntireCell(true);
+            const cell = finder.findNext();
+            if (cell) targetRow = cell.getRow();
           }
-        } catch(e) {
-          updateSuccess = false;
-          console.error("Spreadsheet write error:", e);
+          if (targetRow) {
+            if (isComplete) {
+              sheet.getRange(targetRow, 4, 1, 12).setValues([[
+                completedAt,
+                countVal,
+                data.staffId || "",
+                data.staffName || "",
+                finalGpsStatus,
+                photoStatus,
+                latNum,
+                lngNum,
+                gpsTimestamp,
+                pFileId,
+                pUrl,
+                pTimestamp
+              ]]);
+            } else {
+              sheet.getRange(targetRow, 4, 1, 12).setValues([["", "", "", "", "", "", "", "", "", "", "", ""]]); // Revert D to O
+            }
+            updateSuccess = true;
+          }
         }
+      } catch(e) {
+        updateSuccess = false;
+        console.error("Spreadsheet write error:", e);
       }
 
       if (!updateSuccess) return { success: false, message: "Spreadsheet record update failed or row not found" };

@@ -94,6 +94,14 @@ function getProtectedSheetSet() {
 function isProtectedSheet(sheetName) {
   if (!sheetName) return false;
 
+  // 原本シート5種、月次シート(YYYY-MM)、端末管理、SYSTEM_INFO は常に削除不可
+  if (sheetName.endsWith("の原本") || sheetName === "端末管理" || sheetName === "SYSTEM_INFO") {
+    return true;
+  }
+  if (/^\D+\d{4}-\d{2}$/.test(sheetName)) {
+    return true;
+  }
+
   const protectedSet = getProtectedSheetSet();
   return protectedSet.has(sheetName);
 }

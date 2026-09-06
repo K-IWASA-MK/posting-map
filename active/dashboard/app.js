@@ -1390,12 +1390,20 @@ function navigateToAreaTab() {
 }
 
 
+let lastSummaryData = null;
+
 /**
- * updateStats(summaryData) - 表示専用関数 (SystemSummaryService 参照)
+ * updateStats(summaryData) - 表示専用関数 (SystemSummaryService / AddressMasterService 参照)
  */
 function updateStats(summaryData = null) {
   const countEl = $('header-count');
   const pctEl = $('header-pct');
+
+  if (summaryData) {
+    lastSummaryData = summaryData;
+  } else {
+    summaryData = lastSummaryData;
+  }
 
   if (!summaryData) {
     if (countEl) countEl.textContent = '0/ 0';
@@ -1403,9 +1411,17 @@ function updateStats(summaryData = null) {
     return;
   }
 
-  const total = typeof summaryData.total === 'number' ? summaryData.total : 0;
+  // data/address_master.csv の件数を総エリア数 (total) のSSOTとして使用
+  let total = 0;
+  if (typeof AddressMasterService !== 'undefined' && AddressMasterService.getInstance) {
+    const masterCache = AddressMasterService.getInstance().cache;
+    if (masterCache && Array.isArray(masterCache) && masterCache.length > 0) {
+      total = masterCache.length;
+    }
+  }
+
   const done = typeof summaryData.done === 'number' ? summaryData.done : 0;
-  const percent = typeof summaryData.percent === 'number' ? summaryData.percent : 0;
+  const percent = total > 0 ? Math.round((done / total) * 100) : 0;
 
   if (summaryData.districtName) {
     window.__districtName = summaryData.districtName;
@@ -1414,6 +1430,15 @@ function updateStats(summaryData = null) {
 
   if (countEl) countEl.textContent = `${done}/ ${total}`;
   if (pctEl) pctEl.textContent = `${percent}%`;
+
+  // AddressMasterServiceが未ロードの場合は非同期取得後に自動再反映
+  if (total === 0 && typeof AddressMasterService !== 'undefined' && AddressMasterService.getInstance) {
+    AddressMasterService.getInstance().getAll().then(master => {
+      if (master && master.length > 0 && lastSummaryData) {
+        updateStats(lastSummaryData);
+      }
+    }).catch(() => {});
+  }
 }
 
 let _systemSummaryPromise = null;
@@ -1458,6 +1483,10 @@ async function fetchTier1() {
 
       if (typeof renderAreas === 'function') {
         renderAreas();
+      }
+
+      if (lastSummaryData) {
+        updateStats(lastSummaryData);
       }
 
       return tier1Cache;

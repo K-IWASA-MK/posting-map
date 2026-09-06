@@ -60,9 +60,6 @@ if (typeof DistributionService === 'undefined') {
             }
           });
 
-          // ① 旧エリアシート（互換）へのシャドー書き込み
-          self.repository.updateLegacyAreaSheet(data, event, isComplete);
-
           return { success: true, status: "ok", id: event.id };
         } catch (e) {
           return { success: false, message: e.toString() };
