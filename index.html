@@ -9,11 +9,16 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://k-iwasa-mk.github.io/posting-map/" />
   <meta property="og:image" content="https://k-iwasa-mk.github.io/posting-map/active/dashboard/assets/icon180-v2.png" />
+  <script src="./active/dashboard/config.js"></script>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function() {
-      // 共通のLIFF ID (MIE-03等で使用)
-      const liffId = "2010941735-GRLuqPic";
+      const liffId = (window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.line && window.PMS_CLIENT_CONFIG.line.liffId) || null;
+      if (!liffId) {
+        console.error("LIFF ID not configured in config.js");
+        document.getElementById("loading-text").innerText = "Config Error: LIFF ID missing";
+        return;
+      }
       
       liff.init({ liffId: liffId })
         .then(() => {

@@ -100,10 +100,13 @@ function removePressed() {
 
 
 
-// GAS API CONFIG (DYNAMICS LOADED WITH FALLBACK)
-const API_URL = (window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.api && window.PMS_CLIENT_CONFIG.api.gasWebAppUrl)
-  ? window.PMS_CLIENT_CONFIG.api.gasWebAppUrl
-  : "https://script.google.com/macros/s/AKfycbyjNwgZ_6CCv258lqKMrCXJYi0wDR23ZCyyzOQIV1R_WcCF5TQxYXOzZWWSJd_vMyu_/exec";
+function getApiUrl() {
+  if (typeof window !== 'undefined' && window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.api && window.PMS_CLIENT_CONFIG.api.gasWebAppUrl) {
+    return window.PMS_CLIENT_CONFIG.api.gasWebAppUrl;
+  }
+  throw new Error('[H-App Config Error] PMS_CLIENT_CONFIG.api.gasWebAppUrl が未設定です。config.js を確認してください。');
+}
+const API_URL = getApiUrl();
 
 function getLiffAuthToken() {
   if (typeof liff === "undefined") {
