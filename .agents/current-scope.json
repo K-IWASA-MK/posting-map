@@ -94,5 +94,7 @@
   "index.html",
   "active/dashboard/config.js",
   "scripts/sync-deployment-config.mjs",
-  "scripts/validate-gas-endpoint-ssot.mjs"
+  "scripts/validate-gas-endpoint-ssot.mjs",
+  "active/business/system/district_provisioner.js",
+  "scripts/provision-district.mjs"
 ]
