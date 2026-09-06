@@ -7,10 +7,12 @@ const rootDir = process.cwd();
 
 const server = http.createServer((req, res) => {
   let relativePath = req.url.split('?')[0];
-  if (relativePath === '/' || relativePath === '' || relativePath === '/operations' || relativePath === '/cockpit' || relativePath === '/manager') {
+  if (relativePath === '/' || relativePath === '') {
     relativePath = '/scripts/operations/index.html';
-  } else if (relativePath === '/manager.js') {
-    relativePath = '/scripts/operations/manager.js';
+  } else if (relativePath.startsWith('/manager/')) {
+    relativePath = relativePath.replace('/manager/', '/active/manager/');
+  } else if (relativePath === '/manager') {
+    relativePath = '/active/manager/index.html';
   } else if (relativePath.startsWith('/app/')) {
     relativePath = relativePath.replace('/app/', '/active/dashboard/');
   } else if (relativePath === '/app' || relativePath === '/mobile') {
@@ -50,7 +52,8 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`========================================================`);
   console.log(`🚀 POSTING MAP Local Server Running:`);
-  console.log(`   👉 Dashboard: http://localhost:${PORT}/active/dashboard/index.html`);
-  console.log(`   👉 Root URL:  http://localhost:${PORT}/`);
+  console.log(`   👉 Manager Dashboard: http://localhost:${PORT}/manager/`);
+  console.log(`   👉 H-App (Mobile):     http://localhost:${PORT}/app/`);
+  console.log(`   👉 Root URL:           http://localhost:${PORT}/`);
   console.log(`========================================================`);
 });

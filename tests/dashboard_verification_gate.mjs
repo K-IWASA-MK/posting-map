@@ -189,7 +189,7 @@ function setupGasDeviceAuthSandbox() {
 
 async function ensureServerRunning() {
   return new Promise((resolve) => {
-    const req = http.get('http://localhost:8080/mie-03/dashboard/index.html', (res) => {
+    const req = http.get('http://localhost:8080/manager/index.html', (res) => {
       resolve(null);
     });
     req.on('error', () => {
@@ -392,7 +392,7 @@ async function runDashboardQualityGate() {
       }
       await route.continue();
     });
-    const DASHBOARD_URL = 'http://localhost:8080/mie-03/dashboard/index.html';
+    const DASHBOARD_URL = 'http://localhost:8080/manager/index.html';
     await pageLock.goto(DASHBOARD_URL, { waitUntil: 'load' });
     const isLockScreenActive = await pageLock.evaluate(() => {
       const lockEl = document.getElementById('device-lock-screen');
