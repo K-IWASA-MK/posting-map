@@ -5,14 +5,8 @@
  */
 
 // =============================
-// ② データ抽出 (gas.gs 完全移植)
+// ② 自治体順序解決 (SSOT)
 // =============================
-
-function extractDistrictAddresses(targetDistrictName) {
-  // Static Master (data/address_master.csv) はクライアント側 SSOT として分離
-  // GAS Runtime 上の架空シート探索は完全撤去し、安全な空配列を返却
-  return [];
-}
 /**
  * 指定したキーワード（パターン）を含むファイルをドライブから検索する。
  * なければ fallbackName で完全一致検索する。

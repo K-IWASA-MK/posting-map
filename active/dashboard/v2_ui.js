@@ -23,34 +23,25 @@ function onOpen() {
 
   const ui = SpreadsheetApp.getUi();
   ui.createMenu("⚙️ ポスティング管理")
-    .addItem("🚀 エリアシート一括作成", "forceStartBatch")
+    .addItem("🚀 当月シート一括生成・確認（原本5種 ➔ 当月5種）", "rolloverMonthlySheetsFromUI")
+    .addItem("⏰ 毎月1日 月次自動生成トリガー設定", "setupMonthlyProvisioningTrigger")
     .addSeparator()
     .addItem("🔓 スプシの保護・ロックをすべて解除", "removeAllProtections")
     .addItem("🔍 保護・ロックの状況を診断する", "diagnoseProtections")
     .addSeparator()
     .addItem("📊 全体数を集計する（ランキング更新）", "aggregateTotalVolumes")
-    .addItem("📥 完了データのマスター抽出", "exportAllDataToMasterSheet")
     .addItem("📖 スタッフ用マニュアルを作成", "createManualSheet")
-    .addSeparator()
-    .addItem("🔄 バッチ処理を強制再開", "forceStartBatch")
-    .addItem("⚠️ エリアシートをすべて削除（リセット）", "deleteAllAreaSheets")
     .addSeparator()
     .addItem(
       "🔍 ドライブのファイルを確認する (レスキュー)",
       "diagnoseDriveFiles",
     )
     .addSeparator()
-    .addItem(
-      "⚡ アプリ起動を高速化（キャッシュ更新）",
-      "refreshAreaSummaryCache",
-    )
     .addItem("⏰ 自動集計（1時間ごと）を有効化", "setupHourlyRefreshTrigger")
-    .addItem("⏰ 毎月末の自動更新を有効化", "setupMonthlyResetTrigger")
     .addItem("🛑 契約終了を予約（今月末で停止）", "toggleContractEndReservation")
     .addSeparator()
     .addItem("🎨 全シートを「プロ仕様」に一斉整形", "formatAllSheets")
     .addItem("🔧 名簿シートを初期化・復旧する", "setupRosterSheet")
-    .addItem("📦 受渡要請・保管庫シートの準備", "setupTransferSheets")
     .addSeparator()
     .addItem("💬 LINE配布員用(H)トークン設定", "setLineTokenHFromUI")
     .addItem("💬 LINE管理者用(K)トークン設定", "setLineTokenKFromUI")
@@ -241,43 +232,36 @@ function createRichMenuForHApp() {
 }
 
 /**
- * 受渡要請履歴シートと保有チラシ枚数シートを初期化・準備する
+ * 原本5種から当月5種シートを一括生成・確認する（UI手動実行用）
  */
-function setupTransferSheets() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let msg = "";
-
-  // 1. 保有チラシ枚数
-  let storageSheetName = (typeof MonthlySheetResolver !== 'undefined' && MonthlySheetResolver.getInstance)
-    ? MonthlySheetResolver.getInstance().getSheetName("flyer")
-    : "保有チラシ枚数";
-  let storageSheet = ss.getSheetByName(storageSheetName);
-  if (!storageSheet) {
-    storageSheet = ss.insertSheet(storageSheetName);
-    storageSheet.getRange(1, 1, 1, 6).setValues([["ID", "スタッフID", "スタッフ名", "保管場所", "保管枚数", "更新日時"]]);
-    storageSheet.getRange("A1:F1").setBackground("#1a237e").setFontColor("#ffffff").setFontWeight("bold");
-    storageSheet.setFrozenRows(1);
-    msg += `「${storageSheetName}」を作成しました。\n`;
+function rolloverMonthlySheetsFromUI() {
+  if (typeof DistrictProvisioner !== 'undefined' && DistrictProvisioner.getInstance) {
+    const res = DistrictProvisioner.getInstance().rolloverMonthlySheets();
+    SpreadsheetApp.getActiveSpreadsheet().toast(`当月（${res.month}）の5種シートを正常に確認・生成しました。`, "完了");
   } else {
-    msg += `「${storageSheetName}」は既に存在します。\n`;
+    SpreadsheetApp.getUi().alert("エラー: DistrictProvisioner が利用できません。");
   }
+}
 
-  // 2. 受渡要請履歴
-  let transferSheetName = (typeof MonthlySheetResolver !== 'undefined' && MonthlySheetResolver.getInstance)
-    ? MonthlySheetResolver.getInstance().getSheetName("transfer")
-    : "受渡要請履歴";
-  let transferSheet = ss.getSheetByName(transferSheetName);
-  if (!transferSheet) {
-    transferSheet = ss.insertSheet(transferSheetName);
-    transferSheet.getRange(1, 1, 1, 8).setValues([["日時", "要請者", "要請者ID", "保管者", "保管者ID", "地区", "在庫枚数", "状態"]]);
-    transferSheet.getRange("A1:H1").setBackground("#1a237e").setFontColor("#ffffff").setFontWeight("bold");
-    transferSheet.setFrozenRows(1);
-    msg += `「${transferSheetName}」を作成しました。\n`;
+/**
+ * 毎月1日（深夜0時）の月次自動生成トリガーを設定する
+ */
+function setupMonthlyProvisioningTrigger() {
+  if (typeof DistrictProvisioner !== 'undefined' && DistrictProvisioner.getInstance) {
+    DistrictProvisioner.getInstance().setupMonthlyTrigger();
+    SpreadsheetApp.getUi().alert("⏰ 毎月1日（深夜0時）の月次自動生成トリガーを設定しました。\n毎月自動的に原本5種から新月シートが生成されます。");
   } else {
-    msg += `「${transferSheetName}」は既に存在します。\n`;
+    SpreadsheetApp.getUi().alert("エラー: DistrictProvisioner が利用できません。");
   }
+}
 
-  SpreadsheetApp.getUi().alert("シート準備完了", msg, SpreadsheetApp.getUi().ButtonSet.OK);
+/**
+ * 日次トリガーから実行される月次判定・自動生成関数
+ */
+function rolloverMonthlySheetsDailyCheck() {
+  if (typeof DistrictProvisioner !== 'undefined' && DistrictProvisioner.getInstance) {
+    DistrictProvisioner.getInstance().rolloverMonthlySheets();
+  }
 }
 
 /**
@@ -373,59 +357,6 @@ function diagnoseDriveFiles() {
   }
 
   SpreadsheetApp.getUi().alert(msg);
-}
-
-function deleteAllAreaSheets() {
-  if (isNotAdmin()) return;
-
-  // 1. バックグラウンドで実行中のバッチ処理タイマーとステータスを完全停止・削除
-  deleteTriggers("generateAreaSheetsBatch");
-  const props = PropertiesService.getScriptProperties();
-  props.deleteProperty("BATCH_STATUS");
-  props.deleteProperty("BATCH_INDEX");
-
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  props.setProperty("SPREADSHEET_ID", ss.getId());
-
-  // 2. エリアシート（動的生成タブ）のみを削除。業務データ・システムシートは共通ガバナンス（isProtectedSheet）で保護
-  ss.getSheets().forEach((s) => {
-    if (!isProtectedSheet(s.getName())) {
-      Logger.log("DELETE AREA SHEET: " + s.getName());
-      ss.deleteSheet(s);
-    }
-  });
-  
-  ss.toast("エリアシートのリセットが完了しました（業務データは保持されています）。");
-}
-
-/**
- * 原本シートが存在しない場合、空シートを作成してデザイン・ヘッダー・チェックボックスを完全復元する
- */
-function createTemplateSheet() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const templateName = CONFIG.get("SHEET_TEMPLATE") || "原本";
-  let template = ss.getSheetByName(templateName);
-
-  // YES: 既に「原本」が存在する場合は何もしない
-  if (template) {
-    return template;
-  }
-
-  // NO: 存在しない場合、空シートを作成して完璧に復元構築
-  template = ss.insertSheet(templateName);
-
-  // 1. ヘッダーテキストの設定 (1行目: A1~G1)
-  const headers = [["住所", "地図", "メモ", "完了", "日付", "枚数", "担当"]];
-  template.getRange(1, 1, 1, 7).setValues(headers);
-
-  // 2. D列 (完了) にチェックボックスを標準設置 (D2:D11)
-  template.getRange("D2:D11").insertCheckboxes();
-
-  // 3. Proデザイン・色・列幅・行高・フォント・非表示制御の全適用
-  applyProDesign(template);
-
-  SpreadsheetApp.flush();
-  return template;
 }
 
 /**
@@ -599,36 +530,16 @@ function formatRosterSheet() {
 }
 
 /**
- * 名簿および名簿の原本シートを完全リセット・新4列SSOT構造で再構築
+ * 名簿および名簿の原本シートを初期化・再構築
  */
 function setupRosterSheet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-
-  // 1. 「名簿の原本」シートの再構築
-  let templateSheet = ss.getSheetByName("名簿の原本");
-  if (templateSheet) {
-    ss.deleteSheet(templateSheet);
+  if (typeof DistrictProvisioner !== 'undefined' && DistrictProvisioner.getInstance) {
+    DistrictProvisioner.getInstance().createStaffMaster(ss);
+    DistrictProvisioner.getInstance().rolloverMonthlySheets();
+    return "名簿の原本および当月名簿を4列新SSOT構造で再構築しました。";
   }
-  templateSheet = ss.insertSheet("名簿の原本");
-  templateSheet.getRange(1, 1, 1, 4).setValues([["ID", "名前", "LINE_USER_ID", "登録日時"]]);
-  templateSheet.setFrozenRows(1);
-  formatSingleRosterSheet(templateSheet);
-
-  // 2. 「名簿」シートの再構築 (当月名簿)
-  const rosterSheetName = (typeof MonthlySheetResolver !== 'undefined' && MonthlySheetResolver.getInstance)
-    ? MonthlySheetResolver.getInstance().getSheetName("staff")
-    : null;
-  if (!rosterSheetName) return "MonthlySheetResolver not available";
-  let rosterSheet = ss.getSheetByName(rosterSheetName);
-  if (rosterSheet) {
-    ss.deleteSheet(rosterSheet);
-  }
-  rosterSheet = ss.insertSheet(rosterSheetName);
-  rosterSheet.getRange(1, 1, 1, 4).setValues([["ID", "名前", "LINE_USER_ID", "登録日時"]]);
-  rosterSheet.setFrozenRows(1);
-  formatSingleRosterSheet(rosterSheet);
-
-  return "名簿および名簿の原本を4列新SSOT構造で再構築しました。";
+  return "DistrictProvisioner not available";
 }
 
 /**
@@ -670,23 +581,6 @@ function toggleContractEndReservation() {
       ui.alert("契約終了予約をキャンセルしました。\n来月以降も自動的に今月データがリセットされ、新規シートが作成されます。");
     }
   }
-}
-
-/**
- * 毎月末の自動更新トリガーを設定する
- */
-function setupMonthlyResetTrigger() {
-  // 既存の同名トリガーを掃除
-  deleteTriggers("checkEndOfMonthAndReset");
-
-  // 毎日午前0時〜1時の間に実行する日次トリガーを作成
-  ScriptApp.newTrigger("checkEndOfMonthAndReset")
-    .timeBased()
-    .everyDays(1)
-    .atHour(0)
-    .create();
-
-  SpreadsheetApp.getUi().alert("⏰ 毎月末（翌月1日深夜）の自動データ更新トリガーを設定しました。\n毎日深夜に自動判定を行い、1日のタイミングでデータのリセットと再展開を行います。");
 }
 
 

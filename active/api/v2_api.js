@@ -218,6 +218,16 @@ function doPost(e) {
     const pairResult = pairMobileDevice(postData || params || {});
     return ContentService.createTextOutput(JSON.stringify(pairResult))
       .setMimeType(ContentService.MimeType.JSON);
+  } else if (action === 'provisionDistrict') {
+    const addresses = (postData && postData.addresses) || (params && params.addresses);
+    let result;
+    if (typeof DistrictProvisioner !== 'undefined' && DistrictProvisioner.getInstance) {
+      result = DistrictProvisioner.getInstance().provisionNewDistrict(addresses);
+    } else {
+      result = { success: false, message: 'DistrictProvisioner not available' };
+    }
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
   } else if (isDashboardAction) {
     const dashAuth = authenticateDashboardRequest(postData || params || {});
     if (!dashAuth.success) {
@@ -339,6 +349,10 @@ function processPostAction(action, postData, e) {
       return getGlobalPinStatus();
     case 'setPinInProgress':
       return setPinInProgress(postData);
+    case 'provisionDistrict':
+      return typeof DistrictProvisioner !== 'undefined' && DistrictProvisioner.getInstance
+        ? DistrictProvisioner.getInstance().provisionNewDistrict(postData && postData.addresses)
+        : { success: false, message: 'DistrictProvisioner not available' };
     default:
       return { success: false, message: 'Invalid POST action' };
   }

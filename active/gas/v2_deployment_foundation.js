@@ -135,7 +135,6 @@ class DistrictDeploymentFoundation {
 function isProtectedDeploymentAction(params) {
   return (
     params.cleanupResources === "true" || params.cleanupResources === true ||
-    params.provisionDistrict === "true" || params.provisionDistrict === true ||
     params.bootstrapProperties === "true" || params.bootstrapProperties === true ||
     params.executeFullBatch === "true" || params.executeFullBatch === true ||
     params.rebuildCache === "true" || params.rebuildCache === true
@@ -311,101 +310,7 @@ function verifyDistrictDeployment(e) {
     }
   }
 
-  // Upload Yokkaichi District Master Action (Sprint B-4/B-5)
-  if (params.uploadYokkaichiMaster === "true" || params.uploadYokkaichiMaster === true) {
-    try {
-      const parentFolder = DriveApp.getRootFolder();
-      
-      const existing = parentFolder.getFilesByName("yokkaichi_district_master.csv");
-      while (existing.hasNext()) {
-        existing.next().setTrashed(true);
-      }
-      
-      const csvContent = params.csvContent;
-      if (!csvContent) {
-        return { success: false, message: "Missing csvContent parameter" };
-      }
-      const file = parentFolder.createFile("yokkaichi_district_master.csv", csvContent, MimeType.CSV);
-      return {
-        success: true,
-        fileId: file.getId(),
-        message: "Successfully uploaded Yokkaichi Master CSV to Root Drive"
-      };
-    } catch (err) {
-      return {
-        success: false,
-        message: "Failed uploadYokkaichiMaster: " + err.toString()
-      };
-    }
-  }
 
-  // Provisioning Action (creates spreadsheet and storage folder under user credentials)
-  if (params.provisionDistrict === "true" || params.provisionDistrict === true) {
-    try {
-      const districtId = params.districtId;
-      if (!districtId) {
-        return { success: false, message: "Missing districtId parameter" };
-      }
-      
-      const TEMPLATE_SS_ID = "14rblnvJH5hkXHU9-9lhZlDaUi-FenuQQ5DWnTP7TbW4";
-      const PARENT_FOLDER_ID = "1FyM4wCIqWJovbcsMZ6h9JKFQxhgwciGb"; // 04_STORAGE
-      
-      // 1. Copy template Spreadsheet with file title: {districtId} v1
-      const templateFile = DriveApp.getFileById(TEMPLATE_SS_ID);
-      const newSsFile = templateFile.makeCopy(`${districtId} v1`);
-      const newSsId = newSsFile.getId();
-
-      // Move to 03_BRANCH folder in Drive
-      try {
-        const branchRootFolder = DriveApp.getFolderById("1EQQqWbtyF7iMd7Fk-WnUwWiAGB4MdIdN");
-        let districtFolder;
-        const districtFolders = branchRootFolder.getFoldersByName(districtId);
-        if (districtFolders.hasNext()) {
-          districtFolder = districtFolders.next();
-        } else {
-          districtFolder = branchRootFolder.createFolder(districtId);
-        }
-        newSsFile.moveTo(districtFolder);
-      } catch (e) {
-        Logger.log("Folder move warning: " + e.message);
-      }
-
-      // Do NOT alter internal sheet names. Keep original sheet structure intact.
-      
-      // 2. Create media storage Folder
-      const parentFolder = DriveApp.getFolderById(PARENT_FOLDER_ID);
-      const newFolder = parentFolder.createFolder(`${districtId} 支部_STORAGE`);
-      const newFolderId = newFolder.getId();
-      
-      // 3. Auto bootstrap Script Properties
-      const props = PropertiesService.getScriptProperties();
-      props.setProperties({
-        "SPREADSHEET_ID": newSsId,
-        "STORAGE_PARENT_ID": newFolderId,
-        "DISTRICT_ID": districtId
-      });
-      
-      // Clear cache
-      if (typeof CacheService !== "undefined" && CacheService.getScriptCache()) {
-        CacheService.getScriptCache().remove("CONFIG_CACHE");
-      }
-      
-      return {
-        success: true,
-        message: "District successfully provisioned internally.",
-        resources: {
-          spreadsheetId: newSsId,
-          storageFolderId: newFolderId,
-          districtId: districtId
-        }
-      };
-    } catch (err) {
-      return {
-        success: false,
-        message: "Failed to provision district inside GAS: " + err.toString()
-      };
-    }
-  }
 
   // District CSV Deep Audit Inspector
   if (params.inspectCsvRules === "true" || params.inspectCsvRules === true) {

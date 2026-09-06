@@ -78,14 +78,6 @@ function createManualSheet() {
   ss.toast("マニュアル作成完了。");
 }
 
-function exportAllDataToMasterSheet() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let master =
-    ss.getSheetByName(CONFIG.get("SHEET_MASTER_EXPORT")) ||
-    ss.insertSheet(CONFIG.get("SHEET_MASTER_EXPORT"));
-  master.clear();
-  ss.toast("マスター抽出完了。");
-}
 
 /**
  * 全エリアのシートをスキャンして個人ランキングを集計し、キャッシュに保存する
