@@ -16,10 +16,39 @@ function getMonthlySheet(type) {
   return null;
 }
 
+function computeSha256(str) {
+  if (!str || typeof str !== 'string') return '';
+  try {
+    const rawDigest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, str, Utilities.Charset.UTF_8);
+    let hexHash = '';
+    for (let i = 0; i < rawDigest.length; i++) {
+      let byte = rawDigest[i];
+      if (byte < 0) byte += 256;
+      let hex = byte.toString(16);
+      if (hex.length === 1) hex = '0' + hex;
+      hexHash += hex;
+    }
+    return hexHash;
+  } catch (e) {
+    return '';
+  }
+}
 
-
-
-
+function verifyProvisioningToken(token) {
+  if (!token || typeof token !== 'string' || !token.trim()) {
+    return { success: false, code: "UNAUTHORIZED", message: "Provisioning token is missing." };
+  }
+  const props = PropertiesService.getScriptProperties();
+  const storedHash = (props.getProperty('PROVISIONING_TOKEN_HASH') || '').trim().toLowerCase();
+  if (!storedHash) {
+    return { success: false, code: "UNAUTHORIZED", message: "PROVISIONING_TOKEN_HASH is not configured in GAS Script Properties." };
+  }
+  const clientHash = computeSha256(token.trim()).toLowerCase();
+  if (clientHash === storedHash) {
+    return { success: true };
+  }
+  return { success: false, code: "UNAUTHORIZED", message: "Invalid provisioning token." };
+}
 /**
  * GETリクエスト：JSONデータの取得
  */
@@ -57,7 +86,6 @@ function doGet(e) {
     'getLatestDistribution',
     'getMapsApiKey',
     'getDeliveryStats',
-    'getEvidence',
     'getAreaDetails',
     'getGlobalPinStatus'
   ].includes(action);
@@ -72,20 +100,38 @@ function doGet(e) {
     return ContentService.createTextOutput(JSON.stringify(regResult))
       .setMimeType(ContentService.MimeType.JSON);
   } else if (action === 'resetDeviceManagement') {
-    const rstResult = DeviceManagementService.getInstance().resetSheet();
-    return ContentService.createTextOutput(JSON.stringify(rstResult))
-      .setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      code: "FORBIDDEN",
+      message: "resetDeviceManagement is disabled on Web App endpoint."
+    })).setMimeType(ContentService.MimeType.JSON);
+  } else if (action === 'provisionDistrict') {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      code: "METHOD_NOT_ALLOWED",
+      message: "provisionDistrict requires POST request."
+    })).setMimeType(ContentService.MimeType.JSON);
   } else if (action === 'getDeviceStatus') {
     const statusResult = DeviceManagementService.getInstance().getDeviceStatus();
     return ContentService.createTextOutput(JSON.stringify(statusResult))
       .setMimeType(ContentService.MimeType.JSON);
   } else if (action === 'syncSystemInfo') {
+    const token = params && (params.provisioningToken || (params.options && params.options.provisioningToken));
+    const tokenCheck = verifyProvisioningToken(token);
+    if (!tokenCheck.success) {
+      return ContentService.createTextOutput(JSON.stringify(tokenCheck))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    const options = (params && params.options) || {};
+    options.provisioningToken = token;
     let result;
-    if (typeof DistrictProvisioner !== 'undefined' && DistrictProvisioner.getInstance) {
+    if (typeof SystemInfoService !== 'undefined' && SystemInfoService.getInstance) {
+      result = SystemInfoService.getInstance().syncSystemInfo(options);
+    } else if (typeof DistrictProvisioner !== 'undefined' && DistrictProvisioner.getInstance) {
       const ss = DistrictProvisioner.getInstance().getSS();
-      result = DistrictProvisioner.getInstance().createOrSyncSystemInfo(ss, params);
+      result = DistrictProvisioner.getInstance().createOrSyncSystemInfo(ss, options);
     } else {
-      result = { success: false, message: 'DistrictProvisioner not available' };
+      result = { success: false, message: 'SystemInfoService not available' };
     }
     return ContentService.createTextOutput(JSON.stringify(result))
       .setMimeType(ContentService.MimeType.JSON);
@@ -204,7 +250,6 @@ function doPost(e) {
     'getLatestDistribution',
     'getMapsApiKey',
     'getDeliveryStats',
-    'getEvidence',
     'getAreaDetails',
     'getGlobalPinStatus'
   ].includes(action);
@@ -219,9 +264,11 @@ function doPost(e) {
     return ContentService.createTextOutput(JSON.stringify(regResult))
       .setMimeType(ContentService.MimeType.JSON);
   } else if (action === 'resetDeviceManagement') {
-    const rstResult = DeviceManagementService.getInstance().resetSheet();
-    return ContentService.createTextOutput(JSON.stringify(rstResult))
-      .setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      code: "FORBIDDEN",
+      message: "resetDeviceManagement is disabled on Web App endpoint."
+    })).setMimeType(ContentService.MimeType.JSON);
   } else if (action === 'getDeviceStatus') {
     const statusResult = DeviceManagementService.getInstance().getDeviceStatus();
     return ContentService.createTextOutput(JSON.stringify(statusResult))
@@ -234,9 +281,47 @@ function doPost(e) {
     const pairResult = DeviceManagementService.getInstance().pairMobile(postData || params || {});
     return ContentService.createTextOutput(JSON.stringify(pairResult))
       .setMimeType(ContentService.MimeType.JSON);
+  } else if (action === 'setProvisioningToken') {
+    const dashAuth = DeviceManagementService.getInstance().authenticateDashboard(postData || params || {});
+    if (!dashAuth.success || dashAuth.deviceId !== 'PC-01') {
+      return ContentService.createTextOutput(JSON.stringify({
+        success: false,
+        code: "FORBIDDEN",
+        message: "Only authorized PC-01 terminal can set provisioning token."
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    const newToken = (postData && postData.newToken) || (params && params.newToken);
+    if (!newToken || typeof newToken !== 'string' || !newToken.trim()) {
+      return ContentService.createTextOutput(JSON.stringify({
+        success: false,
+        code: "INVALID_ARGUMENT",
+        message: "newToken is required."
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    const newHash = computeSha256(newToken.trim()).toLowerCase();
+    PropertiesService.getScriptProperties().setProperty('PROVISIONING_TOKEN_HASH', newHash);
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      message: "PROVISIONING_TOKEN_HASH configured successfully."
+    })).setMimeType(ContentService.MimeType.JSON);
   } else if (action === 'provisionDistrict') {
+    const token = (postData && (postData.provisioningToken || (postData.options && postData.options.provisioningToken)))
+               || (params && (params.provisioningToken || (params.options && params.options.provisioningToken)));
+    const tokenCheck = verifyProvisioningToken(token);
+    if (!tokenCheck.success) {
+      return ContentService.createTextOutput(JSON.stringify(tokenCheck))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
     const addresses = (postData && postData.addresses) || (params && params.addresses);
+    if (!Array.isArray(addresses) || addresses.length === 0) {
+      return ContentService.createTextOutput(JSON.stringify({
+        success: false,
+        code: "INVALID_ARGUMENT",
+        message: "addresses must be a non-empty array of address master records."
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
     const options = (postData && postData.options) || (params && params.options) || {};
+    options.provisioningToken = token;
     let result;
     if (typeof DistrictProvisioner !== 'undefined' && DistrictProvisioner.getInstance) {
       result = DistrictProvisioner.getInstance().provisionNewDistrict(addresses, options);
@@ -246,7 +331,15 @@ function doPost(e) {
     return ContentService.createTextOutput(JSON.stringify(result))
       .setMimeType(ContentService.MimeType.JSON);
   } else if (action === 'syncSystemInfo') {
+    const token = (postData && (postData.provisioningToken || (postData.options && postData.options.provisioningToken)))
+               || (params && (params.provisioningToken || (params.options && params.options.provisioningToken)));
+    const tokenCheck = verifyProvisioningToken(token);
+    if (!tokenCheck.success) {
+      return ContentService.createTextOutput(JSON.stringify(tokenCheck))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
     const options = (postData && postData.options) || (params && params.options) || {};
+    options.provisioningToken = token;
     let result;
     if (typeof SystemInfoService !== 'undefined' && SystemInfoService.getInstance) {
       result = SystemInfoService.getInstance().syncSystemInfo(options);
@@ -339,7 +432,11 @@ function processPostAction(action, postData, e) {
     case 'resetRoster':
       return { success: true, message: setupRosterSheet() };
     case 'resetDeviceManagement':
-      return DeviceManagementService.getInstance().resetSheet();
+      return {
+        success: false,
+        code: "FORBIDDEN",
+        message: "resetDeviceManagement is disabled on Web App endpoint."
+      };
     case 'getAreaDetails':
       return AreaService.getInstance().getAreaDetails(postData.name || (e && e.parameter ? e.parameter.name : ""));
     case 'submitDistribution':
@@ -379,10 +476,18 @@ function processPostAction(action, postData, e) {
     case 'setPinInProgress':
       return PinStatusService.getInstance().setInProgress(postData);
     case 'provisionDistrict':
+      const pToken = (postData && (postData.provisioningToken || (postData.options && postData.options.provisioningToken)));
+      const pCheck = verifyProvisioningToken(pToken);
+      if (!pCheck.success) return pCheck;
+      if (postData && postData.options) postData.options.provisioningToken = pToken;
       return typeof DistrictProvisioner !== 'undefined' && DistrictProvisioner.getInstance
         ? DistrictProvisioner.getInstance().provisionNewDistrict(postData && postData.addresses, postData && postData.options)
         : { success: false, message: 'DistrictProvisioner not available' };
     case 'syncSystemInfo':
+      const sToken = (postData && (postData.provisioningToken || (postData.options && postData.options.provisioningToken)));
+      const sCheck = verifyProvisioningToken(sToken);
+      if (!sCheck.success) return sCheck;
+      if (postData && postData.options) postData.options.provisioningToken = sToken;
       return typeof SystemInfoService !== 'undefined' && SystemInfoService.getInstance
         ? SystemInfoService.getInstance().syncSystemInfo(postData && postData.options)
         : { success: false, message: 'SystemInfoService not available' };

@@ -550,6 +550,13 @@
     }
 
     resetSheet() {
+      if (typeof isWebAppCall !== 'undefined' && isWebAppCall) {
+        return {
+          success: false,
+          code: "FORBIDDEN",
+          message: "resetSheet is disabled from external Web App calls."
+        };
+      }
       const lock = LockService.getScriptLock();
       try {
         lock.waitLock(10000);

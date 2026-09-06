@@ -71,10 +71,33 @@ async function main() {
     } catch (e) {}
   }
 
+  let provisioningToken = (process.env.POSTING_MAP_PROVISIONING_TOKEN || '').trim();
+  if (!provisioningToken) {
+    const envPath = path.join(rootDir, '.env');
+    if (fs.existsSync(envPath)) {
+      const envText = fs.readFileSync(envPath, 'utf8');
+      for (const line of envText.split(/\r?\n/)) {
+        const match = line.match(/^\s*POSTING_MAP_PROVISIONING_TOKEN\s*=\s*(.*)$/);
+        if (match) {
+          provisioningToken = match[1].trim().replace(/^['"]|['"]$/g, '');
+          break;
+        }
+      }
+    }
+  }
+
+  if (!provisioningToken) {
+    console.error('❌ Error: POSTING_MAP_PROVISIONING_TOKEN environment variable is required.');
+    console.error('   Please run: export POSTING_MAP_PROVISIONING_TOKEN="<your-secret-token>"');
+    process.exit(1);
+  }
+
   const payload = {
     action: 'provisionDistrict',
+    provisioningToken: provisioningToken,
     addresses: addresses,
     options: {
+      provisioningToken: provisioningToken,
       productionLiffUrl: productionLiffUrl,
       liffId: liffId,
       baseUrl: 'https://postingmap.jp'

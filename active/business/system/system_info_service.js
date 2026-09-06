@@ -57,6 +57,14 @@
 
     syncSystemInfo(options) {
       const opts = options || {};
+      const token = opts.provisioningToken;
+      const tokenCheck = typeof verifyProvisioningToken === 'function'
+        ? verifyProvisioningToken(token)
+        : { success: false, code: "UNAUTHORIZED", message: "verifyProvisioningToken unavailable" };
+      if (!tokenCheck.success) {
+        return tokenCheck;
+      }
+
       const lock = LockService.getScriptLock();
       lock.waitLock(30000);
       try {

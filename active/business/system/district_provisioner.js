@@ -53,6 +53,22 @@
      * @return {Object} 結果オブジェクト { success: true, count: number, month: string }
      */
     provisionNewDistrict(addresses, options) {
+      if (!Array.isArray(addresses) || addresses.length === 0) {
+        return {
+          success: false,
+          code: "INVALID_ARGUMENT",
+          message: "addresses must be a non-empty array of address master records."
+        };
+      }
+
+      const token = options && options.provisioningToken;
+      const tokenCheck = typeof verifyProvisioningToken === 'function'
+        ? verifyProvisioningToken(token)
+        : { success: false, code: "UNAUTHORIZED", message: "verifyProvisioningToken unavailable" };
+      if (!tokenCheck.success) {
+        return tokenCheck;
+      }
+
       const ss = this.getSS();
       const lock = LockService.getScriptLock();
       lock.waitLock(30000);
