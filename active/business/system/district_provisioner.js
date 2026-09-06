@@ -59,10 +59,15 @@
 
       try {
         if (typeof DeviceManagementService !== 'undefined' && DeviceManagementService.getInstance) {
-          DeviceManagementService.getInstance().getOrCreateSheet();
+          const devService = DeviceManagementService.getInstance();
+          if (typeof devService.getOrCreateDeviceManagementSheet === 'function') {
+            devService.getOrCreateDeviceManagementSheet(ss);
+          }
         }
 
-        const sysInfoResult = this.createOrSyncSystemInfo(ss, options);
+        const sysInfoResult = (typeof SystemInfoService !== 'undefined' && SystemInfoService.getInstance)
+          ? SystemInfoService.getInstance().syncSystemInfo(options)
+          : this.createOrSyncSystemInfo(ss, options);
 
         this.createMasterSheets(ss, addresses);
 
@@ -92,6 +97,9 @@
     }
 
     createOrSyncSystemInfo(ss, options) {
+      if (typeof SystemInfoService !== 'undefined' && SystemInfoService.getInstance) {
+        return SystemInfoService.getInstance().syncSystemInfo(options);
+      }
       const opts = options || {};
       const sheetName = "SYSTEM_INFO";
       let sheet = ss.getSheetByName(sheetName);
