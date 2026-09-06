@@ -116,6 +116,30 @@ if (typeof StaffService === 'undefined') {
         }
       }
     }
+
+    getRoster() {
+      const sheet = this.repository.getRosterSheet();
+      if (!sheet) return [];
+      const lastRow = sheet.getLastRow();
+      if (lastRow < 2) return [];
+
+      const values = sheet.getRange(2, 1, lastRow - 1, 4).getValues();
+      const roster = [];
+
+      for (let i = 0; i < values.length; i++) {
+        const id = String(values[i][0] || "").trim();
+        const name = String(values[i][1] || "").trim();
+        const lineUserId = String(values[i][2] || "").trim();
+        const registeredAt = (values[i][3] && typeof values[i][3].getMonth === 'function')
+          ? (typeof Utilities !== 'undefined' && typeof Utilities.formatDate === 'function' ? Utilities.formatDate(values[i][3], "JST", "yyyy/MM/dd HH:mm:ss") : values[i][3].toISOString())
+          : String(values[i][3] || "").trim();
+
+        if (id !== "" && name !== "") {
+          roster.push({ id: id, name: name, lineUserId: lineUserId, registeredAt: registeredAt });
+        }
+      }
+      return roster;
+    }
   };
   StaffService.instance = null;
 }

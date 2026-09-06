@@ -6,6 +6,15 @@
  * Responsibility: 名簿スプレッドシート（A:ID, B:名前, C:LINE_USER_ID, D:登録日時）に対するデータ操作
  */
 
+function normalizeName(str) {
+  if (!str) return "";
+  let s = String(str);
+  if (typeof s.normalize === 'function') {
+    s = s.normalize('NFC');
+  }
+  return s.replace(/[\s\u3000\u200b\u200c\u200d\uFEFF]/g, "");
+}
+
 if (typeof StaffRepository === 'undefined') {
   StaffRepository = class StaffRepository {
     constructor() {

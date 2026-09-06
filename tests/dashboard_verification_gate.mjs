@@ -137,45 +137,12 @@ function setupGasDeviceAuthSandbox() {
 
   const getSS = () => mockSpreadsheet;
 
-  const v2ApiContent = fs.readFileSync(path.resolve(process.cwd(), 'active/api/v2_api.js'), 'utf8');
-
-  const fnNames = [
-    'computeDeviceSha256',
-    'getOrCreateDeviceManagementSheet',
-    'syncPropertiesDeviceHashes',
-    'getContractedPlanCountFromSheet',
-    'registerOrValidateDevice',
-    'authenticateDashboardRequest',
-    'issueMobilePairingToken',
-    'pairMobileDevice',
-    'resetDeviceManagementSheet'
-  ];
-
-  const evalScope = {
-    crypto,
-    Utilities,
-    LockService,
-    PropertiesService,
-    CONFIG,
-    getSS,
-    mockProps,
-    mockSheets,
-    mockSpreadsheet
-  };
+  const serviceContent = fs.readFileSync(path.resolve(process.cwd(), 'active/business/device/device_management_service.js'), 'utf8');
 
   const evalCode = `
-    ${v2ApiContent}
-    return {
-      computeDeviceSha256,
-      getOrCreateDeviceManagementSheet,
-      syncPropertiesDeviceHashes,
-      getContractedPlanCountFromSheet,
-      registerOrValidateDevice,
-      authenticateDashboardRequest,
-      issueMobilePairingToken,
-      pairMobileDevice,
-      resetDeviceManagementSheet
-    };
+    ${serviceContent}
+    const svc = (typeof DeviceManagementService !== 'undefined' ? DeviceManagementService : this.DeviceManagementService).getInstance();
+    return svc;
   `;
 
   const fn = new Function(

@@ -9,6 +9,9 @@ package-lock.json
 # Ignore everything in dashboard
 dashboard/**
 
+# Ignore manager frontend files
+manager/**
+
 # But keep the files required for GAS Runtime
 !dashboard/app.html
 !dashboard/v2_ui.js
