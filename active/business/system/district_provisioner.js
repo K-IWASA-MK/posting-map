@@ -75,11 +75,14 @@
 
         SpreadsheetApp.flush();
 
+        const types = ['distribution', 'staff', 'flyer', 'transfer', 'pin'];
+        const monthlySheets = types.map(t => `${this.prefixes[t]}${monthResult.month}`);
+
         const allSheets = [
           "SYSTEM_INFO",
           "端末管理",
           ...Object.values(this.masterNames),
-          ...monthResult.created
+          ...monthlySheets
         ];
 
         return {

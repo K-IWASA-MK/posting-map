@@ -248,18 +248,14 @@ function doPost(e) {
   } else if (action === 'syncSystemInfo') {
     const options = (postData && postData.options) || (params && params.options) || {};
     let result;
-    if (typeof DistrictProvisioner !== 'undefined' && DistrictProvisioner.getInstance) {
+    if (typeof SystemInfoService !== 'undefined' && SystemInfoService.getInstance) {
+      result = SystemInfoService.getInstance().syncSystemInfo(options);
+    } else if (typeof DistrictProvisioner !== 'undefined' && DistrictProvisioner.getInstance) {
       const ss = DistrictProvisioner.getInstance().getSS();
       result = DistrictProvisioner.getInstance().createOrSyncSystemInfo(ss, options);
     } else {
-      result = { success: false, message: 'DistrictProvisioner not available' };
+      result = { success: false, message: 'SystemInfoService not available' };
     }
-    return ContentService.createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON);
-  } else if (action === 'syncSystemInfo') {
-    const result = typeof SystemInfoService !== 'undefined' && SystemInfoService.getInstance
-      ? SystemInfoService.getInstance().syncSystemInfo()
-      : { success: false, message: 'SystemInfoService not available' };
     return ContentService.createTextOutput(JSON.stringify(result))
       .setMimeType(ContentService.MimeType.JSON);
   } else if (isDashboardAction) {
@@ -384,11 +380,11 @@ function processPostAction(action, postData, e) {
       return PinStatusService.getInstance().setInProgress(postData);
     case 'provisionDistrict':
       return typeof DistrictProvisioner !== 'undefined' && DistrictProvisioner.getInstance
-        ? DistrictProvisioner.getInstance().provisionNewDistrict(postData && postData.addresses)
+        ? DistrictProvisioner.getInstance().provisionNewDistrict(postData && postData.addresses, postData && postData.options)
         : { success: false, message: 'DistrictProvisioner not available' };
     case 'syncSystemInfo':
       return typeof SystemInfoService !== 'undefined' && SystemInfoService.getInstance
-        ? SystemInfoService.getInstance().syncSystemInfo()
+        ? SystemInfoService.getInstance().syncSystemInfo(postData && postData.options)
         : { success: false, message: 'SystemInfoService not available' };
     default:
       return { success: false, message: 'Invalid POST action' };
