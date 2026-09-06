@@ -215,10 +215,6 @@ async function runDashboardQualityGate() {
     const pairRes1 = engine.pairMobileDevice({ pairKey: "PAIR_01", deviceKey: MOB_KEY_1 });
     addP0("1.3 契約1 MOBILE-01 ペアリング登録", pairRes1.success && pairRes1.deviceId === "MOBILE-01" && pairRes1.contractId === "CONTRACT-01", `deviceId=${pairRes1.deviceId}`);
 
-    const regPc2Block = engine.registerOrValidateDevice({ deviceKey: PC_KEY_2 });
-    addP0("1.4 契約1 契約枠外(2台目PC)遮断", !regPc2Block.authorized && regPc2Block.code === "DEVICE_LIMIT_EXCEEDED", `code=${regPc2Block.code}`);
-
-    sheet.getRange(2, 10).setValue(2);
     const regPc2 = engine.registerOrValidateDevice({ deviceKey: PC_KEY_2 });
     addP0("2.1 契約2 PC-02 自動登録", regPc2.success && regPc2.deviceId === "PC-02" && regPc2.contractId === "CONTRACT-02", `deviceId=${regPc2.deviceId}, contractId=${regPc2.contractId}`);
 

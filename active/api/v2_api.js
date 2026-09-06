@@ -77,6 +77,10 @@ function doGet(e) {
     const rstResult = DeviceManagementService.getInstance().resetSheet();
     return ContentService.createTextOutput(JSON.stringify(rstResult))
       .setMimeType(ContentService.MimeType.JSON);
+  } else if (action === 'getDeviceStatus') {
+    const statusResult = DeviceManagementService.getInstance().getDeviceStatus();
+    return ContentService.createTextOutput(JSON.stringify(statusResult))
+      .setMimeType(ContentService.MimeType.JSON);
   } else if (isDashboardAction) {
     const dashAuth = DeviceManagementService.getInstance().authenticateDashboard(params);
     if (!dashAuth.success) {
@@ -210,6 +214,10 @@ function doPost(e) {
   } else if (action === 'resetDeviceManagement') {
     const rstResult = DeviceManagementService.getInstance().resetSheet();
     return ContentService.createTextOutput(JSON.stringify(rstResult))
+      .setMimeType(ContentService.MimeType.JSON);
+  } else if (action === 'getDeviceStatus') {
+    const statusResult = DeviceManagementService.getInstance().getDeviceStatus();
+    return ContentService.createTextOutput(JSON.stringify(statusResult))
       .setMimeType(ContentService.MimeType.JSON);
   } else if (action === 'issueMobilePairingToken') {
     const issueResult = DeviceManagementService.getInstance().issuePairingToken(postData || params || {});

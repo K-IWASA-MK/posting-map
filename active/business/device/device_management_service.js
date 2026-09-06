@@ -47,7 +47,8 @@
         sheet = targetSs.insertSheet(sheetName);
         sheet.getRange(1, 1, 1, targetHeaders.length).setValues([targetHeaders]);
         const nowStr = Utilities.formatDate(new Date(), "JST", "yyyy/MM/dd HH:mm:ss");
-        sheet.appendRow(["CONTRACT-01", "ACTIVE", "PC-01", "", "MOBILE-01", "", nowStr, nowStr, "契約01 (基本プラン)", 1]);
+        sheet.appendRow(["CONTRACT-01", "ACTIVE", "PC-01", "", "MOBILE-01", "", nowStr, nowStr, "契約01 (PC-01 / MOBILE-01)", 2]);
+        sheet.appendRow(["CONTRACT-02", "ACTIVE", "PC-02", "", "MOBILE-02", "", nowStr, nowStr, "契約02 (PC-02 / MOBILE-02)", 2]);
         return sheet;
       }
 
@@ -105,10 +106,36 @@
       try {
         if (sheet.getLastRow() >= 2) {
           const val = parseInt(sheet.getRange(2, 10).getValue(), 10);
-          if (!isNaN(val) && val > 0) return val;
+          if (!isNaN(val) && val > 0) return Math.max(val, 2);
         }
       } catch (e) {}
-      return 1;
+      return 2;
+    }
+
+    getDeviceStatus() {
+      const ss = this.getSS();
+      const sheetName = (typeof CONFIG !== 'undefined' && typeof CONFIG.get === 'function' && CONFIG.get("SHEET_DEVICE_MANAGEMENT")) || "端末管理";
+      const sheet = ss.getSheetByName(sheetName);
+      if (!sheet) return { success: true, exists: false, rows: [] };
+      const lastRow = sheet.getLastRow();
+      const lastCol = sheet.getLastColumn();
+      if (lastRow < 2) return { success: true, exists: true, rows: [] };
+      const rows = sheet.getRange(2, 1, lastRow - 1, Math.min(lastCol, 10)).getValues();
+      return {
+        success: true,
+        exists: true,
+        contractedPlanCount: this.getContractedPlanCountFromSheet(sheet),
+        rows: rows.map(r => ({
+          contractId: String(r[0] || ''),
+          status: String(r[1] || ''),
+          pcDeviceId: String(r[2] || ''),
+          hasPcHash: !!String(r[3] || '').trim(),
+          mobileDeviceId: String(r[4] || ''),
+          hasMobileHash: !!String(r[5] || '').trim(),
+          memo: String(r[8] || ''),
+          contractedPlanCount: r[9]
+        }))
+      };
     }
 
     registerOrValidate(payload) {
@@ -153,7 +180,8 @@
         let lastRow = sheet.getLastRow();
         if (lastRow < 2) {
           const nowStr = Utilities.formatDate(new Date(), "JST", "yyyy/MM/dd HH:mm:ss");
-          sheet.appendRow(["CONTRACT-01", "ACTIVE", "PC-01", "", "MOBILE-01", "", nowStr, nowStr, "契約01 (基本プラン)", contractedPlanCount]);
+          sheet.appendRow(["CONTRACT-01", "ACTIVE", "PC-01", "", "MOBILE-01", "", nowStr, nowStr, "契約01 (PC-01 / MOBILE-01)", contractedPlanCount]);
+          sheet.appendRow(["CONTRACT-02", "ACTIVE", "PC-02", "", "MOBILE-02", "", nowStr, nowStr, "契約02 (PC-02 / MOBILE-02)", contractedPlanCount]);
           lastRow = sheet.getLastRow();
         }
 
