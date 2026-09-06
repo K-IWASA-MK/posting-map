@@ -39,7 +39,6 @@ function doGet(e) {
     e.parameter = params;
   }
 
-  // SEC-006: Prohibit token transmission via GET
   if (params.liffToken) {
     return ContentService.createTextOutput(JSON.stringify({
       success: false,
@@ -49,7 +48,6 @@ function doGet(e) {
 
   const action = params.action || "";
 
-  // Read-only actions that do not require liffToken
   const isReadOnlyAction = [
     'getSystemSummary',
     'getDashboardData',
@@ -187,7 +185,6 @@ function doPost(e) {
   }
   const action = (postData && postData.action) || params.action || (e && e.parameter && e.parameter.action) || "";
 
-  // Read-only actions that do not require liffToken
   const isReadOnlyAction = [
     'getSystemSummary',
     'getDashboardData',
@@ -237,6 +234,12 @@ function doPost(e) {
     }
     return ContentService.createTextOutput(JSON.stringify(result))
       .setMimeType(ContentService.MimeType.JSON);
+  } else if (action === 'syncSystemInfo') {
+    const result = typeof SystemInfoService !== 'undefined' && SystemInfoService.getInstance
+      ? SystemInfoService.getInstance().syncSystemInfo()
+      : { success: false, message: 'SystemInfoService not available' };
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
   } else if (isDashboardAction) {
     const dashAuth = DeviceManagementService.getInstance().authenticateDashboard(postData || params || {});
     if (!dashAuth.success) {
@@ -274,7 +277,6 @@ function doPost(e) {
  * 実際のPOSTアクション処理のスイッチケース
  */
 function processPostAction(action, postData, e) {
-  // 対応案B: e.parameter.json (FormData経由) が存在する場合は自動パースして postData へ統合
   if (e && e.parameter && e.parameter.json) {
     try {
       const parsedJson = typeof e.parameter.json === 'string' ? JSON.parse(e.parameter.json) : e.parameter.json;
@@ -362,6 +364,10 @@ function processPostAction(action, postData, e) {
       return typeof DistrictProvisioner !== 'undefined' && DistrictProvisioner.getInstance
         ? DistrictProvisioner.getInstance().provisionNewDistrict(postData && postData.addresses)
         : { success: false, message: 'DistrictProvisioner not available' };
+    case 'syncSystemInfo':
+      return typeof SystemInfoService !== 'undefined' && SystemInfoService.getInstance
+        ? SystemInfoService.getInstance().syncSystemInfo()
+        : { success: false, message: 'SystemInfoService not available' };
     default:
       return { success: false, message: 'Invalid POST action' };
   }
