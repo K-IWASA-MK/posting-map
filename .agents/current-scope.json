@@ -97,5 +97,9 @@
   "scripts/validate-gas-endpoint-ssot.mjs",
   "active/business/system/district_provisioner.js",
   "scripts/provision-district.mjs",
-  "active/business/system/system_info_service.js"
+  "active/business/system/system_info_service.js",
+  ".gitignore",
+  "scripts/safe-deploy.mjs",
+  "docs/COPY_RUNBOOK.md",
+  "scripts/check-provisioning-gate.mjs"
 ]
