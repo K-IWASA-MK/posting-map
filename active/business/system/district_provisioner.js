@@ -70,6 +70,27 @@
       }
 
       const ss = this.getSS();
+      const districtName = (ss.getName() || '').trim();
+      const invalidNames = [
+        '無題のスプレッドシート',
+        '無題',
+        'untitled spreadsheet',
+        'untitled',
+        '新規スプレッドシート',
+        'スプレッドシート'
+      ];
+      const lowerName = districtName.toLowerCase();
+      const isInvalidName = !districtName ||
+        invalidNames.some(inv => lowerName === inv || lowerName.startsWith('copy of') || lowerName.startsWith('のコピー'));
+
+      if (isInvalidName) {
+        return {
+          success: false,
+          code: "INVALID_DISTRICT_NAME",
+          message: `Spreadsheet name "${districtName}" is invalid. Please rename your spreadsheet to the target district code (e.g. <TARGET_DISTRICT_CODE>) before provisioning.`
+        };
+      }
+
       const lock = LockService.getScriptLock();
       lock.waitLock(30000);
 

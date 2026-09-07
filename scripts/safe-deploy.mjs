@@ -40,7 +40,28 @@ async function main() {
   // Step 1: Preflight SSOT Check
   runStep('Step 1: Preflight SSOT Check', 'npm run check:ssot');
 
-  // Step 2: Push Local Code to GAS HEAD
+  console.log('\n🚀 [Safe Deploy Step] Step 1.5: GAS Version Quota Preflight Gate...');
+  try {
+    const versionsRaw = execSync('npx clasp list-versions', { encoding: 'utf8' });
+    const versionLines = versionsRaw.trim().split('\n').filter(line => /^\d+\s*-/.test(line));
+    const versionCount = versionLines.length;
+    console.log(`📊 Current GAS Version Count: ${versionCount} / 200`);
+
+    if (versionCount >= 190) {
+      console.error(`\n🛑 [Hard Stop] GAS Version Limit Critical! (${versionCount}/200)`);
+      console.error('   Creating a new version would risk exceeding the hard limit of 200 versions.');
+      console.error('   Please manually clean up unused versions in Apps Script Project History before deploying.');
+      process.exit(1);
+    } else if (versionCount >= 170) {
+      console.warn(`\n⚠️  [WARNING] GAS Version Count is High: ${versionCount} / 200.`);
+      console.warn('   Please plan to clean up unused versions via Apps Script Project History soon.\n');
+    } else {
+      console.log(`✅ [Version Gate Normal] Ample version slots available (${200 - versionCount} slots remaining).`);
+    }
+  } catch (err) {
+    console.warn(`⚠️  [Version Gate Warning] Failed to inspect version list: ${err.message}. Proceeding with caution.`);
+  }
+
   console.log('\n🚀 [Safe Deploy Step] Step 2: Source Code Sync (clasp push)...');
   const pushOutput = runStep('Syncing local files to GAS HEAD', 'npx clasp push');
   const pushSuccess = pushOutput.includes('Pushed') || pushOutput.includes('already up to date');

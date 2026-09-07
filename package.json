@@ -15,6 +15,7 @@
     "verify:gas": "node scripts/verify-gas-deployment.mjs",
     "deploy:gas": "node scripts/safe-deploy.mjs",
     "provision:district": "node scripts/provision-district.mjs",
+    "check:provisioning": "node scripts/check-provisioning-gate.mjs",
     "audit:gate": "node scripts/check-scope.mjs"
   },
   "keywords": [],

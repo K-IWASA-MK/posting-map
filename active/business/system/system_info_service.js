@@ -27,16 +27,42 @@
       }
     }
 
-    getLiffConfig(options) {
+    getLiffConfig(options, existingSheet) {
       const opts = options || {};
-      const liffUrl = opts.productionLiffUrl || this.getConfigProperty('PRODUCTION_LIFF_URL') || this.getConfigProperty('LINE_LIFF_URL') || '';
+      let liffUrl = opts.productionLiffUrl || opts.liffUrl || this.getConfigProperty('PRODUCTION_LIFF_URL') || this.getConfigProperty('LINE_LIFF_URL') || '';
       let liffId = opts.liffId || this.getConfigProperty('LINE_LIFF_ID') || this.getConfigProperty('LIFF_ID') || '';
+
+      if ((!liffUrl || !liffId) && existingSheet) {
+        try {
+          const lastRow = existingSheet.getLastRow();
+          if (lastRow > 1) {
+            const data = existingSheet.getRange(1, 1, lastRow, 2).getValues();
+            for (let i = 0; i < data.length; i++) {
+              const row = data[i];
+              if (row[0] === 'LIFF URL' && row[1] && !liffUrl) liffUrl = String(row[1]).trim();
+              if (row[0] === 'LIFF ID' && row[1] && !liffId) liffId = String(row[1]).trim();
+            }
+          }
+        } catch (e) {}
+      }
+
       if (!liffId && liffUrl) {
         const match = String(liffUrl).match(/liff\.line\.me\/([^/?#]+)/i);
         if (match && match[1]) {
           liffId = match[1];
         }
       }
+
+      if (opts.productionLiffUrl || opts.liffUrl) {
+        try {
+          const props = PropertiesService.getScriptProperties();
+          if (props) {
+            if (liffUrl) props.setProperty('PRODUCTION_LIFF_URL', liffUrl);
+            if (liffId) props.setProperty('LINE_LIFF_ID', liffId);
+          }
+        } catch (e) {}
+      }
+
       return { url: liffUrl, id: liffId };
     }
 
@@ -73,7 +99,7 @@
         if (!sheet) sheet = ss.insertSheet('SYSTEM_INFO');
 
         const device = this.getDeviceSnapshot(ss);
-        const liff = this.getLiffConfig(opts);
+        const liff = this.getLiffConfig(opts, sheet);
         const baseUrl = opts.baseUrl || 'https://postingmap.jp';
         const districtName = ss.getName();
         const dashboardUrl = `${baseUrl}/active/manager/`;
