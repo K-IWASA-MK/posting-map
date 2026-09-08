@@ -101,5 +101,6 @@
   ".gitignore",
   "scripts/safe-deploy.mjs",
   "docs/COPY_RUNBOOK.md",
-  "scripts/check-provisioning-gate.mjs"
+  "scripts/check-provisioning-gate.mjs",
+  "CNAME"
 ]
