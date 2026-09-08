@@ -415,7 +415,7 @@ function renderStorageList(stocks) {
     container.innerHTML = `
       <div style="border: 1px solid rgba(255,255,255,0.04);" class="premium-glass p-8 flex flex-col items-center justify-center text-center gap-3">
         <span class="text-2xl">📦</span>
-        <p class="text-sm font-black text-white/60">現在、他の方が保管しているチラシはありません</p>
+        <p class="text-sm font-black text-white/60">現在、他の方が保管している<br>チラシはありません</p>
       </div>`;
     return;
   }
