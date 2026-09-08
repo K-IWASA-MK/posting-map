@@ -876,6 +876,8 @@ async function submitMissionComplete(areaName, rowId) {
       }
     }
 
+    alert("✓ 提出致しました");
+
     if (typeof closeDetailModal === 'function') {
       closeDetailModal();
     }
