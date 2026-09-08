@@ -1428,7 +1428,6 @@ function updateStats(summaryData = null) {
 
   if (summaryData.districtName) {
     window.__districtName = summaryData.districtName;
-    document.title = summaryData.districtName;
   }
 
   if (countEl) countEl.textContent = `${done}/ ${total}`;
