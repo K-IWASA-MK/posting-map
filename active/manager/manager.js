@@ -104,61 +104,6 @@ function getAreaStatusConfig(isCompleted, isInProgress) {
   return AREA_STATUS_CONFIG.UNALLOCATED;
 }
 
-function getOrCreateDeviceKey() {
-  const STORAGE_KEY = 'PMS_COCKPIT_DEVICE_KEY';
-  let key = '';
-  try {
-    key = localStorage.getItem(STORAGE_KEY) || '';
-  } catch (e) {}
-
-  if (!key) {
-    if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
-      const bytes = new Uint8Array(32);
-      crypto.getRandomValues(bytes);
-      key = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
-    } else {
-      key = 'DEV_' + Math.random().toString(36).substring(2, 15) + '_' + Date.now().toString(36);
-    }
-    try {
-      localStorage.setItem(STORAGE_KEY, key);
-    } catch (e) {}
-  }
-  return key;
-}
-
-async function verifyOrRegisterDevice() {
-  try {
-    const res = await callApiPost('registerOrValidateDevice');
-    if (res && res.success && res.authorized) {
-      if (res.deviceId) {
-        DashboardState.currentDeviceId = res.deviceId;
-      }
-      if (res.contractId) {
-        DashboardState.currentContractId = res.contractId;
-      }
-      return true;
-    }
-    return false;
-  } catch (err) {
-    console.error('[Device Auth Error]', err);
-    return false;
-  }
-}
-
-function showDeviceLockScreen() {
-  const lockEl = document.getElementById('device-lock-screen');
-  if (lockEl) {
-    lockEl.classList.remove('hidden');
-    lockEl.classList.add('flex');
-  }
-  const mainEl = document.querySelector('main');
-  if (mainEl) mainEl.style.display = 'none';
-  const headerEl = document.querySelector('header');
-  if (headerEl) headerEl.style.display = 'none';
-  const navEl = document.querySelector('nav');
-  if (navEl) navEl.style.display = 'none';
-}
-
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initDashboard);
 } else {
@@ -169,20 +114,7 @@ async function initDashboard() {
   const urlParams = new URLSearchParams(window.location.search);
   const pairKey = urlParams.get('pair');
   if (pairKey) {
-    try {
-      const pairRes = await callApiPost('pairMobileDevice', { pairKey: pairKey });
-      if (pairRes && pairRes.success) {
-        history.replaceState(null, '', window.location.pathname);
-      }
-    } catch (e) {
-      console.error('[Mobile Pairing Error]', e);
-    }
-  }
-
-  const isAuthOk = await verifyOrRegisterDevice();
-  if (!isAuthOk) {
-    showDeviceLockScreen();
-    return;
+    history.replaceState(null, '', window.location.pathname);
   }
 
   initMap();
@@ -229,8 +161,7 @@ async function fetchStaticDataFile(filename) {
 
 async function callApiPost(action, payload = {}) {
   const url = `${getApiUrl()}?action=${encodeURIComponent(action)}&_t=${Date.now()}`;
-  const deviceKey = getOrCreateDeviceKey();
-  const body = JSON.stringify({ action, deviceKey, ...payload });
+  const body = JSON.stringify({ action, ...payload });
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 25000);
@@ -1604,7 +1535,7 @@ function renderMainStageMobile() {
               <span class="text-statusGreen text-base">🛡️</span>
               <span class="text-textSub">端末セキュリティ</span>
             </div>
-            <span class="font-mono text-[11px] text-textSub/80">${DashboardState.currentContractId ? `${DashboardState.currentContractId} (${DashboardState.currentDeviceId || 'PC'}) 専用ペアリング` : '1契約（PC+スマホ）専用保護'}</span>
+            <span class="font-mono text-[11px] text-textSub/80">専用セキュリティ保護</span>
           </div>
         </div>
       </div>

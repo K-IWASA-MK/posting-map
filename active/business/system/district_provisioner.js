@@ -6,7 +6,7 @@
  * 1. 責務は「原本5種生成」「CSVエリア展開」「当月5種生成（原本からの複製）」「月次トリガー管理」のみ。
  * 2. MonthlySheetResolverとは完全に責務分離する（Resolverは参照解決SSOT、Provisionerが生成SSOT）。
  * 3. 前月シートは一切削除せず、履歴として保持する。
- * 4. SYSTEM_INFO、端末管理は月次化対象外・固定保護。
+ * 4. SYSTEM_INFOは月次化対象外・固定保護。
  * 5. 地区名・自治体名・件数はコードにハードコードせず、CSVおよびSpreadsheetから動的に決定する。
  */
 (function(global) {
@@ -95,13 +95,6 @@
       lock.waitLock(30000);
 
       try {
-        if (typeof DeviceManagementService !== 'undefined' && DeviceManagementService.getInstance) {
-          const devService = DeviceManagementService.getInstance();
-          if (typeof devService.getOrCreateDeviceManagementSheet === 'function') {
-            devService.getOrCreateDeviceManagementSheet(ss);
-          }
-        }
-
         const sysInfoResult = (typeof SystemInfoService !== 'undefined' && SystemInfoService.getInstance)
           ? SystemInfoService.getInstance().syncSystemInfo(options)
           : this.createOrSyncSystemInfo(ss, options);
@@ -117,14 +110,13 @@
 
         const allSheets = [
           "SYSTEM_INFO",
-          "端末管理",
           ...Object.values(this.masterNames),
           ...monthlySheets
         ];
 
         return {
           success: true,
-          message: "All 12 district sheets provisioned successfully.",
+          message: "All 11 district sheets provisioned successfully.",
           districtName: sysInfoResult.districtName,
           sheets: allSheets,
           totalSheetsCount: allSheets.length,
@@ -148,22 +140,6 @@
       }
 
       const districtName = ss.getName();
-
-      let contractedCount = 2;
-      let deviceSummary = "PC-01, PC-02 / MOBILE-01, MOBILE-02";
-      if (typeof DeviceManagementService !== 'undefined' && DeviceManagementService.getInstance) {
-        const devStatus = DeviceManagementService.getInstance().getDeviceStatus();
-        if (devStatus && devStatus.contractedPlanCount) {
-          contractedCount = devStatus.contractedPlanCount;
-        }
-        if (devStatus && Array.isArray(devStatus.rows) && devStatus.rows.length > 0) {
-          const pcs = devStatus.rows.map(r => r.pcDeviceId).filter(Boolean);
-          const mobs = devStatus.rows.map(r => r.mobileDeviceId).filter(Boolean);
-          if (pcs.length > 0 || mobs.length > 0) {
-            deviceSummary = `${pcs.join(', ')} / ${mobs.join(', ')}`;
-          }
-        }
-      }
 
       const baseUrl = opts.baseUrl || "https://postingmap.jp";
       const hAppUrl = `${baseUrl}/`;
@@ -197,8 +173,6 @@
         ["LIFF ID", liffId],
         ["LIFF URL", liffUrl],
         ["Endpoint URL", hAppUrl],
-        ["Dashboard契約数", contractedCount],
-        ["Dashboard端末", deviceSummary],
         ["状態", "ACTIVE"]
       ];
 
@@ -217,8 +191,6 @@
         success: true,
         sheet: sheetName,
         districtName: districtName,
-        contractedCount: contractedCount,
-        deviceSummary: deviceSummary,
         rowCount: rows.length
       };
     }
