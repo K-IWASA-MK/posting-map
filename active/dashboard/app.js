@@ -795,131 +795,81 @@ function pressNum(key) {
 
 // モーダルの「この内容で提出する」ボタン押下時に呼ばれる
 async function submitMissionComplete(areaName, rowId) {
-  const submitBtn = $('submit-mission-btn');
-  const cancelBtn = $('cancel-mission-btn');
-
-  if (submitBtn) {
-    submitBtn.innerHTML = '⏳ [1] 提出処理開始...';
-  }
-
   const p = (typeof allPoints !== 'undefined' && Array.isArray(allPoints) && allPoints.find(point => point.rowId === rowId)) ||
             (typeof window.allPoints !== 'undefined' && Array.isArray(window.allPoints) && window.allPoints.find(point => point.rowId === rowId));
-  if (!p) {
-    alert(`[診断エラー @ [2]対象データ確認] ポイントデータが見つかりません (rowId: ${rowId})`);
-    if (submitBtn) submitBtn.innerHTML = '🚀 この内容で提出する';
-    return;
-  }
+  if (!p) return;
 
-  if (p.photoStatus !== 'OK' || !p.photoBase64) {
-    alert(`[診断停止 @ [3]バリデーション] 写真エラー\nphotoStatus: ${p.photoStatus}\nphotoBase64: ${p.photoBase64 ? 'あり(' + p.photoBase64.length + '文字)' : 'なし'}`);
-    if (submitBtn) submitBtn.innerHTML = '🚀 この内容で提出する';
-    return;
-  }
-
-  if (p.gpsStatus === 'pending') {
-    alert('[診断停止 @ [3]バリデーション] GPS測位中のため提出できません。GPS測位完了をお待ちください。');
-    if (submitBtn) submitBtn.innerHTML = '🚀 この内容で提出する';
-    return;
-  }
-
-  if (p.gpsStatus === 'OK') {
-    if (!Number.isFinite(Number(p.latitude)) || !Number.isFinite(Number(p.longitude))) {
-      alert(`[診断停止 @ [3]バリデーション] GPS座標が不正です\nlat: ${p.latitude}, lng: ${p.longitude}`);
-      if (submitBtn) submitBtn.innerHTML = '🚀 この内容で提出する';
-      return;
-    }
-  }
-
-  if (p.syncStatus === 'submitting') {
-    alert('[診断停止 @ [3]バリデーション] 二重送信防止: 既に送信処理中です');
-    return;
-  }
+  if (p.syncStatus === 'submitting') return;
   p.syncStatus = 'submitting';
 
+  if (p.photoStatus !== 'OK' || !p.photoBase64) {
+    p.syncStatus = 'pending';
+    return;
+  }
+
+  const submitBtn = $('submit-mission-btn');
+  const cancelBtn = $('cancel-mission-btn');
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.style.opacity = '0.75';
-    submitBtn.style.cursor = 'not-allowed';
-    submitBtn.innerHTML = '⏳ [A] ボタンロック完了';
+    submitBtn.textContent = '⏳ 提出中...';
   }
   if (cancelBtn) {
     cancelBtn.disabled = true;
-    cancelBtn.style.opacity = '0.35';
-    cancelBtn.style.cursor = 'not-allowed';
   }
 
+  await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
+
   try {
-    if (submitBtn) submitBtn.innerHTML = '⏳ [4] LIFFトークン確認中...';
-    let liffTokenStatus = '未取得';
-    try {
-      const token = typeof getLiffAuthToken === 'function' ? getLiffAuthToken() : null;
-      liffTokenStatus = token ? `取得OK(${token.slice(0, 8)}...)` : 'なし(ブラウザ/未ログイン)';
-    } catch (tokenErr) {
-      alert(`[診断エラー @ [4]LIFFトークン確認] ${tokenErr.message}`);
-      throw tokenErr;
+    while (p.gpsStatus === 'pending') {
+      await new Promise(r => setTimeout(r, 200));
     }
 
-    if (typeof enqueueSync !== 'function') {
-      alert('[診断エラー @ [5]キュー登録] enqueueSync関数が存在しません');
-      throw new Error("enqueueSync function is missing.");
-    }
+    if (typeof enqueueSync === 'function') {
+      await enqueueSync({
+        areaName,
+        rowId: Number(rowId),
+        isDone:     true,
+        count:      p.count || 0,
+        latitude:   p.gpsStatus === 'OK' ? (p.latitude || '') : '',
+        longitude:  p.gpsStatus === 'OK' ? (p.longitude || '') : '',
+        accuracy:   p.gpsStatus === 'OK' ? (p.accuracy || null) : null,
+        gpsTimestamp: p.gpsStatus === 'OK' ? (p.gpsTimestamp || '') : '',
+        gpsStatusReason: p.gpsStatus || 'NO',
+        branchCode: localStorage.getItem('branch_name') || '',
+        areaId:     String(rowId),
+        photoBase64: p.photoBase64 || '',
+        staffName:  p.staffName || '',
+        staffId:    p.staffId || ''
+      });
 
-    if (submitBtn) submitBtn.innerHTML = `⏳ [5] キュー登録中 (Token: ${liffTokenStatus})...`;
-    await enqueueSync({
-      areaName,
-      rowId: Number(rowId),
-      isDone:     true,
-      count:      p.count || 0,
-      latitude:   p.gpsStatus === 'OK' ? (p.latitude || '') : '',
-      longitude:  p.gpsStatus === 'OK' ? (p.longitude || '') : '',
-      accuracy:   p.gpsStatus === 'OK' ? (p.accuracy || null) : null,
-      gpsTimestamp: p.gpsStatus === 'OK' ? (p.gpsTimestamp || '') : '',
-      gpsStatusReason: p.gpsStatus || 'ERROR',
-      branchCode: localStorage.getItem('branch_name') || '',
-      areaId:     String(rowId),
-      photoBase64: p.photoBase64 || '',
-      staffName:  p.staffName || '',
-      staffId:    p.staffId || ''
-    });
-
-    if (submitBtn) submitBtn.innerHTML = '⏳ [5] キュー登録完了・待機開始';
-
-    let pollCount = 0;
-    while (true) {
-      pollCount++;
-      if (typeof window.getRowStatus !== 'function') {
-        alert('[診断エラー @ [6]ポーリング] window.getRowStatus 関数が存在しません');
-        throw new Error("Sync check mechanism is missing.");
-      }
-      const status = await window.getRowStatus(Number(rowId));
-
-      if (submitBtn) {
-        submitBtn.innerHTML = `⏳ [6] 送信待機中 (${status || '処理中'} #${pollCount})`;
-      }
-
-      if (status === null) {
-        if (typeof window.setPinInProgress === 'function') {
-          window.setPinInProgress(rowId, "remove");
+      while (true) {
+        if (typeof window.getRowStatus !== 'function') {
+          throw new Error("Sync check mechanism is missing.");
         }
-        if (window.globalPinStatus) {
-          if (!window.globalPinStatus.completed.includes(rowId)) {
-            window.globalPinStatus.completed.push(rowId);
+        const status = await window.getRowStatus(Number(rowId));
+
+        if (status === null) {
+          if (typeof window.setPinInProgress === 'function') {
+            window.setPinInProgress(rowId, "remove");
           }
-          window.globalPinStatus.inProgress = window.globalPinStatus.inProgress.filter(id => id !== rowId);
+          if (window.globalPinStatus) {
+            if (!window.globalPinStatus.completed.includes(rowId)) {
+              window.globalPinStatus.completed.push(rowId);
+            }
+            window.globalPinStatus.inProgress = window.globalPinStatus.inProgress.filter(id => id !== rowId);
+          }
+          if (typeof window.lockActivePinAndBubble === 'function') {
+            window.lockActivePinAndBubble(rowId);
+          }
+          break;
         }
-        if (typeof window.lockActivePinAndBubble === 'function') {
-          window.lockActivePinAndBubble(rowId);
+        if (status === 'RETRY') {
+          throw new Error("GAS Save Failed");
         }
-        break;
+        await new Promise(r => setTimeout(r, 500));
       }
-      if (status === 'RETRY') {
-        alert(`[診断エラー @ [6]ポーリング] GAS保存に失敗しました (status: RETRY, 回数: #${pollCount})`);
-        throw new Error("GAS Save Failed");
-      }
-      await new Promise(r => setTimeout(r, 500));
     }
 
-    if (submitBtn) submitBtn.innerHTML = '✓ 提出完了';
     alert("✓ 提出致しました");
 
     if (typeof closeDetailModal === 'function') {
@@ -927,19 +877,17 @@ async function submitMissionComplete(areaName, rowId) {
     }
   } catch (err) {
     console.error("Submission failed:", err);
-    alert(`[診断例外捕捉 @ catch] ${err && err.message ? err.message : String(err)}`);
+    alert("提出に失敗しました: " + (err.message || "エラー"));
     p.syncStatus = 'pending';
-
+  } finally {
+    const submitBtn = $('submit-mission-btn');
+    const cancelBtn = $('cancel-mission-btn');
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.style.opacity = '1';
-      submitBtn.style.cursor = 'pointer';
-      submitBtn.innerHTML = '🚀 この内容で提出する';
+      submitBtn.textContent = '🚀 この内容で提出する';
     }
     if (cancelBtn) {
       cancelBtn.disabled = false;
-      cancelBtn.style.opacity = '1';
-      cancelBtn.style.cursor = 'pointer';
     }
   }
 }
