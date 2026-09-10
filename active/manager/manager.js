@@ -312,10 +312,11 @@ if (typeof window !== 'undefined') {
   window.onCitySelected = onCitySelected;
 }
 
-function toggleCityDropdown(event) {
+function toggleCityDropdown(event, isMobile) {
   if (event) event.stopPropagation();
-  const listEl = document.getElementById('city-selector-list');
-  const triggerEl = document.getElementById('city-selector-trigger');
+  const suffix = isMobile ? 'mobile-city-selector' : 'city-selector';
+  const listEl = document.getElementById(`${suffix}-list`);
+  const triggerEl = document.getElementById(`${suffix}-trigger`);
   if (!listEl) return;
 
   const isHidden = listEl.classList.contains('hidden');
@@ -329,10 +330,12 @@ function toggleCityDropdown(event) {
 }
 
 function closeCityDropdown() {
-  const listEl = document.getElementById('city-selector-list');
-  const triggerEl = document.getElementById('city-selector-trigger');
-  if (listEl) listEl.classList.add('hidden');
-  if (triggerEl) triggerEl.setAttribute('aria-expanded', 'false');
+  ['city-selector', 'mobile-city-selector'].forEach(suffix => {
+    const listEl = document.getElementById(`${suffix}-list`);
+    const triggerEl = document.getElementById(`${suffix}-trigger`);
+    if (listEl) listEl.classList.add('hidden');
+    if (triggerEl) triggerEl.setAttribute('aria-expanded', 'false');
+  });
 }
 
 function selectCity(cityName) {
@@ -342,26 +345,34 @@ function selectCity(cityName) {
   const currentLabelEl = document.getElementById('city-selector-current');
   if (currentLabelEl) currentLabelEl.textContent = labelText;
 
+  const mobileLabelEl = document.getElementById('mobile-city-selector-current');
+  if (mobileLabelEl) mobileLabelEl.textContent = labelText;
+
+  const mobileList = document.getElementById('mobile-city-selector-list');
+  if (mobileList) mobileList.classList.add('hidden');
+
   updateCitySelectorHighlight(cityName);
   onCitySelected(cityName);
 }
 
 function updateCitySelectorHighlight(selectedCity) {
-  const listEl = document.getElementById('city-selector-list');
-  if (!listEl) return;
+  ['city-selector-list', 'mobile-city-selector-list'].forEach(listId => {
+    const listEl = document.getElementById(listId);
+    if (!listEl) return;
 
-  const buttons = listEl.querySelectorAll('button[data-city-val]');
-  buttons.forEach(btn => {
-    const val = btn.getAttribute('data-city-val');
-    if (val === selectedCity) {
-      btn.className = 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-between bg-brand/15 text-brand border border-brand/30';
-      const checkSpan = btn.querySelector('.city-check');
-      if (checkSpan) checkSpan.textContent = '✓';
-    } else {
-      btn.className = 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center justify-between text-textSub hover:text-white hover:bg-white/5 border border-transparent';
-      const checkSpan = btn.querySelector('.city-check');
-      if (checkSpan) checkSpan.textContent = '';
-    }
+    const buttons = listEl.querySelectorAll('button[data-city-val]');
+    buttons.forEach(btn => {
+      const val = btn.getAttribute('data-city-val');
+      if (val === selectedCity) {
+        btn.className = 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-between bg-brand/15 text-brand border border-brand/30';
+        const checkSpan = btn.querySelector('.city-check');
+        if (checkSpan) checkSpan.textContent = '✓';
+      } else {
+        btn.className = 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center justify-between text-textSub hover:text-white hover:bg-white/5 border border-transparent';
+        const checkSpan = btn.querySelector('.city-check');
+        if (checkSpan) checkSpan.textContent = '';
+      }
+    });
   });
 }
 
@@ -372,30 +383,35 @@ function populateCitySelector(cities) {
   const currentLabelEl = document.getElementById('city-selector-current');
   if (currentLabelEl) currentLabelEl.textContent = labelText;
 
-  const listEl = document.getElementById('city-selector-list');
-  if (!listEl) return;
-  listEl.innerHTML = '';
+  const mobileLabelEl = document.getElementById('mobile-city-selector-current');
+  if (mobileLabelEl) mobileLabelEl.textContent = labelText;
 
-  const allBtn = document.createElement('button');
-  allBtn.type = 'button';
-  allBtn.setAttribute('data-city-val', 'ALL');
-  allBtn.onclick = (e) => { e.stopPropagation(); selectCity('ALL'); };
-  allBtn.innerHTML = `<span>全域</span><span class="city-check text-[11px] font-bold">${currentVal === 'ALL' ? '✓' : ''}</span>`;
-  allBtn.className = currentVal === 'ALL'
-    ? 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-between bg-brand/15 text-brand border border-brand/30'
-    : 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center justify-between text-textSub hover:text-white hover:bg-white/5 border border-transparent';
-  listEl.appendChild(allBtn);
+  ['city-selector-list', 'mobile-city-selector-list'].forEach(listId => {
+    const listEl = document.getElementById(listId);
+    if (!listEl) return;
+    listEl.innerHTML = '';
 
-  cities.forEach(cityName => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.setAttribute('data-city-val', cityName);
-    btn.onclick = (e) => { e.stopPropagation(); selectCity(cityName); };
-    btn.innerHTML = `<span>${escapeHtml(cityName)}</span><span class="city-check text-[11px] font-bold">${currentVal === cityName ? '✓' : ''}</span>`;
-    btn.className = currentVal === cityName
+    const allBtn = document.createElement('button');
+    allBtn.type = 'button';
+    allBtn.setAttribute('data-city-val', 'ALL');
+    allBtn.onclick = (e) => { e.stopPropagation(); selectCity('ALL'); };
+    allBtn.innerHTML = `<span>全域</span><span class="city-check text-[11px] font-bold">${currentVal === 'ALL' ? '✓' : ''}</span>`;
+    allBtn.className = currentVal === 'ALL'
       ? 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-between bg-brand/15 text-brand border border-brand/30'
       : 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center justify-between text-textSub hover:text-white hover:bg-white/5 border border-transparent';
-    listEl.appendChild(btn);
+    listEl.appendChild(allBtn);
+
+    cities.forEach(cityName => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.setAttribute('data-city-val', cityName);
+      btn.onclick = (e) => { e.stopPropagation(); selectCity(cityName); };
+      btn.innerHTML = `<span>${escapeHtml(cityName)}</span><span class="city-check text-[11px] font-bold">${currentVal === cityName ? '✓' : ''}</span>`;
+      btn.className = currentVal === cityName
+        ? 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-between bg-brand/15 text-brand border border-brand/30'
+        : 'w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center justify-between text-textSub hover:text-white hover:bg-white/5 border border-transparent';
+      listEl.appendChild(btn);
+    });
   });
 }
 
@@ -605,6 +621,13 @@ function renderCurrentView() {
   const completedEl = document.getElementById('fact-completed-areas');
   const districtLabelEl = document.getElementById('map-district-label');
 
+  const mDoneAreasEl = document.getElementById('mobile-fact-done-areas');
+  const mTotalAreasEl = document.getElementById('mobile-fact-total-areas');
+  const mProgressBadgeEl = document.getElementById('mobile-fact-progress-badge');
+  const mUnallocatedEl = document.getElementById('mobile-fact-unallocated-areas');
+  const mInProgressEl = document.getElementById('mobile-fact-inprogress-areas');
+  const mCompletedEl = document.getElementById('mobile-fact-completed-areas');
+
   const masterOk = DashboardState.masterLoadStatus === 'LOADED';
 
   if (DashboardState.masterLoadStatus === 'PENDING') {
@@ -612,6 +635,9 @@ function renderCurrentView() {
     if (doneAreasEl) doneAreasEl.textContent = 'ERR';
     if (totalAreasEl) totalAreasEl.textContent = 'ERR';
     if (progressBadgeEl) progressBadgeEl.textContent = '--';
+    if (mDoneAreasEl) mDoneAreasEl.textContent = 'ERR';
+    if (mTotalAreasEl) mTotalAreasEl.textContent = 'ERR';
+    if (mProgressBadgeEl) mProgressBadgeEl.textContent = '--';
   } else {
     let totalAreas = DashboardState.masterPins.length;
     let doneAreas = DashboardState.masterPins.filter(p => completedList.includes(p.rowId)).length;
@@ -640,6 +666,13 @@ function renderCurrentView() {
     if (inProgressEl) inProgressEl.textContent = inProgStr;
     if (completedEl) completedEl.textContent = doneStr;
 
+    if (mDoneAreasEl) mDoneAreasEl.textContent = doneStr;
+    if (mTotalAreasEl) mTotalAreasEl.textContent = totalStr;
+    if (mProgressBadgeEl) mProgressBadgeEl.textContent = progStr;
+    if (mUnallocatedEl) mUnallocatedEl.textContent = unallocStr;
+    if (mInProgressEl) mInProgressEl.textContent = inProgStr;
+    if (mCompletedEl) mCompletedEl.textContent = doneStr;
+
     if (districtLabelEl) {
       const districtCode = DashboardState.summary?.districtName;
       const labelPrefix = districtCode ? districtCode : '全域';
@@ -649,6 +682,7 @@ function renderCurrentView() {
 
 
   const totalRecordsEl = document.getElementById('fact-total-records');
+  const mTotalRecordsEl = document.getElementById('mobile-fact-total-records');
   let totalDelivered = 0;
   if (isAll) {
     totalDelivered = (DashboardState.ranking || []).reduce((acc, item) => acc + (Number(item.count) || 0), 0);
@@ -658,13 +692,16 @@ function renderCurrentView() {
   }
   const deliveredStr = totalDelivered.toLocaleString();
   if (totalRecordsEl) totalRecordsEl.textContent = deliveredStr;
+  if (mTotalRecordsEl) mTotalRecordsEl.textContent = deliveredStr;
 
   renderStockFacts(DashboardState.stocks, selected);
 
   const totalRosterEl = document.getElementById('fact-total-roster');
+  const mTotalRosterEl = document.getElementById('mobile-fact-total-roster');
   const rosterCount = (DashboardState.roster || []).length;
   const rosterStr = rosterCount.toLocaleString();
   if (totalRosterEl) totalRosterEl.textContent = rosterStr;
+  if (mTotalRosterEl) mTotalRosterEl.textContent = rosterStr;
 
   renderLiveFeed(DashboardState.liveRecords);
 
@@ -708,8 +745,10 @@ function renderStockFacts(stocks, selectedCity) {
   });
 
   const totalStocksEl = document.getElementById('fact-total-stocks');
+  const mTotalStocksEl = document.getElementById('mobile-fact-total-stocks');
   const stockStr = totalStock.toLocaleString();
   if (totalStocksEl) totalStocksEl.textContent = stockStr;
+  if (mTotalStocksEl) mTotalStocksEl.textContent = stockStr;
 }
 
 function renderLiveFeed(liveRecords) {
@@ -1208,15 +1247,21 @@ function renderMainStageStocks(stocks) {
       : '';
 
     html += `
-      <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
-        <div class="font-semibold text-lg text-white flex-shrink-0 w-[320px] truncate">${escapeHtml(s.location || '保管拠点')}</div>
-        <div class="flex items-center gap-2.5 text-sm text-[#94A3B8] flex-1 min-w-0">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] gap-1.5 sm:gap-2 transition-colors">
+        <div class="flex items-center justify-between w-full sm:w-auto gap-2">
+          <div class="font-semibold text-base sm:text-lg text-white truncate min-w-0 sm:w-64 sm:flex-none">${escapeHtml(s.location || '保管拠点')}</div>
+          <div class="text-right sm:hidden flex-shrink-0">
+            <span class="text-base sm:text-lg font-bold font-mono text-white">${(Number(s.count) || 0).toLocaleString()}</span>
+            <span class="text-xs text-[#94A3B8] font-normal ml-0.5">枚</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 text-xs sm:text-sm text-[#94A3B8] flex-1 min-w-0">
           ${staffBadgeHtml}
-          <span class="font-medium text-white text-sm truncate max-w-[130px]">${escapeHtml(s.staffName || (s.staffId ? '' : '未設定'))}</span>
+          <span class="font-medium text-white text-xs sm:text-sm truncate max-w-[130px]">${escapeHtml(s.staffName || (s.staffId ? '' : '未設定'))}</span>
           <span class="text-[#243044] text-xs">|</span>
           <span class="text-textSub text-xs">更新: <span class="font-mono">${escapeHtml(s.updatedAt || '--')}</span></span>
         </div>
-        <div class="text-right flex-shrink-0">
+        <div class="hidden sm:block text-right flex-shrink-0">
           <span class="text-lg font-bold font-mono text-white">${(Number(s.count) || 0).toLocaleString()}</span>
           <span class="text-xs text-[#94A3B8] font-normal ml-0.5">枚</span>
         </div>
@@ -1246,12 +1291,12 @@ function renderMainStageRoster(roster) {
     }
 
     html += `
-      <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
-        <div class="flex items-center gap-2.5 flex-shrink-0 w-[320px] min-w-0">
+      <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] gap-2 transition-colors">
+        <div class="flex items-center gap-2.5 min-w-0 flex-1 sm:w-64 sm:flex-none">
           <span class="h-7 px-2 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-bold text-xs text-brand flex-shrink-0">${escapeHtml(r.id || '')}</span>
-          <span class="font-semibold text-lg text-white truncate">${escapeHtml(r.name || '')}</span>
+          <span class="font-semibold text-base sm:text-lg text-white truncate">${escapeHtml(r.name || '')}</span>
         </div>
-        <div class="flex items-center gap-2.5 text-sm text-[#94A3B8] flex-1 min-w-0">
+        <div class="flex items-center gap-2 text-xs sm:text-sm text-[#94A3B8] flex-1 min-w-0">
           <span class="text-xs text-[#94A3B8]">登録: <span class="font-mono text-white/90">${escapeHtml(formattedDate)}</span></span>
         </div>
         <div class="text-right flex-shrink-0">
@@ -1290,22 +1335,22 @@ function renderMainStageRequests(requests) {
       : '';
 
     html += `
-      <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] transition-colors">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2.5 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] gap-2 transition-colors">
         <!-- Column 1: IDと名前 (要請者 ➔ 保管者) -->
-        <div class="flex items-center gap-2 flex-shrink-0 w-[320px] min-w-0">
+        <div class="flex items-center gap-2 min-w-0 w-full sm:w-72 sm:flex-none">
           <div class="flex items-center gap-1.5 min-w-0 flex-1">
             ${requesterBadge}
-            <span class="font-semibold text-white truncate text-base">${escapeHtml(req.requesterName || '')}</span>
+            <span class="font-semibold text-white truncate text-sm sm:text-base">${escapeHtml(req.requesterName || '')}</span>
           </div>
           <span class="text-xs text-[#94A3B8] flex-shrink-0">➔</span>
           <div class="flex items-center gap-1.5 min-w-0 flex-1">
             ${holderBadge}
-            <span class="font-semibold text-white truncate text-base">${escapeHtml(req.holderName || '')}</span>
+            <span class="font-semibold text-white truncate text-sm sm:text-base">${escapeHtml(req.holderName || '')}</span>
           </div>
         </div>
 
         <!-- Column 2: 連絡方法・連絡先 -->
-        <div class="flex items-center gap-2 text-sm text-[#94A3B8] flex-1 min-w-0 ml-12">
+        <div class="flex items-center gap-2 text-xs sm:text-sm text-[#94A3B8] flex-1 min-w-0 ml-0 sm:ml-6">
           <span class="text-xs text-[#94A3B8] truncate">
             連絡先: ${req.contactMethod ? `<span class="text-[#94A3B8]/80">[${escapeHtml(req.contactMethod)}]</span> ` : ''}<span class="text-white/90 font-mono">${escapeHtml(req.contactValue || '--')}</span>
           </span>
@@ -1323,7 +1368,7 @@ function renderMainStageRequests(requests) {
 }
 
 function switchView(type) {
-  const views = ['areas', 'records', 'stocks', 'roster', 'requests', 'mail', 'mobile'];
+  const views = ['areas', 'records', 'stocks', 'roster', 'requests', 'mail'];
   const targetView = views.includes(type) ? type : 'areas';
 
   views.forEach(v => {
@@ -1357,13 +1402,11 @@ function switchView(type) {
     renderMainStageRequests(DashboardState.requests);
   } else if (targetView === 'mail') {
     renderMainStageMail(DashboardState.selectedMailTabIndex || 0);
-  } else if (targetView === 'mobile') {
-    renderMainStageMobile();
   }
 }
 
 function updateNavHighlight(activeType) {
-  const navTypes = ['mail', 'roster', 'stocks', 'requests', 'records', 'areas', 'mobile'];
+  const navTypes = ['mail', 'roster', 'stocks', 'requests', 'records', 'areas'];
   navTypes.forEach(t => {
     const el = document.getElementById(`nav-${t}`);
     if (el) {
@@ -1371,6 +1414,15 @@ function updateNavHighlight(activeType) {
         el.className = 'nav-item nav-item-active w-full h-10 flex items-center gap-2.5 px-3 rounded-xl border border-brand/35 text-brand font-semibold text-left';
       } else {
         el.className = 'nav-item w-full h-10 flex items-center gap-2.5 px-3 rounded-xl text-textSub border border-transparent hover:text-white hover:bg-white/5 text-left font-medium';
+      }
+    }
+
+    const mEl = document.getElementById(`mobile-nav-${t}`);
+    if (mEl) {
+      if (t === activeType) {
+        mEl.className = 'mobile-nav-item mobile-nav-active flex flex-col items-center justify-center flex-1 py-1 text-brand font-bold text-[10px] transition-colors cursor-pointer';
+      } else {
+        mEl.className = 'mobile-nav-item flex flex-col items-center justify-center flex-1 py-1 text-textSub font-medium text-[10px] hover:text-white transition-colors cursor-pointer';
       }
     }
   });
@@ -1830,13 +1882,19 @@ function setSyncStatus(isLive) {
   const text = document.getElementById('live-status-text');
   const clock = document.getElementById('sync-clock');
 
+  const mDot = document.getElementById('mobile-live-dot');
+  const mClock = document.getElementById('mobile-sync-clock');
+
   if (dot) dot.className = isLive ? 'w-2 h-2 rounded-full bg-statusGreen' : 'w-2 h-2 rounded-full bg-statusYellow';
+  if (mDot) mDot.className = isLive ? 'w-2 h-2 rounded-full bg-statusGreen' : 'w-2 h-2 rounded-full bg-statusYellow';
   if (text) text.textContent = isLive ? '現場データ同期' : '再接続待機中';
 
   const now = new Date();
   const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+  const shortTimeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
   if (clock) clock.textContent = timeStr;
+  if (mClock) mClock.textContent = shortTimeStr;
 }
 
 
