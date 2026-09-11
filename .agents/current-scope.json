@@ -102,5 +102,7 @@
   "scripts/safe-deploy.mjs",
   "docs/COPY_RUNBOOK.md",
   "scripts/check-provisioning-gate.mjs",
-  "CNAME"
+  "CNAME",
+  ".agents/skills/h-app-auth-boundary/SKILL.md",
+  "scripts/verify_happ_detail.mjs"
 ]
