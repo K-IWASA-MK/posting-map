@@ -108,5 +108,7 @@
   "data/address_master.csv",
   "data/boundaries.geojson",
   "data/area_mapping.json",
-  "docs/area_mapping_mie03.json"
+  "docs/area_mapping_mie03.json",
+  "active/dashboard/components/navigation.js",
+  "active/business/bulletin/bulletin_service.js"
 ]
