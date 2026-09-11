@@ -23,6 +23,7 @@ const DashboardState = {
   liveRecords: [], // Backendから取得した最新配布実績レコード (SSOT)
   latestSeenRecordId: null, // アニメーション検知用最新レコードID
   globalPinStatus: { inProgress: [], completed: [] },
+  areaMapping: null, // 新旧エリア対応表（実績・ステータス継承用）
   masterPins: [], // SSOT マスターピン（config.js で指定された CSV から動的取得）
   masterLoadStatus: 'PENDING', // 'PENDING' | 'LOADED' | 'ERROR'
   boundariesGeoJson: null, // 国勢調査小地域境界GeoJSON（純粋地理背景）
@@ -123,6 +124,7 @@ async function initDashboard() {
   await loadAddressMaster();
 
   loadBoundariesGeoJson();
+  await loadAreaMapping();
 
   await loadElectionTurnoutData();
 
@@ -217,13 +219,17 @@ async function loadAddressMaster() {
         const lng = parseFloat(parts[4]);
 
         if (!isNaN(rowId) && !isNaN(lat) && !isNaN(lng)) {
+          const households = parts[5] ? parseInt(parts[5], 10) : undefined;
+          const population = parts[6] ? parseInt(parts[6], 10) : undefined;
           pins.push({
             rowId: rowId,
             cityName: cityName,
             townName: townName,
             fullName: `${cityName} ${townName}`,
             lat: lat,
-            lng: lng
+            lng: lng,
+            households: !isNaN(households) ? households : undefined,
+            population: !isNaN(population) ? population : undefined
           });
         }
       }
@@ -284,6 +290,17 @@ async function loadBoundariesGeoJson() {
     console.log('[Boundaries Layer Loaded] Pure geographic background layer initialized.');
   } catch (err) {
     console.warn('[Boundaries Load Error - Map continues normally]', err);
+  }
+}
+
+async function loadAreaMapping() {
+  try {
+    const res = await fetchStaticDataFile('area_mapping.json');
+    const mappingData = await res.json();
+    DashboardState.areaMapping = mappingData;
+    console.log('[Area Mapping Loaded] Total mapped parent areas:', mappingData.length);
+  } catch (err) {
+    console.warn('[Area Mapping Load Info - None loaded or not found]', err.message);
   }
 }
 
@@ -500,8 +517,26 @@ async function syncDashboardData() {
     }
 
     if (isPinStatusOk) {
-      DashboardState.globalPinStatus.inProgress = (pinStatusRes.inProgress || []).map(id => parseInt(id, 10)).filter(id => !isNaN(id));
-      DashboardState.globalPinStatus.completed = (pinStatusRes.completed || []).map(id => parseInt(id, 10)).filter(id => !isNaN(id));
+      let inProgress = (pinStatusRes.inProgress || []).map(id => parseInt(id, 10)).filter(id => !isNaN(id));
+      let completed = (pinStatusRes.completed || []).map(id => parseInt(id, 10)).filter(id => !isNaN(id));
+
+      // areaMapping による分割子エリアへのステータス継承
+      if (DashboardState.areaMapping && Array.isArray(DashboardState.areaMapping)) {
+        const completedSet = new Set(completed);
+        for (const entry of DashboardState.areaMapping) {
+          if (completedSet.has(entry.old_rowId) && Array.isArray(entry.new_areas)) {
+            for (const child of entry.new_areas) {
+              if (child.inheritance && child.inheritance.status_inherited === 'COMPLETED') {
+                completedSet.add(child.rowId);
+              }
+            }
+          }
+        }
+        completed = Array.from(completedSet);
+      }
+
+      DashboardState.globalPinStatus.inProgress = inProgress;
+      DashboardState.globalPinStatus.completed = completed;
     }
 
     if (isRankOk) {

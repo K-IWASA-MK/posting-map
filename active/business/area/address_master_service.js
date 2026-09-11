@@ -34,7 +34,9 @@
             city_name: cols[1],
             town_name: cols[2],
             latitude: Number(cols[3]),
-            longitude: Number(cols[4])
+            longitude: Number(cols[4]),
+            households: cols[5] ? Number(cols[5]) : undefined,
+            population: cols[6] ? Number(cols[6]) : undefined
           });
         }
       }
