@@ -79,9 +79,23 @@ function doGet(e) {
 
   const action = params.action || "";
 
-  const isPublicBootstrapAction = [
+  const isReadOnlyAction = [
     'getSystemSummary',
-    'getMapsApiKey'
+    'getDashboardData',
+    'getTier1',
+    'getFlyerStock',
+    'getRanking',
+    'getLatestDistribution',
+    'getMapsApiKey',
+    'getDeliveryStats',
+    'getAreaDetails',
+    'getGlobalPinStatus',
+    'getBulletinPosts'
+  ].includes(action);
+
+  const isDashboardAction = [
+    'getRoster',
+    'getTransferRequests'
   ].includes(action);
 
   if (action === 'registerOrValidateDevice') {
@@ -122,7 +136,7 @@ function doGet(e) {
     }
     return ContentService.createTextOutput(JSON.stringify(result))
       .setMimeType(ContentService.MimeType.JSON);
-  } else if (!isPublicBootstrapAction) {
+  } else if (!isReadOnlyAction && !isDashboardAction) {
     const auth = authenticateRequest(params);
     if (!auth.success) {
       return ContentService.createTextOutput(JSON.stringify(auth))
@@ -223,9 +237,23 @@ function doPost(e) {
   }
   const action = (postData && postData.action) || params.action || (e && e.parameter && e.parameter.action) || "";
 
-  const isPublicBootstrapAction = [
+  const isReadOnlyAction = [
     'getSystemSummary',
-    'getMapsApiKey'
+    'getDashboardData',
+    'getTier1',
+    'getFlyerStock',
+    'getRanking',
+    'getLatestDistribution',
+    'getMapsApiKey',
+    'getDeliveryStats',
+    'getAreaDetails',
+    'getGlobalPinStatus',
+    'getBulletinPosts'
+  ].includes(action);
+
+  const isDashboardAction = [
+    'getRoster',
+    'getTransferRequests'
   ].includes(action);
 
   if (action === 'registerOrValidateDevice') {
@@ -293,7 +321,7 @@ function doPost(e) {
     }
     return ContentService.createTextOutput(JSON.stringify(result))
       .setMimeType(ContentService.MimeType.JSON);
-  } else if (!isPublicBootstrapAction) {
+  } else if (!isReadOnlyAction && !isDashboardAction) {
     const auth = authenticateRequest(postData || {});
     if (!auth.success) {
       return ContentService.createTextOutput(JSON.stringify(auth))
