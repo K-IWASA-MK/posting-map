@@ -101,7 +101,7 @@
 
         this.createMasterSheets(ss, addresses);
 
-        const monthResult = this.rolloverMonthlySheets();
+        const monthResult = this.rolloverMonthlySheets(undefined, options);
 
         SpreadsheetApp.flush();
 
@@ -323,7 +323,7 @@
      * @param {string} [targetMonth] - 生成対象年月 (YYYY-MM)。未指定時は現在月。
      * @return {Object} 結果 { success: true, month: string, created: string[] }
      */
-    rolloverMonthlySheets(targetMonth) {
+    rolloverMonthlySheets(targetMonth, options = {}) {
       const ss = this.getSS();
       const month = targetMonth || (
         typeof MonthlySheetResolver !== 'undefined' && MonthlySheetResolver.getInstance
@@ -360,6 +360,42 @@
           }
 
           createdSheets.push(monthlyName);
+        } else {
+          const masterSheet = ss.getSheetByName(masterName);
+          if (masterSheet) {
+            if (type === 'distribution') {
+              const masterLr = masterSheet.getLastRow();
+              const currentLr = currentMonthly.getLastRow();
+              const currentLc = Math.max(currentMonthly.getLastColumn(), 15);
+
+              let existingCompletedCount = 0;
+              if (currentLr >= 2) {
+                const existingData = currentMonthly.getRange(2, 1, currentLr - 1, currentLc).getValues();
+                existingCompletedCount = existingData.filter(r => r[3] && String(r[3]).trim() !== "").length;
+              }
+
+              const shouldReset = options && options.resetExistingRecords === true;
+              if (existingCompletedCount > 0 && !shouldReset) {
+                console.log(`[rolloverMonthlySheets] distribution sheet has ${existingCompletedCount} completed records. Preserving existing distribution records.`);
+              } else {
+                if (currentLr >= 2) {
+                  currentMonthly.getRange(2, 1, currentLr - 1, currentLc).clearContent();
+                }
+                if (masterLr >= 2) {
+                  const masterData = masterSheet.getRange(2, 1, masterLr - 1, 15).getValues();
+                  const initialMonthlyData = masterData.map(r => [r[0], r[1], r[2], "", "", "", "", "", "", "", "", "", "", "", ""]);
+                  currentMonthly.getRange(2, 1, initialMonthlyData.length, 15).setValues(initialMonthlyData);
+                }
+              }
+            } else if (type === 'pin') {
+            } else {
+              const currentLr = currentMonthly.getLastRow();
+              const currentLc = currentMonthly.getLastColumn();
+              if (currentLr >= 2 && currentLc >= 1) {
+                currentMonthly.getRange(2, 1, currentLr - 1, currentLc).clearContent();
+              }
+            }
+          }
         }
       });
 
