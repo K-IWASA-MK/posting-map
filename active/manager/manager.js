@@ -1368,8 +1368,13 @@ function renderMainStageRequests(requests) {
 }
 
 function switchView(type) {
-  const views = ['areas', 'records', 'stocks', 'roster', 'requests', 'mail'];
+  const views = ['areas', 'records', 'stocks', 'roster', 'requests', 'mail', 'mobile'];
   const targetView = views.includes(type) ? type : 'areas';
+
+  if (targetView !== 'mobile' && _mobilePairingTimer) {
+    clearInterval(_mobilePairingTimer);
+    _mobilePairingTimer = null;
+  }
 
   views.forEach(v => {
     const el = document.getElementById(`main-view-${v}`);
@@ -1402,11 +1407,13 @@ function switchView(type) {
     renderMainStageRequests(DashboardState.requests);
   } else if (targetView === 'mail') {
     renderMainStageMail(DashboardState.selectedMailTabIndex || 0);
+  } else if (targetView === 'mobile') {
+    renderMainStageMobile();
   }
 }
 
 function updateNavHighlight(activeType) {
-  const navTypes = ['mail', 'roster', 'stocks', 'requests', 'records', 'areas'];
+  const navTypes = ['mail', 'roster', 'stocks', 'requests', 'records', 'areas', 'mobile'];
   navTypes.forEach(t => {
     const el = document.getElementById(`nav-${t}`);
     if (el) {
