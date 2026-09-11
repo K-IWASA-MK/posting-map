@@ -106,5 +106,7 @@
   ".agents/skills/h-app-auth-boundary/SKILL.md",
   "scripts/verify_happ_detail.mjs",
   "data/address_master.csv",
-  "data/boundaries.geojson"
+  "data/boundaries.geojson",
+  "data/area_mapping.json",
+  "docs/area_mapping_mie03.json"
 ]
