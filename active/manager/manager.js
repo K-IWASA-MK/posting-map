@@ -1402,8 +1402,58 @@ function renderMainStageRequests(requests) {
   contentEl.innerHTML = html;
 }
 
+function renderMainStageBulletin() {
+  const contentEl = document.getElementById('main-stage-bulletin-content');
+  if (!contentEl) return;
+
+  contentEl.innerHTML = `
+    <div class="flex items-center justify-center py-12">
+      <div class="w-6 h-6 rounded-full border-2 border-brand/40 border-t-brand animate-spin"></div>
+    </div>
+  `;
+
+  callApiPost('getBulletinPosts', {}).then(res => {
+    if (!res || !res.success || !Array.isArray(res.posts) || res.posts.length === 0) {
+      contentEl.innerHTML = `<div class="text-sm text-[#94A3B8]/60 text-center py-12">現在、掲示板の投稿はありません</div>`;
+      return;
+    }
+
+    let html = '<div class="space-y-1.5">';
+    res.posts.forEach(post => {
+      let formattedDate = '--';
+      if (post.updatedAt) {
+        const match = String(post.updatedAt).trim().match(/(?:^\d{4}[\/-])?(\d{1,2}[\/-]\d{1,2}\s+\d{1,2}:\d{2})/);
+        formattedDate = match ? match[1].replace('-', '/') : String(post.updatedAt).substring(0, 16);
+      }
+
+      const staffBadge = post.staffId
+        ? `<span class="h-7 px-2 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center font-mono font-bold text-xs text-brand flex-shrink-0">${escapeHtml(post.staffId)}</span>`
+        : '';
+
+      html += `
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 rounded-xl bg-[#182130] border border-[#243044] hover:border-[#33435C] gap-3 transition-colors">
+          <div class="flex items-center gap-2 min-w-0 w-full sm:w-60 sm:flex-none">
+            ${staffBadge}
+            <span class="font-semibold text-white truncate text-sm sm:text-base">${escapeHtml(post.staffName || '')}</span>
+          </div>
+          <div class="flex-1 min-w-0 text-xs sm:text-sm text-white/90 whitespace-pre-wrap break-words leading-relaxed">
+            ${escapeHtml(post.message || '')}
+          </div>
+          <div class="text-right flex-shrink-0">
+            <span class="font-mono text-xs text-[#94A3B8]">${escapeHtml(formattedDate)}</span>
+          </div>
+        </div>
+      `;
+    });
+    html += '</div>';
+    contentEl.innerHTML = html;
+  }).catch(() => {
+    contentEl.innerHTML = `<div class="text-sm text-statusRed/80 text-center py-12">掲示板の取得に失敗しました</div>`;
+  });
+}
+
 function switchView(type) {
-  const views = ['areas', 'records', 'stocks', 'roster', 'requests', 'mail', 'mobile'];
+  const views = ['areas', 'records', 'stocks', 'roster', 'requests', 'mail', 'mobile', 'bulletin'];
   const targetView = views.includes(type) ? type : 'areas';
 
   if (targetView !== 'mobile' && _mobilePairingTimer) {
@@ -1444,11 +1494,13 @@ function switchView(type) {
     renderMainStageMail(DashboardState.selectedMailTabIndex || 0);
   } else if (targetView === 'mobile') {
     renderMainStageMobile();
+  } else if (targetView === 'bulletin') {
+    renderMainStageBulletin();
   }
 }
 
 function updateNavHighlight(activeType) {
-  const navTypes = ['mail', 'roster', 'stocks', 'requests', 'records', 'areas', 'mobile'];
+  const navTypes = ['mail', 'roster', 'stocks', 'requests', 'records', 'areas', 'mobile', 'bulletin'];
   navTypes.forEach(t => {
     const el = document.getElementById(`nav-${t}`);
     if (el) {

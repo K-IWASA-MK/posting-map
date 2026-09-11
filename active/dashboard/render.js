@@ -506,6 +506,73 @@ function renderStorageList(stocks) {
   container.innerHTML = groupsHtml;
 }
 
+function renderBulletinList(posts) {
+  const container = $('bulletin-list-container');
+  if (!container) return;
+
+  const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+  const myStaffId = userInfo.id ? String(userInfo.id).trim() : (window.currentUser && window.currentUser.id ? String(window.currentUser.id).trim() : '');
+
+  let displayPosts = Array.isArray(posts) ? posts.slice() : [];
+  if (displayPosts.length > 0) {
+    displayPosts = displayPosts.filter(p => {
+      const id = p.staffId ? String(p.staffId).trim() : '';
+      if (myStaffId && id === myStaffId) return false;
+      return true;
+    });
+  }
+
+  if (displayPosts.length === 0) {
+    container.innerHTML = `
+      <div style="border: 1px solid rgba(255,255,255,0.04);" class="premium-glass p-8 flex flex-col items-center justify-center text-center gap-3">
+        <span class="text-2xl">💬</span>
+        <p class="text-sm font-black text-white/60">現在、他の配布員からの<br>投稿はありません</p>
+      </div>`;
+    return;
+  }
+
+  const rowsHtml = displayPosts.map(p => {
+    const sId = (p.staffId || '').replace(/"/g, '&quot;');
+    const sIdEscaped = escapeHtml(p.staffId || '');
+    const sMsgEscaped = escapeHtml(p.message || '');
+    const sTimeEscaped = escapeHtml(p.updatedAt || '---');
+
+    return `
+      <div class="bulletin-row flex flex-col pt-2 pb-4 border-b border-white/5 last:border-b-0 rounded-xl px-2 -mx-2 gap-2" data-staff-id="${sId}">
+        <div class="w-full text-left">
+          <div class="text-sm font-black font-mono text-white truncate">${sIdEscaped}</div>
+        </div>
+        <div class="w-full flex items-start justify-between gap-3 py-1">
+          <div class="text-sm text-white/90 whitespace-pre-wrap break-words leading-relaxed flex-1">${sMsgEscaped}</div>
+          <button type="button"
+            ontouchstart="this.style.transform='scale(0.92)'; this.style.opacity='0.7';"
+            ontouchend="this.style.transform='scale(1)'; this.style.opacity='1'; event.preventDefault(); if(window.openBulletinContactDialog){window.openBulletinContactDialog('${sId}');}"
+            ontouchcancel="this.style.transform='scale(1)'; this.style.opacity='1';"
+            onclick="if(window.openBulletinContactDialog){window.openBulletinContactDialog('${sId}');}"
+            style="background: rgba(6,199,85,0.1); border-color: rgba(6,199,85,0.3); color: #06C755; gap: 6px; transition: transform 0.15s ease, opacity 0.15s ease; touch-action: manipulation;"
+            class="flex items-center justify-center px-4 py-1.5 rounded-full border shrink-0">
+            <span class="text-sm pointer-events-none">🤝</span>
+            <span class="text-[10px] font-black tracking-wider pointer-events-none">連絡</span>
+          </button>
+        </div>
+        <div class="w-full text-right">
+          <div class="text-[9px] text-white/40 font-mono truncate">UPDATE: ${sTimeEscaped}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="premium-glass p-6 space-y-2">
+      <div class="flex justify-between items-center border-b border-white/10 pb-3">
+        <span class="text-base font-black text-white tracking-wider">💬 配布員タイムライン</span>
+        <span style="background: rgba(37,99,235,0.1); color: #2563eb;" class="text-[10px] font-black px-2 py-0.5 rounded-full font-mono">${displayPosts.length}件</span>
+      </div>
+      <div class="space-y-1">
+        ${rowsHtml}
+      </div>
+    </div>`;
+}
+
 window.initMainMap = function() {
   const mapEl = document.getElementById("main-map");
   if (!mapEl || !window.google || !window.google.maps) return;

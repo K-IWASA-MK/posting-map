@@ -410,6 +410,18 @@ function processPostAction(action, postData, e) {
       );
     case 'getGlobalPinStatus':
       return PinStatusService.getInstance().getStatus();
+    case 'getBulletinPosts':
+      return typeof BulletinService !== 'undefined' && BulletinService.getInstance
+        ? BulletinService.getInstance().getPosts()
+        : { success: false, message: 'BulletinService not available' };
+    case 'createBulletinPost':
+      return typeof BulletinService !== 'undefined' && BulletinService.getInstance
+        ? BulletinService.getInstance().createPost(postData)
+        : { success: false, message: 'BulletinService not available' };
+    case 'sendBulletinContact':
+      return typeof BulletinService !== 'undefined' && BulletinService.getInstance
+        ? BulletinService.getInstance().sendContact(postData)
+        : { success: false, message: 'BulletinService not available' };
     case 'setPinInProgress':
       return PinStatusService.getInstance().setInProgress(postData);
     case 'provisionDistrict':

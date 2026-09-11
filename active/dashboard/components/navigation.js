@@ -4,7 +4,7 @@ window.renderBottomNavigation = function(activePage) {
   const getTextClass = (page) => activePage === page ? 'text-white' : 'text-white/40';
 
   // Determine if we show Tier 1 or Tier 2 by default
-  const isTier2 = ['areas', 'ranking', 'detail'].includes(activePage);
+  const isTier2 = ['areas', 'ranking', 'detail', 'bulletin'].includes(activePage);
 
   return `
     <!-- Tier 1 Container -->
@@ -38,6 +38,10 @@ window.renderBottomNavigation = function(activePage) {
       <button data-page="ranking" onclick="switchPage('ranking')" class="nav-btn flex flex-col items-center gap-1 flex-1 transition-all ${getOpacity('ranking')}">
         <div class="text-xl">🏆</div>
         <span class="text-[10px] font-black uppercase tracking-widest ${getTextClass('ranking')}">ランキング</span>
+      </button>
+      <button data-page="bulletin" onclick="switchPage('bulletin')" class="nav-btn flex flex-col items-center gap-1 flex-1 transition-all ${getOpacity('bulletin')}">
+        <div class="text-xl">💬</div>
+        <span class="text-[10px] font-black uppercase tracking-widest ${getTextClass('bulletin')}">掲示板</span>
       </button>
       <button data-page="back" onclick="backToTier1()" class="nav-btn flex flex-col items-center gap-1 flex-1 transition-all opacity-40">
         <div class="text-xl">↩️</div>

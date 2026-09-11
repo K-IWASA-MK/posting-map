@@ -78,7 +78,8 @@ const pageIdMap = {
   'page-settings': 'settings',
   'page-ranking': 'ranking',
   'page-storage-register': 'storage-register',
-  'page-storage-list': 'storage-list'
+  'page-storage-list': 'storage-list',
+  'page-bulletin': 'bulletin'
 };
 
 // プレミアム・インタラクション・スキル (JS Touch Handler)
@@ -907,6 +908,7 @@ async function switchPage(id, force = false) {
                    id === 'ranking' ? 'page-ranking' :
                    id === 'storage-register' ? 'page-storage-register' :
                    id === 'storage-list' ? 'page-storage-list' :
+                   id === 'bulletin' ? 'page-bulletin' :
                    'page-areas';
   const target = $(targetId);
   if (!target) return;
@@ -1225,6 +1227,10 @@ window.updateStorageLocationDropdown = function updateStorageLocationDropdown(ov
     } else {
       if (typeof renderStorageList === 'function') renderStorageList(_stockData);
     }
+  }
+
+  if (id === 'bulletin') {
+    if (typeof fetchBulletinPosts === 'function') fetchBulletinPosts();
   }
 
   updateBottomNavVisibility();
@@ -1870,6 +1876,224 @@ window.openTransferRequestDialog = function(name, id, loc, count, storageId) {
 
 window.closeTransferRequestDialog = function() {
   const d = document.getElementById('dynamic-transfer-dialog');
+  if (d) d.remove();
+};
+
+window.updateBulletinCharCount = function(textarea) {
+  const counter = document.getElementById('bulletin-char-counter');
+  if (!counter || !textarea) return;
+  const len = textarea.value.length;
+  counter.textContent = len + ' / 150';
+  if (len >= 150) {
+    counter.classList.add('text-red-400');
+    counter.classList.remove('text-white/40');
+  } else {
+    counter.classList.remove('text-red-400');
+    counter.classList.add('text-white/40');
+  }
+};
+
+window.fetchBulletinPosts = function() {
+  const container = document.getElementById('bulletin-list-container');
+  if (container) {
+    container.innerHTML = `
+      <div style="border: 1px solid rgba(255,255,255,0.04);" class="premium-glass p-8 flex flex-col items-center justify-center text-center gap-3">
+        <div class="w-8 h-8 rounded-full border-2 border-[#2563eb]/40 border-t-[#2563eb] animate-spin"></div>
+        <p class="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Loading Bulletin...</p>
+      </div>`;
+  }
+  callApiPost('getBulletinPosts').then(data => {
+    if (data && data.success && Array.isArray(data.posts)) {
+      if (typeof renderBulletinList === 'function') renderBulletinList(data.posts);
+    } else {
+      if (container) {
+        container.innerHTML = `
+          <div style="border: 1px solid rgba(255,255,255,0.04);" class="premium-glass p-8 flex flex-col items-center justify-center text-center gap-3">
+            <span class="text-2xl">⚠️</span>
+            <p class="text-sm font-black text-white/60">データ取得に失敗しました</p>
+          </div>`;
+      }
+    }
+  }).catch(() => {
+    if (container) {
+      container.innerHTML = `
+        <div style="border: 1px solid rgba(255,255,255,0.04);" class="premium-glass p-8 flex flex-col items-center justify-center text-center gap-3">
+          <span class="text-2xl">⚠️</span>
+          <p class="text-sm font-black text-white/60">エラーが発生しました</p>
+        </div>`;
+    }
+  });
+};
+
+window.submitBulletinPost = async function() {
+  const inputEl = document.getElementById('bulletin-message-input');
+  const btn = document.getElementById('btn-bulletin-submit');
+  const counter = document.getElementById('bulletin-char-counter');
+  if (!inputEl || !btn) return;
+
+  const msg = inputEl.value.trim();
+  if (!msg) {
+    alert('メッセージを入力してください。');
+    inputEl.focus();
+    return;
+  }
+  if (msg.length > 150) {
+    alert('メッセージは150文字以内で入力してください。');
+    return;
+  }
+
+  const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+  const staffId = userInfo.id ? String(userInfo.id).trim() : (window.currentUser && window.currentUser.id ? String(window.currentUser.id).trim() : '');
+  const staffName = `${userInfo.last || ''} ${userInfo.first || ''}`.trim() || staffId;
+
+  if (!staffId) {
+    alert('配布員IDが取得できませんでした。');
+    return;
+  }
+
+  const originalText = btn.textContent;
+  btn.textContent = '投稿中...';
+  btn.disabled = true;
+
+  try {
+    const res = await callApiPost('createBulletinPost', {
+      staffId: staffId,
+      staffName: staffName,
+      message: msg
+    });
+
+    if (res && res.success) {
+      inputEl.value = '';
+      if (counter) counter.textContent = '0 / 150';
+      alert('✓ 投稿が完了しました');
+      window.fetchBulletinPosts();
+    } else {
+      alert('投稿に失敗しました: ' + (res ? res.message : 'Unknown error'));
+    }
+  } catch (err) {
+    alert('通信エラー: ' + err.message);
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+};
+
+window.openBulletinContactDialog = function(targetStaffId) {
+  const prev = document.getElementById('dynamic-bulletin-contact-dialog');
+  if (prev) prev.remove();
+
+  const targetIdStr = String(targetStaffId || '').trim();
+  const overlay = document.createElement('div');
+  overlay.id = 'dynamic-bulletin-contact-dialog';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,0.85);';
+
+  overlay.innerHTML = `
+    <div style="background:#1C1C1E;border-radius:24px;border:1px solid rgba(255,255,255,0.12);padding:28px 20px;width:100%;max-width:340px;box-sizing:border-box;">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:24px;margin-bottom:8px;">💬</div>
+        <div style="color:white;font-size:16px;font-weight:900;letter-spacing:0.05em;">連絡</div>
+      </div>
+      <div style="color:rgba(255,255,255,0.7);font-size:13px;font-weight:700;margin-bottom:20px;line-height:1.5;text-align:left;">
+        ${escapeHtml(targetIdStr)}さんとの<br>連絡方法を入力してください。
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="display:block;color:rgba(255,255,255,0.45);font-size:11px;font-weight:900;letter-spacing:0.05em;margin-bottom:8px;">【連絡方法】</label>
+        <div style="display:flex;gap:16px;align-items:center;padding:4px 0;">
+          <label style="display:flex;align-items:center;gap:6px;color:white;font-size:13px;font-weight:700;cursor:pointer;">
+            <input type="radio" name="bulletin-contact-method" value="LINE" checked style="accent-color:#2563eb;cursor:pointer;"> LINE
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;color:white;font-size:13px;font-weight:700;cursor:pointer;">
+            <input type="radio" name="bulletin-contact-method" value="電話" style="accent-color:#2563eb;cursor:pointer;"> 電話
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;color:white;font-size:13px;font-weight:700;cursor:pointer;">
+            <input type="radio" name="bulletin-contact-method" value="メール" style="accent-color:#2563eb;cursor:pointer;"> メール
+          </label>
+        </div>
+      </div>
+
+      <div style="margin-bottom:24px;">
+        <label style="display:block;color:rgba(255,255,255,0.45);font-size:11px;font-weight:900;letter-spacing:0.05em;margin-bottom:8px;">【連絡先】</label>
+        <input type="text" id="bulletin-contact-value" placeholder="LINE ID"
+          style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:12px 14px;color:white;font-size:14px;font-weight:700;outline:none;" />
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button id="btn-bulletin-contact-cancel"
+          style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);border-radius:14px;padding:14px 8px;font-size:13px;font-weight:900;cursor:pointer;transition:transform 0.12s ease, opacity 0.12s ease;"
+          onpointerdown="this.style.transform='scale(0.94)'; this.style.opacity='0.7';"
+          onpointerup="this.style.transform='scale(1)'; this.style.opacity='1';"
+          onpointerleave="this.style.transform='scale(1)'; this.style.opacity='1';">キャンセル</button>
+        <button id="btn-bulletin-contact-submit" class="btn-neu"
+          style="flex:2;background:#2563eb;border:none;color:white;border-radius:14px;padding:14px 8px;font-size:13px;font-weight:900;cursor:pointer;transition:transform 0.12s ease, opacity 0.12s ease;"
+          onpointerdown="this.style.transform='scale(0.96)'; this.style.opacity='0.85';"
+          onpointerup="this.style.transform='scale(1)'; this.style.opacity='1';"
+          onpointerleave="this.style.transform='scale(1)'; this.style.opacity='1';">連絡する</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const contactValueInput = document.getElementById('bulletin-contact-value');
+  const methodPlaceholders = {
+    'LINE': 'LINE ID',
+    '電話': '電話番号',
+    'メール': 'メールアドレス'
+  };
+
+  document.querySelectorAll('input[name="bulletin-contact-method"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      if (contactValueInput) {
+        contactValueInput.placeholder = methodPlaceholders[e.target.value] || '連絡先を入力';
+      }
+    });
+  });
+
+  document.getElementById('btn-bulletin-contact-cancel').addEventListener('click', () => overlay.remove());
+
+  document.getElementById('btn-bulletin-contact-submit').addEventListener('click', async () => {
+    const contactValueInput = document.getElementById('bulletin-contact-value');
+    const contactValue = contactValueInput ? contactValueInput.value.trim() : '';
+
+    if (!contactValue) {
+      alert('連絡先を入力してください。');
+      if (contactValueInput) contactValueInput.focus();
+      return;
+    }
+
+    const methodRadio = document.querySelector('input[name="bulletin-contact-method"]:checked');
+    const contactMethod = methodRadio ? methodRadio.value : 'LINE';
+
+    const btn = document.getElementById('btn-bulletin-contact-submit');
+    if (btn) { btn.textContent = '連絡中...'; btn.disabled = true; }
+
+    const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+    const requestUserId = userInfo.id ? String(userInfo.id).trim() : (window.currentUser && window.currentUser.id ? String(window.currentUser.id).trim() : 'UNKNOWN');
+
+    try {
+      const res = await callApiPost('sendBulletinContact', {
+        requestUserId: requestUserId,
+        targetStaffId: targetIdStr,
+        contactMethod: contactMethod,
+        contactValue: contactValue
+      });
+
+      overlay.remove();
+      if (res && res.success) {
+        alert('✓ 連絡を送信しました');
+      } else {
+        alert('連絡の送信に失敗しました: ' + (res ? res.message : 'Unknown error'));
+      }
+    } catch(err) {
+      alert('通信エラー: ' + err.message);
+      if (btn) { btn.textContent = '連絡する'; btn.disabled = false; }
+    }
+  });
+};
+
+window.closeBulletinContactDialog = function() {
+  const d = document.getElementById('dynamic-bulletin-contact-dialog');
   if (d) d.remove();
 };
 

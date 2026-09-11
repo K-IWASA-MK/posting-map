@@ -258,6 +258,21 @@
           <!-- Group cards dynamically populated -->
         </div>
       </section>
+
+      <section id="page-bulletin" class="page hidden space-y-4" style="padding-bottom: 160px; padding-top: 8px;">
+        <div id="bulletin-input-card" class="premium-glass p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <label class="text-[10px] font-bold text-white/40 tracking-wider">情報交換・メッセージ投稿</label>
+            <span id="bulletin-char-counter" class="text-[10px] font-mono font-bold text-white/40">0 / 150</span>
+          </div>
+          <div class="relative w-full bg-[#1C1C1E] border border-white/10 rounded-2xl p-3 transition-colors focus-within:border-[#2563eb]">
+            <textarea id="bulletin-message-input" maxlength="150" rows="3" placeholder="配布員同士で情報交換しよう（150文字以内）" class="w-full bg-transparent text-sm font-medium text-white placeholder-white/30 focus:outline-none resize-none" oninput="updateBulletinCharCount(this)"></textarea>
+          </div>
+          <button id="btn-bulletin-submit" onclick="submitBulletinPost()" class="btn-neu w-full bg-[#2563eb] text-white rounded-2xl py-3.5 text-sm font-black shadow-xl uppercase tracking-wider">投稿する</button>
+        </div>
+
+        <div id="bulletin-list-container" class="space-y-4"></div>
+      </section>
     </main>
 
     <!-- 下ナビ：iOSライクなガラス感に調整 -->
