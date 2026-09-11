@@ -104,5 +104,7 @@
   "scripts/check-provisioning-gate.mjs",
   "CNAME",
   ".agents/skills/h-app-auth-boundary/SKILL.md",
-  "scripts/verify_happ_detail.mjs"
+  "scripts/verify_happ_detail.mjs",
+  "data/address_master.csv",
+  "data/boundaries.geojson"
 ]
