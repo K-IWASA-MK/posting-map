@@ -148,6 +148,7 @@ async function checkManagerAuth() {
     callApiPost('getSystemSummary').then(summary => {
       if (summary && summary.districtName) {
         DashboardState.districtCode = summary.districtName;
+        DashboardState.summary = summary;
       }
     }).catch(err => {
       console.warn('[Background SystemSummary Error]', err);
@@ -159,6 +160,7 @@ async function checkManagerAuth() {
     const summary = await callApiPost('getSystemSummary');
     if (summary && summary.districtName) {
       DashboardState.districtCode = summary.districtName;
+      DashboardState.summary = summary;
       const verifiedAuthKey = 'pm_auth_' + summary.districtName;
       if (localStorage.getItem(verifiedAuthKey) === 'true' || sessionStorage.getItem(verifiedAuthKey) === 'true') {
         return true;
@@ -705,6 +707,10 @@ async function syncDashboardData() {
     }
 
     renderCurrentView();
+
+    if (DashboardState.currentFocus === 'mail') {
+      renderMainStageMail(DashboardState.selectedMailTabIndex || 0);
+    }
 
     if (pinStatusChanged && DashboardState.map && DashboardState.markersLayer) {
       renderPinsOnMap(DashboardState.map, DashboardState.markersLayer, DashboardState.masterPins);
@@ -1918,7 +1924,9 @@ function renderMainStageMail(tabIndex = 0) {
   const container = document.getElementById('main-stage-mail-content');
   if (!container) return;
 
-  const districtName = DashboardState.summary?.districtName;
+  const districtName = (DashboardState.summary && DashboardState.summary.districtName)
+    || DashboardState.districtCode
+    || getResolvedDistrictCode();
   const liffId = (typeof window !== 'undefined' && window.PMS_CLIENT_CONFIG && window.PMS_CLIENT_CONFIG.line && window.PMS_CLIENT_CONFIG.line.liffId);
 
   if (!districtName || typeof districtName !== 'string' || !districtName.trim()) {
