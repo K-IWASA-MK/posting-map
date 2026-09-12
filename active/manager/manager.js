@@ -156,6 +156,10 @@ async function checkManagerAuth() {
     return true;
   }
 
+  if (districtCode && districtCode !== 'DEFAULT') {
+    return false;
+  }
+
   try {
     const summary = await callApiPost('getSystemSummary');
     if (summary && summary.districtName) {
