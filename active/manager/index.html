@@ -170,8 +170,8 @@
       </div>
 
       <!-- タイトル -->
-      <h2 class="text-lg font-bold text-white tracking-wide mb-1">管理コックピット 認証</h2>
-      <p class="text-xs text-textSub mb-5">6桁のManager認証PINコードを入力してください</p>
+      <h2 class="text-lg font-bold text-white tracking-wide mb-1">管理画面ログイン</h2>
+      <p class="text-xs text-textSub mb-5">Manager用パスワードを入力してください</p>
 
       <!-- 6桁PIN入力フォーム -->
       <form id="manager-pin-form" onsubmit="handleManagerPinSubmit(event)" class="w-full space-y-4">
@@ -195,15 +195,14 @@
           id="manager-pin-btn"
           class="w-full h-11 bg-brand hover:bg-brandLight text-white font-bold rounded-xl text-sm transition-all shadow-lg shadow-brand/20 active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
         >
-          <span id="manager-pin-btn-text">認証して入場</span>
+          <span id="manager-pin-btn-text">ログイン</span>
           <span id="manager-pin-btn-spinner" class="hidden animate-spin text-sm">⏳</span>
         </button>
       </form>
 
       <!-- フッターセキュリティバッジ -->
       <div class="mt-6 pt-4 border-t border-[#243044]/60 w-full flex items-center justify-center gap-1.5 text-[11px] text-textSub/60">
-        <span>🛡️</span>
-        <span>地区専用セキュリティ保護</span>
+        <span>🔒 関係者専用</span>
       </div>
     </div>
   </div>

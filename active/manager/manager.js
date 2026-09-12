@@ -158,7 +158,7 @@ async function handleManagerPinSubmit(event) {
   if (!inputEl) return;
   const pin = inputEl.value.trim();
   if (pin.length !== 6) {
-    if (errorEl) errorEl.textContent = '6桁の数字を入力してください';
+    if (errorEl) errorEl.textContent = '6桁のパスワードを入力してください';
     inputEl.focus();
     return;
   }
@@ -187,7 +187,7 @@ async function handleManagerPinSubmit(event) {
     inputEl.focus();
   } finally {
     if (btn) btn.disabled = false;
-    if (btnText) btnText.textContent = '認証して入場';
+    if (btnText) btnText.textContent = 'ログイン';
     if (btnSpinner) btnSpinner.classList.add('hidden');
   }
 }
