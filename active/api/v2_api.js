@@ -90,7 +90,8 @@ function doGet(e) {
     'getDeliveryStats',
     'getAreaDetails',
     'getGlobalPinStatus',
-    'getBulletinPosts'
+    'getBulletinPosts',
+    'verifyManagerPassword'
   ].includes(action);
 
   const isDashboardAction = [
@@ -209,6 +210,11 @@ function processGetActionLegacy(action, e) {
       case 'getTransferRequests':
         response = { success: true, requests: TransferService.getInstance().getTransferRequests() };
         break;
+      case 'verifyManagerPassword':
+        response = typeof SystemInfoService !== 'undefined' && SystemInfoService.getInstance
+          ? SystemInfoService.getInstance().verifyManagerPassword((e && e.parameter ? e.parameter.password : ""))
+          : { success: false, message: 'SystemInfoService not available' };
+        break;
 
 
       default:
@@ -248,7 +254,8 @@ function doPost(e) {
     'getDeliveryStats',
     'getAreaDetails',
     'getGlobalPinStatus',
-    'getBulletinPosts'
+    'getBulletinPosts',
+    'verifyManagerPassword'
   ].includes(action);
 
   const isDashboardAction = [
@@ -467,6 +474,11 @@ function processPostAction(action, postData, e) {
       if (postData && postData.options) postData.options.provisioningToken = sToken;
       return typeof SystemInfoService !== 'undefined' && SystemInfoService.getInstance
         ? SystemInfoService.getInstance().syncSystemInfo(postData && postData.options)
+        : { success: false, message: 'SystemInfoService not available' };
+    case 'verifyManagerPassword':
+      const postPwd = (postData && postData.password) || (e && e.parameter ? e.parameter.password : "");
+      return typeof SystemInfoService !== 'undefined' && SystemInfoService.getInstance
+        ? SystemInfoService.getInstance().verifyManagerPassword(postPwd)
         : { success: false, message: 'SystemInfoService not available' };
     default:
       return { success: false, message: 'Invalid POST action' };

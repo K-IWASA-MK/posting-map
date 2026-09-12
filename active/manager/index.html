@@ -159,6 +159,55 @@
     </div>
   </div>
 
+  <!-- ==================== MANAGER 6-DIGIT PIN GATE SCREEN ==================== -->
+  <div id="manager-pin-gate" class="fixed inset-0 z-50 bg-[#0B1019] flex items-center justify-center p-4 select-none">
+    <div class="w-full max-w-sm p-6 sm:p-8 rounded-2xl bg-[#131A26] border border-[#243044] shadow-2xl flex flex-col items-center text-center">
+      <!-- 公式ロゴ -->
+      <div class="w-20 h-20 rounded-full bg-[#0B1019] border border-[#243044] flex items-center justify-center p-2 mb-4 shadow-inner">
+        <div class="w-16 h-16 rounded-full overflow-hidden border border-white/10 bg-white flex items-center justify-center p-1 shadow">
+          <img src="/active/dashboard/assets/icon180-v2.png" alt="POSTING MAP" class="w-full h-full object-cover">
+        </div>
+      </div>
+
+      <!-- タイトル -->
+      <h2 class="text-lg font-bold text-white tracking-wide mb-1">管理コックピット 認証</h2>
+      <p class="text-xs text-textSub mb-5">6桁のManager認証PINコードを入力してください</p>
+
+      <!-- 6桁PIN入力フォーム -->
+      <form id="manager-pin-form" onsubmit="handleManagerPinSubmit(event)" class="w-full space-y-4">
+        <div class="relative">
+          <input
+            type="password"
+            id="manager-pin-input"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            maxlength="6"
+            autocomplete="off"
+            placeholder="••••••"
+            class="w-full h-14 bg-[#0B1019] border-2 border-[#243044] focus:border-brand rounded-xl text-center text-2xl font-mono tracking-[0.4em] text-white placeholder-textSub/30 outline-none transition-all shadow-inner"
+            required
+            autofocus
+          />
+        </div>
+        <div id="manager-pin-error" class="text-xs text-statusRed font-medium min-h-[1.25rem] transition-opacity"></div>
+        <button
+          type="submit"
+          id="manager-pin-btn"
+          class="w-full h-11 bg-brand hover:bg-brandLight text-white font-bold rounded-xl text-sm transition-all shadow-lg shadow-brand/20 active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+        >
+          <span id="manager-pin-btn-text">認証して入場</span>
+          <span id="manager-pin-btn-spinner" class="hidden animate-spin text-sm">⏳</span>
+        </button>
+      </form>
+
+      <!-- フッターセキュリティバッジ -->
+      <div class="mt-6 pt-4 border-t border-[#243044]/60 w-full flex items-center justify-center gap-1.5 text-[11px] text-textSub/60">
+        <span>🛡️</span>
+        <span>地区専用セキュリティ保護</span>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== MOBILE TOP HEADER (lg:hidden) ==================== -->
   <header class="lg:hidden h-12 bg-containerBg border-b border-borderNormal px-3 flex items-center justify-between flex-shrink-0 z-30">
     <div class="flex items-center gap-2">

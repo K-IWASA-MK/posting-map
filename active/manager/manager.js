@@ -111,12 +111,110 @@ if (document.readyState === 'loading') {
   initDashboard();
 }
 
+let _isDashboardInitialized = false;
+
+async function checkManagerAuth() {
+  try {
+    const summary = await callApiPost('getSystemSummary');
+    if (summary && summary.districtName) {
+      DashboardState.districtCode = summary.districtName;
+      const authKey = 'pm_auth_' + summary.districtName;
+      if (localStorage.getItem(authKey) === 'true' || sessionStorage.getItem(authKey) === 'true') {
+        return true;
+      }
+    }
+  } catch (err) {
+    console.warn('[Auth Check Error]', err);
+  }
+  return false;
+}
+
+function showManagerPinGate() {
+  const gateEl = document.getElementById('manager-pin-gate');
+  if (gateEl) {
+    gateEl.classList.remove('hidden');
+    const inputEl = document.getElementById('manager-pin-input');
+    if (inputEl) {
+      setTimeout(() => inputEl.focus(), 100);
+    }
+  }
+}
+
+function hideManagerPinGate() {
+  const gateEl = document.getElementById('manager-pin-gate');
+  if (gateEl) {
+    gateEl.classList.add('hidden');
+  }
+}
+
+async function handleManagerPinSubmit(event) {
+  if (event) event.preventDefault();
+  const inputEl = document.getElementById('manager-pin-input');
+  const errorEl = document.getElementById('manager-pin-error');
+  const btnText = document.getElementById('manager-pin-btn-text');
+  const btnSpinner = document.getElementById('manager-pin-btn-spinner');
+  const btn = document.getElementById('manager-pin-btn');
+
+  if (!inputEl) return;
+  const pin = inputEl.value.trim();
+  if (pin.length !== 6) {
+    if (errorEl) errorEl.textContent = '6桁の数字を入力してください';
+    inputEl.focus();
+    return;
+  }
+
+  if (errorEl) errorEl.textContent = '';
+  if (btn) btn.disabled = true;
+  if (btnText) btnText.textContent = '照合中...';
+  if (btnSpinner) btnSpinner.classList.remove('hidden');
+
+  try {
+    const res = await callApiPost('verifyManagerPassword', { password: pin });
+    if (res && res.success) {
+      const districtCode = res.districtCode || DashboardState.districtCode || 'DEFAULT';
+      localStorage.setItem('pm_auth_' + districtCode, 'true');
+      DashboardState.districtCode = districtCode;
+      hideManagerPinGate();
+      await startDashboardLifecycle();
+    } else {
+      if (errorEl) errorEl.textContent = (res && res.message) || '認証コードが正しくありません';
+      inputEl.value = '';
+      inputEl.focus();
+    }
+  } catch (err) {
+    if (errorEl) errorEl.textContent = err.message || '通信エラーが発生しました';
+    inputEl.value = '';
+    inputEl.focus();
+  } finally {
+    if (btn) btn.disabled = false;
+    if (btnText) btnText.textContent = '認証して入場';
+    if (btnSpinner) btnSpinner.classList.add('hidden');
+  }
+}
+if (typeof window !== 'undefined') {
+  window.handleManagerPinSubmit = handleManagerPinSubmit;
+}
+
 async function initDashboard() {
   const urlParams = new URLSearchParams(window.location.search);
   const pairKey = urlParams.get('pair');
   if (pairKey) {
     history.replaceState(null, '', window.location.pathname);
   }
+
+  const isAuth = await checkManagerAuth();
+  if (!isAuth) {
+    showManagerPinGate();
+    return;
+  }
+
+  hideManagerPinGate();
+  await startDashboardLifecycle();
+}
+
+async function startDashboardLifecycle() {
+  if (_isDashboardInitialized) return;
+  _isDashboardInitialized = true;
 
   initMap();
   updateNavHighlight('areas');
