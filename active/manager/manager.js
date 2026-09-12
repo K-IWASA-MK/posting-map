@@ -113,13 +113,52 @@ if (document.readyState === 'loading') {
 
 let _isDashboardInitialized = false;
 
+function getResolvedDistrictCode() {
+  if (typeof window !== 'undefined' && window.location && window.location.hostname) {
+    const host = window.location.hostname.toLowerCase();
+    const parts = host.split('.');
+    if (parts.length >= 2 && parts[0] && parts[0] !== 'www' && parts[0] !== 'localhost') {
+      return parts[0].toUpperCase();
+    }
+  }
+  if (DashboardState && DashboardState.districtCode) {
+    return DashboardState.districtCode;
+  }
+  try {
+    const lastDistrict = localStorage.getItem('pm_last_district');
+    if (lastDistrict) return lastDistrict;
+  } catch (e) {}
+
+  return 'DEFAULT';
+}
+
 async function checkManagerAuth() {
+  const districtCode = getResolvedDistrictCode();
+  DashboardState.districtCode = districtCode;
+  const authKey = 'pm_auth_' + districtCode;
+
+  let isLocallyAuthed = false;
+  try {
+    isLocallyAuthed = (localStorage.getItem(authKey) === 'true' || sessionStorage.getItem(authKey) === 'true');
+  } catch (e) {}
+
+  if (isLocallyAuthed) {
+    callApiPost('getSystemSummary').then(summary => {
+      if (summary && summary.districtName) {
+        DashboardState.districtCode = summary.districtName;
+      }
+    }).catch(err => {
+      console.warn('[Background SystemSummary Error]', err);
+    });
+    return true;
+  }
+
   try {
     const summary = await callApiPost('getSystemSummary');
     if (summary && summary.districtName) {
       DashboardState.districtCode = summary.districtName;
-      const authKey = 'pm_auth_' + summary.districtName;
-      if (localStorage.getItem(authKey) === 'true' || sessionStorage.getItem(authKey) === 'true') {
+      const verifiedAuthKey = 'pm_auth_' + summary.districtName;
+      if (localStorage.getItem(verifiedAuthKey) === 'true' || sessionStorage.getItem(verifiedAuthKey) === 'true') {
         return true;
       }
     }
@@ -169,21 +208,20 @@ async function handleManagerPinSubmit(event) {
   if (btnSpinner) btnSpinner.classList.remove('hidden');
 
   try {
-    const res = await callApiPost('verifyManagerPassword', { password: pin });
+    const res = await callApiPost('verifyManagerPassword', { password: pin }, { timeoutMs: 45000 });
     if (res && res.success) {
-      const districtCode = res.districtCode || DashboardState.districtCode || 'DEFAULT';
+      const districtCode = res.districtCode || getResolvedDistrictCode();
       localStorage.setItem('pm_auth_' + districtCode, 'true');
+      localStorage.setItem('pm_last_district', districtCode);
       DashboardState.districtCode = districtCode;
       hideManagerPinGate();
       await startDashboardLifecycle();
     } else {
       if (errorEl) errorEl.textContent = (res && res.message) || '認証コードが正しくありません';
-      inputEl.value = '';
       inputEl.focus();
     }
   } catch (err) {
     if (errorEl) errorEl.textContent = err.message || '通信エラーが発生しました';
-    inputEl.value = '';
     inputEl.focus();
   } finally {
     if (btn) btn.disabled = false;
@@ -259,12 +297,13 @@ async function fetchStaticDataFile(filename) {
   throw new Error(`Failed to load static file: ${filename}`);
 }
 
-async function callApiPost(action, payload = {}) {
+async function callApiPost(action, payload = {}, options = {}) {
+  const timeoutMs = options.timeoutMs || 25000;
   const url = `${getApiUrl()}?action=${encodeURIComponent(action)}&_t=${Date.now()}`;
   const body = JSON.stringify({ action, ...payload });
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 25000);
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   const response = await fetch(url, {
     method: 'POST',
