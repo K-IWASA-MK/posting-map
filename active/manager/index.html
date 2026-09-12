@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0B1019">
   <title>POSTING MAP</title>
 
   <!-- Fonts -->
@@ -208,7 +211,7 @@
   </div>
 
   <!-- ==================== MOBILE TOP HEADER (lg:hidden) ==================== -->
-  <header class="lg:hidden h-12 bg-containerBg border-b border-borderNormal px-3 flex items-center justify-between flex-shrink-0 z-30">
+  <header class="lg:hidden h-[calc(3rem+env(safe-area-inset-top,0px))] pt-[env(safe-area-inset-top,0px)] bg-containerBg border-b border-borderNormal px-3 flex items-center justify-between flex-shrink-0 z-30">
     <div class="flex items-center gap-2">
       <div class="w-7 h-7 rounded-lg overflow-hidden border border-white/10 bg-white flex items-center justify-center p-0.5 shadow-sm flex-shrink-0">
         <img src="/active/dashboard/assets/icon180-v2.png" alt="POSTING MAP" class="w-full h-full object-cover">
@@ -310,7 +313,7 @@
   </aside>
 
   <!-- ==================== MAIN CONTROL CANVAS (管制メインキャンバス) ==================== -->
-  <main class="flex-1 flex flex-col p-2 lg:p-2.5 gap-2 overflow-hidden bg-appBg min-w-0 min-h-0 pb-16 lg:pb-2.5">
+  <main class="flex-1 flex flex-col p-2 lg:p-2.5 gap-2 overflow-hidden bg-appBg min-w-0 min-h-0 pb-[calc(4rem+env(safe-area-inset-bottom,0px))] lg:pb-2.5">
 
     <!-- ========== ① 統括状況 BAR (PC用: hidden lg:flex 固定幅計器ライン) ========== -->
     <div id="situation-bar" class="hidden lg:flex h-11 flex-shrink-0 items-center justify-between gap-2 px-2.5 bg-containerBg border border-borderNormal rounded-xl overflow-hidden">
@@ -603,7 +606,7 @@
   </main>
 
   <!-- ==================== MOBILE BOTTOM NAVIGATION (lg:hidden) ==================== -->
-  <nav class="lg:hidden fixed bottom-0 left-0 right-0 h-14 bg-[#0B1019]/95 backdrop-blur border-t border-borderNormal flex items-center justify-around px-1 z-40 pb-[env(safe-area-inset-bottom)]">
+  <nav class="lg:hidden fixed bottom-0 left-0 right-0 h-[calc(3.5rem+env(safe-area-inset-bottom,0px))] pb-[env(safe-area-inset-bottom,0px)] bg-[#0B1019]/95 backdrop-blur border-t border-borderNormal flex items-center justify-around px-1 z-40">
     <button id="mobile-nav-areas" onclick="switchView('areas')" class="mobile-nav-item mobile-nav-active flex flex-col items-center justify-center flex-1 py-1 text-brand font-bold text-[10px] transition-colors cursor-pointer">
       <span class="text-base leading-none">🗺️</span>
       <span class="mt-0.5">エリア</span>
