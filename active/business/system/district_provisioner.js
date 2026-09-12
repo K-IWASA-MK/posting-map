@@ -140,8 +140,10 @@
       }
 
       const districtName = ss.getName();
-
-      const baseUrl = opts.baseUrl || "https://postingmap.jp";
+      const subdomain = districtName.toLowerCase();
+      const baseUrl = (opts.baseUrl && opts.baseUrl !== "https://postingmap.jp")
+        ? opts.baseUrl
+        : `https://${subdomain}.postingmap.jp`;
       const hAppUrl = `${baseUrl}/`;
       const dashboardUrl = `${baseUrl}/active/manager/`;
 

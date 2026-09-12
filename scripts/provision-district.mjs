@@ -103,7 +103,6 @@ async function main() {
       provisioningToken: provisioningToken,
       productionLiffUrl: productionLiffUrl,
       liffId: liffId,
-      baseUrl: 'https://postingmap.jp',
       resetExistingRecords: resetExistingRecords
     }
   };

@@ -144,8 +144,11 @@
 
         const liff = this.getLiffConfig(opts, sheet);
         const managerPassword = opts.managerPassword || this.getManagerPassword(sheet);
-        const baseUrl = opts.baseUrl || 'https://postingmap.jp';
         const districtName = ss.getName();
+        const subdomain = districtName.toLowerCase();
+        const baseUrl = (opts.baseUrl && opts.baseUrl !== 'https://postingmap.jp')
+          ? opts.baseUrl
+          : `https://${subdomain}.postingmap.jp`;
         const dashboardUrl = `${baseUrl}/active/manager/`;
         const hAppUrl = `${baseUrl}/`;
 
@@ -176,6 +179,7 @@
           districtName: districtName,
           dashboardUrl: dashboardUrl,
           hAppUrl: hAppUrl,
+          endpointUrl: hAppUrl,
           liffUrl: liff.url,
           liffId: liff.id,
           status: 'ACTIVE'
