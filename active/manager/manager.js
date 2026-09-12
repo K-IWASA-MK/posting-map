@@ -264,7 +264,12 @@ async function startDashboardLifecycle() {
 
   await loadElectionTurnoutData();
 
-  await syncDashboardData();
+  renderCurrentView();
+  if (DashboardState.map && DashboardState.markersLayer) {
+    renderPinsOnMap(DashboardState.map, DashboardState.markersLayer, DashboardState.masterPins);
+  }
+
+  syncDashboardData();
 
   setInterval(() => {
     syncDashboardData();
