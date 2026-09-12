@@ -112,6 +112,8 @@ if (document.readyState === 'loading') {
 }
 
 let _isDashboardInitialized = false;
+let _isSyncing = false;
+let _hasAppliedPinStatus = false;
 
 function getResolvedDistrictCode() {
   if (typeof window !== 'undefined' && window.location && window.location.hostname) {
@@ -613,10 +615,11 @@ function initMap() {
 }
 
 async function syncDashboardData() {
+  if (_isSyncing) return;
+  _isSyncing = true;
   try {
-    const [summaryRes, tier1Res, stockRes, rankRes, pinStatusRes, rosterRes, reqRes, latestDistRes] = await Promise.all([
+    const [summaryRes, stockRes, rankRes, pinStatusRes, rosterRes, reqRes, latestDistRes] = await Promise.all([
       callApiPost('getSystemSummary').catch(e => ({ success: false, error: e.message })),
-      callApiPost('getTier1').catch(e => ({ success: false, error: e.message })),
       callApiPost('getFlyerStock').catch(e => ({ success: false, error: e.message })),
       callApiPost('getRanking').catch(e => ({ success: false, error: e.message })),
       callApiPost('getGlobalPinStatus').catch(e => ({ success: false, error: e.message })),
@@ -626,7 +629,6 @@ async function syncDashboardData() {
     ]);
 
     const isSummaryOk = summaryRes && summaryRes.success;
-    const isTier1Ok = tier1Res && tier1Res.success;
     const isStockOk = stockRes && stockRes.success;
     const isRankOk = rankRes && rankRes.success;
     const isPinStatusOk = pinStatusRes && pinStatusRes.success;
@@ -636,12 +638,6 @@ async function syncDashboardData() {
 
     if (isSummaryOk) {
       DashboardState.summary = summaryRes;
-    }
-
-    if (isTier1Ok) {
-      if (DashboardState.cities && DashboardState.cities.length > 0) {
-        populateCitySelector(DashboardState.cities);
-      }
     }
 
     if (isStockOk) {
@@ -658,6 +654,7 @@ async function syncDashboardData() {
       DashboardState.requests = [];
     }
 
+    let pinStatusChanged = false;
     if (isPinStatusOk) {
       let inProgress = (pinStatusRes.inProgress || []).map(id => parseInt(id, 10)).filter(id => !isNaN(id));
       let completed = (pinStatusRes.completed || []).map(id => parseInt(id, 10)).filter(id => !isNaN(id));
@@ -677,6 +674,22 @@ async function syncDashboardData() {
         completed = Array.from(completedSet);
       }
 
+      const prevCompleted = DashboardState.globalPinStatus.completed || [];
+      const prevInProgress = DashboardState.globalPinStatus.inProgress || [];
+
+      if (!_hasAppliedPinStatus || prevCompleted.length !== completed.length || prevInProgress.length !== inProgress.length) {
+        pinStatusChanged = true;
+        _hasAppliedPinStatus = true;
+      } else {
+        const prevCompSet = new Set(prevCompleted);
+        const prevProgSet = new Set(prevInProgress);
+        const compSame = completed.every(id => prevCompSet.has(id));
+        const progSame = inProgress.every(id => prevProgSet.has(id));
+        if (!compSame || !progSame) {
+          pinStatusChanged = true;
+        }
+      }
+
       DashboardState.globalPinStatus.inProgress = inProgress;
       DashboardState.globalPinStatus.completed = completed;
     }
@@ -693,16 +706,18 @@ async function syncDashboardData() {
 
     renderCurrentView();
 
-    if (DashboardState.map && DashboardState.markersLayer) {
+    if (pinStatusChanged && DashboardState.map && DashboardState.markersLayer) {
       renderPinsOnMap(DashboardState.map, DashboardState.markersLayer, DashboardState.masterPins);
     }
 
-    const allOk = isSummaryOk && isTier1Ok && isStockOk && isPinStatusOk;
+    const allOk = isSummaryOk && isStockOk && isPinStatusOk;
     setSyncStatus(allOk);
 
   } catch (err) {
     console.error('[Dashboard Sync Error]', err);
     setSyncStatus(false);
+  } finally {
+    _isSyncing = false;
   }
 }
 
