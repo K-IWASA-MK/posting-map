@@ -250,7 +250,7 @@ function showMainApp() {
   if (mainAppVisible) return;
 
   const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
-  if (!userInfo.id) return;
+  if (!userInfo.last && !userInfo.id) return;
 
   mainAppVisible = true;
   switchPage('settings');
@@ -395,6 +395,7 @@ function triggerBackgroundRegistration(profile) {
     if (typeof renderSettings === 'function') {
       renderSettings();
     }
+    showMainApp();
   });
 }
 
@@ -1538,8 +1539,6 @@ async function safeInitApp() {
 
         } else {
           try {
-            await new Promise(r => setTimeout(r, 300));
-
             logDebug("PROFILE START");
             const profile = await liff.getProfile();
             logDebug("PROFILE OK");
@@ -1552,8 +1551,23 @@ async function safeInitApp() {
               console.warn("Failed to clean OAuth query parameters:", e);
             }
 
-            setLoadingProgress(65, 'PROFILE LOADED');
+            setLoadingProgress(100, 'READY');
             console.log(profile);
+
+            const initialUserInfo = {
+              last: profile.displayName || '',
+              first: '',
+              id: '',
+              lineUserId: profile.userId,
+              picture: profile.pictureUrl || ''
+            };
+            localStorage.setItem('user_info', JSON.stringify(initialUserInfo));
+
+            if (typeof renderSettings === 'function') {
+              renderSettings();
+            }
+            updateBottomNavVisibility();
+            showMainApp();
 
             triggerBackgroundRegistration(profile);
           } catch (err) {
